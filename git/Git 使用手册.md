@@ -2158,7 +2158,6 @@ IdentityFile ~/.ssh/id_rsa
 ```shell
 $ ssh -T git@github.com
 Hi hoojo! You've successfully authenticated, but GitHub does not provide shell access.
-## 这里的 hoojo 和下面的config 中的User的配置对应
 ```
 
 
