@@ -2057,12 +2057,109 @@ $ git push --tags git-world
 
 ## 3、Github 的使用
 ---
-### 配置ssh key
+### 配置ssh key秘钥
 
-#### 1、生成ssh key
+> 如果你使用https的协议方式，每次提交代码都需要输入用户名、密码。而使用ssh方式的情况下，你可以配置ssh的key方便提交，不需要重复输入代码。
 
-#### 2、配置
+#### 1、切换https协议到ssh
 
+> 切换方式有两种：
+>
+> * 提交所有代码，并保存到远程仓库，最后删除本地代码，然后`git clone`远程仓库代码，注意克隆下来的时候使用ssh协议
+>
+> * 直接命令修改协议方式：
+>
+>   `git remote set-url origin git@github.com:account/project.git`
+
+#### 2、生成个人ssh key，在git bash中键入命令
+
+```shell
+## 切换到用户命令下的.ssh目录 C:\Users\Administrator\.ssh
+$ cd ~/.ssh
+
+## 执行 ssh-keygen方法生成key
+$ ssh-keygen -t rsa -b 4096 -C "hoojo_@126.com"
+
+## 输入id_rsa 秘钥文件的名称，默认名称是id_ras, 因为之前已成存在了一个git 账号的key，这里不能同名
+Enter file in which to save the key (/c/Users/Administrator/.ssh/id_rsa): id_rsa_github
+
+## 需要输入密码和确认密码
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+
+## 生成完成
+The key fingerprint is:
+SHA256:meYAXwqpIgi5tnAv9ndJ2m8+mx/Dau6R7HvzWrB6vtk hoojo_@126.com
+The key's randomart image is:
++---[RSA 4096]----+
+|                 |
+| .   .           |
+|o   +   .        |
+|o. . + o o       |
+|*.o   + S   .    |
+|+o..   +.. o o   |
+| .o .  +..+ = .  |
+| . o  o +.+=+*   |
+|    .. . B%O*=E  |
++----[SHA256]-----+
+
+```
+
+#### 3、配置key 到 ssh agent中
+
+> `ssh` 默认读取的秘钥是 `id_rsa`，为了让ssh能识别到新的秘钥，需要把刚才生成的`id_rsa_github`添加到ssh agent中。
+
+```shell
+$ ssh-add.exe ~/.ssh/id_rsa_github
+Could not open a connection to your authentication agent.
+```
+
+> 上面执行发生错误，解决方法如下：
+
+```shell
+## 执行命令
+$ ssh-agent.exe bash
+## 再次执行上一步的命令，添加秘钥到ssh agent中
+$ ssh-add.exe ~/.ssh/id_rsa_github
+Enter passphrase for /c/Users/Administrator/.ssh/id_rsa_github:
+Identity added: /c/Users/Administrator/.ssh/id_rsa_github (/c/Users/Administrator/.ssh/id_rsa_github)
+```
+
+#### 4、配置config文件
+
+> 因为有多个秘钥文件，为了让ssh知道每个账号和git 域名host对应的秘钥文件，所以需要在~/.ssh 目录下配置config
+
+```shell
+# 该配置用于个人 github 上
+# Host 服务器别名
+Host github.com
+# HostName 服务器ip地址或机器名
+HostName github.com
+# User连接服务器的用户名，和下面的 ssh -T git@github.com 中输出的用户名对应
+User hoojo
+# IdentityFile 密匙文件的具体路径
+IdentityFile ~/.ssh/id_rsa_github
+
+# 该配置用于个人 gitlib 上
+# Host 服务器别名
+Host xxx.gitlib.com
+# HostName 服务器ip地址或机器名
+HostName xxx.gitlib.com
+# User连接服务器的用户名
+User git_lib_user_name
+# IdentityFile 密匙文件的具体路径
+IdentityFile ~/.ssh/id_rsa
+```
+
+#### 5、配置github的SSH keys公钥
+> 访问地址：https://github.com/settings/keys
+>
+> **测试配置是否成功，测试之前还需要把id_rsa_github 的秘钥内容粘贴到 github 的ssh key中**
+```shell
+$ ssh -T git@github.com
+Hi hoojo! You've successfully authenticated, but GitHub does not provide shell access.
+## 这里的 hoojo 和下面的config 中的User的配置对应
+```
 
 
 ## 4、码云 的使用
@@ -2077,3 +2174,6 @@ $ git push --tags git-world
 * [教程](https://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/001373962845513aefd77a99f4145f0a2c7a7ca057e7570000)
 * [官方资料、教程](https://git-scm.com/book/zh/v2)
 * [官方pdf文档](https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf)
+```
+
+```
