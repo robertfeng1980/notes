@@ -1904,6 +1904,9 @@ $ git remote
 $ git remote -v
 git-world       git://github.com/hoojo/git-world.git (fetch)
 git-world       git://github.com/hoojo/git-world.git (push)
+
+# git 设置url
+$ git remote set-url origin git@github.com:hooj0/rapid-framework.git
 ```
 
 
@@ -1931,7 +1934,7 @@ $ git remote show git-world
 ***举个栗子***
 
 ```shell
-$ git remote add git-world git://github.com/hoojo/git-world.git
+$ git remote add git-world git:github.com/hoojo/git-world.git
 ```
 
 
@@ -2012,6 +2015,8 @@ $ git push origin dev:remote-dev
 
 # 推送本地dev分支到远程origin上
 $ git push origin dev
+# or
+$ git pull origin master --allow-unrelated-histories
 
 # 推送已跟踪过的分支到远程分支
 $ git push
