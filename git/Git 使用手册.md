@@ -1255,7 +1255,6 @@ $ git merge dev
 Merge made by the 'recursive' strategy.
  FileInfo.java | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
-
 ```
 
 
@@ -1958,7 +1957,6 @@ $ git remote remove git-world
 `git fetch`
 
 > 1、`git fetch`取回远程主机的所有分支更新版本，不对本地代码造成冲突。
->
 > 2、`git fetch <remote>`取指定分支更新
 
 ***举个栗子***
@@ -2002,7 +2000,6 @@ $ git pull git-world master:dev
 > 2、推送本地分支dev版本到远程`origin`分支`rm_dev`：`git push origin dev:rm_dev`
 > 3、推送本地分支到已关联的远程分支：`git push`
 > 4、推送一个空的本地分支覆盖远程分支，即删除远程分支：`git push origin :master`
->
 > 5、推送所有本地分支到远程主机：`git push --all origin`
 >
 > 以上推送的远程分支如果不存在会自动创建，例如本地master分支推送到origin主机仓库，但远程还没有master分支，系统会自动创建好该分支。
@@ -2165,10 +2162,27 @@ $ ssh -T git@github.com
 Hi hoojo! You've successfully authenticated, but GitHub does not provide shell access.
 ```
 
+#### 6、常见问题汇总
+-[ ] 1、重启电脑后发现push数据需要重新写入git密码(当我们把当前的Git窗口关闭，重新打开一个时，又会出现这个错误了)
 
-## 4、码云 的使用
----
-的都得到
+> $ ssh -T git@gitee.com
+> Enter passphrase for key '/c/Users/Administrator/.ssh/id_rsa_gitee':
+> Permission denied (publickey).
+>
+> 这是因为： 
+>
+> **ssh-agent 是一个用于存储私钥的临时性的 session 服务，也就是说当你重启之后，ssh-agent 服务也就重置了**
+>
+> 解决办法，重新将秘钥加入到ssh中：
+>
+> ```shell
+> ## 执行命令
+> $ ssh-agent.exe bash
+> ## 再次执行上一步的命令，添加秘钥到ssh agent中
+> $ ssh-add.exe ~/.ssh/id_rsa_github
+> Enter passphrase for /c/Users/Administrator/.ssh/id_rsa_github:
+> Identity added: /c/Users/Administrator/.ssh/id_rsa_github 
+> ```
 
 
 
@@ -2178,6 +2192,4 @@ Hi hoojo! You've successfully authenticated, but GitHub does not provide shell a
 * [教程](https://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/001373962845513aefd77a99f4145f0a2c7a7ca057e7570000)
 * [官方资料、教程](https://git-scm.com/book/zh/v2)
 * [官方pdf文档](https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf)
-```
 
-```
