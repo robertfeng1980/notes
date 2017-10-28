@@ -1,20 +1,20 @@
 # Git 使用手册
 [TOC]
 ---
-##Git简介
+## Git简介
 
 ---
 
-###Git 是什么？
+### Git 是什么？
 > Git是一款免费、开源的分布式版本控制系统，用于敏捷高效地处理任何或大或小的项目版本管理。
 
 
-###Git 的特点
+### Git 的特点
 
 >分布式相比于集中式的最大区别在于开发者可以提交到本地，每个开发者通过克隆（git clone），在本地机器上拷贝一个完整的Git仓库。
 
 
-###Git 的功能特征
+### Git 的功能特征
 
 >1、从服务器上克隆完整的Git仓库（包括代码和版本信息）到单机上。
 >2、在自己的机器上根据不同的开发目的，创建分支，修改代码。
@@ -27,7 +27,7 @@
 
 
 
-###Git 的优缺点
+### Git 的优缺点
 
 **优点** 
 > 分布式开发（安全、支持离线），强调个体（灵活、高效），主库坏掉了也不影响工作。
@@ -37,14 +37,14 @@
 
 
 
-##Git的安装
+## Git的安装
 ---
 由于我这边的系统是Windows，这里我只介绍Windows平台上的安装。
 > 早期Git是在Linux上开发的，很长一段时间内，Git也只能在Linux和Unix系统上使用。慢慢地有人把它移植到了Windows上。现在，Git可以在Linux、Unix、Mac和Windows这几大平台上正常运行了。
 
 
 
-###下载Git工具
+### 下载Git工具
 
 速度很慢，可以去找其他可下载的地址，对应好自己的操作系统和系统位数
 
@@ -58,7 +58,7 @@ Git for Windows 下载站点：https://git-for-windows.github.io/
 
 
 
-###安装Windows Git
+### 安装Windows Git
 
 双击运行一直下一步，直到看到这个步骤，选择Git命令行的使用方式，是GUI Bash还是Windows的Docs命令行窗口或是Windows下的Unix工具的命令行窗口。
 一般选择第一个选项，Git GUI Bash就可以了，这个工具还是非常好用的，支持提示和快捷输入。
@@ -69,7 +69,7 @@ Git for Windows 下载站点：https://git-for-windows.github.io/
 
 
 
-###检查是否安装成功
+### 检查是否安装成功
 
 安装成功完成后，启动快捷菜单中的 `Git`-> `Git Bash`后可以看到窗口，在窗口中输入命令：
 ```shell
@@ -82,10 +82,10 @@ git version 2.8.1.windows.1
 
 
 
-##Git常用命令
+## Git常用命令
 ---
 
-###配置工具/ Configuration Tooling
+### 配置工具/ Configuration Tooling
 
 - [x] Git支持配置一些全局的选项，就像客户端工具的设置功能一样。通过配置这些选项，可以定制不同的体验和用法，还有一些常规的选项，这些都是必须的配置。一般情况下安装好的git在用户目录下（C:\Users\Administrator）就会生成几个全局的配置文件。
 
@@ -101,7 +101,7 @@ git version 2.8.1.windows.1
 
       ​
 
-####配置个人信息
+#### 配置个人信息
 Git安装完成后，需要设置个人信息，也就是版本提交人的基本资料，用来区分是谁做的版本变更，方便找到责任人。
 ```shell
 $ git config --global user.name "Your Name"
@@ -110,7 +110,7 @@ $ git config --global user.email "email@example.com
 
 
 
-####配置文本编辑器
+#### 配置文本编辑器
 
 如果你不喜欢vi、vim编辑器可以配置你自己的编辑器
 ```shell
@@ -120,7 +120,7 @@ git config --global core.editor emacs
 
 
 
-####查看当前配置
+#### 查看当前配置
 使用`git config --global --list`查看当前全局配置信息
 ```shell
 git config --global --list
@@ -163,7 +163,7 @@ remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
 
 
 
-####配置命令别名
+#### 配置命令别名
 
 `git config --global alias` git的命令支持配置别名（短名称、简写）
 ***举个栗子***
@@ -201,9 +201,9 @@ log --color --graph --pretty=format:'%C(bold red)%h%C(reset) - %C(bold green)(%c
 ![img](https://segmentfault.com/img/bVOGPf?w=683&h=463)
 
 ###创建仓库/ Create Repositories
--[x] 仓库就是存储储备用的地方，这里的仓库
+- [x] 仓库就是存储储备用的地方，这里的仓库
 
-####`git clone`克隆一个存在的远程仓库
+#### `git clone`克隆一个存在的远程仓库
 `git clone`
 > 这个命令可以把远程服务器的git项目给下载到本地仓库
 
@@ -242,9 +242,9 @@ Initialized empty Git repository in D:/workspace/gittest/.git/
 
 
 
-###本地修改 和 基本快照/ Local Changes & Basic Snapshotting
+### 本地修改 和 基本快照/ Local Changes & Basic Snapshotting
 
-####`git status`查看本地工作目录变更修改记录
+#### `git status`查看本地工作目录变更修改记录
 `git status`
 > 查看本地仓库状态，如果没有修改记录，会显示干净的工作目录和分支一致。如果存在修改的记录，则提示提交。如果存在修改目录，又没有添加到暂存区就提示添加到暂存区。
 
@@ -339,7 +339,7 @@ $  git checkout HEAD
 
 
 
-####`git diff --staged`比较暂存区文件变更内容
+#### `git diff --staged`比较暂存区文件变更内容
 
 `git diff --staged`
 
@@ -365,7 +365,7 @@ $ git commit -m 'commit readme.txt'
 $ git diff --staged readme.txt
 ```
 
-####`git diff`比较文件变更内容
+#### `git diff`比较文件变更内容
 
 `git diff`
 
@@ -406,7 +406,7 @@ index 5375821..1fb3b4e 100644
 
 ```
 
-####`git add`添加所有文件到暂存区
+#### `git add`添加所有文件到暂存区
 
 `git add`
 
@@ -510,7 +510,7 @@ $ git add .
 
 
 
-####`git add -p <file>`添加文件部分内容到暂存区
+#### `git add -p <file>`添加文件部分内容到暂存区
 
 `git add -p <file>`
 
@@ -606,7 +606,7 @@ Stage this hunk [y,n,q,a,d,/,k,K,g,e,?]? y
 
 
 
-####`git commit -a` 提交所有修改，不含新增
+#### `git commit -a` 提交所有修改，不含新增
 
 `git commit -a`
 
@@ -640,7 +640,7 @@ $ git commit -am '也可以提交成功'
 
 > ***`git commit -a -m 'commit message' 可以简写 git commit -am 'commit message'`***
 
-####`git commit` 提交暂存区所有修改内容
+#### `git commit` 提交暂存区所有修改内容
 
 `git commit`
 
@@ -850,7 +850,7 @@ M       readme.txt
 
 > **关于历史版本的回退将在后面会重点介绍**
 
-### 预览历史/ Review History
+###  预览历史/ Review History
 
 #### `git log` 查看提交日志
 `git log`
@@ -1308,11 +1308,11 @@ $ git rebase --continue
 
 
 ### 回退提交/ Undo Commit
--[x] Git的后悔药，可以撤销某一次的版本提交。上面已经介绍过在暂存区使用reset可以将暂存区提交的版本变更到工作区，这里将介绍在仓库中进行后退版本。
--[x] `reset`和`revert`后面会使用到这两个命令，它们的区别在于reset是把回退版本后提交的操作删除，相当于指定版本后的操作没有发生原因；而revert则是保留回退版本操作后的操作，再把回退版本的内容重新提交一遍，覆盖掉之前的版本内容。简单的来说，reset是版本的**后退**操作，而revert则是版本的**前进**。
+- [x] Git的后悔药，可以撤销某一次的版本提交。上面已经介绍过在暂存区使用reset可以将暂存区提交的版本变更到工作区，这里将介绍在仓库中进行后退版本。
+- [x] `reset`和`revert`后面会使用到这两个命令，它们的区别在于reset是把回退版本后提交的操作删除，相当于指定版本后的操作没有发生原因；而revert则是保留回退版本操作后的操作，再把回退版本的内容重新提交一遍，覆盖掉之前的版本内容。简单的来说，reset是版本的**后退**操作，而revert则是版本的**前进**。
 
 
-####`git reset <commit-id>`回退提交到仓库的版本
+#### `git reset <commit-id>`回退提交到仓库的版本
 
 `git reset <commit-id>`
 
@@ -1583,7 +1583,7 @@ $ git revert 8625ff6e7f191a712273c29292154b18671e4d22 -m 2
 ```
 
 ### 重构文件/Refactor Files
-####`git rm <file>`删除仓库文件
+#### `git rm <file>`删除仓库文件
 `git rm <file>`
 >删除文件会将文件从仓库移动到暂存区，执行commit后文件才被完全移除。同时工作区也不会存在删除文件的记录。当一个文件在工作区或者暂存区没有添加到仓库，将不能被移除。只有完整提交到仓库，没有被修改过的文件才能执行此操作。
 
@@ -1615,7 +1615,7 @@ error: the following file has changes staged in the index:
 
 
 
-####`git rm --cached <file>`删除暂存区的文件，保留到工作区
+#### `git rm --cached <file>`删除暂存区的文件，保留到工作区
 
 `git rm --cached <file>`
 
@@ -1674,7 +1674,7 @@ nothing to commit, working directory clean
 
 
 
-####`git mv <file-orig> <file-renamed>`移动文件并重命名
+#### `git mv <file-orig> <file-renamed>`移动文件并重命名
 
 `git mv <file-orig> <file-renamed>`
 
@@ -1910,7 +1910,7 @@ $ git remote set-url origin git@github.com:hooj0/rapid-framework.git
 
 
 
-####`git remote show <remote>` 查看远程仓库主机详细信息
+#### `git remote show <remote>` 查看远程仓库主机详细信息
 
 `git remote show <remote>`
 
@@ -2049,12 +2049,6 @@ $ git push --tags
 
 $ git push --tags git-world
 ```
-
-
-
-
-
-
 
 
 ## 3、Github 的使用
