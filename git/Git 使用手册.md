@@ -1,9 +1,7 @@
 # Git 使用手册
 [TOC]
----
-# Git简介
 
----
+# Git简介
 
 ## Git 是什么？
 > Git是一款免费、开源的分布式版本控制系统，用于敏捷高效地处理任何或大或小的项目版本管理。
@@ -38,7 +36,7 @@
 
 
 # Git的安装
----
+
 由于我这边的系统是Windows，这里我只介绍Windows平台上的安装。
 > 早期Git是在Linux上开发的，很长一段时间内，Git也只能在Linux和Unix系统上使用。慢慢地有人把它移植到了Windows上。现在，Git可以在Linux、Unix、Mac和Windows这几大平台上正常运行了。
 
@@ -83,7 +81,6 @@ git version 2.8.1.windows.1
 
 
 # Git常用命令
----
 
 ## 配置工具/ Configuration Tooling
 
@@ -1883,7 +1880,7 @@ Changes to be committed:
 ## 更新和发布/ Update & Publish
 
 ### `git remote` 查看所有远程仓库主机
-
+---
 `git remote`
 
 > 可以显示已经存在的远程仓库主机
@@ -1909,7 +1906,7 @@ $ git remote set-url origin git@github.com:hooj0/rapid-framework.git
 
 
 ### `git remote show <remote>` 查看远程仓库主机详细信息
-
+---
 `git remote show <remote>`
 
 > 查看远程分支详细信息
@@ -1923,7 +1920,7 @@ $ git remote show git-world
 
 
 ### `git remote add <shortname> <url>` 添加远程仓库
-
+---
 `git remote add <shortname> <url>`
 
 > 添加远程仓库主机，设置短名称和仓库主机url就可以添加一个远程的仓库
@@ -1937,7 +1934,7 @@ $ git remote add git-world git:github.com/hoojo/git-world.git
 
 
 ### `git remote remove <shortname>`删除远程仓库主机
-
+---
 `git remote remove <shortname>`
 
 > 删除远程仓库主机，设置短名称和仓库主机url就可以删除一个远程的仓库主机
@@ -1951,7 +1948,7 @@ $ git remote remove git-world
 
 
 ### `git fetch <remote>` 拉取远程主机更新
-
+---
 `git fetch`
 
 > 1、`git fetch`取回远程主机的所有分支更新版本，不对本地代码造成冲突。
@@ -1970,7 +1967,7 @@ $ git fetch origin master
 
 
 ### `git pull <remote> <branch>`从远程分支拉取更新版本
-
+---
 `git pull <remote> <branch>`
 
 > `git pull`在不带参数的情况下是拉取当前本地分支对应的远程分支版本，带参数可以指定远程主机和分支。
@@ -1991,14 +1988,14 @@ $ git pull git-world master:dev
 
 
 ### `git push <remote> <branch>` 推送版本到远程分支
-
+---
 `git push <remote> <branch>`
 
-> 1、推送本地分支master版本到远程`origin`分支`master`： `git push origin master`
-> 2、推送本地分支dev版本到远程`origin`分支`rm_dev`：`git push origin dev:rm_dev`
-> 3、推送本地分支到已关联的远程分支：`git push`
-> 4、推送一个空的本地分支覆盖远程分支，即删除远程分支：`git push origin :master`
-> 5、推送所有本地分支到远程主机：`git push --all origin`
+> 1、推送本地分支master版本到远程`origin`分支`master`： `git push origin master`<br/>
+> 2、推送本地分支dev版本到远程`origin`分支`rm_dev`：`git push origin dev:rm_dev`<br/>
+> 3、推送本地分支到已关联的远程分支：`git push`<br/>
+> 4、推送一个空的本地分支覆盖远程分支，即删除远程分支：`git push origin :master`<br/>
+> 5、推送所有本地分支到远程主机：`git push --all origin`<br/>
 >
 > 以上推送的远程分支如果不存在会自动创建，例如本地master分支推送到origin主机仓库，但远程还没有master分支，系统会自动创建好该分支。
 
@@ -2020,7 +2017,7 @@ $ git push
 
 
 ### `git branch -dr <remote/branch>`
-
+---
 `git branch -dr <remote/branch>`
 
 > sh
@@ -2034,7 +2031,7 @@ $ git
 
 
 ### `git push --tags` 发布标签
-
+---
 `git push --targs`
 
 > 1、发布标签到远程仓库分支：`git push --tags`
@@ -2050,7 +2047,7 @@ $ git push --tags git-world
 
 
 # 3、Github 的使用
----
+
 ## 配置ssh key秘钥
 
 > 如果你使用https的协议方式，每次提交代码都需要输入用户名、密码。而使用ssh方式的情况下，你可以配置ssh的key方便提交，不需要重复输入代码。
