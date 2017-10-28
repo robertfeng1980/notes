@@ -1951,7 +1951,7 @@ $ git remote remove git-world
 ---
 `git fetch`
 
-> 1、`git fetch`取回远程主机的所有分支更新版本，不对本地代码造成冲突。
+> 1、`git fetch`取回远程主机的所有分支更新版本，不对本地代码造成冲突。<br/>
 > 2、`git fetch <remote>`取指定分支更新
 
 ***举个栗子***
@@ -2034,7 +2034,7 @@ $ git
 ---
 `git push --targs`
 
-> 1、发布标签到远程仓库分支：`git push --tags`
+> 1、发布标签到远程仓库分支：`git push --tags`<br/>
 > 2、发布标签到指定远程仓库分支：`$ git push --tags origin`
 
 ***举个栗子***
@@ -2152,7 +2152,7 @@ Hi hoojo! You've successfully authenticated, but GitHub does not provide shell a
 ```
 
 ### 6、常见问题汇总
--[ ] 1、重启电脑后发现push数据需要重新写入git密码(当我们把当前的Git窗口关闭，重新打开一个时，又会出现这个错误了)
+- [ ] 1、重启电脑后发现push数据需要重新写入git密码(当我们把当前的Git窗口关闭，重新打开一个时，又会出现这个错误了)
 
 > $ ssh -T git@gitee.com
 > Enter passphrase for key '/c/Users/Administrator/.ssh/id_rsa_gitee':
