@@ -2182,12 +2182,12 @@ $ git push
 ---
 `git branch -dr <remote/branch>`
 
-> sh
+> 删除远程分支
 
 ***举个栗子***
 
 ```shell
-$ git
+$ git branch -dr remove-dev
 ```
 
 
@@ -2210,7 +2210,7 @@ $ git push --tags git-world
 
 
 
-# 3、Github 的使用
+# 4、Github 的使用
 
 ## 配置ssh key秘钥
 
