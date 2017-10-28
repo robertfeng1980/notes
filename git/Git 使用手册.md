@@ -1,20 +1,20 @@
 # Git 使用手册
 [TOC]
 ---
-## Git简介
+# Git简介
 
 ---
 
-### Git 是什么？
+## Git 是什么？
 > Git是一款免费、开源的分布式版本控制系统，用于敏捷高效地处理任何或大或小的项目版本管理。
 
 
-### Git 的特点
+## Git 的特点
 
 >分布式相比于集中式的最大区别在于开发者可以提交到本地，每个开发者通过克隆（git clone），在本地机器上拷贝一个完整的Git仓库。
 
 
-### Git 的功能特征
+## Git 的功能特征
 
 >1、从服务器上克隆完整的Git仓库（包括代码和版本信息）到单机上。
 >2、在自己的机器上根据不同的开发目的，创建分支，修改代码。
@@ -27,7 +27,7 @@
 
 
 
-### Git 的优缺点
+## Git 的优缺点
 
 **优点** 
 > 分布式开发（安全、支持离线），强调个体（灵活、高效），主库坏掉了也不影响工作。
@@ -37,14 +37,14 @@
 
 
 
-## Git的安装
+# Git的安装
 ---
 由于我这边的系统是Windows，这里我只介绍Windows平台上的安装。
 > 早期Git是在Linux上开发的，很长一段时间内，Git也只能在Linux和Unix系统上使用。慢慢地有人把它移植到了Windows上。现在，Git可以在Linux、Unix、Mac和Windows这几大平台上正常运行了。
 
 
 
-### 下载Git工具
+## 下载Git工具
 
 速度很慢，可以去找其他可下载的地址，对应好自己的操作系统和系统位数
 
@@ -58,7 +58,7 @@ Git for Windows 下载站点：https://git-for-windows.github.io/
 
 
 
-### 安装Windows Git
+## 安装Windows Git
 
 双击运行一直下一步，直到看到这个步骤，选择Git命令行的使用方式，是GUI Bash还是Windows的Docs命令行窗口或是Windows下的Unix工具的命令行窗口。
 一般选择第一个选项，Git GUI Bash就可以了，这个工具还是非常好用的，支持提示和快捷输入。
@@ -69,7 +69,7 @@ Git for Windows 下载站点：https://git-for-windows.github.io/
 
 
 
-### 检查是否安装成功
+## 检查是否安装成功
 
 安装成功完成后，启动快捷菜单中的 `Git`-> `Git Bash`后可以看到窗口，在窗口中输入命令：
 ```shell
@@ -82,10 +82,10 @@ git version 2.8.1.windows.1
 
 
 
-## Git常用命令
+# Git常用命令
 ---
 
-### 配置工具/ Configuration Tooling
+## 配置工具/ Configuration Tooling
 
 - [x] Git支持配置一些全局的选项，就像客户端工具的设置功能一样。通过配置这些选项，可以定制不同的体验和用法，还有一些常规的选项，这些都是必须的配置。一般情况下安装好的git在用户目录下（C:\Users\Administrator）就会生成几个全局的配置文件。
 
@@ -101,7 +101,7 @@ git version 2.8.1.windows.1
 
       ​
 
-#### 配置个人信息
+### 配置个人信息
 Git安装完成后，需要设置个人信息，也就是版本提交人的基本资料，用来区分是谁做的版本变更，方便找到责任人。
 ```shell
 $ git config --global user.name "Your Name"
@@ -109,8 +109,7 @@ $ git config --global user.email "email@example.com
 ```
 
 
-
-#### 配置文本编辑器
+### 配置文本编辑器
 
 如果你不喜欢vi、vim编辑器可以配置你自己的编辑器
 ```shell
@@ -120,7 +119,7 @@ git config --global core.editor emacs
 
 
 
-#### 查看当前配置
+### 查看当前配置
 使用`git config --global --list`查看当前全局配置信息
 ```shell
 git config --global --list
@@ -163,9 +162,10 @@ remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
 
 
 
-#### 配置命令别名
+### 配置命令别名
 
 `git config --global alias` git的命令支持配置别名（短名称、简写）
+
 ***举个栗子***
 
 ```shell
@@ -200,10 +200,10 @@ log --color --graph --pretty=format:'%C(bold red)%h%C(reset) - %C(bold green)(%c
 效果如下：
 ![img](https://segmentfault.com/img/bVOGPf?w=683&h=463)
 
-###创建仓库/ Create Repositories
+## 创建仓库/ Create Repositories
 - [x] 仓库就是存储储备用的地方，这里的仓库
 
-#### `git clone`克隆一个存在的远程仓库
+### `git clone`克隆一个存在的远程仓库
 `git clone`
 > 这个命令可以把远程服务器的git项目给下载到本地仓库
 
@@ -224,7 +224,7 @@ git clone git@github.com:hooj0/xxxx.git
 
 
 
-#### `git init`创建一个新的本地仓库
+### `git init`创建一个新的本地仓库
 `git init`
 > 创建一个本地的Git仓库，会在当前目录下初始化 `.git`子目录，在这个目录中存放git仓库是配置和版本跟踪信息。本地仓库所有的变更版本数据，缓存数据都会存在这个目录下。
 > **注意**：这个目录中的文件是git仓库的数据文件，不能随便修改和删除，否则会破坏git的仓库数据
@@ -242,9 +242,9 @@ Initialized empty Git repository in D:/workspace/gittest/.git/
 
 
 
-### 本地修改 和 基本快照/ Local Changes & Basic Snapshotting
+## 本地修改 和 基本快照/ Local Changes & Basic Snapshotting
 
-#### `git status`查看本地工作目录变更修改记录
+### `git status`查看本地工作目录变更修改记录
 `git status`
 > 查看本地仓库状态，如果没有修改记录，会显示干净的工作目录和分支一致。如果存在修改的记录，则提示提交。如果存在修改目录，又没有添加到暂存区就提示添加到暂存区。
 
@@ -308,7 +308,7 @@ Changes to be committed:
 #将文件提交到暂存区后，可以通过reset进行回滚出暂存区
 ```
 
-#### `git status -s` 简版文件状态信息
+### `git status -s` 简版文件状态信息
 `git status -s`
 > 如果你觉得git status的内容太过冗余，你可以试试这个命令，它会减少内容的输出
 > （M: 修改，??：新增，D：删除）
@@ -339,7 +339,7 @@ $  git checkout HEAD
 
 
 
-#### `git diff --staged`比较暂存区文件变更内容
+### `git diff --staged`比较暂存区文件变更内容
 
 `git diff --staged`
 
@@ -365,7 +365,7 @@ $ git commit -m 'commit readme.txt'
 $ git diff --staged readme.txt
 ```
 
-#### `git diff`比较文件变更内容
+### `git diff`比较文件变更内容
 
 `git diff`
 
@@ -401,12 +401,12 @@ index 5375821..1fb3b4e 100644
  part 3 content
 ----------------hahaha
 \ No newline at end of file
-+-------############--------hahaha
++-------#########--------hahaha
 \ No newline at end of file
 
 ```
 
-#### `git add`添加所有文件到暂存区
+### `git add`添加所有文件到暂存区
 
 `git add`
 
@@ -510,7 +510,7 @@ $ git add .
 
 
 
-#### `git add -p <file>`添加文件部分内容到暂存区
+### `git add -p <file>`添加文件部分内容到暂存区
 
 `git add -p <file>`
 
@@ -606,7 +606,7 @@ Stage this hunk [y,n,q,a,d,/,k,K,g,e,?]? y
 
 
 
-#### `git commit -a` 提交所有修改，不含新增
+### `git commit -a` 提交所有修改，不含新增
 
 `git commit -a`
 
@@ -640,7 +640,7 @@ $ git commit -am '也可以提交成功'
 
 > ***`git commit -a -m 'commit message' 可以简写 git commit -am 'commit message'`***
 
-#### `git commit` 提交暂存区所有修改内容
+### `git commit` 提交暂存区所有修改内容
 
 `git commit`
 
@@ -664,7 +664,7 @@ nothing to commit, working directory clean
 
 
 
-#### `git commit --amend`修改最后的提交
+### `git commit --amend`修改最后的提交
 
 `git commit --amend`
 
@@ -725,7 +725,7 @@ fatal: --author 'hoojo2@qq.com' is not 'Name <email>' and matches no existing au
 
 
 
-#### `git commit --amend | git rebase` 修改以前历史任意版本信息
+### `git commit --amend | git rebase` 修改以前历史任意版本信息
 
 `git commit --amend  + git rebase`
 
@@ -821,7 +821,7 @@ Date:   Sun Aug 27 19:41:03 2017 +0800
 
 
 
-#### `git reset`重置暂存区的修改记录
+### `git reset`重置暂存区的修改记录
 
 `git rest`
 
@@ -850,9 +850,9 @@ M       readme.txt
 
 > **关于历史版本的回退将在后面会重点介绍**
 
-###  预览历史/ Review History
+##  预览历史/ Review History
 
-#### `git log` 查看提交日志
+### `git log` 查看提交日志
 `git log`
 > 1、查看文件的提交到仓库分支的日志信息，日志包含提交版本、时间、作者、注释内容
 > 2、如果日志版本信息很多，要看最后N个版本的日志，可以带参数 `git log -n` n 表示最后版本数
@@ -926,7 +926,7 @@ $ git log --pretty=oneline --graph --abbrev-commit
 ```
 
 
-#### `git log --follow <file>` 跟踪指定文件的版本日志
+### `git log --follow <file>` 跟踪指定文件的版本日志
 `git log --follow <file>`
 > 可以指定文件，只看当前文件的版本日志信息，包括作者、日期、版本、注释等
 
@@ -953,7 +953,7 @@ Date:   Sun Aug 27 19:36:38 2017 +0800
 ```
 
 
-#### `git log -p <file>` 查看指定文件提交版本日志、变更内容
+### `git log -p <file>` 查看指定文件提交版本日志、变更内容
 `git log -p <file>`
 > 这个命令是针对文件的版本日志，并且显示每次提交版本的修改内容
 
@@ -977,7 +977,7 @@ index 0000000..b6fc4c6
 ```
 
 
-#### `git reflog` 查看操作日志
+### `git reflog` 查看操作日志
 `git reflog`
 > 任何操作都会在这里留下痕迹，`-n`查看最后的几个版本
 
@@ -999,7 +999,7 @@ b5c4f4a HEAD@{2}: reset: moving to b5c4f4a
 ```
 
 
-#### `git blame`查看内容变更者和时间、版本
+### `git blame`查看内容变更者和时间、版本
 `git blame`
 > 查看文件的内容是由谁变更修改的，显示更改日期、提交的版本号，谁动了我的文件一目了然。
 
@@ -1014,7 +1014,7 @@ f167b82a (hoojo 2017-08-27 19:41:03 +0800 3) 2 add line
 f167b82a (hoojo 2017-08-27 19:41:03 +0800 4) 3 add line
 ```
 
-#### `git show <commit-id>` 查看某个版本的变更日志记录
+### `git show <commit-id>` 查看某个版本的变更日志记录
 `git show <commit-id>`
 > `git log` 是针对文件或分支的变更日志，而 git show可以查看某个具体版本的变更记录内容
 
@@ -1049,7 +1049,7 @@ index b6fc4c6..b0c780a 100644
 \ No newline at end of file
 ```
 
-#### `git diff <branch 1>...<branch 2>`比较第一个分支和第二个分支的不同
+### `git diff <branch 1>...<branch 2>`比较第一个分支和第二个分支的不同
 `git diff <branch 1>...<branch 2>`
 > 比较前者分支与后者分支存在的不同，只显示前者比后者存在的变更内容。也就是说前者在后者的基础上存在什么文件内容不同；相反，如果调换前者和后者的位置，会看到一个相反的比较，所以参照物以后者为准。
 
@@ -1072,12 +1072,12 @@ index b6fc4c6..b0c780a 100644
 $ git diff dev...master
 ```
 
-### 分支和标签/ Branches & Tags
+## 分支和标签/ Branches & Tags
 
 -[x] 分支的意思就是一个独立的版本枝干，相当于SVN中的基线，当前分支的所有操作和其他分支互不干扰。在实际开发中，一个项目可能存在很多分支，比如开发分支、测试分支、BUG修复分支、准线上分支、正式线上分支等等，每个分支都不影响，它们可以在每个不同阶段进行合并拆分，方便协调工作。
 -[x] 标签是一个标记，用来做一个记号，方便日后找到具体版本而不用记住版本号等信息
 
-#### `git branch` 显示所有分支列表
+### `git branch` 显示所有分支列表
 
 `git branch`
 
@@ -1100,7 +1100,7 @@ $ git branch -av
 
 
 
-#### `git branch <new-branch>` 创建一个新的分支
+### `git branch <new-branch>` 创建一个新的分支
 
 `git branch <new-branch>`
 
@@ -1119,7 +1119,7 @@ $ git branch local_dev aa1ecb3
 
 
 
-#### `git branch -d <branch>` 删除分支
+### `git branch -d <branch>` 删除分支
 
 `git branch -d <branch>`
 
@@ -1147,7 +1147,7 @@ $ git branch
 
 
 
-#### `git checkout <branch>` 切换分支
+### `git checkout <branch>` 切换分支
 
 `git checkout <branch>`
 
@@ -1172,7 +1172,7 @@ $ git branch
 
 
 
-#### `git branch --trick` 将本地分支与远程分支同步
+### `git branch --trick` 将本地分支与远程分支同步
 
 `git branch --trick`
 
@@ -1187,7 +1187,7 @@ $ git branch --track local-dev origin/dev
 
 
 
-#### `git tag` 标签管理
+### `git tag` 标签管理
 
 `git tag`
 
@@ -1236,14 +1236,12 @@ v1.4            new version
 ```
 
 
-### 合并和变基/ Merge & Rebase
+## 合并和变基/ Merge & Rebase
 - [x] 合并分支，当前开发分支发生版本变更后，会与其他测试分支或线上分支进行合并，以保持其他分支是最新的分支
 
 - [x] 改变基线，有时候需要从当前版本切换到历史的某一个版本，进行历史记录的更新或是内容的更新
 
-      ​
-
-#### `git merge` 合并分支
+### `git merge` 合并分支
 `git merge`
 > 将当前分支和某一个分支进行合并，保持两个分支版本达到最新的版本数据
 
@@ -1259,7 +1257,7 @@ Merge made by the 'recursive' strategy.
 
 
 
-#### `git rebase <branch>` 变更分支基线
+### `git rebase <branch>` 变更分支基线
 
 `git rebase <branch>`
 
@@ -1282,7 +1280,7 @@ Applying: dev commit
 ###结果会发现master分支上的修改被同步到dev上
 ```
 
-#### `git rebase --abort` 变更分支基线
+### `git rebase --abort` 变更分支基线
 
 `git rebase --abort`
 
@@ -1294,7 +1292,7 @@ Applying: dev commit
 $ git rebase --abort
 ```
 
-#### `git rebase --continue` 从基线历史版本回到最新版本
+### `git rebase --continue` 从基线历史版本回到最新版本
 
 `git rebase --continue`
 
@@ -1312,7 +1310,7 @@ $ git rebase --continue
 - [x] `reset`和`revert`后面会使用到这两个命令，它们的区别在于reset是把回退版本后提交的操作删除，相当于指定版本后的操作没有发生原因；而revert则是保留回退版本操作后的操作，再把回退版本的内容重新提交一遍，覆盖掉之前的版本内容。简单的来说，reset是版本的**后退**操作，而revert则是版本的**前进**。
 
 
-#### `git reset <commit-id>`回退提交到仓库的版本
+### `git reset <commit-id>`回退提交到仓库的版本
 
 `git reset <commit-id>`
 
@@ -1333,7 +1331,7 @@ $ git status -s
 
 
 
-#### `git reset --hard <commit-d> `回退提交不留痕迹
+### `git reset --hard <commit-d> `回退提交不留痕迹
 
 `git reset --hard <commit-d>`
 
@@ -1420,7 +1418,7 @@ $ git reset --hard HEAD^
 
 
 
-#### `git checkout HEAD <file>`切出当前分支最新文件版本
+### `git checkout HEAD <file>`切出当前分支最新文件版本
 
 `git checkout HEAD <file>`
 
@@ -1472,7 +1470,7 @@ OMGGGGGGGGGGGGGGGGGGGGG
 
 
 
-#### `git revert`撤销某次操作，并保留历史记录
+### `git revert`撤销某次操作，并保留历史记录
 
 `git revert`
 
@@ -1529,7 +1527,7 @@ $ git revert HEAD --no-edit
 
 
 
-#### `git revert HEAD -m` 撤退合并操作
+### `git revert HEAD -m` 撤退合并操作
 
 `git revert HEAD -m`
 
@@ -1540,7 +1538,7 @@ $ git revert HEAD --no-edit
 ```shell
 $ git log -5
 commit 8625ff6e7f191a712273c29292154b18671e4d22
-Merge: ad689ba (1) da719ed (2)          ######这里是一个分支合并的操作日志####
+Merge: ad689ba (1) da719ed (2)          #####这里是一个分支合并的操作日志###
 Author: hoojo <hoojo@qq.com>
 Date:   Sun Sep 3 18:06:22 2017 +0800
     合并
@@ -1582,8 +1580,8 @@ $ git revert 8625ff6e7f191a712273c29292154b18671e4d22 -m 2
  2 files changed, 2 insertions(+), 12 deletions(-)
 ```
 
-### 重构文件/Refactor Files
-#### `git rm <file>`删除仓库文件
+## 重构文件/Refactor Files
+### `git rm <file>`删除仓库文件
 `git rm <file>`
 >删除文件会将文件从仓库移动到暂存区，执行commit后文件才被完全移除。同时工作区也不会存在删除文件的记录。当一个文件在工作区或者暂存区没有添加到仓库，将不能被移除。只有完整提交到仓库，没有被修改过的文件才能执行此操作。
 
@@ -1615,7 +1613,7 @@ error: the following file has changes staged in the index:
 
 
 
-#### `git rm --cached <file>`删除暂存区的文件，保留到工作区
+### `git rm --cached <file>`删除暂存区的文件，保留到工作区
 
 `git rm --cached <file>`
 
@@ -1645,7 +1643,7 @@ Untracked files:
         a..txt
 ```
 
-#### `git rm -f <file>`彻底删除暂存区的文件
+### `git rm -f <file>`彻底删除暂存区的文件
 
 `git rm -f <file>`
 
@@ -1674,7 +1672,7 @@ nothing to commit, working directory clean
 
 
 
-#### `git mv <file-orig> <file-renamed>`移动文件并重命名
+### `git mv <file-orig> <file-renamed>`移动文件并重命名
 
 `git mv <file-orig> <file-renamed>`
 
@@ -1711,9 +1709,9 @@ Changes to be committed:
 
 
 
-### 保存片段 / Save FrageMents
+## 保存片段 / Save FrageMents
 
-#### `git stash` 备份仓库最近提交，并同步工作区
+### `git stash` 备份仓库最近提交，并同步工作区
 
 `git stash`
 
@@ -1749,7 +1747,7 @@ nothing to commit, working directory clean
 
 
 
-#### `git stash list` 查看所有备份
+### `git stash list` 查看所有备份
 
 `git stash list` 
 
@@ -1770,7 +1768,7 @@ stash@{6}: WIP on dev: da719ed Revert "roll back"
 
 
 
-#### `git stash pop `恢复备份历史记录
+### `git stash pop `恢复备份历史记录
 
 `git stash pop`
 
@@ -1815,7 +1813,7 @@ Changes not staged for commit:
 
 
 
-#### `git stash drop`删除最近的备份历史记录
+### `git stash drop`删除最近的备份历史记录
 
 `git stash dropo`
 
@@ -1841,7 +1839,7 @@ Dropped stash@{1} (5776a835f04bddf17138bf9ca64feaaecda79525)
 
 
 
-#### `git stash show`显示备份历史记录的文件跟踪对比情况
+### `git stash show`显示备份历史记录的文件跟踪对比情况
 
 `git stash show`
 
@@ -1862,7 +1860,7 @@ $ git stash show stash@{2}
 
 
 
-#### `git stash apply`应用指定节点历史备份记录
+### `git stash apply`应用指定节点历史备份记录
 
 `git stash apply`
 
@@ -1882,9 +1880,9 @@ Changes to be committed:
 
 
 
-### 更新和发布/ Update & Publish
+## 更新和发布/ Update & Publish
 
-#### `git remote` 查看所有远程仓库主机
+### `git remote` 查看所有远程仓库主机
 
 `git remote`
 
@@ -1910,7 +1908,7 @@ $ git remote set-url origin git@github.com:hooj0/rapid-framework.git
 
 
 
-#### `git remote show <remote>` 查看远程仓库主机详细信息
+### `git remote show <remote>` 查看远程仓库主机详细信息
 
 `git remote show <remote>`
 
@@ -1924,7 +1922,7 @@ $ git remote show git-world
 
 
 
-#### `git remote add <shortname> <url>` 添加远程仓库
+### `git remote add <shortname> <url>` 添加远程仓库
 
 `git remote add <shortname> <url>`
 
@@ -1938,7 +1936,7 @@ $ git remote add git-world git:github.com/hoojo/git-world.git
 
 
 
-#### `git remote remove <shortname>`删除远程仓库主机
+### `git remote remove <shortname>`删除远程仓库主机
 
 `git remote remove <shortname>`
 
@@ -1952,7 +1950,7 @@ $ git remote remove git-world
 
 
 
-#### `git fetch <remote>` 拉取远程主机更新
+### `git fetch <remote>` 拉取远程主机更新
 
 `git fetch`
 
@@ -1971,7 +1969,7 @@ $ git fetch origin master
 
 
 
-#### `git pull <remote> <branch>`从远程分支拉取更新版本
+### `git pull <remote> <branch>`从远程分支拉取更新版本
 
 `git pull <remote> <branch>`
 
@@ -1992,7 +1990,7 @@ $ git pull git-world master:dev
 
 
 
-#### `git push <remote> <branch>` 推送版本到远程分支
+### `git push <remote> <branch>` 推送版本到远程分支
 
 `git push <remote> <branch>`
 
@@ -2021,7 +2019,7 @@ $ git push
 
 
 
-#### `git branch -dr <remote/branch>`
+### `git branch -dr <remote/branch>`
 
 `git branch -dr <remote/branch>`
 
@@ -2035,7 +2033,7 @@ $ git
 
 
 
-#### `git push --tags` 发布标签
+### `git push --tags` 发布标签
 
 `git push --targs`
 
@@ -2051,13 +2049,13 @@ $ git push --tags git-world
 ```
 
 
-## 3、Github 的使用
+# 3、Github 的使用
 ---
-### 配置ssh key秘钥
+## 配置ssh key秘钥
 
 > 如果你使用https的协议方式，每次提交代码都需要输入用户名、密码。而使用ssh方式的情况下，你可以配置ssh的key方便提交，不需要重复输入代码。
 
-#### 1、切换https协议到ssh
+### 1、切换https协议到ssh
 
 > 切换方式有两种：
 >
@@ -2067,7 +2065,7 @@ $ git push --tags git-world
 >
 >   `git remote set-url origin git@github.com:account/project.git`
 
-#### 2、生成个人ssh key，在git bash中键入命令
+### 2、生成个人ssh key，在git bash中键入命令
 
 ```shell
 ## 切换到用户命令下的.ssh目录 C:\Users\Administrator\.ssh
@@ -2101,7 +2099,7 @@ The key's randomart image is:
 
 ```
 
-#### 3、配置key 到 ssh agent中
+### 3、配置key 到 ssh agent中
 
 > `ssh` 默认读取的秘钥是 `id_rsa`，为了让ssh能识别到新的秘钥，需要把刚才生成的`id_rsa_github`添加到ssh agent中。
 
@@ -2121,7 +2119,7 @@ Enter passphrase for /c/Users/Administrator/.ssh/id_rsa_github:
 Identity added: /c/Users/Administrator/.ssh/id_rsa_github (/c/Users/Administrator/.ssh/id_rsa_github)
 ```
 
-#### 4、配置config文件
+### 4、配置config文件
 
 > 因为有多个秘钥文件，为了让ssh知道每个账号和git 域名host对应的秘钥文件，所以需要在~/.ssh 目录下配置config
 
@@ -2147,7 +2145,7 @@ User git_lib_user_name
 IdentityFile ~/.ssh/id_rsa
 ```
 
-#### 5、配置github的SSH keys公钥
+### 5、配置github的SSH keys公钥
 > 访问地址：https://github.com/settings/keys
 >
 > **测试配置是否成功，测试之前还需要把id_rsa_github 的秘钥内容粘贴到 github 的ssh key中**
@@ -2156,7 +2154,7 @@ $ ssh -T git@github.com
 Hi hoojo! You've successfully authenticated, but GitHub does not provide shell access.
 ```
 
-#### 6、常见问题汇总
+### 6、常见问题汇总
 -[ ] 1、重启电脑后发现push数据需要重新写入git密码(当我们把当前的Git窗口关闭，重新打开一个时，又会出现这个错误了)
 
 > $ ssh -T git@gitee.com
@@ -2180,7 +2178,7 @@ Hi hoojo! You've successfully authenticated, but GitHub does not provide shell a
 
 
 
-### 参考资料
+# 参考资料
 
 * [介绍与特征](https://baike.baidu.com/item/GIT/12647237?fr=aladdin)
 * [教程](https://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/001373962845513aefd77a99f4145f0a2c7a7ca057e7570000)
