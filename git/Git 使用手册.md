@@ -48,11 +48,11 @@
 
 速度很慢，可以去找其他可下载的地址，对应好自己的操作系统和系统位数
 
-官方下载站点：https://git-for-windows.github.io/ 
-Git for Windows 下载站点：https://git-for-windows.github.io/ 
-更多版本下载：https://github.com/git-for-windows/build-extra/releases/latest
+官方下载站点：https://git-for-windows.github.io/  <br/>
+Git for Windows 下载站点：https://git-for-windows.github.io/  <br/>
+更多版本下载：https://github.com/git-for-windows/build-extra/releases/latest <br/>
 
-直接下载：[Windows Git-2.14.1-64 位](https://github.com/git-for-windows/git/releases/download/v2.14.1.windows.1/Git-2.14.1-64-bit.exe)
+直接下载：[Windows Git-2.14.1-64 位](https://github.com/git-for-windows/git/releases/download/v2.14.1.windows.1/Git-2.14.1-64-bit.exe) <br/>
 
 我下载安装的版本是**Git-2.8.1-64-bit**
 
@@ -1418,7 +1418,7 @@ $ git rebase --continue
 
 
 
-### 回退提交/ Undo Commit
+## 回退提交/ Undo Commit
 
 - [x] Git的后悔药，可以撤销某一次的版本提交。上面已经介绍过在暂存区使用reset可以将暂存区提交的版本变更到工作区，这里将介绍在仓库中进行后退版本。
 - [x] `reset`和`revert`后面会使用到这两个命令，它们的区别在于reset是把回退版本后提交的操作删除，相当于指定版本后的操作没有发生原因；而revert则是保留回退版本操作后的操作，再把回退版本的内容重新提交一遍，覆盖掉之前的版本内容。简单的来说，reset是版本的**后退**操作，而revert则是版本的**前进**。
@@ -2175,7 +2175,7 @@ $ git push
 
 
 
-### `git branch -dr <remote/branch>`
+### `git branch -dr <remote/branch>` 删除远程仓库分支
 ---
 `git branch -dr <remote/branch>`
 
