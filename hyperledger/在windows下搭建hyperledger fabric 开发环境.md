@@ -158,7 +158,7 @@ end
 
 > 在默认情况下，`Vagrant`所创建的`Virtualbox`虚拟机使用的是`NAT`网络类型，即外界是不能直接访问你的虚拟机的，就连宿主（装`Virtualbox`软件的这台机器）机器也访问不了。此时，如果你在虚拟机中启动的一个`Tomcat`来部署网站的测试环境，而又想外界能够访问的话，你需要使用端口转发。
 >
-> 通过上面的配置后，宿主主机的`8888`端口转发到了虚拟机的`8080`端口，这样你便可以通过在宿主主机上访问http://localhost:8888来访问虚拟机的`Tomcat`了。对于`Virtualbox`来说，只有NAT类型的网络类型支持端口转发，这也是为什么`Vagrant`创建的`Virtualbox`虚拟机默认都有一个支持NAT的虚拟网卡，原因就是要能够支持`Vagrant`级别的端口转发。另外，`Vagrant`在第一次尝试连接虚拟机时使用的也是NAT。
+> 通过上面的配置后，宿主主机的`8888`端口转发到了虚拟机的`8080`端口，这样你便可以通过在宿主主机上访问 http://localhost:8888 来访问虚拟机的`Tomcat`了。对于`Virtualbox`来说，只有NAT类型的网络类型支持端口转发，这也是为什么`Vagrant`创建的`Virtualbox`虚拟机默认都有一个支持NAT的虚拟网卡，原因就是要能够支持`Vagrant`级别的端口转发。另外，`Vagrant`在第一次尝试连接虚拟机时使用的也是NAT。
 
 12、
 
@@ -364,7 +364,7 @@ Vagrantfile and to try again.
 
 
 
-**方法1、**执行命令行`vagrant global-status`，找到所有在运行的虚拟机系统
+**方法1、** 执行命令行`vagrant global-status`，找到所有在运行的虚拟机系统
 
 ```shell
 $ vagrant global-status
@@ -405,7 +405,7 @@ Last login: Wed Apr 11 13:46:04 2018 from 10.0.2.2
 
 
 
-**方法2、**直接进入虚拟机安装的位置`cd GoPath/src/github.com/hyperledger/fabric/devenv`，执行命令行`vagrant.exe ssh`
+**方法2、** 直接进入虚拟机安装的位置`cd GoPath/src/github.com/hyperledger/fabric/devenv`，执行命令行`vagrant.exe ssh`
 
 ```shell
 $ cd GoPath/src/github.com/hyperledger/fabric/devenv
