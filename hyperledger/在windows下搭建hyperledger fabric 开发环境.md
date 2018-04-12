@@ -8,13 +8,26 @@
 
 ### 1、命令终端工具的安装
 
-### 2、Go 语言环境的安装
+### 2、Go 语言
+
+- [ ] 下载安装文件：https://golang.org/dl/
+- [ ] 配置环境变量，在电脑系统变量中进行新建配置
+  - `go` 安装目录环境变量配置：`GOROOT`=`E:\Go`
+  - `go` 工作目录环境变量配置：`GOPATH`=`D:\GOPATH`
+    - 在`D:\GOPATH`创建目录`src`，`bin`，`pkg`
+    - 在`src`目录创建`github.com\hyperledger` 这个目录后面会放`hyperledger fabric`的代码
 
 ### 3、vagrant工具
 
 > vagrant 工具就是一个用命令行和脚本的方式，帮你创建虚拟机和安装虚拟机里面的软件的一个工具。并且它支持把安装好的环境进行打包成`*.box`然后在其他机器上再通过vagrant很方便的添加到机器上。
 
 #### 安装 vagrant
+
+- [ ] 下载安装文件：https://www.vagrantup.com/downloads.html
+
+- [ ] 安装完成后重启电脑
+
+  ​
 
 #### vagrant的基本命令
 
@@ -57,7 +70,7 @@
 
 
 
-+ **添加一个远程现有的`box` **
++  **添加一个远程现有的`box` **
 
     ```shell
     $ vagrant init mybox https://boxes.company.com/my-project.box
@@ -109,9 +122,7 @@
 + **`ssh`连到虚拟机**，`vagrant ssh`就可以直接连接到当前虚拟机。
 
     > 如果当前目录没有`Vagrantfile`就无法进行连接，这是有两种办法，
-    >
     > 一种是进入到虚拟机目录`/box/work/mybox`(存在`Vagrantfile`文件的目录)
-    >
     > 另一种则是：
     >
     > ```shell
@@ -236,19 +247,31 @@
   > ansible是基于模块工作的，本身没有批量部署的能力。真正具有批量部署的是ansible所运行的模块，ansible只是提供一种框架。主要包括：
   >
   > (1)、连接插件connection plugins：负责和被监控端实现通信；
+  >
   > (2)、host inventory：指定操作的主机，是一个配置文件里面定义监控的主机；
+  >
   > (3)、各种模块核心模块、command模块、自定义模块；
+  >
   > (4)、借助于插件完成记录日志邮件等功能；
+  >
   > (5)、playbook：剧本执行多个任务时，非必需可以让节点一次性运行多个任务；
   >
+  > ​
+  >
   > ansible 使用指南：http://www.ansible.com.cn/index.html
+  >
+  > ​
+  >
   > ansible 文档：https://yq.aliyun.com/articles/86760?t=t1
 
   ​
 
   在使用`ansible`批量自动化任务时，有两种方式：
+
   （1）在宿主主机机器上安装`ansible`
+
   （2）采用`ansible local`的方式，即在虚拟机自身上安装`ansible`
+
   对于第（1）种方法，我们需要保证宿主主机机器上已经安装了`ansible`，然后进行配置：
 
   ```shell
@@ -274,9 +297,11 @@
 
   > 当我们多次执行`vagrant up`启动虚拟机时，`provison`并不会每次都执行，只有在这三种情况下provision才会运行：
   >
-  > 1. 首次执行`vagrant up`
-  > 2. 执行`vagrant provision`
-  > 3. 执行`vagrant reload --provision`
+  > 首次执行`vagrant up`
+  >
+  > 执行`vagrant provision`
+  >
+  > 执行`vagrant reload --provision`
 
   ​
 
@@ -308,7 +333,60 @@
   end
   ```
 
-  ​
++ 配置共有的固定`ip`网络
+
+    ```shell
+    Vagrant.configure("2") do |config|
+      config.vm.network "public_network", ip: "192.168.1.15"
+    end
+    ```
+
++ 配置虚拟机主机源`Provider`
+
+    不同的`Provider`有不同的特性，也存在不同的配置方式。以`Virtualbox`为例，`Vagrant`默认会给虚拟机指定一个不具备可读性的名字，比如`mybox_default_1523517449396_15013`，我们可以对此进行配置予以更改：
+
+    ```shell
+    config.vm.provider "virtualbox" do |v|
+      v.name = "mybox"
+    end
+    ```
+
+     
+
+    `Provider`的特定配置也可以覆盖`Vagrant`原来的配置：
+
+    ```shell
+    Vagrant.configure("2") do |config|
+      config.vm.box = "precise64"
+
+      config.vm.provider "vmware_fusion" do |v, override|
+        override.vm.box = "precise64_fusion"
+      end
+    end
+    ```
+
+
+
+##### 打包`box`
+
+> 打包`box`可以让之前安装好的环境重复使用，比如将自己机器的工作环境打包成一个`box`，以后去其他公司或者网络封闭的场所时，把这个打包好的box直接添加到新机器上直接就可以使用了。而不需要重复安装一些软件，这样避免了错误也省去了大量的时间精力，毕竟安装软件是一些苦力活，对网络的也有要求。
+
+```shell
+$ vagrant halt
+# 这里的mybox是虚拟机的名称，在 Vagrantfile 有指定虚拟机的情况下可以这样使用
+$ vagrant package --base mybox
+```
+
+> 这样就创建了一个打包，打包完成后可以拷贝到其他地方使用。注意在打包之前要关闭虚拟机。
+
+如果当前打包的目录是在`Vagrantfile`所在目录(这样当前命令就直接指向了当前配置对应的虚拟机)，那就可以直接打包
+
+```shell
+$ vagrant halt
+$ vagrant package
+```
+
+
 
 ### 4、Virtualbox 的安装
 
