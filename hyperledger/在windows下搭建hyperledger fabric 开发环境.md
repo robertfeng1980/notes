@@ -6,7 +6,14 @@
 
 ## 一、准备工作
 
-### 1、命令终端工具的安装
+### 1、命令终端工具
+
+命令终端工具很多，有常用的`xshell`、`Cygwin64 Terminal`、`Git`，这里推荐使用`Git`
+
+- [ ] 下载安装文件：https://git-for-windows.github.io/
+- [ ] 加入配置，防止路径太长太深出现错误
+  - `git config --global core.autocrlf false`
+  - `git config --global core.longpaths true`
 
 ### 2、Go 语言
 
@@ -388,9 +395,18 @@ $ vagrant package
 
 
 
-### 4、Virtualbox 的安装
+### 4、Virtualbox 虚拟机
+
+来自于`Oracle`的虚拟机，小巧便用、占用空间小。
+
+- [x] 下载安装文件：https://www.virtualbox.org/wiki/Downloads
+- [ ] 直接下一步，安装完成即可
+
+
 
 ### 5、hyperledger fabric 源码的安装
+
+`hyperledger fabric` 核心代码
 
 
 
