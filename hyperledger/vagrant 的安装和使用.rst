@@ -4,14 +4,16 @@
 
 `vagrant` 工具就是一个用命令行和脚本的方式，帮你创建虚拟机和安装虚拟机里面的软件的一个工具。并且它支持把安装好的环境进行打包成`*.box`然后在其他机器上再通过vagrant很方便的添加到机器上。
 
+
+
 安装 Vagrant
 ===
 
-- [ ] 下载安装文件：https://www.vagrantup.com/downloads.html
+下载安装文件：https://www.vagrantup.com/downloads.html
 
-- [ ] 安装完成后重启电脑
+选择适合电脑的版本，安装完成后重启电脑
 
-  ​
+​
 
 Vagrant 基本操作
 ===
@@ -30,9 +32,9 @@ Vagrant 基本操作
   $ vagrant init ubuntu/trusty64
   ```
 
-  > 执行上面的`init`命令后其实就是在是在当前目录下创建了一个`Vagrantfile`的文件。打开这个文件看看，里面有当前虚拟机的名称和一些注释掉的配置。
-  >
-  > `Vagrant`还会在`Vagrantfile`所在同级目录下创建一个`.vagrant`隐藏文件夹，该文件夹包含了在本地运行虚拟机的一些信息。如果使用了代码库管理（比如Git），这个`.vagrant`文件夹应该被`ignore`掉。同时这个目录还存在一个私钥`private_key`
+  执行上面的`init`命令后其实就是在是在当前目录下创建了一个`Vagrantfile`的文件。打开这个文件看看，里面有当前虚拟机的名称和一些注释掉的配置。
+
+  `Vagrant`还会在`Vagrantfile`所在同级目录下创建一个`.vagrant`隐藏文件夹，该文件夹包含了在本地运行虚拟机的一些信息。如果使用了代码库管理（比如Git），这个`.vagrant`文件夹应该被`ignore`掉。同时这个目录还存在一个私钥`private_key`
 
   ​
 
@@ -43,13 +45,15 @@ Vagrant 基本操作
   $ vagrant box add my-box-file.box  --name mybox
   ```
 
-  > 上面的命令是在当前目录里有一个`my-box-file.box`的文件，添加到当前环境中，它的名称叫`mybox`
+  上面的命令是在当前目录里有一个`my-box-file.box`的文件，添加到当前环境中，它的名称叫`mybox`
+
+  ​
 
   ```shell
   $ vagrant box add --name mybox http://pan.baidu.com/AsFS24D/my-box-file.box
   ```
 
-  > 添加一个box在远程服务器上，程序会自动到这个地址下载。然后添加这个box到虚拟机上名称为`mybox`
+  添加一个box在远程服务器上，程序会自动到这个地址下载。然后添加这个box到虚拟机上名称为`mybox`
 
   ​
 
@@ -60,7 +64,7 @@ Vagrant 基本操作
   $ vagrant init mybox https://boxes.company.com/my-project.box
   ```
 
-  > 上面的`mybox`是虚拟机名称，后面的网址是远程的虚拟机文件
+  上面的`mybox`是虚拟机名称，后面的网址是远程的虚拟机文件
 
   ​
 
@@ -137,16 +141,23 @@ Vagrant 基本操作
 
 
 
+
 ### 关闭虚拟机
 
-- **关闭虚拟机 `vagrant halt`**，关闭正在运行的虚拟机，当你的工作目录不在虚拟机目录下 ` vagrant.exe halt ID`
+- **关闭虚拟机 `vagrant halt`**
+
+  关闭正在运行的虚拟机，当你的工作目录不在虚拟机目录下 ` vagrant.exe halt ID`
 
 
 
 
 ### 销毁虚拟机
 
-- **删除销毁虚拟机 `vagrant destroy` ，该操作只会删除虚拟机，不会删除虚拟机对应的`box`**
+- **删除销毁虚拟机 `vagrant destroy` **
+
+  **该操作只会删除虚拟机，不会删除虚拟机对应的`box`**
+
+  ​
 
 
 
@@ -173,6 +184,8 @@ Vagrant 基本操作
 
 - **查看正在运行的虚拟机** `vagrant global-status`
 
+  ​
+
 
 
 配置选项
@@ -188,9 +201,9 @@ Vagrant 基本操作
   end
   ```
 
-  > 在默认情况下，`Vagrant`所创建的`Virtualbox`虚拟机使用的是`NAT`网络类型，即外界是不能直接访问你的虚拟机的，就连宿主（装`Virtualbox`软件的这台机器）机器也访问不了。此时，如果你在虚拟机中启动的一个`Tomcat`来部署网站的测试环境，而又想外界能够访问的话，你需要使用端口转发。
-  >
-  > 通过上面的配置后，宿主主机的`8888`端口转发到了虚拟机的`8080`端口，这样你便可以通过在宿主主机上访问 http://localhost:8888 来访问虚拟机的`Tomcat`了。对于`Virtualbox`来说，只有NAT类型的网络类型支持端口转发，这也是为什么`Vagrant`创建的`Virtualbox`虚拟机默认都有一个支持NAT的虚拟网卡，原因就是要能够支持`Vagrant`级别的端口转发。另外，`Vagrant`在第一次尝试连接虚拟机时使用的也是NAT。
+  在默认情况下，`Vagrant`所创建的`Virtualbox`虚拟机使用的是`NAT`网络类型，即外界是不能直接访问你的虚拟机的，就连宿主（装`Virtualbox`软件的这台机器）机器也访问不了。此时，如果你在虚拟机中启动的一个`Tomcat`来部署网站的测试环境，而又想外界能够访问的话，你需要使用端口转发。
+
+  通过上面的配置后，宿主主机的`8888`端口转发到了虚拟机的`8080`端口，这样你便可以通过在宿主主机上访问 http://localhost:8888 来访问虚拟机的`Tomcat`了。对于`Virtualbox`来说，只有NAT类型的网络类型支持端口转发，这也是为什么`Vagrant`创建的`Virtualbox`虚拟机默认都有一个支持NAT的虚拟网卡，原因就是要能够支持`Vagrant`级别的端口转发。另外，`Vagrant`在第一次尝试连接虚拟机时使用的也是NAT。
 
 
 
@@ -205,7 +218,7 @@ Vagrant 基本操作
   end
   ```
 
-  > 上面的配置是将当前`Vagrantfile`所在目录下的`images`挂载在虚拟机`/home/files/images`上
+  上面的配置是将当前`Vagrantfile`所在目录下的`images`挂载在虚拟机`/home/files/images`上
 
 
 
@@ -226,7 +239,7 @@ Vagrant 基本操作
   SHELL
   ```
 
-  > 上面的配置是系统在执行`vagrant provision`的时候就会输出 `hello`
+  上面的配置是系统在执行`vagrant provision`的时候就会输出 `hello`
 
   ```shell
   Vagrant.configure("2") do |config|
@@ -234,7 +247,7 @@ Vagrant 基本操作
   end
   ```
 
-  > 引用外部脚本 ` "script.sh"`
+  > 上面的配置引用外部脚本 ` "script.sh"`
 
 ​    
 
@@ -244,15 +257,10 @@ Vagrant 基本操作
   >
   > ansible是基于模块工作的，本身没有批量部署的能力。真正具有批量部署的是ansible所运行的模块，ansible只是提供一种框架。主要包括：
   >
-  > (1)、连接插件connection plugins：负责和被监控端实现通信；
+  > (1)、连接插件connection plugins：负责和被监控端实现通信；<br/>(2)、host inventory：指定操作的主机，是一个配置文件里面定义监控的主机；<br/>(3)、各种模块核心模块、command模块、自定义模块；<br/>(4)、借助于插件完成记录日志邮件等功能；<br/>(5)、playbook：剧本执行多个任务时，非必需可以让节；
   >
-  > (2)、host inventory：指定操作的主机，是一个配置文件里面定义监控的主机；
-  >
-  > (3)、各种模块核心模块、command模块、自定义模块；
-  >
-  > (4)、借助于插件完成记录日志邮件等功能；
-  >
-  > (5)、playbook：剧本执行多个任务时，非必需可以让节；
+  > ansible 使用指南：<http://www.ansible.com.cn/index.html><br/>
+  > ansible 文档：<https://yq.aliyun.com/articles/86760?t=t1>
 
   ​
 
@@ -284,11 +292,7 @@ Vagrant 基本操作
 
   > 当我们多次执行`vagrant up`启动虚拟机时，`provison`并不会每次都执行，只有在这三种情况下provision才会运行：
   >
-  > 首次执行`vagrant up`
-  >
-  > 执行`vagrant provision`
-  >
-  > 执行`vagrant reload --provision`
+  > 首次执行`vagrant up`<br/>执行`vagrant provision`<br/>执行`vagrant reload --provision`
 
   ​
 
@@ -346,17 +350,16 @@ Vagrant 基本操作
 
 
     `Provider`的特定配置也可以覆盖`Vagrant`原来的配置：
-
+    
     ```shell
     Vagrant.configure("2") do |config|
       config.vm.box = "precise64"
-
+    
       config.vm.provider "vmware_fusion" do |v, override|
         override.vm.box = "precise64_fusion"
       end
     end
     ```
-
 
 
 ## 打包虚拟机
