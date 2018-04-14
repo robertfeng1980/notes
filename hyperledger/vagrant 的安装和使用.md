@@ -25,6 +25,8 @@ Vagrant 基本操作
 
 ### 创建虚拟机
 
+---
+
 - **创建或初始化一个虚拟机环境，和`git`创建仓库有些类似**
 
   ```shell
@@ -34,9 +36,7 @@ Vagrant 基本操作
 
   执行上面的`init`命令后其实就是在是在当前目录下创建了一个`Vagrantfile`的文件。打开这个文件看看，里面有当前虚拟机的名称和一些注释掉的配置。
 
-  `Vagrant`还会在`Vagrantfile`所在同级目录下创建一个`.vagrant`隐藏文件夹，该文件夹包含了在本地运行虚拟机的一些信息。如果使用了代码库管理（比如Git），这个`.vagrant`文件夹应该被`ignore`掉。同时这个目录还存在一个私钥`private_key`
-
-  ​
+  `Vagrant`还会在`Vagrantfile`所在同级目录下创建一个`.vagrant`隐藏文件夹，该文件夹包含了在本地运行虚拟机的一些信息。如果使用了代码库管理（比如`Git`），这个`.vagrant`文件夹应该被`ignore`掉。同时这个目录还存在一个私钥`private_key`
 
 
 - **如果已经有一个现有的`box`，那可以这样操作**
@@ -47,18 +47,14 @@ Vagrant 基本操作
 
   上面的命令是在当前目录里有一个`my-box-file.box`的文件，添加到当前环境中，它的名称叫`mybox`
 
-  ​
-
   ```shell
   $ vagrant box add --name mybox http://pan.baidu.com/AsFS24D/my-box-file.box
   ```
 
   添加一个box在远程服务器上，程序会自动到这个地址下载。然后添加这个box到虚拟机上名称为`mybox`
 
-  ​
 
-
-- **添加一个远程现有的`box` **
+- **添加一个远程现有的`box`  **
 
   ```shell
   $ vagrant init mybox https://boxes.company.com/my-project.box
@@ -70,7 +66,9 @@ Vagrant 基本操作
 
 ### 启动虚拟机
 
-- **启动虚拟机 `vagrant up`就可以启动当前虚拟机了**，此时`vagrant`会检查本地是否有`ubuntu/trusty64`这个虚拟机的`trusty`的`ubuntu`版本（`Ubuntu Server 14.04 LTS (Trusty Tahr) daily builds`），如果没有就会从官网`https://atlas.hashicorp.com`来下载`ubuntu/trusty64`这个box，这个过程的速度看网络好坏。
+---
+
+- **启动虚拟机 `vagrant up`就可以启动当前虚拟机了**，此时`vagrant`会检查本地是否有`ubuntu/trusty64`这个虚拟机的`trusty`的`ubuntu`版本（`Ubuntu Server 14.04 LTS (Trusty Tahr) daily builds`），如果没有就会从官网https://atlas.hashicorp.com来下载`ubuntu/trusty64`这个box，这个过程的速度看网络好坏。
 
   ```shell
   $ vagrant up
@@ -87,9 +85,7 @@ Vagrant 基本操作
   ```
 
   从上面的日志可以看到，程序会先去找`'ubuntu/trusty64'`没有找到，于是就去匹配`vagrant`虚拟镜像配置
-  `URL: https://vagrantcloud.com/ubuntu/trusty64`，它会配置虚拟机的名称和使用的虚拟机软件。
-
-  下载`vagrant`的`box`文件： https://vagrantcloud.com/ubuntu/boxes/trusty64/versions/20180409.0.0/providers/virtualbox.box
+  `URL: https://vagrantcloud.com/ubuntu/trusty64`，它会配置虚拟机的名称和使用的虚拟机软件。<br/>下载`vagrant`的`box`文件： https://vagrantcloud.com/ubuntu/boxes/trusty64/versions/20180409.0.0/providers/virtualbox.box
 
   ```shell
   Vagrant.configure("2") do |config|
@@ -101,20 +97,18 @@ Vagrant 基本操作
   virtualbox Externally hosted (cloud-images.ubuntu.com)
   ```
 
-  云镜像：` cloud-images.ubuntu.com`
-  上面的网址都可以打开看看，你就明白了`Vagrant`是如何去下载、匹配文件的。
-
-  `vagrant up`这个命令会默认使用`Virtualbox`，如果需要使用其他的虚拟机产品可以设置`vagrant up --provider hyperv` 这里的hyperv是一个虚拟机产品，如：`VMware`、`Virtualbox`
+  云镜像仓库：` cloud-images.ubuntu.com`<br/>上面的网址都可以打开看看，你就明白了`Vagrant`是如何去下载、匹配文件的。<br/>`vagrant up`这个命令会默认使用`Virtualbox`，如果需要使用其他的虚拟机产品可以设置`vagrant up --provider hyperv` 这里的hyperv是一个虚拟机产品，如：`VMware`、`Virtualbox`
 
   ​
 
 ### 连接虚拟机
 
+---
+
 
 - **`ssh`连到虚拟机**，`vagrant ssh`就可以直接连接到当前虚拟机。
 
-  如果当前目录没有`Vagrantfile`就无法进行连接，这是有两种办法，
-  一种是进入到虚拟机目录`/box/work/mybox`(存在`Vagrantfile`文件的目录)
+  如果当前目录没有`Vagrantfile`就无法进行连接，这是有两种办法，一种是进入到虚拟机目录 `/box/work/mybox`(存在`Vagrantfile`文件的目录)
   另一种则是：
 
   ```shell
@@ -144,6 +138,8 @@ Vagrant 基本操作
 
 ### 关闭虚拟机
 
+---
+
 - **关闭虚拟机 `vagrant halt`**
 
   关闭正在运行的虚拟机，当你的工作目录不在虚拟机目录下 ` vagrant.exe halt ID`
@@ -153,9 +149,11 @@ Vagrant 基本操作
 
 ### 销毁虚拟机
 
+---
+
 - **删除销毁虚拟机 `vagrant destroy` **
 
-  **该操作只会删除虚拟机，不会删除虚拟机对应的`box`**
+  **该操作只会删除虚拟机，不会删除虚拟机对应的`box` **
 
   ​
 
@@ -164,27 +162,74 @@ Vagrant 基本操作
 高级命令
 ---
 
-- **添加和查看当前机器上安装或下载的`box`**，在当前用户`Administrator`目录`C:\Users\Administrator\.vagrant.d\boxes\`
+### 查看虚拟机`box`文件
 
-  ```shell
-  $ cd ~/.vagrant.d/boxes
-  ```
+---
 
+**添加和查看当前机器上安装或下载的`box`**，在当前用户`Administrator`目录`C:\Users\Administrator\.vagrant.d\boxes\`
 
-- **列举出本地所有下载好的`box`文件信息**
-
-  ```shell
-  $ vagrant box list
-  ubuntu/xenial64 (virtualbox, 20180410.0.0)
-  ```
+```shell
+$ cd ~/.vagrant.d/boxes
+```
 
 
-- **删除本地的`box`信息** `vagrant box remove box-name`
+### 查看虚拟机`box`列表
+
+---
+
+**列举出本地所有下载好的`box`文件信息**
+
+```shell
+$ vagrant box list
+ubuntu/xenial64 (virtualbox, 20180410.0.0)
+```
 
 
-- **查看正在运行的虚拟机** `vagrant global-status`
+### 删除虚拟机 `box`
 
-  ​
+---
+
+**删除本地的`box`信息** `vagrant box remove box-name`
+
+```shell
+$ vagrant box remove box-name
+```
+
+
+
+### 查看已下载的虚拟机`box`
+
+---
+
+**查看正在运行的虚拟机** `vagrant global-status`
+
+```shell
+$ vagrant global-status
+```
+
+
+
+### 打包虚拟机 `box`
+
+---
+
+打包`box`可以让之前安装好的环境重复使用，比如将自己机器的工作环境打包成一个`box`，以后去其他公司或者网络封闭的场所时，把这个打包好的box直接添加到新机器上直接就可以使用了。而不需要重复安装一些软件，这样避免了错误也省去了大量的时间精力，毕竟安装软件是一些苦力活，对网络的也有要求。
+
+```shell
+$ vagrant halt
+# 这里的mybox是虚拟机的名称，在 Vagrantfile 有指定虚拟机的情况下可以这样使用
+$ vagrant package --base mybox
+```
+
+> 这样就创建了一个打包，打包完成后可以拷贝到其他地方使用。注意在打包之前要关闭虚拟机。
+
+如果当前打包的目录是在`Vagrantfile`所在目录(这样当前命令就直接指向了当前配置对应的虚拟机)，那就可以直接打包
+
+```shell
+$ vagrant halt
+$ vagrant package
+```
+
 
 
 
@@ -192,6 +237,7 @@ Vagrant 基本操作
 ---
 
 ### 端口映射转发
+---
 
 - **端口映射转发**，多用于在宿主主机或外部主机访问虚拟机不能访问的情况，解决方法如下，在`Vagrantfile`中加入配置：
 
@@ -209,21 +255,22 @@ Vagrant 基本操作
 
 
 ### 共享挂载目录
+---
 
-- **共享挂载目录到虚拟机上**，在`Vagrantfile`中加入配置：
+**共享挂载目录到虚拟机上**，在`Vagrantfile`中加入配置：
 
-  ```shell
-  Vagrant.configure("2") do |config|
-    config.vm.synced_folder "images/", "/home/files/images"
-  end
-  ```
+```shell
+Vagrant.configure("2") do |config|
+  config.vm.synced_folder "images/", "/home/files/images"
+end
+```
 
-  上面的配置是将当前`Vagrantfile`所在目录下的`images`挂载在虚拟机`/home/files/images`上
-
+上面的配置是将当前`Vagrantfile`所在目录下的`images`挂载在虚拟机`/home/files/images`上
 
 
 
 ### `provision` 
+---
 
 - `provision` 规定虚拟机运行一段特定的 **命令或脚本**。简单地说，`provision`即通过使用某些工具自动地、批量地为机器安装软件以及配置系统，它省去了人工安装和配置系统时的重复性和易错性，当然还享受了计算机与生俱来的速度。Vagrant提供多种方式对虚拟机进行`provision`，包括`Shell`、`Chef`、`Puppet`和`Ansible`等。以`Shell`为例，既可以通过直接在`Vagrantfile`中编写`Shell`脚本的方式，也可以通过引用外部Shell文件的方式。
 
@@ -264,9 +311,9 @@ Vagrant 基本操作
 
   ​
 
-  在使用`ansible`批量自动化任务时，有两种方式：
-    （1）在宿主主机机器上安装`ansible`
-    （2）采用`ansible local`的方式，即在虚拟机自身上安装`ansible`
+  在使用`ansible`批量自动化任务时，有两种方式：<br/>
+    （1）在宿主主机机器上安装`ansible`<br/>
+    （2）采用`ansible local`的方式，即在虚拟机自身上安装`ansible`<br/>
     对于第（1）种方法，我们需要保证宿主主机机器上已经安装了`ansible`，然后进行配置：
 
   ```shell
@@ -308,7 +355,10 @@ Vagrant 基本操作
 
 
 
+
+
 ### 网络设置
+---
 
 - 配置私有固定`ip`网络
 
@@ -336,51 +386,30 @@ Vagrant 基本操作
 
 
 
+
 ### 虚拟机提供商
+---
 
-- 配置虚拟机主机源`Provider`
+配置虚拟机主机源`Provider`
 
-  不同的`Provider`有不同的特性，也存在不同的配置方式。以`Virtualbox`为例，`Vagrant`默认会给虚拟机指定一个不具备可读性的名字，比如`mybox_default_1523517449396_15013`，我们可以对此进行配置予以更改：
+不同的`Provider`有不同的特性，也存在不同的配置方式。以`Virtualbox`为例，`Vagrant`默认会给虚拟机指定一个不具备可读性的名字，比如`mybox_default_1523517449396_15013`，我们可以对此进行配置予以更改：
 
-  ```shell
-  config.vm.provider "virtualbox" do |v|
-    v.name = "mybox"
+```shell
+config.vm.provider "virtualbox" do |v|
+  v.name = "mybox"
+end
+```
+`Provider`的特定配置也可以覆盖`Vagrant`原来的配置：
+
+```shell
+Vagrant.configure("2") do |config|
+  config.vm.box = "precise64"
+
+  config.vm.provider "vmware_fusion" do |v, override|
+    override.vm.box = "precise64_fusion"
   end
-  ```
-
-
-    `Provider`的特定配置也可以覆盖`Vagrant`原来的配置：
-    
-    ```shell
-    Vagrant.configure("2") do |config|
-      config.vm.box = "precise64"
-    
-      config.vm.provider "vmware_fusion" do |v, override|
-        override.vm.box = "precise64_fusion"
-      end
-    end
-    ```
-
-
-## 打包虚拟机
-
-打包`box`可以让之前安装好的环境重复使用，比如将自己机器的工作环境打包成一个`box`，以后去其他公司或者网络封闭的场所时，把这个打包好的box直接添加到新机器上直接就可以使用了。而不需要重复安装一些软件，这样避免了错误也省去了大量的时间精力，毕竟安装软件是一些苦力活，对网络的也有要求。
-
-```shell
-$ vagrant halt
-# 这里的mybox是虚拟机的名称，在 Vagrantfile 有指定虚拟机的情况下可以这样使用
-$ vagrant package --base mybox
+end
 ```
-
-> 这样就创建了一个打包，打包完成后可以拷贝到其他地方使用。注意在打包之前要关闭虚拟机。
-
-如果当前打包的目录是在`Vagrantfile`所在目录(这样当前命令就直接指向了当前配置对应的虚拟机)，那就可以直接打包
-
-```shell
-$ vagrant halt
-$ vagrant package
-```
-
 
 
 # 命令行汇总
