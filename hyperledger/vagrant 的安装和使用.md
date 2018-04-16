@@ -482,3 +482,8 @@ $ vagrant package				# 打包虚拟机
 $ vagrant package --base mybox	 # 打包虚拟机
 ```
 
+
+
+# 参考资料
+
+http://www.cnblogs.com/davenkin/p/vagrant-ansible-gocd.html

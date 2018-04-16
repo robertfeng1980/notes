@@ -12,13 +12,7 @@
 
 ![开发环境架构图](https://raw.githubusercontent.com/hyperledger/fabric/release-1.1/devenv/images/openchain-dev-env-deployment-diagram.png)
 
-上面的这张图是官方的，通过这张图可以不难看出，`fabric`的开发环境分本地和虚拟机两个部分。本地需要安装`git、vagrant、vbox`，并且需要配置`GoPath`、以及自己的工作空间和`local-dev`。而`vagrant`虚拟的镜像中需要`python、docker、golang`。
-
-将本地的`$GoPath\src\github.com\hyperledger`映射到虚拟机上的`/opt/gopath/src/github.com/hyperledger`
-
-将本地的`$GoPath\src\github.com\hyperledger`映射到虚拟机上的`hyperledger`，后期这个目录可以放置其他项目代码或示例
-
-将本地`$LOCALDEVDIR`环境变量（默认`/local-dev`）映射到虚拟机上的`/local-dev`
+上面的这张图是官方的，通过这张图可以不难看出，`fabric`的开发环境分本地和虚拟机两个部分。本地需要安装`git、vagrant、vbox`，并且需要配置`GoPath`、以及自己的工作空间和`local-dev`。而`vagrant`虚拟的镜像中需要`python、docker、golang`。<br/>将本地的`$GoPath\src\github.com\hyperledger`映射到虚拟机上的`/opt/gopath/src/github.com/hyperledger`。<br/>将本地的`$GoPath\src\github.com\hyperledger`映射到虚拟机上的`hyperledger`，后期这个目录可以放置其他项目代码或示例。<br/>将本地`$LOCALDEVDIR`环境变量（默认`/local-dev`）映射到虚拟机上的`/local-dev`
 
 ```shell
 default: /vagrant => D:/GoPath/src/github.com/hyperledger/fabric/devenv
@@ -95,16 +89,18 @@ cd /d/GoPath/src/github.com/hyperledger/fabric/devenv
 $ vagrant.exe up
 ```
 
-> 执行上述命令行，其实就是运行了`devenv`目录中的`Vagrantfile`脚本。有兴趣的可以去看看这个脚本，脚本里面会运行`setup.sh`脚本。`Vagrantfile`脚本会帮你配置网络、挂载之前配置好的`GoPath`下的`fabric`工程，也就是当前目录。还会安装`virtualbox`虚拟机、以及安装`docker`。由于脚本中安装虚拟机会默认分配内存和cpu资源，如果你的机器配置比较低，可以适当的调整这里分配的资源。
->
-> ```shell
-> config.vm.provider :virtualbox do |vb|
->     vb.name = "hyperledger"
->     vb.customize ['modifyvm', :id, '--memory', '4096']
->     vb.cpus = 2
-> ```
->
-> 后续还会对这个脚本进行修改，挂载我们自己的开发的智能合约` chaincode`代码和官方的示例。
+执行上述命令行，其实就是运行了`devenv`目录中的`Vagrantfile`脚本。有兴趣的可以去看看这个脚本，脚本里面会运行`setup.sh`脚本。`Vagrantfile`脚本会帮你配置网络、挂载之前配置好的`GoPath`下的`fabric`工程，也就是当前目录。还会安装`virtualbox`虚拟机、以及安装`docker`。
+
+由于脚本中安装虚拟机会默认分配内存和cpu资源，如果你的机器配置比较低，可以适当的调整这里分配的资源。
+
+```shell
+config.vm.provider :virtualbox do |vb|
+    vb.name = "hyperledger"
+    vb.customize ['modifyvm', :id, '--memory', '4096']
+    vb.cpus = 2
+```
+
+后续还会对这个脚本进行修改，挂载我们自己的开发的智能合约` chaincode`代码和官方的示例。
 
 
 
