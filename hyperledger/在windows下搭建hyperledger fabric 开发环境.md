@@ -4,11 +4,11 @@
 
 
 
-> `hyperledger fabric` 开发环境搭建是一项大工程，这里主要描述`windows`下的环境搭建。其他`linux`和`mac`不做描述。我的机器是`win7 64`位系统。
+`hyperledger fabric` 开发环境搭建是一项大工程，这里主要描述`windows`下的环境搭建。其他`linux`和`mac`不做描述。我的机器是`win7 64`位系统。
 
 
 
-## 一、准备工作
+# 一、准备工作
 
 ![开发环境架构图](https://raw.githubusercontent.com/hyperledger/fabric/release-1.1/devenv/images/openchain-dev-env-deployment-diagram.png)
 
@@ -29,7 +29,7 @@ default: /opt/gopath/src/github.com/hyperledger => D:/GoPath/src/github.com/hype
 
 
 
-### 1、命令终端工具
+## 1、命令终端工具
 
 命令终端工具很多，有常用的`xshell`、`Cygwin64 Terminal`、`Git`，这里推荐使用`Git`
 
@@ -38,7 +38,7 @@ default: /opt/gopath/src/github.com/hyperledger => D:/GoPath/src/github.com/hype
   - `git config --global core.autocrlf false`
   - `git config --global core.longpaths true`
 
-### 2、Go 语言
+## 2、Go 语言
 
 - [ ] 下载安装文件：https://golang.org/dl/
 - [ ] 配置环境变量，在电脑系统变量中进行新建配置
@@ -47,9 +47,9 @@ default: /opt/gopath/src/github.com/hyperledger => D:/GoPath/src/github.com/hype
     - 在`D:\GOPATH`创建目录`src`，`bin`，`pkg`
     - 在`src`目录创建`github.com\hyperledger` 这个目录后面会放`hyperledger fabric`的代码
 
-### 3、Vagrant 工具
+## 3、Vagrant 工具
 
-> vagrant 工具就是一个用命令行和脚本的方式，帮你创建虚拟机和安装虚拟机里面的软件的一个工具。并且它支持把安装好的环境进行打包成`*.box`然后在其他机器上再通过vagrant很方便的添加到机器上。
+vagrant 工具就是一个用命令行和脚本的方式，帮你创建虚拟机和安装虚拟机里面的软件的一个工具。并且它支持把安装好的环境进行打包成`*.box`然后在其他机器上再通过vagrant很方便的添加到机器上。
 
 - [ ] 下载安装文件：https://www.vagrantup.com/downloads.html
 
@@ -57,7 +57,7 @@ default: /opt/gopath/src/github.com/hyperledger => D:/GoPath/src/github.com/hype
 
   ​
 
-### 4、Virtualbox 虚拟机
+## 4、Virtualbox 虚拟机
 
 来自于`Oracle`的虚拟机，小巧便用、占用空间小。
 
@@ -66,7 +66,7 @@ default: /opt/gopath/src/github.com/hyperledger => D:/GoPath/src/github.com/hype
 
 
 
-### 5、Hyperledger Fabric 源码的安装
+## 5、Hyperledger Fabric 源码的安装
 
 `hyperledger fabric` 平台核心代码也就是运行的基础，需要从`github`上下载
 
@@ -80,11 +80,13 @@ $ git checkout v1.0.3
 
 
 
-## 二、搭建开发环境
+# 二、搭建开发环境
 
-> 由于上面已经准备好了环境的必要工具，下面全程用命令行的方式去安装虚拟机。
+由于上面已经准备好了环境的必要工具，下面全程用命令行的方式去安装虚拟机。
 
-### 1、安装虚拟机系统
+
+
+## 1、安装虚拟机系统
 
 进入`devenv`开发环境目录下，执行命令行
 
@@ -133,9 +135,7 @@ Bringing machine 'default' up with 'virtualbox' provider...
 
 
 
-如果以上程序执行过程中发生中断或错误，可以先解决错误，随后运行命令`vagrant.exe provision`
-
-如果是下载docker太慢，也许会断掉或者龟速。这时候可能需要加速，使用国内的阿里加速下载`docker`，修改`GoPath/src/github.com/hyperledger/fabric/devenv`目录下的`setup.sh`脚本，加入如下代码
+如果以上程序执行过程中发生中断或错误，可以先解决错误，随后运行命令`vagrant.exe provision`<br/>如果是下载docker太慢，也许会断掉或者龟速。这时候可能需要加速，使用国内的阿里加速下载`docker`，修改`GoPath/src/github.com/hyperledger/fabric/devenv`目录下的`setup.sh`脚本，加入如下代码
 
 ```shell
 # ----------------------------------------------------------------
@@ -165,11 +165,11 @@ Welcome to Ubuntu 16.04.4 LTS (GNU/Linux 4.4.0-119-generic x86_64)
 0 updates are security updates.
 ```
 
-> 看到上面的输出信息后，表明成功链接到Ubuntu系统
+看到上面的输出信息后，表明成功链接到Ubuntu系统
 
 
 
-### 2、下载docker镜像
+## 2、下载docker镜像
 
 这里下载的docker镜像是`hyperledger fabric`必须的镜像，它是后面`fabric`运行的基础。
 
@@ -220,7 +220,7 @@ $ chmod +x download_docker_images.sh
 $ sudo sh download_docker_images.sh
 ```
 
-> 如果最后一个命令不带`sudo`脚本将运行失败，因为当前用户权限不够，所以必须要。或者切换到`root`用户。
+如果最后一个命令不带`sudo`脚本将运行失败，因为当前用户权限不够，所以必须要。或者切换到`root`用户。
 
 
 
@@ -234,14 +234,14 @@ $ vi daemon.json
 }
 ```
 
-> 在`daemon.json`中加入上面的配置即可加速
+在`daemon.json`中加入上面的配置即可加速
 
 
 
-### 遇到的问题
+## 遇到的问题
 
-#### 1、若执行`vagrant.exe up`命令出现以下错误提醒，你需要升级`powershell`
-
+### 1、若执行`vagrant.exe up`命令出现以下错误提醒，你需要升级`powershell`
+---
 ```shell
 $ vagrant.exe up
 The version of powershell currently installed on this host is less than
@@ -259,8 +259,8 @@ https://www.microsoft.com/en-us/download/details.aspx?id=40855
 
 
 
-#### 2、若中途不小心关闭了终端命令行窗口，怎么再打开之前的虚拟机系统
-
+### 2、若中途不小心关闭了终端命令行窗口，怎么再打开之前的虚拟机系统
+---
 > 这时当我们打开命令终端后，输入命令`vagrant ssh`发现有一段提示信息
 
 ```shell
