@@ -8,12 +8,30 @@ docker是开发人员和系统管理员 使用容器**开发、部署和运行**
 
 装箱化越来越受欢迎，因为装箱是：
 
-- **灵活：**即使是最复杂的应用程序也可以进行集装箱化。
-- **轻量级：**容器利用并共享主机内核。
-- **可互换：**您可以即时部署更新和升级。
-- **便携式：**您可以在本地构建，部署到云中并在任何地方运行。
-- **可扩展性：**您可以增加和自动分发容器副本。
-- **可堆叠：**您可以垂直堆叠服务并即时堆叠服务。
+- **灵活：** 即使是最复杂的应用程序也可以进行集装箱化。
+- **轻量级：** 容器利用并共享主机内核。
+- **可互换：** 您可以即时部署更新和升级。
+- **便携式：** 您可以在本地构建，部署到云中并在任何地方运行。
+- **可扩展性：** 您可以增加和自动分发容器副本。
+- **可堆叠：** 您可以垂直堆叠服务并即时堆叠服务。
+
+
+
+
+### 镜像和容器
+
+通过运行镜像启动容器。一个**镜像**是一个可执行的包，其中包括运行应用程序代码所需的所有内容、运行时、库、环境变量和配置文件。
+
+**容器**是镜像的运行时实例，当被执行时（即镜像的状态或者用户进程）在容器中变得可以监控查看。您可以使用该命令`docker ps`查看正在运行的镜像列表。
+
+
+
+### 容器和虚拟机
+
+一个**容器**中运行*原生* Linux和共享主机与其它容器的内核。它运行一个独立的进程，不占用任何其他可执行文件的内存，使其轻量化。
+
+相比之下，**虚拟机**（VM）运行一个完整的“客户”操作系统，通过虚拟机管理程序*虚拟*访问主机资源。一般来说，虚拟机提供的环境比大多数应用程序需要的资源更多。
+
 
 
 
@@ -134,6 +152,8 @@ Start interactive shell
 
 
 
+### 测试
+
 继续在上面的窗口输入命令行，或者打开电脑中的`dos`命令行窗口 `cmd`，或者是使用`powershell`、`git`、`xshell`都可以。这里使用`git bash`窗口进行操作。
 
 输入命令行`docker --version`，查看版本
@@ -229,25 +249,78 @@ Live Restore Enabled: false
 
 
 
-## docker 的使用
+ssh链接到指定虚拟机，可以打开本地vbox软件，看看哪些虚拟机，然后利用`docker-machine ssh`去打开
 
-### 镜像和容器
-
-通过运行镜像启动容器。一个**镜像**是一个可执行的包，其中包括运行应用程序代码所需的所有内容、运行时、库、环境变量和配置文件。
-
-**容器**是镜像的运行时实例，当被执行时（即镜像的状态或者用户进程）在容器中变得可以监控查看。您可以使用该命令`docker ps`查看正在运行的镜像列表。
+```shell
+$ docker-machine ssh default
+```
 
 
 
-### 容器和虚拟机
-
-一个**容器**中运行*原生* Linux和共享主机与其它容器的内核。它运行一个独立的进程，不占用任何其他可执行文件的内存，使其轻量化。
-
-相比之下，**虚拟机**（VM）运行一个完整的“客户”操作系统，通过虚拟机管理程序*虚拟*访问主机资源。一般来说，虚拟机提供的环境比大多数应用程序需要的资源更多。
 
 
+## docker 容器
 
-### 基本用法
+### 镜像加速
+
+**Ubuntu系统加速**
+
+```shell
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json <<-'EOF'
+{
+  "registry-mirrors": ["https://8kzs1r91.mirror.aliyuncs.com"]
+}
+EOF
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+```
+
+
+
+**Win 7 如何配置镜像加速器**
+针对安装了Docker Toolbox的用户，您可以参考以下配置步骤：
+创建一台安装有Docker环境的Linux虚拟机，指定机器名称为default，同时配置Docker加速器地址。
+
+```shell
+$ docker-machine create --engine-registry-mirror=https://8kzs1r91.mirror.aliyuncs.com -d virtualbox default
+```
+
+对于已经安装创建过虚拟机的，可以先`docker-machine ssh default`链接到`default`虚拟机如下处理
+
+```shell
+sudo sed -i "s|EXTRA_ARGS='|EXTRA_ARGS='--registry-mirror=https://8kzs1r91.mirror.aliyuncs.com |g" /var/lib/boot2docker/profile
+
+# 退出
+exit
+# 重启虚拟机
+docker-machine restart default
+```
+
+
+
+查看机器的环境配置，并配置到本地，并通过Docker客户端访问Docker服务。
+
+```shell
+docker-machine env default
+eval "$(docker-machine env default)"
+docker info
+```
+
+针对安装了Docker for Windows的用户，您可以参考以下配置步骤：
+在系统右下角托盘图标内右键菜单选择 Settings，打开配置窗口后左侧导航菜单选择 Docker Daemon。编辑窗口内的JSON串，填写加速器地址，如下所示：
+
+```shell
+{
+  "registry-mirrors": ["https://8kzs1r91.mirror.aliyuncs.com"]
+}
+```
+
+编辑完成，点击 Apply 保存按钮，等待Docker重启并应用配置的镜像加速器。
+
+
+
+### 基本命令
 
 + 运行hello world示例
 
@@ -549,7 +622,7 @@ Live Restore Enabled: false
 
 ### 分享镜像
 
-分享镜像就是将个人的镜像推送到docker云端，这样大家都可以进行拉取共享使用。docker云端和github有些类似，在使用云端之前需要先注册，注册地址：[cloud.docker.com](https://cloud.docker.com/)
+分享镜像就是将个人的镜像推送到docker云端，这样大家都可以进行拉取共享使用。docker云端和github有些类似，在使用云端之前需要先注册，注册地址：[cloud.docker.com](https://cloud.docker.com/)。国内阿里镜像地址：https://dev.aliyun.com/
 
 + 登陆docker 云端
 
@@ -559,6 +632,9 @@ Live Restore Enabled: false
   $ docker login -p xxxx -u xxxx
   WARNING! Using --password via the CLI is insecure. Use --password-stdin.
   Login Succeeded
+
+  # 或者登陆其他仓库
+  $ sudo docker login --username=xxx -p xxxx registry.cn-hangzhou.aliyuncs.com
   ```
 
 + 登出docker 云端，命令行 `docker logout`
@@ -566,10 +642,12 @@ Live Restore Enabled: false
 
 + 建立一个镜像的标签，方便于查看和管理
 
-  命令行`docker tag image username/repository:tag`，其中`image`代表镜像的名称、 `username`代表用户id、`repository`表示集合仓库名称、`tag`则是标签名称。示例如下：
+  命令行`docker tag image username/repository:tag`，其中`image`代表镜像的名称、 `username`代表用户id、`repository`表示集合仓库名称、`tag`则是标签名称。若是第三方仓库则需要带仓库地址，同时`useranme`部分在阿里仓库中被称为**命名空间**，而且需要手动创建。示例如下：
 
   ```shell
   # docker tag image username/repository:tag
+  # 为其他仓库打标签
+  # docker tag [ImageId] registry.cn-hangzhou.aliyuncs.com/username_namespace/repository:[tag]
 
   $ docker tag myhello hoojo/test:my_hello_world
 
@@ -585,9 +663,12 @@ Live Restore Enabled: false
 
 + 提交镜像到云端仓库
 
-  使用命令行`docker push`来进行推送，整个推送可能很慢，由于是国外的网站
+  使用命令行`docker push`来进行推送，整个推送可能很慢，由于是国外的网站。若使用国内阿里镜像则需要在前面带上仓库地址`registry.cn-hangzhou.aliyuncs.com/hoojo/test:my_hello_world`
 
   ```shell
+  # 为其他仓库push
+  # docker push registry.cn-hangzhou.aliyuncs.com/hoojo/test:my_hello_world
+
   $ docker push hoojo/test:my_hello_world
   The push refers to repository [docker.io/hoojo/test]
   0c5f092b929e: Preparing
@@ -603,6 +684,247 @@ Live Restore Enabled: false
 
   ​
 
+### 运行远程云端的镜像
+
+从现在开始，您可以使用`docker run`此命令在任何机器上使用并运行远程的应用程序：
+
+```shell
+docker run -p 4000:80 username/repository:tag
+
+$ docker run -p 4000:80 hoojo/test:my_hello_world
+ * Running on http://0.0.0.0:80/ (Press CTRL+C to quit)
+```
+
+这样就把云镜像端程序运行在本地了，如果本地没有当前需要的镜像程序，则docker会在远程拉取程序到本地进行运行。无论在哪里`docker run`执行，它都会将会下载Python以及所有依赖项从中拉出`requirements.txt`，然后运行镜像中的代码。它们都在一个整体小包中一起运行，你不需要在主机上安装任何东西来让docker运行它。
+
+
+
+### 本节命令汇总
+
+```shell
+docker build -t friendlyhello .  # 使用此目录的Dockerfile创建图像
+docker run -p 4000:80 friendlyhello  # 运行“friendlyname”映射端口4000到80
+docker run -d -p 4000:80 friendlyhello         # 同上，但处于分离模式
+docker run --detach --publish 4000:80 --name webserver nginx
+docker ps                               # 列出所有正在运行的容器
+docker container ls                                # 列出所有正在运行的容器
+docker container ls -a             	# 列出所有容器，即使那些没有运行的容器
+docker container stop <hash>           # 停止指定的容器
+docker container kill <hash>         # 强制关闭指定的容器
+docker container rm <hash>        	# 从本机中移除指定的容器
+docker container rm $(docker container ls -a -q)         # 删除所有容器
+docker image ls -a                             # 列出此机器上的所有图像
+docker image rm <image id>            # 从本机中删除指定的图像
+docker image rm $(docker image ls -a -q)   # 从本机中删除所有图像
+docker images myhello                      # 通过仓库查看镜像
+docker login             					# 登录
+docker tag <image> username/repository:tag  # 标签<image>用于上传到仓库
+docker push username/repository:tag            # 上传标记的图像到仓库
+docker run username/repository:tag                   # 从仓库运行图像，本地没有会先拉取镜像
+docker push registry/username/repository:tag 
+docker run registry/username/repository:tag
+
+docker-machine ssh default 					# ssh 链接到虚拟机 default
+docker-machine ip 							# 查看虚拟机ip地址
+```
+
+
+
+## docker 服务
+
+在分布式应用程序中，应用程序的不同部分被称为“服务”。例如，如果您想象一个视频共享网站，它可能包含一个用于将应用程序数据存储在数据库中的服务，一个用于在后台进行视频转码的服务用户上传的东西，前端的服务等等。服务会更改运行该软件的容器实例的数量，从而为流程中的服务分配更多计算资源，**这就相当于在一台机器上部署了一套服务的集群，提高了服务的并发和高性能**。
+
+幸运的是，使用Docker平台定义，运行和扩展服务非常简单 - 只需编写一个`docker-compose.yml`文件即可。
+
+
+
+### 配置 `docker-compose.yml`文件
+
+`docker-compose.yml`文件是一个`YAML`文件，它定义了Docker容器在生产中的配置方式。
+
+在任意目录位置创建文件`docker-compose.yml`，并粘贴如下内容
+
+```shell
+version: "3"
+services:
+  web:
+    # replace username/repo:tag with your name and image details
+    # pull image 拉取文件，这里对应远程仓库中的镜像
+    image: hoojo/test:my_hello_world 
+    deploy:
+      replicas: 5
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 50M
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "80:80"
+    networks:
+      - webnet
+networks:
+  webnet:
+```
+
+> 该`docker-compose.yml`文件告诉Docker执行以下操作：
+>
+> - 从注册表中拉出[我们在步骤2中上传的图像](https://docs.docker.com/get-started/part2/)。
+> - 运行该镜像的5个实例作为所调用的服务`web`，限制每个实例使用最多10％的CPU（跨所有核心）和50MB的RAM。
+> - 如果一个失败，立即重启容器。
+> - 将主机上的端口80映射到`web`端口80。
+> - `web`通过称为负载平衡的网络指示容器共享端口80 `webnet`。（在内部，容器本身`web`在临时端口上发布到 80端口。）
+> - `webnet`使用默认设置定义网络（这是一个负载平衡覆盖网络）。
+
+
+
+### 运行负载平衡应用程序
+
+在使用`docker stack deploy`命令进行部署之前，首先运行如下命令
+
+```shell
+$ docker swarm init
+Error response from daemon: could not choose an IP address to advertise since this system has multiple addresses on different interfaces (10.0.2.15 on eth0 and 192.168.99.100 on eth1) - specify one with --advertise-addr
+```
+
+出现以上问题后可以按照说明解决，解决方法如下
+
+```shell
+$ docker swarm init --advertise-addr eth1
+# or
+$ docker swarm init --advertise-addr 192.168.99.100
+# or
+$ docker swarm init --listen-addr 192.168.99.100:2377 --advertise-addr 192.168.99.100:2377
+```
+
+
+
+现在正式部署镜像程序，将部署后的程序服务命名为：`run_hello`
+
+```shell
+$ docker stack deploy -c docker-compose.yml run_hello
+Creating network run_hello_webnet
+Creating service run_hello_web
+```
+
+> 创建网络`run_hello_webnet`，创建服务`run_hello_web`
+
+我们在单个堆栈上将一个镜像程序部署在一个主机上运行5个实例的服务。查看服务列表：
+
+```shell
+$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE                       PORTS
+6vtacv7c9tq5        run_hello_web       replicated          5/5                 hoojo/test:my_hello_world   *:80->80/tcp
+```
+
+> 默认服务名称会在之前部署在堆栈`docker stack deploy -c docker-compose.yml run_hello`的时候的名称后面加上`web`，这里的服务名称应该是 `run_hello_web`。还列出了服务ID以及副本数，映射的名称和已公开端口。
+
+
+
+在服务中运行的单个容器称为**任务**。任务的的id是一个定量增加的数据，这个定量取决于在文件`docker-compose.yml`配置的`replicas` 的数量。查看服务的任务：
+
+```shell
+$ docker service ps run_hello_web
+ID                  NAME                IMAGE                       NODE                DESIRED STATE       CURRENT STATE           ERROR               PORTS
+ksy1vbv0t4qf        run_hello_web.1     hoojo/test:my_hello_world   default             Running             Running 5 minutes ago
+b38a3x3pjym5        run_hello_web.2     hoojo/test:my_hello_world   default             Running             Running 5 minutes ago
+x8syohl5prfs        run_hello_web.3     hoojo/test:my_hello_world   default             Running             Running 5 minutes ago
+z8k0wsfecw49        run_hello_web.4     hoojo/test:my_hello_world   default             Running             Running 5 minutes ago
+ri68se61gfc2        run_hello_web.5     hoojo/test:my_hello_world   default             Running             Running 5 minutes ago
+```
+
+
+
+通过查看系统容器列表，也会显示所有的服务任务数据，这些任务无法被过滤
+
+```shell
+$ docker container ls -q
+CONTAINER ID        IMAGE                       COMMAND             CREATED             STATUS              PORTS               NAMES
+540ea1cf9981        hoojo/test:my_hello_world   "python app.py"     15 minutes ago      Up 15 minutes       80/tcp              run_hello_web.1.ksy1vbv0t4qf1g3mfd0x1xonu
+1bed6aaa2541        hoojo/test:my_hello_world   "python app.py"     15 minutes ago      Up 15 minutes       80/tcp              run_hello_web.3.x8syohl5prfsyfpao6nf0xrge
+97026758b279        hoojo/test:my_hello_world   "python app.py"     15 minutes ago      Up 15 minutes       80/tcp              run_hello_web.5.ri68se61gfc2fski787fdgz34
+d30c0bc32ac8        hoojo/test:my_hello_world   "python app.py"     15 minutes ago      Up 15 minutes       80/tcp              run_hello_web.4.z8k0wsfecw49z9zodkbebeoum
+354825ff501b        hoojo/test:my_hello_world   "python app.py"     15 minutes ago      Up 15 minutes       80/tcp              run_hello_web.2.b38a3x3pjym5k3w90qyyd2apz
+```
+
+
+
+直接访问IP地址：http://192.168.99.100 就可以看到镜像运行的结果
+
+```shell
+Hello World!
+Hostname: 1bed6aaa2541
+Visits: cannot connect to Redis, counter disabled
+```
+
+> 通过连续刷新url，会发现hostname发生变化，这里的hostname正是对应上面的**CONTAINER ID**，这就表明5个实例可以任意访问，负载均衡已发生作用。
+
+
+
+### 无缝更新应用程序
+
+当我们需要修改`docker-compose.yml`的配置信息，不需要先关闭集群、删除服务、杀死删除容器，只需用修改配置，然后重新部署发布`docker stack deploy`，这样大大的提高了效率、缩短了发布的间歇时间。
+
+比如我们修改`docker-compose.yml`的副本`replicas `数量为2，然后重新发布
+
+```shell
+$ docker stack deploy -c docker-compose.yml run_hello
+Updating service run_hello_web (id: 6vtacv7c9tq5b2m6i0fetan85)
+```
+
+上面的日志反馈是更新服务`run_hello_web`，通过目录查看服务容器`docker container ls -q`，会发现少了
+
+```shell
+$ docker container ls
+CONTAINER ID        IMAGE                       COMMAND             CREATED             STATUS              PORTS               NAMES
+540ea1cf9981        hoojo/test:my_hello_world   "python app.py"     29 minutes ago      Up 29 minutes       80/tcp              run_hello_web.1.ksy1vbv0t4qf1g3mfd0x1xonu
+354825ff501b        hoojo/test:my_hello_world   "python app.py"     29 minutes ago      Up 29 minutes       80/tcp              run_hello_web.2.b38a3x3pjym5k3w90qyyd2apz
+
+```
+
+
+
+### 关闭服务和集群
+
+删除发布在堆栈中的服务`docker stack rm`
+
+```shell
+$ docker stack rm run_hello
+Removing service run_hello_web
+Removing network run_hello_webnet
+```
+
+停掉集群
+
+```shell
+$ docker swarm leave --force
+Node left the swarm.
+```
+
+用Docker轻松发布、开启并扩展您的应用程序非常简单。
+
+
+
+### 本节命令汇总
+
+```shell
+docker stack ls                                            # List stacks or apps
+docker stack deploy -c <compose-yml-file> <appname>  # Run the specified Compose file
+docker service ls                 # List running services associated with an app
+docker service ps <service>                  # List tasks associated with an app
+docker inspect <task or container>                   # Inspect task or container
+docker container ls -q                                      # List container IDs
+docker stack rm <appname>                             # Tear down an application
+docker swarm leave --force      # Take down a single node swarm from the manager
+docker swarm init --advertise-addr eth1                 # 启动集群、暴露某个ip地址
+```
+
+
+
 ## 参考文档
 
 https://docs.docker.com/get-started/part2/
+
+https://docs.docker.com/docker-for-windows/
+
+http://www.fecshop.com/topic/591
