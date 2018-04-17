@@ -12,7 +12,7 @@
 
 4. 在整个集群中分配应用程序
 
-5. 通过添加后端数据库来堆叠服务
+5. 通过添加后端数据库来堆叠编排服务
 
 6. 将应用部署到生产
 
@@ -20,16 +20,16 @@
 
 # docker 概述
 
-docker是开发人员和系统管理员 使用容器**开发、部署和运行**应用程序的平台。使用Linux容器来部署应用程序称为*镜像化*。容器不是新的，但它们用于轻松部署应用程序。
+docker是开发人员和系统管理员 使用容器**开发、部署和运行**应用程序的平台。使用Linux容器来部署应用程序称为*容器化*。容器并不是新的，但它们用于轻松部署应用程序。
 
-镜像化越来越受欢迎，镜像化的优点有：
+容器化越来越受欢迎，容器的优点有：
 
-- **灵活：** 即使是最复杂的应用程序也可以进行镜像化。
+- **灵活：** 即使是最复杂的应用程序也可以进行容器化。
 - **轻量级：** 容器利用并共享主机内核。
 - **可互换：** 您可以即时部署更新和升级。
 - **便携式：** 您可以在本地构建，部署到云中并在任何地方运行。
 - **可扩展性：** 您可以增加和自动分发容器副本。
-- **可堆叠：** 您可以垂直堆叠服务并即时堆叠服务。
+- **可堆叠编排：** 您可以垂直堆叠编排服务并即时编排堆叠服务。
 
 
 
@@ -53,7 +53,7 @@ docker是开发人员和系统管理员 使用容器**开发、部署和运行**
 
 # docker 安装
 
-docker版本众多，这里介绍Windows下如何下载安装。在Win7系统上，docker安装需要使用docker toolbox，而Win10则直接使用docker CE，还有企业版的 docker EE。
+docker版本众多，这里介绍Windows下如何下载安装。在Win7系统上，docker安装需要使用`docker toolbox`，而Win10则直接使用docker CE，还有企业版的 docker EE。
 
 
 
@@ -1006,15 +1006,566 @@ docker swarm init --advertise-addr eth1               # 启动集群、暴露某
 
 # docker 集群
 
-将应用程序部署到群集上，并在多台机器上运行它。多容器，多机应用程序通过连接多台机器到称为一个“Dockerized”**集群**。
+将应用程序部署到群集上，并在多台机器上运行它。多容器、多机应用程序通过连接多台机器到称为一个Docker**集群**。
 
 Swarm是一组运行Docker并加入到集群中的机器。下面的Docker命令将由**群集管理器**在群集上执行。群体中的机器可以是物理的或虚拟的。加入群体后的机器被称为**节点**。
 
-Swarm管理人员可以使用多种策略来运行容器，例如“最空节点” —— 它可以使用容器充分利用使用率最低的机器。它确保每台机器只获取指定容器的一个实例。指示集群管理器在Compose文件中使用这些策略，就像您已经使用的策略一样。
+Swarm管理人员可以使用多种策略来运行容器，例如“最空节点” —— 它可以使用容器充分利用使用率最低的机器。它确保每台机器只获取指定容器的一个实例。指示集群管理器在Compose文件中使用这些策略。
 
 集群管理器是集群中唯一可以执行命令的机器，或者授权其他机器作为**工作者**加入群体。工作者只是在那里提供能力，并没有权力告诉任何其他机器可以做什么和不可以做什么。
 
-到目前为止，您已经在本地机器上以单主机模式使用Docker。但是Docker也可以切换到**群集模式**，这就是使用群集的原因。立即启用群模式使当前的机器成为群管理器。从此，Docker将运行您在您管理的群集上执行的命令，而不仅仅是在当前机器上执行。
+到目前为止，已经在本地机器上以单主机模式使用Docker。但是Docker也可以切换到**群集模式**，这就是使用群集的原因。立即启用群模式使当前的机器成为群管理器。从此，Docker将运行在您管理的群集上执行的命令，而不仅仅是在当前机器上执行。
+
+
+
+## 创建集群
+
+一个**集群**由多个节点组成，可以是物理机器或虚拟机器。基本概念很简单：运行`docker swarm init`以启用群模式，并使您的当前机器成为**集群管理器**，然后`docker swarm join`在其他机器上运行 ，让它们作为**工作节点**加入群体。我们使用虚拟机来快速创建一个双机集群。
+
+### 创建`VM`虚拟机
+
+---
+
+现在使用`docker-machine`命令和`VirtualBox`驱动程序创建几个`VM `：
+
+```shell
+$ docker-machine create --driver virtualbox my-vm-node-1
+$ docker-machine create --driver virtualbox my-vm-node-2
+```
+
+执行命令后可以看到成功创建虚拟机
+
+```shell
+$ docker-machine create --driver virtualbox my-vm-node-1
+Running pre-create checks...
+Creating machine...
+(my-vm-node-1) Copying C:\Users\Administrator\.docker\machine\cache\boot2docker.iso to C:\Users\Administrator\.docker\machine\machines\my-vm-node-1\boot2docker.iso...
+(my-vm-node-1) Creating VirtualBox VM...
+(my-vm-node-1) Creating SSH key...
+(my-vm-node-1) Starting the VM...
+(my-vm-node-1) Check network to re-create if needed...
+(my-vm-node-1) Waiting for an IP...
+Waiting for machine to be running, this may take a few minutes...
+Detecting operating system of created instance...
+Waiting for SSH to be available...
+Detecting the provisioner...
+Provisioning with boot2docker...
+Copying certs to the local machine directory...
+Copying certs to the remote machine...
+Setting Docker configuration on the remote daemon...
+Checking connection to Docker...
+Docker is up and running!
+To see how to connect your Docker Client to the Docker Engine running on this virtual machine, run: E:\Docker Toolbox\docker-machine.exe env my-vm-node-1
+```
+
+接着创建虚拟机`my-vm-node-2`，创建完成后查看虚拟机`ip`地址
+
+
+
+### 查看虚拟机和`ip`地址
+
+---
+
+现在创建了两个虚拟机，分别命名为`my-vm-node-1`和`my-vm-node-2`。现在要列出虚拟机并获取其IP地址。
+
+使用此命令`docker-machine ls`列出机器并获取其IP地址
+
+```shell
+$ docker-machine ls
+NAME           ACTIVE   DRIVER       STATE     URL                         SWARM   DOCKER        ERRORS
+default        *        virtualbox   Running   tcp://192.168.99.100:2376           v18.04.0-ce
+my-vm-node-1   -        virtualbox   Running   tcp://192.168.99.101:2376           v18.04.0-ce
+my-vm-node-2   -        virtualbox   Running   tcp://192.168.99.102:2376           v18.04.0-ce
+```
+
+
+
+### 初始化集群
+
+---
+
+第一台机器作为**管理员（主节点）**，执行管理员命令并认证**工作节点**加入群体，第二台机器是**工作节点**。<br/>
+
+可以使用`ssh`命令来发送命令行控制你的`VM ` `docker-machine ssh`。指示`my-vm-node-1`成为一名`swarm`管理者`docker swarm init`并查找如下输出：
+
+```shell
+$ docker-machine ssh my-vm-node-1 "docker swarm init --advertise-addr 192.168.99.101"
+Swarm initialized: current node (1qdcis4nk664vc2zvw2xh2jdj) is now a manager.
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-2tyylp5ch3ojkm9ereotwbs7n649v21hrq8mnqxfz00vnwg5zh-3ddke9ir33ubxhrx02yw9gxyd 192.168.99.101:2377
+
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+```
+
+上面的提示说明当前节点已经成为管理者，并且在其他机器上使用命令可以让其加入到集群管理中。
+
+> **端口2377和2376**
+>
+> 始终运行`docker swarm init`并`docker swarm join`使用端口2377（群管理端口），或根本没有端口，并让它采用默认值。<br/>`docker-machine ls` 命令可以查看端口2376和虚拟机的IP地址，即Docker守护程序端口。**请勿使用此端口，否则 [可能会遇到错误](https://forums.docker.com/t/docker-swarm-join-with-virtualbox-connection-error-13-bad-certificate/31392/2)。**
+
+
+
+**无法使用SSH？**试试`--native-ssh`标志
+
+如果由于某些原因，无法向`Swarm`管理节点发送命令，`Docker Machine` [可以让您使用自己系统的SSH](https://docs.docker.com/machine/reference/ssh/#different-types-of-ssh)。只需`--native-ssh` 在调用该`ssh`命令时指定标志：
+
+```shell
+$ docker-machine --native-ssh ssh my-vm-node-1 `指令`
+```
+
+
+
+### 添加集群节点
+
+---
+
+正如你所看到的，执行`docker swarm init`指令后会输出一个预配置的 `docker swarm join`命令，让你在任何你想添加的节点上运行。复制此命令，并将其发送给`my-vm-node-2`通过`docker-machine ssh`以`my-vm-node-2` 加入集群中作为工作者：
+
+```shell
+$ docker-machine ssh my-vm-node-2 "docker swarm join --token SWMTKN-1-2tyylp5ch3ojkm9ereotwbs7n649v21hrq8mnqxfz00vnwg5zh-3ddke9ir33ubxhrx02yw9gxyd 192.168.99.101:2377"
+This node joined a swarm as a worker.
+```
+
+这样`my-vm-node-2`就成功加入了集群中。
+
+
+
+### 查看机器节点信息
+
+---
+
+通过命令行`docker node ls`在集群管理节点中查看集群节点的信息
+
+```shell
+$ docker-machine ssh my-vm-node-1 "docker node ls"
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
+1qdcis4nk664vc2zvw2xh2jdj *   my-vm-node-1        Ready               Active              Leader              18.04.0-ce
+xbgzqgx0mpnxs2iyevih9id4x     my-vm-node-2        Ready               Active                                  18.04.0-ce
+```
+
+从上信息的**MANAGER STATUS**可以看出 `my-vm-node-1`就是管理节点
+
+
+
+### 脱离集群
+
+---
+
+如果需要脱离集群环境，可以使用命令`docker swarm leave`在需要脱离环境的机器上运行指令
+
+```shell
+$ docker-machine ssh my-vm-node-2 "docker swarm leave"
+```
+
+
+
+## 在集群上部署应用
+
+复杂的部分已经完成，现在只需要重复**创建容器镜像**部分章节的工作就可以部署应用了。当然，只有集群管理者`my-vm-node-1`采用全新执行 `docker`的命令，而工人节点只能工作。
+
+
+
+### 为管理节点配置`shell`
+
+---
+
+`docker-machine`为swarm管理者配置一个`shell`。到目前为止，一直在封装Docker命令`docker-machine ssh`来与`VM`虚拟机进行交互。另一个选择是运行`docker-machine env <machine>`来配置一个命令行，该命令将当前`shell`配置为与`VM`上的`Docker`守护程序进行通信。此方法对更好，因为它允许您使用本地`docker-compose.yml`文件**远程**部署应用程序，而无需将其复制到任何位置。
+
+输入`docker-machine env my-vm-node-1`，然后复制粘贴并运行输出的最后一行提供的命令，以配置shell `my-vm-node-1`与swarm管理器进行通信。
+
+配置shell的命令根据你是Mac，Linux还是Windows而有所不同，因此下面的示例进行演示：
+
+```shell
+$ docker-machine env my-vm-node-1
+export DOCKER_TLS_VERIFY="1"
+export DOCKER_HOST="tcp://192.168.99.101:2376"
+export DOCKER_CERT_PATH="C:\Users\Administrator\.docker\machine\machines\my-vm-node-1"
+export DOCKER_MACHINE_NAME="my-vm-node-1"
+export COMPOSE_CONVERT_WINDOWS_PATHS="true"
+# Run this command to configure your shell:
+# eval $("E:\Docker Toolbox\docker-machine.exe" env my-vm-node-1)
+```
+
+复制最后一行命令配置`shell`，并运行
+
+```shell
+$ eval $("E:\Docker Toolbox\docker-machine.exe" env my-vm-node-1)
+```
+
+执行完成后，通过命令查看`my-vm-node-1`是否是活动的节点
+
+```shell
+$ docker-machine ls
+NAME           ACTIVE   DRIVER       STATE     URL                         SWARM   DOCKER        ERRORS
+default        -        virtualbox   Running   tcp://192.168.99.100:2376           v18.04.0-ce
+my-vm-node-1   *        virtualbox   Running   tcp://192.168.99.101:2376           v18.04.0-ce
+my-vm-node-2   -        virtualbox   Running   tcp://192.168.99.102:2376           v18.04.0-ce
+```
+
+
+
+### 发布应用程序
+
+---
+
+现在`my-vm-node-1`有了集群管理器的能力，通过使用第3部分**docker 服务**中使用的`docker stack deploy`命令在`my-vm-node-1`上部署应用程序`docker-compose.yml`。该命令可能需要几秒钟才能完成，部署需要一段时间才能完成。在群管理器上使用该命令`docker service ps <service_name>`来验证所有服务已被重新部署。
+
+`my-vm-node-1`通过`docker-machine`的shell配置连接，并且仍然可以访问本地主机上的文件。确保你和前面一样在同一个目录中，其中包括[`docker-compose.yml`你在第3部分中创建](https://docs.docker.com/get-started/part3/#docker-composeyml)的 [文件](https://docs.docker.com/get-started/part3/#docker-composeyml)。
+
+下面运行以下命令来部署应用程序到管理者节点`my-vm-node-1`
+
+```shell
+$ docker stack deploy -c docker-compose.yml node_hello
+Creating network node_hello_webnet
+Creating service node_hello_web
+```
+
+这样应用程序就轻松部署到了集群机器行。
+
+> **注意**：如果您的镜像存储在私有云而不是`Docker Hub`中，则需要使用登录`docker login <your-registry>`，然后需要将该`--with-registry-auth`标志添加到上述命令。例如：
+>
+> ```shell
+> $ docker login registry.example.com
+> $ docker stack deploy --with-registry-auth -c docker-compose.yml node_hello
+> ```
+>
+> 这使用加密的`WAL`日志将登录令牌从本地客户端传递到部署服务的群集节点。有了这些信息，这些节点就能够登录到注册表并提取远程镜像。
+
+通过命令`docker stack ps`查看发布的程序在两个节点中的分布情况，由于我们发布的程序需要**5**个实例副本`replicas`。所以在发布程序后，docker会为我们在两个集群节点中发布总共副本数量`5`个。
+
+```shell
+$ docker stack ps node_hello
+ID                  NAME                IMAGE                       NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS
+ogpj3g1x91cp        node_hello_web.1    hoojo/test:my_hello_world   my-vm-node-2        Running             Running 11 minutes ago
+nf693l7s6pqc        node_hello_web.2    hoojo/test:my_hello_world   my-vm-node-1        Running             Running 11 minutes ago
+lvxvfi6ocp7e        node_hello_web.3    hoojo/test:my_hello_world   my-vm-node-2        Running             Running 43 seconds ago
+6od67vw6hw49        node_hello_web.4    hoojo/test:my_hello_world   my-vm-node-1        Running             Running 42 seconds ago
+3xiidbo0k3fk        node_hello_web.5    hoojo/test:my_hello_world   my-vm-node-1        Running             Running 42 seconds ago
+
+```
+
+
+
+>使用`docker-machine env`和`docker-machine ssh`连接到VM。如果采用了`docker-machine env`进行配置shell链接后，即可在随意使用命令操作VM。
+>
+>- 要将shell设置为与其他机器交互`my-vm-node-2`，只需 `docker-machine env`在相同或不同的shell中重新运行，然后运行给定的命令指向`my-vm-node-2`。只有在当前shell中才有效。如果为未配置的shell或打开一个新的shell，则需要重新运行这些命令。使用`docker-machine ls`列出的机器，看看他们是在什么状态，获取IP地址，找出需要连接的节点进行链接即可。要了解更多信息，请参阅[Docker Machine入门主题](https://docs.docker.com/machine/get-started/#create-a-machine)。
+>- 或者，您可以以Docker命令的形式打包 `docker-machine ssh <machine> "<command>"`，直接登录到VM，但不能立即访问本地主机上的文件。
+>- 在Mac和Linux上，您可以使用`docker-machine scp <file> <machine>:~` 跨机器复制文件，但Windows用户需要像[Git Bash](https://git-for-windows.github.io/)这样的Linux终端模拟器才能工作。
+>
+>本教程演示既`docker-machine ssh`和 `docker-machine env`，因为它们可以在通过所有平台`docker-machine`CLI。
+
+
+
+### 访问集群应用
+
+---
+
+您可以从**任一个**集群机器的IP地址访问应用程序`node_hello`。有五个容器ID进入随机循环，展示负载平衡。
+
+创建的网络在它们之间共享并负载平衡。运行 `docker-machine ls`以获取虚拟机的IP地址，并在浏览器中访问其中的任何一个，然后刷新（或只是`curl`它们）。
+
+```shell
+docker@my-vm-node-2:~$ curl http://192.168.99.102
+<h3>Hello World!</h3><b>Hostname:</b> b2f95756f081<br/><b>Visits:</b> <i>cannot connect to Redis, counter disabled</i>
+```
+
+或者打开浏览器窗口，输入地址：http://192.168.99.102 经过几次刷新可以看到hostname在切换。同样节点`192.168.99.101` 也可以访问。
+
+>连接有问题？<br/>请记住，要使用群集中的入口网络，在启用群集模式之前，需要在群集节点之间打开以下端口：
+>
+>- 用于容器网络发现的端口7946 TCP / UDP。
+>- 端口4789 UDP，用于容器入口网络。
+
+
+
+### 扩展集群应用
+
+---
+
+通过更改`docker-compose.yml`文件来更新集群应用程序。通过编辑程序原始代码更改应用程序行为，然后重新构建`build`并推送`push`新镜像。（要做到这一点，请按照之前用于[构建应用程序](https://docs.docker.com/get-started/part2/#build-the-app)和[发布图像](https://docs.docker.com/get-started/part2/#publish-the-image)的相同步骤）。
+
+无论哪种情况，只需`docker stack deploy`再次运行即可部署这些更改。
+
+```shell
+$ docker stack deploy -c docker-compose.yml node_hello
+Updating service node_hello_web (id: 1llfh50y71z6vrfzkhk1wnelc)
+```
+
+可以使用`docker swarm join`命令将任何物理或虚拟机器加入此群集`my-vm-node-2`，并将节点添加到群集中。随后运行`docker stack deploy`，您的应用可以利用新集群节点资源。
+
+```shell
+$ docker-machine create --driver virtualbox my-vm-node-3
+$ docker-machine ssh my-vm-node-3 "docker swarm join --token SWMTKN-1-2tyylp5ch3ojkm9ereotwbs7n649v21hrq8mnqxfz00vnwg5zh-3ddke9ir33ubxhrx02yw9gxyd 192.168.99.101:2377"
+$ docker-machine ls
+```
+
+执行完上面的命令行后，直接通过：http://192.168.99.103/ 就可以访问之前部署过的程序资源。
+
+
+
+## 清理和重启集群应用
+
+### 堆栈和集群
+
+---
+
+删除部署的堆栈程序 `docker stack rm`
+
+```shell
+$ docker stack rm node_hello
+Removing service node_hello_web
+Removing network node_hello_webnet
+```
+
+> **保留集群或删除它？**
+>
+> 在某个时候，如果你想要在工作节点`docker-machine ssh my-vm-node-2 "docker swarm leave"`和集群管理节点`docker-machine ssh my-vm-node-1 "docker swarm leave --force"`*上*工作，你可以移除这个群体 ，但是*你需要这个群体来完成第5部分，所以现在保留它*。
+
+
+
+### 取消变量设置
+
+---
+
+取消设置docker-machine shell变量设置。可以`docker-machine`使用给定的命令取消当前shell中的环境变量。
+
+命令是：
+
+```shell
+$ eval $(docker-machine env -u)
+# 或者
+$ eval $("E:\Docker Toolbox\docker-machine.exe" env my-vm-node-1 -u)
+```
+
+这会导致`docker-machine`创建的虚拟机与`shell`断开连接，并允许您继续在同一个`shell`中工作，现在使用本机`docker` 命令（例如，在Docker for Mac或Docker for Windows上）。要了解更多信息，请参阅[关于取消设置环境变量](https://docs.docker.com/machine/get-started/#unset-environment-variables-in-the-current-shell)的[机器主题](https://docs.docker.com/machine/get-started/#unset-environment-variables-in-the-current-shell)。
+
+
+
+### 重启docker 虚拟机
+
+---
+
+如果关闭本地主机，Docker机器将停止运行。您可以通过运行`docker-machine ls`检查机器的状态。
+
+```shell
+$ docker-machine ls
+NAME           ACTIVE   DRIVER       STATE     URL                         SWARM   DOCKER        ERRORS
+default        -        virtualbox   Running   tcp://192.168.99.100:2376           v18.04.0-ce
+my-vm-node-1   *        virtualbox   Running   tcp://192.168.99.101:2376           v18.04.0-ce
+my-vm-node-2   -        virtualbox   Running   tcp://192.168.99.102:2376           v18.04.0-ce
+my-vm-node-3   -        virtualbox   Running   tcp://192.168.99.103:2376           v18.04.0-ce
+```
+
+要重新启动已停止的计算机，请运行：
+
+```shell
+$ docker-machine start <machine-name>
+# 重启
+$ docker-machine restart <machine-name>
+```
+
+例如启动`node-3`
+
+```shell
+$ docker-machine restart my-vm-node-3
+Restarting "my-vm-node-3"...
+(my-vm-node-3) Check network to re-create if needed...
+(my-vm-node-3) Windows might ask for the permission to configure a dhcp server. Sometimes, such confirmation window is minimized in the taskbar.
+(my-vm-node-3) Waiting for an IP...
+Waiting for SSH to be available...
+Detecting the provisioner...
+Restarted machines may have new IP addresses. You may need to re-run the `docker-machine env` command.
+```
+
+
+
+## 本节命令行汇总
+
+```shell
+docker-machine create --driver virtualbox myvm1 	# 创建虚拟机 myvm1 (Mac, Win7, Linux)
+docker-machine create -d hyperv --hyperv-virtual-switch "myswitch" myvm1 # Win10 下创建虚拟机
+docker-machine env myvm1                		 # 查看myvm1节点基本信息
+docker-machine ssh myvm1 "docker node ls"         # 查看myvm1集群节点信息
+docker-machine ssh myvm1 "docker node inspect <node ID>"        # 检查节点
+docker-machine ssh myvm1 "docker swarm join-token -q worker"   # 查看加入集群的token
+docker-machine ssh myvm1   							# ssh 链接到 VM; 退出输入 "exit" 结束
+docker node ls                						# 查看集群中的节点（登录到管理器时）
+docker-machine ssh myvm2 "docker swarm leave"  # 使 worker节点离开集群
+docker-machine ssh myvm1 "docker swarm leave -f" # 主节点离开集群，并杀死集群
+docker-machine ls 						# VMs 列表, 星号显示这个shell正在与哪个虚拟机通话
+docker-machine start myvm1            	# 启动虚拟机，如果在没启动的情况下
+docker-machine env myvm1      			# 显示myvm1的环境变量和命令
+eval $(docker-machine env myvm1)         # 将 shell 链接到 myvm1
+& "C:\Program Files\Docker\Docker\Resources\bin\docker-machine.exe" env myvm1 | Invoke-Expression   # windows 将 shell 链接到 myvm1
+docker stack deploy -c <file> <app>  # 部署程序; 必须设置命令shell与管理器（myvm1）交互，使用本地compose文件
+docker-machine scp docker-compose.yml myvm1:~ # 将文件复制到主节点的目录（仅当您使用的ssh连接到管理器并部署应用程序时才需要）
+docker-machine ssh myvm1 "docker stack deploy -c <file> <app>"   # 使用ssh的部署应用程序（您必须首先将compose文件复制到myvm1）
+eval $(docker-machine env -u)     						# 从虚拟机断开shell，使用本地docker
+docker-machine stop $(docker-machine ls -q)               # 停止全部运行的虚拟机
+docker-machine rm $(docker-machine ls -q) 				# 删除所有运行的镜像，包括磁盘上的
+```
+
+
+
+# docker 应用栈
+
+分布式应用程序层次结构的顶部：**应用堆栈（应用编排栈）**。堆栈是一组相互关联的服务，它们可以共享依赖关系，并且可以进行协调和伸缩。单个堆栈能够定义和协调整个应用程序的功能（尽管非常复杂的应用程序可能需要使用多个堆栈）。
+
+好消息是，从第3部分开始，在创建Compose文件并使用时，从技术上讲，已经在使用堆栈`docker stack deploy`。但是，这是在单个主机上运行的单个服务堆栈，通常不会发生在生产环境中。在这里，你可以把你学到的东西，使多个服务相互关联，并在多台机器上运行它们。
+
+
+
+## 部署可视化工具服务
+
+### 编写 `docker-compose.yml`
+
+---
+
+向`docker-compose.yml`文件添加服务很容易。首先，添加一个免费的可视化工具，看看如何编排容器。
+
+打开`docker-compose.yml`并编辑文件中内容如下：
+
+```yaml
+version: "3"
+services:
+  web:
+    # replace username/repo:tag with your name and image details
+    image: hoojo/test:my_hello_world
+    deploy:
+      replicas: 5
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 50M
+    ports:
+      - "80:80"
+    networks:
+      - webnet
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+      	# 节点权限是管理者，只有主节点才可以使用这个服务
+        constraints: [node.role == manager]
+    networks:
+      - webnet
+networks:
+  webnet:
+```
+
+这里唯一的新添加的东西是对等服务`web`，也叫`visualizer`。需要注意两件新事物：一个`volumes`键，让可视化工具访问`Docker`的主机`socket`文件，以及一个`placement`关键字，确保此服务只运行在`swarm`管理节点上——而不是工作节点。这是因为这个容器[是由Docker创建的一个开源项目](https://github.com/ManoMarks/docker-swarm-visualizer)构建[的](https://github.com/ManoMarks/docker-swarm-visualizer)，在图表中显示运行在群集上的`docker`服务。
+
+
+
+### 配置`shell` 交互变量
+
+---
+
+确保你的shell已经被配置与`my-vm-node-1`交互无问题。
+
+- 运行`docker-machine ls`列出机器并确保已连接`my-vm-node-1`主节点，如旁边的*****所示。
+- 如果需要，重新运行`docker-machine env myvm1`，然后运行给定的命令来配置shell。
+  - `eval $("E:\Docker Toolbox\docker-machine.exe" env my-vm-node-1)`
+
+
+
+### 部署编排服务
+
+---
+
+`docker stack deploy`在管理节点上重新运行该命令，并更新需要更新的任何服务：
+
+```shell
+$ docker stack deploy -c docker-compose.yml stack_node_hello
+Creating network stack_node_hello_webnet
+Creating service stack_node_hello_web
+Creating service stack_node_hello_visualizer
+```
+
+
+
+### 预览测试编排服务
+
+---
+
+`visualizer`在端口`8080` 上运行的`Compose`文件中看到。通过运行获取机器中一个节点的`IP`地址`docker-machine ls`。转到`8080`端口的`IP`地址，您可以看到可视化器正在运行：http://192.168.99.101:8080/
+
+如果未看到，请稍等片刻，有时候有点慢。
+
+`visualizer`如你所期望的那样，单个副本在管理器上运行，并且5个实例`web`遍布整个集群。您可以运行`docker stack ps <stack>`以下内容来确认此可视化：
+
+```shell
+$ docker stack ps stack_node_hello
+```
+
+可视化器是一个独立的服务，可以在包含它的任何应用程序中运行。它不依赖于其他任何东西。现在让我们创建一个服务*不会*有依赖性：`Redis`的服务，提供访客计数器。
+
+
+
+## 部署存储数据服务
+
+再次通过相同的工作流程来添加用于存储应用程序数据的`Redis`数据库。
+
+### 编写 `docker-compose.yml`
+
+---
+
+添加一个`Redis`服务，编写它的`docker-compose.yml`，这个文件内容如下：
+
+```shell
+version: "3"
+services:
+  web:
+    # replace username/repo:tag with your name and image details
+    image: hoojo/test:my_hello_world
+    deploy:
+      replicas: 5
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 50M
+    ports:
+      - "80:80"
+    networks:
+      - webnet
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - webnet
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - "/home/docker/data:/data"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    command: redis-server --appendonly yes
+    networks:
+      - webnet
+networks:
+  webnet:
+```
+
+
 
 
 
