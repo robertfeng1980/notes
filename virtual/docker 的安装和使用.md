@@ -1167,7 +1167,7 @@ $ docker-machine ssh my-vm-node-2 "docker swarm leave"
 
 
 
-### 为管理节点配置`shell`
+### 配置`shell`
 
 ---
 
@@ -1206,7 +1206,7 @@ my-vm-node-2   -        virtualbox   Running   tcp://192.168.99.102:2376        
 
 
 
-### 发布应用程序
+### 编排部署应用
 
 ---
 
@@ -1465,19 +1465,19 @@ networks:
 
 
 
-### 配置`shell` 交互变量
+### 配置`shell` 
 
 ---
 
 确保你的shell已经被配置与`my-vm-node-1`交互无问题。
 
 - 运行`docker-machine ls`列出机器并确保已连接`my-vm-node-1`主节点，如旁边的*****所示。
-- 如果需要，重新运行`docker-machine env myvm1`，然后运行给定的命令来配置shell。
+- 如果需要，重新运行`docker-machine env my-vm-node-1`，然后运行给定的命令来配置shell。
   - `eval $("E:\Docker Toolbox\docker-machine.exe" env my-vm-node-1)`
 
 
 
-### 部署编排服务
+### 编排部署服务
 
 ---
 
@@ -1492,7 +1492,7 @@ Creating service stack_node_hello_visualizer
 
 
 
-### 预览测试编排服务
+### 预览编排服务工具
 ---
 
 `visualizer`在端口`8080` 上运行的`Compose`文件中看到。通过运行获取机器中一个节点的`IP`地址`docker-machine ls`。转到`8080`端口的`IP`地址，您可以看到可视化器正在运行：http://192.168.99.101:8080/
@@ -1562,6 +1562,95 @@ services:
 networks:
   webnet:
 ```
+
+`redis`在`docker`库中有一个官方镜像，并被授予`redis`的简短镜像名称，所以`username/repo`在这里没有标记。Redis端口6379已经由Redis容器预先配置并暴露给主机，并且在我们的`Compose`文件中将它从主机暴露给外界，因此可以通过输入`IP`节点添加到`Redis`桌面管理器中并管理`Redis`实例。
+
+最重要的是，`redis`规范中有几件事情使数据在这个堆栈的部署之间保持不变：
+
+- `redis` 总是在管理器上运行，所以它总是使用相同的文件系统。
+- `redis` 访问主机文件系统中的任意目录作为`/data`，这是`Redis`存储数据的地方。
+
+这是在主机的物理文件系统中为`redis`数据创建“真相源”。否则，`redis`会将其数据存储在容器文件系统中的`/data`中，如果该容器曾经被重新部署过，则该数据将被清除。
+
+这个真相的来源有两个组成部分：
+
+- 放置在`Redis`服务上的放置约束，确保它始终使用相同的主机。
+- 您创建的容器，允许容器`./data`（在主机上）访问（在`/data`Redis容器内）。容器来来去去时，存储在`./data`指定主机上的文件仍然存在，从而保持连续性。
+
+
+
+### 创建`./data`目录
+
+---
+
+在主节点上创建`./data`目录，这个目录用于redis存储数据
+
+```shell
+$ docker-machine ssh my-vm-node-1 "mkdir ./data"
+```
+
+
+
+### 配置 `shell` 
+
+---
+
+确保你的`shell`已经被配置好与主机节点（管理节点）`my-vm-node-1`交互
+
+- 运行`docker-machine ls`列出机器并确保您已连接`my-vm-node-1`，如有星号标记的节点。
+
+- 如果需要，重新运行`docker-machine env my-vm-node-1`，然后运行给定的命令来配置shell。
+
+  - 会提示运行命令：`eval $("E:\Docker Toolbox\docker-machine.exe" env my-vm-node-1)`
+
+  ​
+
+### 编排部署服务
+
+---
+
+`docker stack deploy`在管理节点上重新运行该命令，并删除重复或者占用端口的服务：
+
+```shell
+$ docker stack deploy -c docker-compose.yml redis_node_hello
+Creating service redis_node_hello_redis
+Updating service redis_node_hello_web (id: 6bozutve6xhwdfugdt0yvoage)
+Updating service redis_node_hello_visualizer (id: yx9f0wnyp7yerkcys587cz92j)
+```
+
+
+
+### 预览编排服务
+
+---
+
+运行`docker service ls`以验证这三个服务是否按预期运行。
+
+```shell
+$ docker service ls
+ID                  NAME                          MODE                REPLICAS            IMAGE                             PORTS
+xmc12o1jw4dg        redis_node_hello_redis        replicated          1/1                 redis:latest                      *:6379->6379/tcp
+yx9f0wnyp7ye        redis_node_hello_visualizer   replicated          1/1                 dockersamples/visualizer:stable   *:8080->8080/tcp
+6bozutve6xhw        redis_node_hello_web          replicated          5/5                 hoojo/test:my_hello_world         *:80->80/tcp
+```
+
+运行命令`docker stack ps`查看服务运行状态
+
+```shell
+$ docker stack ps redis_node_hello
+ID                  NAME                            IMAGE                             NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS
+6oavwsueaeqm        redis_node_hello_redis.1        redis:latest                      my-vm-node-1        Running             Running 6 minutes ago
+oouvfn08dn92        redis_node_hello_web.1          hoojo/test:my_hello_world         my-vm-node-3        Running             Running 10 minutes ago
+tqnc6tva5z4f        redis_node_hello_visualizer.1   dockersamples/visualizer:stable   my-vm-node-1        Running             Running 11 minutes ago
+osnzlz143q9j        redis_node_hello_web.2          hoojo/test:my_hello_world         my-vm-node-1        Running             Running 10 minutes ago
+qc5xzi76en1h        redis_node_hello_web.3          hoojo/test:my_hello_world         my-vm-node-2        Running             Running 10 minutes ago
+h8iikqblg993        redis_node_hello_web.4          hoojo/test:my_hello_world         my-vm-node-3        Running             Running 10 minutes ago
+jtjpys25xwi8        redis_node_hello_web.5          hoojo/test:my_hello_world         my-vm-node-2        Running             Running 10 minutes ago
+```
+
+通过访问：http://192.168.99.101/ 后，发现网页上的 **Visits**会计数并累加变化。<br/>通过访问：http://192.168.99.102:8080/ 会看到 多了一个服务 `redis `也在上面运行。
+
+
 
 
 
