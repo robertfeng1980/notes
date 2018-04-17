@@ -1493,7 +1493,6 @@ Creating service stack_node_hello_visualizer
 
 
 ### 预览测试编排服务
-
 ---
 
 `visualizer`在端口`8080` 上运行的`Compose`文件中看到。通过运行获取机器中一个节点的`IP`地址`docker-machine ls`。转到`8080`端口的`IP`地址，您可以看到可视化器正在运行：http://192.168.99.101:8080/
@@ -1515,7 +1514,6 @@ $ docker stack ps stack_node_hello
 再次通过相同的工作流程来添加用于存储应用程序数据的`Redis`数据库。
 
 ### 编写 `docker-compose.yml`
-
 ---
 
 添加一个`Redis`服务，编写它的`docker-compose.yml`，这个文件内容如下：
