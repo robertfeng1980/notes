@@ -22,6 +22,14 @@
 
 命令窗口可以是`Bash shell`、`xshell`、`powershell`，只要能运行`shell`即可。
 
+如果你的机器没有安装`shell`，可以安装`Git bash`。`Linux`执行命令安装：
+
+```shell
+sudo curl -L https://raw.githubusercontent.com/docker/machine/v0.14.0/contrib/completion/bash/docker-machine.bash -o /etc/bash_completion.d/docker-machine
+```
+
+
+
 ## 查看机器
 
 使用`docker-machine ls`列出可用的机器，如果创建了机器会显示已有的机器。
@@ -34,6 +42,8 @@ my-vm-node-1   *        virtualbox   Running   tcp://192.168.99.101:2376        
 my-vm-node-2   -        virtualbox   Running   tcp://192.168.99.102:2376           v18.04.0-ce
 my-vm-node-3   -        virtualbox   Running   tcp://192.168.99.103:2376           v18.04.0-ce
 ```
+
+查看哪台机器处于**活动状态**（如果`DOCKER_HOST`环境变量指向该机器，则认为机器处于活动状态 ）
 
 ## 创建VM
 
@@ -317,6 +327,582 @@ DOCKER_TOOLBOX_INSTALL_PATH=E:\Docker Toolbox
 
 
 
+# Machine CLI 客户端
+
+## active 活动
+
+`docker-machine ls`查看哪台机器处于**活动状态**（如果`DOCKER_HOST`环境变量指向该机器，则认为机器处于活动状态 ）
+
+```shell
+$ docker-machine ls
+NAME           ACTIVE   DRIVER       STATE     URL                         SWARM   DOCKER        ERRORS
+default        *        virtualbox   Running   tcp://192.168.99.100:2376           v18.04.0-ce
+my-vm-node-1   -        virtualbox   Running   tcp://192.168.99.101:2376           v18.04.0-ce
+my-vm-node-2   -        virtualbox   Running   tcp://192.168.99.102:2376           v18.04.0-ce
+my-vm-node-3   -        virtualbox   Running   tcp://192.168.99.103:2376           v18.04.0-ce
+```
+
+## config 配置
+
+`docker-machine config`查看机器的配置信息
+
+```shell
+$ docker-machine config default
+--tlsverify
+--tlscacert="C:\\Users\\Administrator\\.docker\\machine\\machines\\default\\ca.pem"
+--tlscert="C:\\Users\\Administrator\\.docker\\machine\\machines\\default\\cert.pem"
+--tlskey="C:\\Users\\Administrator\\.docker\\machine\\machines\\default\\key.pem"
+-H=tcp://192.168.99.100:2376
+```
+
+## create 创建
+
+`docker-machine create`创建一台机器。需要该`--driver`标志来指示应在哪个提供商（`VirtualBox，DigitalOcean，AWS`等）上创建机器，以及用于指示所创建机器的名称的参数。
+
+```shell
+$ docker-machine create --driver virtualbox dev
+```
+
+创建虚拟机名称为 `dev`，提供商是 `virtualbox`
+
+使用帮助指令会看到很多关于创建虚拟机的默认配置选项
+
+```shell
+$ docker-machine create -h
+```
+
+可以到一些标志也指定了它们与之关联的环境变量（位于该行的最左侧）。如果这些环境变量在`docker-machine create`被调用时被设置，`Docker Machine`将它们用作默认值。
+
+`Docker Machine`仅在守护进程上设置配置参数，并且不会设置任何“依赖关系”。例如，如果指定创建的守护程序应该`btrfs`用作存储驱动程序，则仍必须确保安装了适当的依赖关系，已创建`BTRFS`文件系统等等。
+
+以下是一个示例用法：
+
+```shell
+$ docker-machine create -d virtualbox \
+    --engine-label foo=bar \
+    --engine-label spam=eggs \
+    --engine-storage-driver overlay \
+    --engine-insecure-registry registry.myco.com \
+    foobarmachine
+```
+
+这将创建一个在`Virtualbox`中本地运行的虚拟机，该虚拟机使用 `overlay`存储后端，在引擎上具有键值对`foo=bar`和`spam=eggs`标签，并允许从位于的不安全的仓库中进行**推送/拉取**`registry.myco.com`。您可以通过查看一下内容输出来验证大部分内容`docker info`：
+
+```shell
+$ eval $(docker-machine env foobarmachine)
+$ docker info
+Containers: 0
+Images: 0
+Storage Driver: overlay
+...
+Name: foobarmachine
+...
+Labels:
+ foo=bar
+ spam=eggs
+ provider=virtualbox
+```
+
+支持的配置如下所示：
+
+- `--engine-insecure-registry`：指定[不安全的注册表](https://docs.docker.com/engine/reference/commandline/cli/#insecure-registries)以允许创建引擎
+- `--engine-registry-mirror`：指定要使用的[注册表镜像](https://docs.docker.com/registry/recipes/mirror/)
+- `--engine-label`：为创建的引擎指定[标签](https://docs.docker.com/engine/userguide/labels-custom-metadata/#daemon-labels)
+- `--engine-storage-driver`：指定要与引擎一起使用的[存储驱动程序](https://docs.docker.com/engine/reference/commandline/cli/#daemon-storage-driver-option)
+
+除了直接支持的守护进程标志子集之外，Docker Machine还支持一个附加标志，`--engine-opt`可用于使用语法指定任意守护进程选项`--engine-opt flagname=value`。例如，要指定守护程序应该`8.8.8.8`用作所有容器的DNS服务器，并且始终使用`syslog` [日志驱动程序](https://docs.docker.com/engine/reference/run/#logging-drivers-log-driver)，则可以运行以下create命令：
+
+```shell
+$ docker-machine create -d virtualbox \
+    --engine-opt dns=8.8.8.8 \
+    --engine-opt log-driver=syslog \
+    gdns
+```
+
+另外，Docker机器支持一个标志，`--engine-env`它可以用来指定任意环境变量，以便在语法引擎中设置`--engine-env name=value`。例如，要指定引擎应该`example.com`用作代理服务器，可以运行以下create命令：
+
+```shell
+$ docker-machine create -d virtualbox \
+    --engine-env HTTP_PROXY=http://example.com:8080 \
+    --engine-env HTTPS_PROXY=https://example.com:8080 \
+    --engine-env NO_PROXY=example2.com \
+    proxbox
+```
+
+
+
+## env 环境变量
+
+设置环境变量以指示`docker`应该针对特定机器运行命令。
+
+`docker-machine env machine_name`可以输出在`shell`中运行的环境变量。运行`docker-machine machine_name -u`可以取消设置环境变量`unset`。
+
+```shell
+$ env | grep DOCKER
+
+$ eval "$(docker-machine env machine_name)"
+
+$ env | grep DOCKER
+DOCKER_HOST=tcp://192.168.99.101:2376
+DOCKER_CERT_PATH=/Users/nathanleclaire/.docker/machines/.client
+DOCKER_TLS_VERIFY=1
+DOCKER_MACHINE_NAME=machine_name
+$ # If you run a docker command, now it runs against that host.
+$ eval "$(docker-machine env -u)"
+$ env | grep DOCKER
+$ # The environment variables have been unset.
+```
+
+代理模式配置
+
+```shell
+$ docker-machine env --no-proxy default
+```
+
+
+
+## inspect 检查
+
+这个命令会将机器的详细配置信息以`JSON`的格式展示出来
+
+```shell
+$ docker-machine inspect default
+{
+    "ConfigVersion": 3,
+    "Driver": {
+        "IPAddress": "192.168.99.100",
+        "MachineName": "default",
+        "SSHUser": "docker",
+        "SSHPort": 9112,
+        "SSHKeyPath": "C:\\Users\\Administrator\\.docker\\machine\\machines\\default\\id_rsa",
+        "StorePath": "C:\\Users\\Administrator\\.docker\\machine",
+        "SwarmMaster": false,
+        "SwarmHost": "tcp://0.0.0.0:3376",
+        "SwarmDiscovery": "",
+        "VBoxManager": {},
+        "HostInterfaces": {},
+        "CPU": 1,
+        "Memory": 1024,
+        "DiskSize": 20000,
+		........
+    },
+	......
+......	
+```
+
+**获取机器的IP地址和内存大小：** 大多数情况下，可以以相当直接的方式从`JSON`中查找对应的字段。
+
+```shell
+$ docker-machine inspect --format='{{.Driver.IPAddress}}' default
+192.168.5.99
+
+$ docker-machine inspect --format='{{.Driver.Memory}}' default
+1024
+```
+
+**取消JSON格式化信息**，从详细信息中获取`Driver`的信息，没有格式化的返回原始数据模型。
+
+```shell
+# 无格式化返回json
+$ docker-machine inspect --format='{{json .Driver}}' default
+# 直接返回原始数据
+$ docker-machine inspect --format='{{.Driver}}' default
+map[CPU:1 IPAddress:192.168.99.100 VBoxManager:map[] Memory:1024 NoShare:false MachineName:default SSHKeyPath:C:\Users\Administrator\.docker\machine\machines\default\id_rsa SwarmDiscovery: HostOnlyPromiscMode:deny DNSProxy:true SwarmHost:tcp://0.0.0.0:3376 NatNicType:82540EM SSHPort:9112 Boot2DockerURL: StorePath:C:\Users\Administrator\.docker\machine UIType:headless SSHUser:docker HostInterfaces:map[] DiskSize:20000 NoVTXCheck:false HostOnlyCIDR:192.168.99.1/24 HostOnlyNicType:82540EM HostOnlyNoDHCP:false ShareFolder: SwarmMaster:false Boot2DockerImportVM: HostDNSResolver:false]
+```
+
+**格式化输出信息**，为了提高可读性，利用`prettyjson`进行格式化
+
+```shell
+$ docker-machine inspect --format='{{prettyjson .Driver}}' default
+{
+    "Boot2DockerImportVM": "",
+    "Boot2DockerURL": "",
+    "CPU": 1,
+    "DNSProxy": true,
+    "DiskSize": 20000,
+    "HostDNSResolver": false,
+    "HostInterfaces": {},
+    "HostOnlyCIDR": "192.168.99.1/24",
+    "HostOnlyNicType": "82540EM",
+    "HostOnlyNoDHCP": false,
+    "HostOnlyPromiscMode": "deny",
+    "IPAddress": "192.168.99.100",
+    "MachineName": "default",
+    "Memory": 1024,
+    "NatNicType": "82540EM",
+    "NoShare": false,
+    "NoVTXCheck": false,
+    "SSHKeyPath": "C:\\Users\\Administrator\\.docker\\machine\\machines\\default\\id_rsa",
+    "SSHPort": 9112,
+    "SSHUser": "docker",
+    "ShareFolder": "",
+    "StorePath": "C:\\Users\\Administrator\\.docker\\machine",
+    "SwarmDiscovery": "",
+    "SwarmHost": "tcp://0.0.0.0:3376",
+    "SwarmMaster": false,
+    "UIType": "headless",
+    "VBoxManager": {}
+}
+```
+
+## ip 地址
+
+`docker-machine ip dev dev2` 获取一台或多台机器IP地址
+
+```shell
+$ docker-machine ip dev
+192.168.99.104
+
+$ docker-machine ip dev dev2
+192.168.99.104
+192.168.99.105
+```
+
+
+
+## kill 结束
+
+`docker-machine kill dev` 杀死机器 `dev`
+
+```shell
+$ docker-machine ls
+NAME   ACTIVE   DRIVER       STATE     URL
+dev    *        virtualbox   Running   tcp://192.168.99.104:2376
+
+$ docker-machine kill dev
+$ docker-machine ls
+NAME   ACTIVE   DRIVER       STATE     URL
+dev    *        virtualbox   Stopped
+```
+
+
+
+## ls 显示列表
+
+`docker-machine ls`显示所有安装的机器
+
+```shell
+$ docker-machine ls
+NAME   ACTIVE   DRIVER       STATE     URL
+dev    *        virtualbox   Running   tcp://192.168.99.104:2376
+```
+
+### Timeout 超时
+
+---
+
+`ls`命令尝试并行访问每个主机。如果在10秒内给定的主机没有应答，则该`ls`命令指出该主机处于 `Timeout`状态。在某些情况下（连接不良，负载过高或故障排除时），可能需要增加或减少此值。可以使用`-t`标志来达到此目的，**数值单位是秒**。
+
+```shell
+$ docker-machine ls -t 1
+NAME           ACTIVE   DRIVER       STATE     URL   SWARM   DOCKER   ERRORS
+default                 virtualbox   Timeout
+my-vm-node-1            virtualbox   Timeout
+my-vm-node-2            virtualbox   Timeout
+my-vm-node-3            virtualbox   Timeout
+```
+
+如果1秒内没有显示出的机器就会显示`timeout`状态
+
+### filter 过滤
+
+---
+
+过滤标志（`--filter`）格式是`key=value`键值对。如果有多个过滤器，则传递多个标志。例如：`--filter "foo=bar" --filter "bif=baz"`
+
+目前支持的过滤器有：
+
+- driver (设备名称、提供商)
+- swarm (集群主机)
+- state (`Running|Paused|Saved|Stopped|Stopping|Starting|Error`)
+- name (机器名称，支持[golang风格的](https://github.com/google/re2/wiki/Syntax)正则表达式)
+- label (机器创建的`--engine-label`选项，可以过滤`label=<key>[=<value>]`)
+
+列举 名称` my- `开头的机器
+
+```shell
+$ docker-machine ls --filter name=my-*
+NAME           ACTIVE   DRIVER       STATE     URL                         SWARM   DOCKER        ERRORS
+my-vm-node-1   -        virtualbox   Running   tcp://192.168.99.101:2376           v18.04.0-ce
+my-vm-node-2   -        virtualbox   Running   tcp://192.168.99.102:2376           v18.04.0-ce
+my-vm-node-3   -        virtualbox   Running   tcp://192.168.99.103:2376           v18.04.0-ce
+```
+
+列举 提供商是 `virtualbox`， 状态是`Stopped` 的机器
+
+```shell
+$ docker-machine ls --filter driver=virtualbox --filter state=Stopped
+```
+
+列举时，用` label`进行过滤
+
+```shell
+$ docker-machine ls --filter label=com.class.app=foo1 --filter label=com.class.app=foo2
+```
+
+### format 格式化
+
+---
+
+在列举机器的时候，可以自定义格式化输出形式，格式化字段
+
+| Placeholder    | Description                              |
+| -------------- | ---------------------------------------- |
+| .Name          | Machine name                             |
+| .Active        | Is the machine active?                   |
+| .ActiveHost    | Is the machine an active non-swarm host? |
+| .ActiveSwarm   | Is the machine an active swarm master?   |
+| .DriverName    | Driver name                              |
+| .State         | Machine state (running, stopped...)      |
+| .URL           | Machine URL                              |
+| .Swarm         | Machine swarm name                       |
+| .Error         | Machine errors                           |
+| .DockerVersion | Docker Daemon version                    |
+| .ResponseTime  | Time taken by the host to respond        |
+
+**普通格式化输出**
+
+```shell
+$ docker-machine ls --format "{{.Name}}: {{.DriverName}}"
+default: virtualbox
+my-vm-node-1: virtualbox
+my-vm-node-2: virtualbox
+my-vm-node-3: virtualbox
+```
+
+**table 格式输出**
+
+```shell
+$ docker-machine ls --format "table {{.Name}} \t {{.DriverName}}"
+NAME             DRIVER
+default          virtualbox
+my-vm-node-1     virtualbox
+my-vm-node-2     virtualbox
+my-vm-node-3     virtualbox
+```
+
+
+
+## mount 挂载
+
+`docker-machine mount`将本地主机上的目录挂载到远程机器上
+
+```shell
+# 本地创建一个目录
+$ mkdir foo
+# 在远程dev主机上创建一个目录
+$ docker-machine ssh dev mkdir foo
+# 挂载目录，将当前目录 foo 挂载到远程主机 dev上的/home/docker/foo
+$ docker-machine mount dev:/home/docker/foo foo
+# 创建文件
+$ touch foo/bar
+# 查看远程主机的 foo
+$ docker-machine ssh dev ls foo
+```
+
+要再次卸载挂载目录，可以使用与`-u`选项 。也可以直接调用`fuserunmount`（或`fusermount -u`）命令。
+
+```shell
+$ docker-machine mount -u dev:/home/docker/foo foo
+$ rmdir foo
+```
+
+
+
+## provision
+
+`docker-machine provision`在机器上重新运行配置。有时候在创建虚拟机的时候会发生错误或异常，或者是需要修改主机配置。在此过程出现错误异常故障后，经过修复后需要重新接着之前的命令运行可以运行这个命令。
+
+用法是`docker-machine provision [name]`。可以指定多个名称
+
+```shell
+$ docker-machine provision foo bar
+
+Copying certs to the local machine directory...
+Copying certs to the remote machine...
+Setting Docker configuration on the remote daemon...
+```
+
+机器重新运行配置过程将会执行如下操作：
+
+1. 将实例上的主机名设置为机器的名称，例如`default`。
+2. 如果Docker不存在，请安装Docker。
+3. 生成一组证书（通常使用默认的自签名CA）并配置守护程序以接受通过TLS的连接。
+4. 将生成的证书复制到服务器和本地配置目录。
+5. 根据创建时指定的选项配置Docker引擎。
+6. 如果适用，配置并激活Swarm。
+
+
+
+## regenerate-certs 重生证书
+
+`docker-machine regenerate-certs`重新生成TLS证书并使用新证书更新机器。
+
+例如：
+
+```shell
+$ docker-machine regenerate-certs dev
+
+Regenerate TLS machine certs?  Warning: this is irreversible. (y/n): y
+Regenerating TLS certificates
+```
+
+如果您的证书已过期，则还需要使用以下`--client-certs`选项重新生成客户端证书：
+
+```shell
+$ docker-machine regenerate-certs --client-certs dev
+Regenerate TLS machine certs?  Warning: this is irreversible. (y/n): y
+Regenerating TLS certificates
+Regenerating local certificates
+...
+```
+
+
+
+## restart 重启
+
+`docker-machine restart`重新启动机器。这通常相当于 `docker-machine stop; docker-machine start`。但是一些云驱动程序试图实现保持相同IP地址的巧妙重启。
+
+```shell
+$ docker-machine restart dev
+Waiting for VM to start...
+```
+
+
+
+## rm 删除机器
+
+`docker-machine rm`删除一台机器。这会删除本地引用文件，并在云提供商或虚拟化管理平台上将其删除。
+
+`docker-machine rm baz` 删除一台机器，`docker-machine rm baz foo` 删除多台机器，直接删除 `-y`选项 `docker-machine rm -y foo`
+
+
+
+## scp 复制文件
+
+`docker-machine scp`将文件从本地主机复制到机器，从机器到机器或从机器到使用的本地主机`scp`。目录是`machinename:/path/to/files`， 在主机的情况下，不需要指定名称，只需指定路径。
+
+```shell
+$ cat foo.txt
+cat: foo.txt: No such file or directory
+# 查看远程主机的工作目录
+$ docker-machine ssh dev pwd
+/home/docker
+# 在远程主机上创建文件
+$ docker-machine ssh dev 'echo A file created remotely! >foo.txt'
+# 将远程主机上的文件复制到本地 当前目录
+$ docker-machine scp dev:/home/docker/foo.txt .
+foo.txt                                                           100%   28     0.0KB/s   00:00
+$ cat foo.txt
+A file created remotely!
+```
+
+`-r ` 递归选项，用于复制目录结构的文件夹。`-d` 表示有大量的文件，通过增量复制，避免中途失败从新开始。
+
+```shell
+$ mkdir -p bar
+$ touch bar/baz
+$ docker-machine scp -r -d bar/ dev:/home/docker/bar/
+$ docker-machine ssh dev ls bar
+```
+
+
+
+## ssh 远程连接
+
+`docker-machine ssh`使用SSH登录或在计算机上运行命令。
+
+要登录，只需运行`docker-machine ssh machine_name`：
+
+```shell
+$ docker-machine ssh dev
+```
+
+在远程主机上运行命令`docker-machine ssh dev free`，这种操作就像在本地操作一样：
+
+```shell
+$ docker-machine ssh dev free
+```
+
+如果端口冲突不能连接，可以进行端口映射访问，以下命令将端口8080从`default`机器转发到`localhost`主机上：
+
+```shell
+$ docker-machine ssh default -L 8080:localhost:8080
+```
+
+其他版本的ssh进行连接，可以设置默认的版本
+
+```shell
+$ docker-machine --native-ssh ssh dev
+```
+
+
+
+## start 启动
+
+`docker-machine start`启动机器
+
+```shell
+$ docker-machine start dev
+Starting VM...
+```
+
+
+
+## status 状态
+
+`docker-machine status`查看机器运行状态
+
+```shell
+$ docker-machine status dev
+Running
+```
+
+
+
+## stop 停止
+
+`docker-machine stop`停止机器运行
+
+```shell
+$ docker-machine ls
+NAME   ACTIVE   DRIVER       STATE     URL
+dev    *        virtualbox   Running   tcp://192.168.99.104:2376
+
+$ docker-machine stop dev
+
+$ docker-machine ls
+NAME   ACTIVE   DRIVER       STATE     URL
+dev    *        virtualbox   Stopped
+```
+
+
+
+## upgrade 升级
+
+将计算机升级到最新版本的Docker。如果机器使用`Ubuntu`作为底层操作系统，它会运行一个类似的命令`sudo apt-get upgrade docker-engine`，因为机器期望`Ubuntu`管理它使用这个软件包。又如，如果机器使用`boot2docker`作为其操作系统，则该命令会下载最新的`boot2docker` ISO并将机器的现有ISO替换为最新的。
+
+```shell
+$ docker-machine upgrade default
+
+Stopping machine to do the upgrade...
+Upgrading machine default...
+Downloading latest boot2docker release to /home/username/.docker/machine/cache/boot2docker.iso...
+Starting machine back up...
+Waiting for VM to start...
+```
+
+
+
+## tcp 网址
+
+```shell
+$ docker-machine url dev
+tcp://192.168.99.109:2376
+```
+
+
+
 # 命令行汇总
 
 ```shell
@@ -326,12 +912,16 @@ $ env | grep DOCKER						# 查看 环境变量
 $ docker-machine env default  			# 查看指定机器环境变量
 $ docker-machine env -u 				# 取消环境变量设置
 $ eval $(docker-machine env default)	# 配置指定机器环境里的shell默认链接机器
-$ docker-machine.exe env --shell powershell dev  # 指定shell目录的终端工具
+$ docker-machine env --shell powershell dev  # 指定shell目录的终端工具
 $ docker-machine ip default					# 获取指定机器地址
 $ docker run -d -p 8000:80 nginx			# -d 表示后台运行，-p 表示发布应用
 $ curl $(docker-machine ip default):8000		# 访问指定机器
 $ docker-machine stop default				# 启动指定机器
 $ docker-machine start default				# 停止 指定 机器
+
+$ docker-machine scp dev:/home/docker/foo.txt .  #复制远程主机文件到本地
+$ docker-machine rm baz				# 删除主机
+$ docker-machine mount dev:/home/docker/foo foo		# 挂载目录
 
 - `docker-machine config` 			# 机器配置
 - `docker-machine env`				# 环境变量
