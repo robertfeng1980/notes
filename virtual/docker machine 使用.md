@@ -937,6 +937,5 @@ $ docker-machine mount dev:/home/docker/foo foo		# 挂载目录
 - `docker-machine stop`				# 停止
 - `docker-machine upgrade`			# 升级
 - `docker-machine url`				# tcp url
-
 ```
 

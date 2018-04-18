@@ -9,20 +9,24 @@ $ env | grep DOCKER						# 查看 环境变量
 $ docker-machine env default  			# 查看指定机器环境变量
 $ docker-machine env -u 				# 取消环境变量设置
 $ eval $(docker-machine env default)	# 配置指定机器环境里的shell默认链接机器
-$ docker-machine.exe env --shell powershell dev  # 指定shell目录的终端工具
-$ docker-machine ip default			# 获取指定机器地址
+$ docker-machine env --shell powershell dev  # 指定shell目录的终端工具
+$ docker-machine ip default					# 获取指定机器地址
 $ docker run -d -p 8000:80 nginx			# -d 表示后台运行，-p 表示发布应用
 $ curl $(docker-machine ip default):8000		# 访问指定机器
 $ docker-machine stop default				# 启动指定机器
 $ docker-machine start default				# 停止 指定 机器
+
+$ docker-machine scp dev:/home/docker/foo.txt .  #复制远程主机文件到本地
+$ docker-machine rm baz				# 删除主机
+$ docker-machine mount dev:/home/docker/foo foo		# 挂载目录
 
 - `docker-machine config` 			# 机器配置
 - `docker-machine env`				# 环境变量
 - `docker-machine inspect`			# 检查
 - `docker-machine ip`				# 机器 ip
 - `docker-machine kill`				# 杀死机器
-- `docker-machine provision`			# 重做固定的任务	
-- `docker-machine regenerate-certs`  	# 注册生成证书
+- `docker-machine provision`		# 重做固定的任务	
+- `docker-machine regenerate-certs`  # 注册生成证书
 - `docker-machine restart`			# 重启机器
 - `docker-machine ssh`				# ssh 链接机器
 - `docker-machine start`			# 启动
