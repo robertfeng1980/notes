@@ -1402,7 +1402,7 @@ docker-machine scp docker-compose.yml myvm1:~ # 将文件复制到主节点的�
 docker-machine ssh myvm1 "docker stack deploy -c <file> <app>"   # 使用ssh的部署应用程序（您必须首先将compose文件复制到myvm1）
 eval $(docker-machine env -u)     						# 从虚拟机断开shell，使用本地docker
 docker-machine stop $(docker-machine ls -q)               # 停止全部运行的虚拟机
-docker-machine rm $(docker-machine ls -q) 				# 删除所有运行的镜像，包括磁盘上的
+docker-machine rm $(docker-machine ls -q) 				# 删除所有运行的虚拟机，包括磁盘上的
 ```
 
 
