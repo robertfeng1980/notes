@@ -471,7 +471,7 @@ $ vagrant box add my-box-file.box  --name mybox # 在当前目录里有一个my-
 $ vagrant box add --name mybox http://pan.baidu.com/AsFS24D/my-box-file.box  # 添加一个box在远程服务器上
 $ vagrant init mybox https://boxes.company.com/my-project.box   # 添加远程的虚拟机文件
 $ vagrant up				# 启动虚拟机
-$ vagrant global-status # 查看所有虚拟机状态
+$ vagrant global-status 	 # 查看所有虚拟机状态
 $ vagrant ssh ccbaaf6        # ssh 连接虚拟机，通过上面状态查询的id
 $ vagrant halt				# 关闭虚拟机
 $ vagrant halt [id]			# 关闭指定id虚拟机

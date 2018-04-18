@@ -44,28 +44,28 @@ docker是开发人员和系统管理员 使用容器**开发、部署和运行**
 
 ## 容器和虚拟机
 
-一个**容器**中运行*原生* Linux和共享主机与其它容器的内核。它运行一个独立的进程，不占用任何其他可执行文件的内存，使其轻量化。
+一个**容器**中运行*原生* `Linux`和共享主机与其它容器的内核。它运行一个独立的进程，不占用任何其他可执行文件的内存，使其轻量化。
 
-相比之下，**虚拟机**（VM）运行一个完整的“客户”操作系统，通过虚拟机管理程序*虚拟*访问主机资源。一般来说，虚拟机提供的环境比大多数应用程序需要的资源更多。
+相比之下，**虚拟机**（`VM`）运行一个完整的“客户”操作系统，通过虚拟机管理程序*虚拟*访问主机资源。一般来说，虚拟机提供的环境比大多数应用程序需要的资源更多。
 
 
 
 
 # docker 安装
 
-docker版本众多，这里介绍Windows下如何下载安装。在Win7系统上，docker安装需要使用`docker toolbox`，而Win10则直接使用docker CE，还有企业版的 docker EE。
+docker版本众多，这里介绍`Windows`下如何下载安装。在`Win7`系统上，docker安装需要使用`docker toolbox`，而`Win10`则直接使用`docker CE`，还有企业版的 `docker EE`。
 
 
 
 ## 下载
 
-Win10 docker CE下载地址：https://docs.docker.com/docker-for-windows/install/ <br/>Win 7 Docker Toolbox 下载地址：https://docs.docker.com/toolbox/overview/ <br/>
+`Win10 docker CE`下载地址：https://docs.docker.com/docker-for-windows/install/ <br/>`Win 7 Docker Toolbox` 下载地址：https://docs.docker.com/toolbox/overview/ <br/>
 
 以上选择你的平台的下载链接即可下载
 
 
 
-docker toolbox 是旧版系统使用的docker安装包，toolbox包含以下工具：
+`docker toolbox` 是旧版系统使用的`docker`安装包，`toolbox`包含以下工具：
 
 > 工具箱包括这些Docker工具：
 >
@@ -85,7 +85,7 @@ docker toolbox 是旧版系统使用的docker安装包，toolbox包含以下工�
 
 ## 安装
 
-安装很简单，直接下一步，其中有一个选项则是选择安装工具，如果你的电脑安装过Git和VirtualBox的可以不选这两个选项。其他的直接下一步完成即可。
+安装很简单，直接下一步，其中有一个选项则是选择安装工具，如果你的电脑安装过`Git`和`VirtualBox`的可以不选这两个选项。其他的直接下一步完成即可。
 
 找到docker安装目录，在目录下会有一个`start.sh`，使用`Git bash`运行这个脚本。双击脚本会执行启动docker程序操作，这个过程可能有点慢。
 
@@ -251,7 +251,7 @@ Live Restore Enabled: false
 
 介绍了一下docker的基本配置信息，包括重要的容器信息、镜像信息、存储目录等。
 
-ssh链接到指定虚拟机，可以打开本地vbox软件，看看哪些虚拟机，然后利用`docker-machine ssh`去打开
+ssh链接到指定虚拟机，可以打开本地`vbox`软件，看看哪些虚拟机，然后利用`docker-machine ssh`去打开
 
 ```shell
 $ docker-machine ssh default
@@ -282,8 +282,8 @@ sudo systemctl restart docker
 
 ------
 
-针对安装了Docker Toolbox的用户，您可以参考以下配置步骤：
-创建一台安装有Docker环境的Linux虚拟机，指定机器名称为default，同时配置Docker加速器地址。
+针对安装了`Docker Toolbox`的用户，您可以参考以下配置步骤：
+创建一台安装有Docker环境的`Linux`虚拟机，指定机器名称为`default`，同时配置Docker加速器地址。
 
 ```shell
 $ docker-machine create --engine-registry-mirror=https://8kzs1r91.mirror.aliyuncs.com -d virtualbox default
@@ -310,8 +310,8 @@ eval "$(docker-machine env default)"
 docker info
 ```
 
-针对安装了Docker for Windows的用户，您可以参考以下配置步骤：
-在系统右下角托盘图标内右键菜单选择 Settings，打开配置窗口后左侧导航菜单选择 Docker Daemon。编辑窗口内的JSON串，填写加速器地址，如下所示：
+针对安装了`Docker for Windows`的用户，您可以参考以下配置步骤：
+在系统右下角托盘图标内右键菜单选择 `Settings`，打开配置窗口后左侧导航菜单选择 `Docker Daemon`。编辑窗口内的`JSON`串，填写加速器地址，如下所示：
 
 ```shell
 {
@@ -319,7 +319,7 @@ docker info
 }
 ```
 
-编辑完成，点击 Apply 保存按钮，等待Docker重启并应用配置的镜像加速器。
+编辑完成，点击 `Apply` 保存按钮，等待Docker重启并应用配置的镜像加速器。
 
 
 
@@ -356,7 +356,7 @@ $ docker-machine ssh default 				# ssh 连接到default这台虚拟机
 
 ## 基本命令
 
-### 运行hello world示例
+### 运行`hello world`示例
 
 ---
 
@@ -379,7 +379,7 @@ This message shows that your installation appears to be working correctly.
 省略其他。。。。。。
 ```
 
-由于docker的hello world示例镜像在docker的官网，可能需要翻墙并且速度慢，这里可以使用国内阿里镜像，打开本地的刚才安装好的虚拟机`Oracle VM VirtualBox`，找到`default`。这是`default`已经在运行，直接右键点击**显示**即可，然后输入命令
+由于docker的`hello world`示例镜像在docker的官网，可能需要翻墙并且速度慢，这里可以使用国内阿里镜像，打开本地的刚才安装好的虚拟机`Oracle VM VirtualBox`，找到`default`。这是`default`已经在运行，直接右键点击**显示**即可，然后输入命令
 
 ```shell
 $ cd /etc/docker
@@ -531,9 +531,9 @@ if __name__ == "__main__":
 
 从上面的代码可以看出程序依赖了`from flask import Flask`,`from redis import Redis`，并且访问了系统变量`os.getenv("NAME", "world")`，程序运行的端口是`app.run(host='0.0.0.0', port=80)`。这就是`requirements.txt` 和 `Dockerfile`文件内容的原因了。
 
-现在我们看到`pip install -r requirements.txt`为Python安装Flask和Redis库，并且该应用程序输出环境变量`NAME`以及调用的输出`socket.gethostname()`。最后，因为Redis没有运行（因为我们只安装了Python的Redis库，而没有Redis），所以在这里会失败并发生错误异常消息。
+现在我们看到`pip install -r requirements.txt`为Python安装`Flask`和`Redis`库，并且该应用程序输出环境变量`NAME`以及调用的输出`socket.gethostname()`。最后，因为`Redis`没有运行（因为我们只安装了Python的`Redis`库，而没有`Redis`），所以在这里会失败并发生错误异常消息。
 
-​
+
 
 ### 构建镜像程序
 
@@ -595,9 +595,9 @@ $ docker run -p 4000:80 myhello
  * Running on http://0.0.0.0:80/ (Press CTRL+C to quit)
 ```
 
-上面的命令是将镜像程序发布出去，其中的80端口映射的4000端口上，通过docker关联的虚拟机的ip地址就可以访问到当前镜像应用。
+上面的命令是将镜像程序发布出去，其中的80端口映射的4000端口上，通过docker关联的虚拟机的`ip`地址就可以访问到当前镜像应用。
 
-​
+
 
 ### 查看`ip`地址
 
@@ -673,7 +673,7 @@ $ docker container stop faf0d327cb8ba130fb69cd7719c8d2732ebe6f3f223e93afa68bc7b9
 
 ## 分享镜像
 
-分享镜像就是将个人的镜像推送到docker云端，这样大家都可以进行拉取共享使用。docker云端和github有些类似，在使用云端之前需要先注册，注册地址：[cloud.docker.com](https://cloud.docker.com/)。国内阿里镜像地址：https://dev.aliyun.com/
+分享镜像就是将个人的镜像推送到docker云端，这样大家都可以进行拉取共享使用。docker云端和`github`有些类似，在使用云端之前需要先注册，注册地址：[cloud.docker.com](https://cloud.docker.com/)。国内阿里镜像地址：https://dev.aliyun.com/
 
 ### 登陆docker 云端
 
@@ -762,7 +762,7 @@ $ docker run -p 4000:80 hoojo/test:my_hello_world
  * Running on http://0.0.0.0:80/ (Press CTRL+C to quit)
 ```
 
-这样就把云镜像端程序运行在本地了，如果本地没有当前需要的镜像程序，则`docker`会在远程拉取程序到本地进行运行。无论在哪里`docker run`执行，它都会将会下载Python以及所有依赖项从中拉出`requirements.txt`，然后运行镜像中的代码。它们都在一个整体小包中一起运行，你不需要在主机上安装任何东西来让`docker`运行它。
+这样就把云镜像端程序运行在本地了，如果本地没有当前需要的镜像程序，则`docker`会在远程拉取程序到本地进行运行。无论在哪里`docker run`执行，它都会将会下载`Python`以及所有依赖项从中拉出`requirements.txt`，然后运行镜像中的代码。它们都在一个整体小包中一起运行，你不需要在主机上安装任何东西来让`docker`运行它。
 
 
 
@@ -1010,7 +1010,7 @@ docker swarm init --advertise-addr eth1               # 启动集群、暴露某
 
 Swarm是一组运行Docker并加入到集群中的机器。下面的Docker命令将由**群集管理器**在群集上执行。群体中的机器可以是物理的或虚拟的。加入群体后的机器被称为**节点**。
 
-Swarm管理人员可以使用多种策略来运行容器，例如“最空节点” —— 它可以使用容器充分利用使用率最低的机器。它确保每台机器只获取指定容器的一个实例。指示集群管理器在Compose文件中使用这些策略。
+Swarm管理人员可以使用多种策略来运行容器，例如“最空节点” —— 它可以使用容器充分利用使用率最低的机器。它确保每台机器只获取指定容器的一个实例。指示集群管理器在`Compose`文件中使用这些策略。
 
 集群管理器是集群中唯一可以执行命令的机器，或者授权其他机器作为**工作者**加入群体。工作者只是在那里提供能力，并没有权力告诉任何其他机器可以做什么和不可以做什么。
 
@@ -1175,7 +1175,7 @@ $ docker-machine ssh my-vm-node-2 "docker swarm leave"
 
 输入`docker-machine env my-vm-node-1`，然后复制粘贴并运行输出的最后一行提供的命令，以配置shell `my-vm-node-1`与swarm管理器进行通信。
 
-配置shell的命令根据你是Mac，Linux还是Windows而有所不同，因此下面的示例进行演示：
+配置shell的命令根据你是`Mac`，`Linux`还是`Windows`而有所不同，因此下面的示例进行演示：
 
 ```shell
 $ docker-machine env my-vm-node-1
@@ -1246,15 +1246,13 @@ lvxvfi6ocp7e        node_hello_web.3    hoojo/test:my_hello_world   my-vm-node-2
 
 ```
 
-
-
->使用`docker-machine env`和`docker-machine ssh`连接到VM。如果采用了`docker-machine env`进行配置shell链接后，即可在随意使用命令操作VM。
+>使用`docker-machine env`和`docker-machine ssh`连接到`VM`。如果采用了`docker-machine env`进行配置`shell`链接后，即可在随意使用命令操作指定的`VM`。
 >
->- 要将shell设置为与其他机器交互`my-vm-node-2`，只需 `docker-machine env`在相同或不同的shell中重新运行，然后运行给定的命令指向`my-vm-node-2`。只有在当前shell中才有效。如果为未配置的shell或打开一个新的shell，则需要重新运行这些命令。使用`docker-machine ls`列出的机器，看看他们是在什么状态，获取IP地址，找出需要连接的节点进行链接即可。要了解更多信息，请参阅[Docker Machine入门主题](https://docs.docker.com/machine/get-started/#create-a-machine)。
->- 或者，您可以以Docker命令的形式打包 `docker-machine ssh <machine> "<command>"`，直接登录到VM，但不能立即访问本地主机上的文件。
->- 在Mac和Linux上，您可以使用`docker-machine scp <file> <machine>:~` 跨机器复制文件，但Windows用户需要像[Git Bash](https://git-for-windows.github.io/)这样的Linux终端模拟器才能工作。
+>- 要将`shell`设置为与其他机器交互`my-vm-node-2`，只需 `docker-machine env`在相同或不同的`shell`中重新运行，然后运行给定的命令指向`my-vm-node-2`。只有在当前`shell`中才有效。如果为未配置的`shell`或打开一个新的`shell`，则需要重新运行这些命令。使用`docker-machine ls`列出的机器，看看他们是在什么状态，获取`IP`地址，找出需要连接的节点进行链接即可。要了解更多信息，请参阅[Docker Machine入门主题](https://docs.docker.com/machine/get-started/#create-a-machine)。
+>- 或者，您可以以Docker命令的形式打包 `docker-machine ssh <machine> "<command>"`，直接登录到`VM`，但不能立即访问本地主机上的文件。
+>- 在`Mac`和`Linux`上，您可以使用`docker-machine scp <file> <machine>:~` 跨机器复制文件，但`Windows`用户需要像[Git Bash](https://git-for-windows.github.io/)这样的`Linux`终端模拟器才能工作。
 >
->本教程演示既`docker-machine ssh`和 `docker-machine env`，因为它们可以在通过所有平台`docker-machine`CLI。
+>本教程演示既`docker-machine ssh`和 `docker-machine env`，因为它们可以在通过所有平台`docker-machine CLI`。
 
 
 
@@ -1262,21 +1260,21 @@ lvxvfi6ocp7e        node_hello_web.3    hoojo/test:my_hello_world   my-vm-node-2
 
 ---
 
-您可以从**任一个**集群机器的IP地址访问应用程序`node_hello`。有五个容器ID进入随机循环，展示负载平衡。
+您可以从**任一个**集群机器的IP地址访问应用程序`node_hello`。有五个容器`ID`进入随机循环，展示负载平衡。
 
-创建的网络在它们之间共享并负载平衡。运行 `docker-machine ls`以获取虚拟机的IP地址，并在浏览器中访问其中的任何一个，然后刷新（或只是`curl`它们）。
+创建的网络在它们之间共享并负载平衡。运行 `docker-machine ls`以获取虚拟机的`IP`地址，并在浏览器中访问其中的任何一个，然后刷新（或只是`curl`它们）。
 
 ```shell
 docker@my-vm-node-2:~$ curl http://192.168.99.102
 <h3>Hello World!</h3><b>Hostname:</b> b2f95756f081<br/><b>Visits:</b> <i>cannot connect to Redis, counter disabled</i>
 ```
 
-或者打开浏览器窗口，输入地址：http://192.168.99.102 经过几次刷新可以看到hostname在切换。同样节点`192.168.99.101` 也可以访问。
+或者打开浏览器窗口，输入地址：http://192.168.99.102 经过几次刷新可以看到`hostname`在切换。同样节点`192.168.99.101` 也可以访问。
 
 >连接有问题？<br/>请记住，要使用群集中的入口网络，在启用群集模式之前，需要在群集节点之间打开以下端口：
 >
->- 用于容器网络发现的端口7946 TCP / UDP。
->- 端口4789 UDP，用于容器入口网络。
+>- 用于容器网络发现的端口`7946` `TCP / UDP`。
+>- 端口`4789 UDP`，用于容器入口网络。
 
 
 
@@ -1329,7 +1327,7 @@ Removing network node_hello_webnet
 
 ---
 
-取消设置docker-machine shell变量设置。可以`docker-machine`使用给定的命令取消当前shell中的环境变量。
+取消设置`docker-machine shell`变量设置。可以`docker-machine`使用给定的命令取消当前`shell`中的环境变量。
 
 命令是：
 
@@ -1339,7 +1337,7 @@ $ eval $(docker-machine env -u)
 $ eval $("E:\Docker Toolbox\docker-machine.exe" env my-vm-node-1 -u)
 ```
 
-这会导致`docker-machine`创建的虚拟机与`shell`断开连接，并允许您继续在同一个`shell`中工作，现在使用本机`docker` 命令（例如，在Docker for Mac或Docker for Windows上）。要了解更多信息，请参阅[关于取消设置环境变量](https://docs.docker.com/machine/get-started/#unset-environment-variables-in-the-current-shell)的[机器主题](https://docs.docker.com/machine/get-started/#unset-environment-variables-in-the-current-shell)。
+这会导致`docker-machine`创建的虚拟机与`shell`断开连接，并允许您继续在同一个`shell`中工作，现在使用本机`docker` 命令（例如，在`Docker for Mac`或`Docker for Windows`上）。要了解更多信息，请参阅[关于取消设置环境变量](https://docs.docker.com/machine/get-started/#unset-environment-variables-in-the-current-shell)的[机器主题](https://docs.docker.com/machine/get-started/#unset-environment-variables-in-the-current-shell)。
 
 
 
@@ -1413,7 +1411,7 @@ docker-machine rm $(docker-machine ls -q) 				# 删除所有运行的镜像，�
 
 分布式应用程序层次结构的顶部：**应用堆栈（应用编排栈）**。堆栈是一组相互关联的服务，它们可以共享依赖关系，并且可以进行协调和伸缩。单个堆栈能够定义和协调整个应用程序的功能（尽管非常复杂的应用程序可能需要使用多个堆栈）。
 
-好消息是，从第3部分开始，在创建Compose文件并使用时，从技术上讲，已经在使用堆栈`docker stack deploy`。但是，这是在单个主机上运行的单个服务堆栈，通常不会发生在生产环境中。在这里，你可以把你学到的东西，使多个服务相互关联，并在多台机器上运行它们。
+好消息是，从第3部分开始，在创建`Compose`文件并使用时，从技术上讲，已经在使用堆栈`docker stack deploy`。但是，这是在单个主机上运行的单个服务堆栈，通常不会发生在生产环境中。在这里，你可以把你学到的东西，使多个服务相互关联，并在多台机器上运行它们。
 
 
 
@@ -1469,7 +1467,7 @@ networks:
 
 ---
 
-确保你的shell已经被配置与`my-vm-node-1`交互无问题。
+确保你的`shell`已经被配置与`my-vm-node-1`交互无问题。
 
 - 运行`docker-machine ls`列出机器并确保已连接`my-vm-node-1`主节点，如旁边的*****所示。
 - 如果需要，重新运行`docker-machine env my-vm-node-1`，然后运行给定的命令来配置shell。
@@ -1583,7 +1581,7 @@ networks:
 
 ---
 
-在主节点上创建`./data`目录，这个目录用于redis存储数据
+在主节点上创建`./data`目录，这个目录用于`redis`存储数据
 
 ```shell
 $ docker-machine ssh my-vm-node-1 "mkdir ./data"
