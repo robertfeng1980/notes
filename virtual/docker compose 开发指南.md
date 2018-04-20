@@ -1402,11 +1402,292 @@ volumes:
 
 您可以使用Bash类`${VARIABLE}`语法在配置值中使用环境变量 - 有关完整详细信息，请参阅 [变量替换](https://docs.docker.com/compose/compose-file/#variable-substitution)。
 
-下面介绍服务定义所支持的所有配置选项的列表。
+下面介绍服务定义所支持的所有配置选项的列表。需要创建好文件，文件目录结构如下：
+
+```shell
+D:\DOCKER\COMPOSE_SAMPLE
+│  docker-compose.yml
+│
+└─sample
+        app.py
+        Dockerfile
+        Dockerfile-alternate
+        requirements.txt
+```
+
+`docker-compose.yml` 将是下面演示需要修改的文件，`sample` 目录存放应用程序的文件。
 
 
 
 ### build 构建
 
 ---
+
+在构建时应用的配置选项。
+
+`build`可以指定为构建上下文的路径，**`build`后面的字符串将指向构建程序的真实路径**，下面的代码build指向的路径是 当前`compose`文件所在目录下的`sample `目录。
+
+```yaml
+version: '3'
+services:
+  webapp:
+    build: ./sample # 当前docker-compose.yml文件所在目录下的 sample目录
+```
+
+在 `docker-compose.yml`文件所在目录中执行命令 `docker-compose build`构建程序
+```shell
+$ docker-compose build
+Building webapp
+.....
+```
+
+或者，用`context`指定应用的路径，并且可以使用`dockerfile` 指定`Dockerfile` 文件名称和`args` 指定当前构建的参数数据，作为环境变量使用：
+
+```yaml
+version: '3'
+services:
+  webapp:
+    build:
+      context: ./sample  # 当前docker-compose.yml文件所在目录下的 sample目录
+      dockerfile: Dockerfile-alternate # 备用的 dockerfile 文件名称
+      args: # 构建参数
+        buildno: 1 
+```
+
+如果指定`image` 和 `build`，那么文件中指定的`image: webapp:first`将是构建镜像名称：
+
+```yaml
+  webapp:
+    image: webapp:first # 镜像名称
+    build:
+      context: ./sample     
+```
+
+随后可以运行命令`docker-compose config`检查 `docker-compose.yml`配置是否正确。
+
+**这将产生一个名为`webapp`和`tag`标记为`first`的镜像，该镜像由目录`./sample`内容构建。**
+
+> **注意**：当 使用（版本3）Compose文件[在集群模式下部署编排堆栈服务时，](https://docs.docker.com/engine/reference/commandline/stack_deploy/)忽略此选项 。`docker stack`命令仅接受预先构建的图像。
+
+
+
+#### context 上下文
+
+---
+
+可以是`Dockerfile`所在的目录的路径，也可以是`Git`仓库的`url`。
+
+当`context`的值是相对路径时，它被解释为相对于`docker-compose.yam`文件的位置。这个目录也是推送到Docker守护进程的构建上下文。
+
+```yaml
+build:
+  context: ./sample
+```
+
+
+
+#### dockerfile 
+
+---
+
+备用`Dockerfile`。`compose`命令使用替代文件来构建，还必须指定构建路径 `build` 的值。
+
+```yacas
+ build:
+      context: ./sample
+      dockerfile: Dockerfile-alternate
+```
+
+在 `sample` 目录中必须有文件名称为 `Dockerfile-alternate`的`dockerfile`
+
+
+
+#### args 参数
+
+---
+
+添加构建参数，这些参数是仅在构建过程中可访问的环境变量。
+
+首先，在`Dockerfile-alternate`中指定参数：
+
+```dockerfile
+ARG buildno
+ARG author
+
+RUN echo "Build number: $buildno"
+RUN echo "Build author: $author"
+```
+
+然后指定`build`键下的参数。可以传递一个映射或一个列表：
+
+```yaml
+build:
+  context: .
+  args:
+    buildno: 1
+    author: hoojo
+    
+### 或者如下写法
+build:
+  context: .
+  args:
+    - buildno: 1
+    - author: hoojo    
+```
+
+重新构建后会看到输出信息中出现我们定义输出的内容
+
+```shell
+$ docker-compose build
+
+Step 6/9 : RUN echo "Build number: ${buildno}"
+ ---> Running in 1611c23cbdb6
+Build number: 1
+Removing intermediate container 1611c23cbdb6
+ ---> e2ea0d5585da
+Step 7/9 : RUN echo "Build author: $author"
+ ---> Running in fc12e0ee505b
+Build author: hoojo
+```
+
+指定构建参数时可以省略该值，在这种情况下，构建时的值是构成运行环境中的值。
+
+```yaml
+args:
+  - buildno
+  - author
+```
+
+> **注**：YAML布尔值（`true`，`false`，`yes`，`no`，`on`，`off`）必须用引号括起来，以便解析器将它们解释为字符串。
+
+
+
+#### cache_from 缓存
+
+---
+
+引擎用于缓存解析的镜像列表。**在版本：3.2 可用**
+
+```yaml
+build:
+  context: .
+  cache_from:
+    - redis:latest
+    - hoojo/web_app:3.14
+```
+
+
+
+#### lables 标签
+
+---
+
+使用[Docker标签](https://docs.docker.com/engine/userguide/labels-custom-metadata/)将元数据添加到生成的镜像中。可以使用数组或字典。建议使用反向DNS标记来防止标签与其他软件使用的标签冲突。**注意：**这个选项在v3.3中可用
+
+```shell
+build:
+  context: .
+  labels:
+    com.example.description: "Accounting webapp"
+    com.example.department: "Finance"
+    com.example.label-with-empty-value: ""
+
+build:
+  context: .
+  labels:
+    - "com.example.description=Accounting webapp"
+    - "com.example.department=Finance"
+    - "com.example.label-with-empty-value"
+```
+
+
+
+#### shm_size 分区大小
+
+---
+
+设置`/dev/shm`容器的分区大小。指定为表示字节数的整数值或表示[字节值](https://docs.docker.com/compose/compose-file/#specifying-byte-values)的字符串。**在3.5版本中可用**
+
+```yaml
+build:
+  context: .
+  shm_size: '2gb'
+
+
+build:
+  context: .
+  shm_size: 10000000
+```
+
+
+
+#### target 目标
+
+---
+
+根据`Dockerfile`中定义指定构建阶段。**在3.4版本可用**
+
+```yaml
+  build:
+    context: .
+    target: prod
+```
+
+
+
+### cap_add，cap_drop 添加删除容器
+
+---
+
+添加或删除容器功能。请参阅`man 7 capabilities`完整列表。
+
+```yaml
+cap_add:
+  - ALL
+
+cap_drop:
+  - NET_ADMIN
+  - SYS_ADMIN
+```
+
+> **注意**：[在](https://docs.docker.com/engine/reference/commandline/stack_deploy/) 使用（版本3）Compose文件的[群集模式下部署堆栈](https://docs.docker.com/engine/reference/commandline/stack_deploy/)时，会忽略这些选项 。
+
+
+
+### command 命令
+
+---
+
+覆盖默认命令。
+
+```
+command: bundle exec thin -p 3000
+```
+
+该命令也可以是一个列表，方式类似于 [dockerfile](https://docs.docker.com/engine/reference/builder/#cmd)：
+
+```
+command: ["bundle", "exec", "thin", "-p", "3000"]
+```
+
+在`docker-compose.yml`文件中加入配置`    command: echo "hello!"` ，执行启动后发现输出日志
+
+```shell
+$ docker-compose up
+Creating network "composesample_default" with the default driver
+Creating composesample_webapp_1 ... done
+Attaching to composesample_webapp_1
+webapp_1  | hello!
+composesample_webapp_1 exited with code 0
+```
+
+
+
+### configs 配置
+
+---
+
+使用每项服务`configs` 配置为每个服务授予对配置的访问权限。支持两种不同的语法变体。
+
+> **注意**：配置必须已经存在或 [在`configs`](https://docs.docker.com/compose/compose-file/#configs-configuration-reference) 此堆栈文件[的顶层](https://docs.docker.com/compose/compose-file/#configs-configuration-reference)[配置](https://docs.docker.com/compose/compose-file/#configs-configuration-reference)中[定义](https://docs.docker.com/compose/compose-file/#configs-configuration-reference)，否则堆栈部署失败。
 
