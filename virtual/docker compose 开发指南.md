@@ -65,14 +65,12 @@ volumes:
 `Compose`功能包括：
 
 - [单个主机上有多个独立的环境](https://docs.docker.com/compose/overview/#Multiple-isolated-environments-on-a-single-host)
-
 - [创建容器时保留卷数据](https://docs.docker.com/compose/overview/#preserve-volume-data-when-containers-are-created)
-
 - [只重新创建已更改的容器](https://docs.docker.com/compose/overview/#only-recreate-containers-that-have-changed)
-
 - [变量并在环境之间移动合成](https://docs.docker.com/compose/overview/#variables-and-moving-a-composition-between-environments)
 
-  ​
+
+
 
 ### 单个主机上有多个独立的环境
 
@@ -551,6 +549,64 @@ $ docker-compose down --volumes			# 卸载应用并删除data数据
 
 通过`docker-compose --help`来查看compose命令行的帮助，会显示配置和命令行列表。可以使用`Docker Compose`二进制文件`docker-compose [-f <arg>...][options] [COMMAND][ARGS...]`在Docker容器中构建和管理多个服务。
 
+```shell
+$ docker-compose -h
+使用Docker定义和运行多容器应用程序
+
+Usage:
+  docker-compose [-f <arg>...] [options] [COMMAND] [ARGS...]
+  docker-compose -h|--help
+
+Options:
+  -f, --file FILE             指定一个备用的compose file
+                              (默认: docker-compose.yml)
+  -p, --project-name NAME     指定一个替代项目名称
+                              (默认: 目录名称)
+  --verbose                   显示更多输出
+  --log-level LEVEL           设置日志级别 (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  --no-ansi                   不要打印ANSI控制字符
+  -v, --version               打印版本并退出
+  -H, --host HOST             用于连接到的HOST守护程序套接字
+
+  --tls                       使用TLS;--tlsverify
+  --tlscacert CA_PATH         仅由此CA签署的信任证书
+  --tlscert CLIENT_CERT_PATH  证书文件的路径
+  --tlskey TLS_KEY_PATH       密钥文件的路径
+  --tlsverify                 使用TLS并验证远程
+  --skip-hostname-check       不要检查守护进程的主机名
+                              在客户端证书中指定的名称
+  --project-directory PATH    指定一个备用工作目录
+                              (默认: Compose file的路径)
+  --compatibility             如果设置，Compose将尝试转换部署
+                              将v3文件中的密钥添加到其非Swarm等效项
+
+Commands:
+  build              构建或重建服务
+  bundle             从Compose文件中生成一个Docker bundle
+  config             验证并查看Compose file
+  create             创建服务
+  down               停止并移除容器，网络，图像和卷
+  events             接收来自容器的实时事件
+  exec               在正在运行的容器中执行命令 
+  images             镜像列表
+  kill               杀死容器
+  logs               查看容器的日志输出
+  pause              暂停服务
+  port               打印端口绑定的公共端口
+  ps                 容器列表
+  pull               拉取服务镜像
+  push               推送服务镜像
+  restart            重启服务
+  rm                 移除停止的容器
+  run                运行一次性命令
+  scale              设置服务的容器数量
+  start              开始服务
+  stop               停止服务
+  top                显示正在运行的进程
+  unpause            暂停服务
+  up                 创建并启动容器 
+```
+
 
 
 ## 选项 `-f` 用法
@@ -695,7 +751,6 @@ Status: Image is up to date for redis:alpine
 
 
 ### 在文件中配置环境变量
-
 ---
 
 compose支持在执行`docker-compose`命令（当前工作目录）的文件夹中，建立名为`.env`的环境配置文件中声明默认环境变量。
@@ -705,14 +760,10 @@ compose支持在执行`docker-compose`命令（当前工作目录）的文件夹
 这些语法规则适用于`.env`文件：
 
 - compose期望`.env`文件中的每一行都是`VAR=VAL`格式。
-
 - 开头的行`#`被处理为注释并被忽略。
-
 - 空白行被忽略。
-
 - 没有特殊的引号处理。这意味着 **它们是VAL的一部分**。
 
-  ​
 
 #### compose 文件和命令行变量
 
@@ -734,67 +785,7 @@ compose支持在执行`docker-compose`命令（当前工作目录）的文件夹
 
 
 
-## 命令行
-
-```shell
-$ docker-compose -h
-使用Docker定义和运行多容器应用程序
-
-Usage:
-  docker-compose [-f <arg>...] [options] [COMMAND] [ARGS...]
-  docker-compose -h|--help
-
-Options:
-  -f, --file FILE             指定一个备用的compose file
-                              (默认: docker-compose.yml)
-  -p, --project-name NAME     指定一个替代项目名称
-                              (默认: 目录名称)
-  --verbose                   显示更多输出
-  --log-level LEVEL           设置日志级别 (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-  --no-ansi                   不要打印ANSI控制字符
-  -v, --version               打印版本并退出
-  -H, --host HOST             用于连接到的HOST守护程序套接字
-
-  --tls                       使用TLS;--tlsverify
-  --tlscacert CA_PATH         仅由此CA签署的信任证书
-  --tlscert CLIENT_CERT_PATH  证书文件的路径
-  --tlskey TLS_KEY_PATH       密钥文件的路径
-  --tlsverify                 使用TLS并验证远程
-  --skip-hostname-check       不要检查守护进程的主机名
-                              在客户端证书中指定的名称
-  --project-directory PATH    指定一个备用工作目录
-                              (默认: Compose file的路径)
-  --compatibility             如果设置，Compose将尝试转换部署
-                              将v3文件中的密钥添加到其非Swarm等效项
-
-Commands:
-  build              构建或重建服务
-  bundle             从Compose文件中生成一个Docker bundle
-  config             验证并查看Compose file
-  create             创建服务
-  down               停止并移除容器，网络，图像和卷
-  events             接收来自容器的实时事件
-  exec               在正在运行的容器中执行命令 
-  images             镜像列表
-  kill               杀死容器
-  logs               查看容器的日志输出
-  pause              暂停服务
-  port               打印端口绑定的公共端口
-  ps                 容器列表
-  pull               拉取服务镜像
-  push               推送服务镜像
-  restart            重启服务
-  rm                 移除停止的容器
-  run                运行一次性命令
-  scale              设置服务的容器数量
-  start              开始服务
-  stop               停止服务
-  top                显示正在运行的进程
-  unpause            暂停服务
-  up                 创建并启动容器 
-```
-
-
+## 命令
 
 ### up 装载
 
