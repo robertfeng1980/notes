@@ -321,6 +321,8 @@ DOCKER_TOOLBOX_INSTALL_PATH=E:\Docker Toolbox
 
   **如果您在`Docker Cloud`上运行群集，则可以重新运行`export` 用于连接群集的命令。**
 
+  ​
+
 
 
 ## 机器启动时默认配置环境变量
@@ -329,7 +331,52 @@ DOCKER_TOOLBOX_INSTALL_PATH=E:\Docker Toolbox
 
 
 
-# Machine CLI 客户端
+# Machine 命令行
+
+```shell
+$ docker-machine -h
+Usage: docker-machine.exe [OPTIONS] COMMAND [arg...]
+创建和管理运行Docker的机器.
+
+Options:
+  --debug, -D                                                   启用调试模式
+  --storage-path, -s "C:\Users\Administrator\.docker\machine"   配置存储路[$MACHINE_STORAGE_PATH]
+  --tls-ca-cert                                                 CA远程验证[$MACHINE_TLS_CA_CERT]
+  --tls-ca-key                                                生成证书的私钥[$MACHINE_TLS_CA_KEY]
+  --tls-client-cert                                用于TLS的客户端证书[$MACHINE_TLS_CLIENT_CERT]
+  --tls-client-key                                用于客户端TLS认证的私钥[$MACHINE_TLS_CLIENT_KEY]
+  --github-api-token                            令牌用于请求Github API[$MACHINE_GITHUB_API_TOKEN]
+  --native-ssh                                    使用本地（基于Go）的SSH实现[$MACHINE_NATIVE_SSH]
+  --bugsnag-api-token                  用于崩溃报告的BugSnag API令牌[$MACHINE_BUGSNAG_API_TOKEN]
+  --help, -h                                                    帮助
+  --version, -v                                                 打印版本
+
+Commands:
+  active                打印哪台机器处于活动状态
+  config                打印机器的连接配置
+  create                创建一台机器
+  env                   显示设置Docker客户端环境的命令
+  inspect               检查检查有关机器的信息
+  ip                    获取一台机器的IP地址
+  kill                  杀死一台机器
+  ls                    列出机器
+  provision             准备重新调配现有机器
+  regenerate-certs      重新生成证书为机器重新生成TLS证书
+  restart               重新启动重新启动机器
+  rm                    删除一台机器
+  ssh                   使用SSH登录或在机器上运行命令.
+  scp                   在机器之间复制文件
+  mount                 使用SSHFS挂载或卸载机器上的目录.
+  start                 开始启动一台机器
+  status                获取机器的状态
+  stop                  停止一台机器
+  upgrade               将计算机升级到最新版本的Docker
+  url                   获取一台机器的URL
+  version               Show the Docker Machine version or a machine docker version
+  help                  Shows a list of commands or help for one command
+```
+
+
 
 ## active 活动
 
