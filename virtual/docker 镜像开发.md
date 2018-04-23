@@ -934,15 +934,15 @@ Docker提供了一个用于与Docker守护进程（称为`Docker Engine API`）�
 
 - **建议**：运行`pip install docker`。
 - **如果你不能使用pip**：
-  1. [直接下载软件包](https://pypi.python.org/pypi/docker/)。
-  2. 提取它并更改为提取的目录，
-  3. 运行`python setup.py install`。
+  + 直接下载软件包](https://pypi.python.org/pypi/docker/)。
+  + 提取它并更改为提取的目录，
+  + 运行`python setup.py install`。
 
 [阅读完整的Docker引擎Python SDK参考](https://docker-py.readthedocs.io/)。
 
 
 
-## API参考
+## API 参考
 
 
 可以 [查看API最新版本的参考](https://docs.docker.com/engine/api/latest/) 或[选择特定版本](https://docs.docker.com/engine/api/version-history/)
