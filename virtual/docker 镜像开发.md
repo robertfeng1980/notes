@@ -1,4 +1,4 @@
-# docker 上开发应用
+# docker 镜像开发
 
 [TOC]
 
@@ -378,8 +378,6 @@ LABEL vendor=ACME\ Incorporated \
 为了使`Dockerfile`可读性更强，易于理解并且可维护，可以`RUN`在**多行用反斜杠分隔长分或复杂语句**
 
 #### apt-get
-
----
 
 可能最常见的用例是应用程序`RUN apt-get`。该 `RUN apt-get`命令，因为它安装了软件包，有几个需要注意的问题。
 
