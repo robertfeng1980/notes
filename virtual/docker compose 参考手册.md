@@ -1,8 +1,10 @@
-# Docker Compose 开发指南
+# Docker Compose 参考手册
 
 [TOC]
 
-`Compose`是定义和运行多容器Docker应用程序的工具。使用`Compose`可以使用`YAML`文件来配置应用程序的服务。然后使用单个命令，可以创建并启动配置中的所有服务。要详细了解`Compose`的所有功能，请参阅功能列表。
+`Docker Compose`是一个用Docker定义和运行复杂应用程序、运行多容器的工具。使用Compose可以在单个文件(使用`Compose`可以使用`YAML`文件来配置应用程序的服务)中定义一个多容器应用程序，然后将应用程序放在一个单独的命令中，该命令将完成所有需要完成的操作以使其运行。
+
+使用Docker容器的应用程序通常由多个容器组成。使用`Docker Compose`，不需要编写`shell`脚本来启动容器。所有容器都使用服务在配置文件中定义，然后使用`docker-compose`脚本启动，停止和重新启动应用程序以及该应用程序中的所有服务以及该服务中的所有容器。
 
 
 
@@ -98,7 +100,7 @@ volumes:
 
 
 
-### 变量并在环境之间移动合成
+### 变量在环境之间移动合成
 
 `Compose`支持`yml`文件中的变量。可以使用这些变量为不同的环境或不同的用户定制编排服务。更多细节请参阅变量替换。您可以使用扩展字段或创建多个`Compose`文件来扩展`Compose`文件。
 
@@ -456,7 +458,7 @@ Hello World! OMG!! I have been seen 12 times.
 
 
 
-## 一些其他命令
+## 其他命令
 
 ### 后台模式
 
@@ -470,6 +472,21 @@ composeexample_redis_1 is up-to-date
 composeexample_web_1 is up-to-date
 ```
 
+### 查看日志
+
+---
+
+在后台模式下可以查看日志 `docker-compose logs`
+
+```shell
+$ docker-compose logs
+$ docker-compose logs redis
+```
+
+### 查看运行的服务
+
+---
+
 并用于`docker-compose ps`查看当前正在运行的内容：
 
 ```shell
@@ -480,7 +497,7 @@ composeexample_redis_1   docker-entrypoint.sh redis ...   Up      6379/tcp
 composeexample_web_1     python app.py                    Up      0.0.0.0:5000->5000/tcp
 ```
 
-### 一次性的命令
+### 运行一次性
 
 ---
 
@@ -497,7 +514,7 @@ PYTHON_PIP_VERSION=9.0.3
 HOME=/root
 ```
 
-### 停止Compose
+### 停止服务
 
 ---
 
@@ -1550,7 +1567,7 @@ Step 7/9 : RUN echo "Build author: $author"
 Build author: hoojo
 ```
 
-指定构建参数时可以省略该值，在这种情况下，构建时的值是构成运行环境中的值。
+指定构建参数时可以省略该值，在这种情况下，构建时的值是运行环境中的值。
 
 ```yaml
 args:
@@ -1625,12 +1642,12 @@ build:
 
 ---
 
-根据`Dockerfile`中定义指定构建阶段。**在3.4版本可用**
+根据构建阶段在`Dockerfile`中定义指定目标配置。**在3.4版本可用**
 
 ```yaml
   build:
     context: .
-    target: prod
+    target: prod # 在dockerfile中的prod 构建阶段
 ```
 
 
@@ -1658,7 +1675,7 @@ cap_drop:
 
 ---
 
-覆盖默认命令。
+启动后执行的命令，会覆盖默认命令。
 
 ```
 command: bundle exec thin -p 3000
@@ -1690,4 +1707,382 @@ composesample_webapp_1 exited with code 0
 使用每项服务`configs` 配置为每个服务授予对配置的访问权限。支持两种不同的语法变体。
 
 > **注意**：配置必须已经存在或 [在`configs`](https://docs.docker.com/compose/compose-file/#configs-configuration-reference) 此堆栈文件[的顶层](https://docs.docker.com/compose/compose-file/#configs-configuration-reference)[配置](https://docs.docker.com/compose/compose-file/#configs-configuration-reference)中[定义](https://docs.docker.com/compose/compose-file/#configs-configuration-reference)，否则堆栈部署失败。
+
+
+
+#### SHORT SYNTAX 短语法
+
+短的语法体只能指定配置名称。这会授予容器对配置的访问权限并将其装载到容器中的`/<config_name>`处。源名称和目标装入点都设置为配置名称。
+
+以下示例使用简短语法将`redis`服务访问权限授予`my_config`和`my_other_config`configs。值`my_config`被设置为文件的内容`./my_config.txt`，并被 `my_other_config`定义为外部资源，这意味着它已经在Docker中定义，可以通过运行该`docker config create` 命令或通过另一个堆栈部署。如果外部配置不存在，则堆叠部署失败并出现`config not found`错误。
+
+> **注**：`config`定义仅在3.3版及更高版本的compose文件格式中受支持。
+
+```yaml
+version: "3.3"
+services:
+  redis:
+    image: redis:latest
+    deploy:
+      replicas: 1
+    configs:
+      - my_config
+      - my_other_config
+configs:
+  my_config:
+    file: ./my_config.txt
+  my_other_config:
+    external: true
+```
+
+#### LONG SYNTAX 长语法
+
+长的语法提供了更多的粒度，以便在服务的任务容器中如何配置。
+
+- `source`：它在Docker中存在的配置名称。
+- `target`：要在服务的任务容器中装载的文件的路径和名称。如果未指定，则默认为`/<source>`。
+- `uid`以及`gid`：在服务的任务容器中拥有安装的配置文件的数字UID或GID。`0`如果未指定，则默认为在Linux上。Windows不支持。
+- `mode`：在服务的任务容器中安装的文件的权限，以八进制表示法。例如，`0444` 代表世界可读的。默认是`0444`。配置文件无法写入，因为它们安装在临时文件系统中，所以如果设置了可写位，它将被忽略。可执行位可以被设置。如果您不熟悉UNIX文件权限模式，则可能会发现此 [权限计算器](http://permissions-calculator.org/) 很有用。
+
+以下示例在容器中将`my_config`的名称设置为`redis_config`，将模式设置为`0440`（可读组），并将用户和组设置为`103`. `redis`服务无法访问`my_other_config`配置。
+
+```yaml
+version: "3.5"
+services:
+  redis:
+    image: redis:latest
+    deploy:
+      replicas: 1
+    configs:
+      - source: my_config
+        target: /redis_config
+        uid: '103'
+        gid: '103'
+        mode: 0440
+configs:
+  my_config:
+    file: ./my_config.txt
+  my_other_config:
+    external: true
+```
+
+您可以授予多个配置的服务访问权限，并且您可以混合使用长短语法。定义配置并不意味着授予服务访问权限。
+
+
+
+### cgroup_parent 上级组
+
+---
+
+为容器指定一个可选的父cgroup。
+
+```yaml
+cgroup_parent: m-executor-abcd
+```
+
+> **注意**：当 使用（版本3）Compose文件[在群集模式下部署堆栈时，](https://docs.docker.com/engine/reference/commandline/stack_deploy/)忽略此选项 。
+
+
+
+### container_name 容器名称
+
+---
+
+指定一个自定义容器名称，而不是生成的默认名称。
+
+```
+version: '3.5'
+services:
+  webapp:
+    container_name: webapp_first
+    image: webapp:first
+```
+
+由于Docker容器名称必须是唯一的，因此如果指定了自定义名称，则无法将服务扩展到1个容器之外。试图这样做会导致错误。
+
+> **注意**：当 使用（版本3）Compose文件[在群集模式下部署堆栈时，](https://docs.docker.com/engine/reference/commandline/stack_deploy/)忽略此选项 。
+
+```shell
+$ docker-compose.exe ps
+    Name         Command     State    Ports
+-------------------------------------------
+webapp_first   echo hello!   Exit 0
+```
+
+
+
+### credential_spec 凭据规范
+
+> **注意：**该选项已添加到v3.3中
+
+为托管服务帐户配置凭据规范。此选项仅用于使用Windows容器的服务。在`credential_spec`必须在格式`file://<filename>`或`registry://<value-name>`。
+
+使用时`file:`，引用的文件必须存在于`CredentialSpecs` docker数据目录的子目录中，该目录默认为`C:\ProgramData\Docker\` 在Windows上。以下示例从名为的文件加载凭证规范`C:\ProgramData\Docker\CredentialSpecs\my-credential-spec.json`：
+
+```
+credential_spec:
+  file: my-credential-spec.json
+```
+
+使用时`registry:`，将从守护进程主机上的Windows注册表中读取凭据规范。具有给定名称的注册表值必须位于：
+
+```
+HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Virtualization\Containers\CredentialSpecs
+```
+
+以下示例从`my-credential-spec` 注册表中指定的值加载凭证规范：
+
+```
+credential_spec:
+  registry: my-credential-spec
+```
+
+
+
+### deploy 部署
+
+---
+
+> **仅限版本3。**
+
+指定与服务的部署和运行相关的配置。这只在部署到使用`docker stack`部署的`swarm`时才会生效，并且被`docker-compose up`和`docker-compose run`忽略。
+
+```yaml
+version: '3'
+services:
+  redis:
+    image: redis:alpine
+    deploy:
+      replicas: 6
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+```
+
+#### endpoint_mode 端点模式
+
+为连接到群的外部客户端指定服务发现方法。
+
+> **仅版本3.3。**
+
+- `endpoint_mode: vip` - Docker为该服务分配一个虚拟IP（VIP），作为客户端到达网络服务的“前端”。Docker在客户端和可用的工作节点之间为服务路由请求，而客户端不知道有多少节点参与服务或其IP地址或端口。（这是默认设置。）
+- `endpoint_mode: dnsrr` - DNS轮询（DNSRR）服务发现不使用单个虚拟IP。Docker为服务设置DNS条目，使得服务名称的DNS查询返回一个IP地址列表，并且客户端直接连接到其中的一个。如果您想使用自己的负载平衡器，或者混合Windows和Linux应用程序，则DNS轮询功能非常有用。
+
+```yaml
+version: "3.3"
+
+services:
+  wordpress:
+    image: wordpress
+    ports:
+      - 8080:80
+    networks:
+      - overlay
+    deploy:
+      mode: replicated
+      replicas: 2
+      endpoint_mode: vip
+
+  mysql:
+    image: mysql
+    volumes:
+       - db-data:/var/lib/mysql/data
+    networks:
+       - overlay
+    deploy:
+      mode: replicated
+      replicas: 2
+      endpoint_mode: dnsrr
+
+volumes:
+  db-data:
+
+networks:
+  overlay:
+```
+
+这些选项`endpoint_mode`也可用作集群模式CLI命令[docker service create中的](https://docs.docker.com/engine/reference/commandline/service_create/)选项 。有关所有swarm相关`docker`命令的快速列表，请参阅[Swarm模式CLI命令](https://docs.docker.com/engine/swarm/#swarm-mode-key-concepts-and-tutorial)。
+
+要了解有关集群模式下的服务发现和网络的更多信息，请参阅 在群集模式主题中[配置服务发现](https://docs.docker.com/engine/swarm/networking/#configure-service-discovery)。
+
+#### labels 标签
+
+指定服务的标签。这些标签*仅*在服务上设置，*而不*在服务的任何容器上设置。
+
+```yaml
+version: "3"
+services:
+  web:
+    image: web
+    deploy:
+      labels:
+        com.example.description: "This label will appear on the web service"
+```
+
+要改为在容器上设置标签，请在以下位置使用`labels`，而并非在`deploy` 键下面：
+
+```yaml
+version: "3"
+services:
+  web:
+    image: web
+    labels:
+      com.example.description: "This label will appear on all containers for the web service"
+```
+
+#### mode 模式
+
+全局唯一模式：`global`，还是副本多实例模式：`replicated`，若是副本模式就需要指定副本数量`replicas`。要么`global`（每个群集节点只有一个容器）或`replicated`（指定数量的容器）。默认是`replicated`。（要了解更多信息，请参阅[swarm](https://docs.docker.com/engine/swarm/)主题 中的[复制和全局服务](https://docs.docker.com/engine/swarm/how-swarm-mode-works/services/#replicated-and-global-services)。）
+
+```yaml
+version: '3'
+services:
+  worker:
+    image: dockersamples/examplevotingapp_worker
+    deploy:
+      mode: global
+```
+
+#### placement 放置
+
+指定约束和偏好的位置。请参阅docker服务创建文档以获取语法和可用类型的[约束](https://docs.docker.com/engine/reference/commandline/service_create/#specify-service-constraints-constraint)和[首选项](https://docs.docker.com/engine/reference/commandline/service_create/#specify-service-placement-preferences-placement-pref)的完整说明。
+
+```yaml
+version: '3'
+services:
+  db:
+    image: postgres
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+          - engine.labels.operatingsystem == ubuntu 14.04
+        preferences:
+          - spread: node.labels.zone
+```
+
+#### replicas 副本
+
+如果服务是`replicated`（这是默认设置），请指定在任何给定时间应该运行的容器数量。
+
+```yaml
+version: '3'
+services:
+  worker:
+    image: dockersamples/examplevotingapp_worker   
+    deploy:
+      mode: replicated
+      replicas: 6
+```
+
+#### resources 资源
+
+配置限制资源。
+
+> **注意**：这取代了[旧的资源约束选项](https://docs.docker.com/compose/compose-file/compose-file-v2/#cpu-and-other-resources)在compose非集群模式文件之前版本3（ `cpu_shares`，`cpu_quota`，`cpuset`，`mem_limit`，`memswap_limit`，`mem_swappiness`）如在[升级版本2.x到3.x](https://docs.docker.com/compose/compose-file/compose-versioning/#upgrading)。
+
+这些都是单一的值，类似于[docker服务创建的](https://docs.docker.com/engine/reference/commandline/service_create/)对应服务。
+
+在这个通用示例中，`redis`服务限制使用不超过`50M`的内存和`0.50`（50％）可用处理时间（CPU），并且 保留`20M`了内存和`0.25`CPU时间（如同始终可用的那样）。
+
+```yaml
+version: '3'
+services:
+  redis:
+    image: redis:alpine
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 50M
+        reservations: # 保留资源，避免程序内存溢出
+          cpus: '0.25'
+          memory: 20M
+```
+
+下面的主题描述了设置群集中服务或容器资源约束的可用选项。
+
+> 寻找在非群模式容器上设置资源的选项？
+>
+> 这里描述的选项特定于 `deploy`密钥和群集模式。如果要为非集群部署设置资源约束，请使用 [Compose文件格式版本2 CPU，内存和其他资源选项](https://docs.docker.com/compose/compose-file/compose-file-v2/#cpu-and-other-resources)。如果您还有其他问题，请参阅关于GitHub问题[docker /compose/4513](https://github.com/docker/compose/issues/4513)的讨论。
+
+
+
+##### Out Of Memory Exceptions 内存异常（OOME）
+
+如果服务或容器尝试使用比系统可用的内存更多的内存，则可能会遇到内存异常（`OOME`），并且容器或Docker守护程序可能会被内核OOM错误所杀。要防止发生这种情况，请确保应用程序在具有足够内存的主机上运行，并且请参阅[了解耗尽内存的风险](https://docs.docker.com/engine/admin/resource_constraints/#understand-the-risks-of-running-out-of-memory)。
+
+#### restart_policy 重启策略
+
+配置是否以及如何在退出时重新启动容器。取代 [`restart`](https://docs.docker.com/compose/compose-file/compose-file-v2/#orig-resources)。
+
+- `condition`：其中之一`none`，`on-failure`或`any`，默认：`any`。
+- `delay`：在重启尝试之间等待多长时间，指定为 [持续时间](https://docs.docker.com/compose/compose-file/#specifying-durations)（默认值：0）。
+- `max_attempts`：在放弃之前尝试重新启动容器多少次（默认：从不放弃）。如果重新启动在配置中没有成功`window`，则此尝试不计入配置`max_attempts`值。例如，如果`max_attempts`设置为“2”，并且第一次尝试重新启动失败，则可能会尝试重新启动两次以上。
+- `window`：在决定重新启动是否成功之前等待多久，指定为[持续时间](https://docs.docker.com/compose/compose-file/#specifying-durations)（默认值：立即决定）。
+
+```
+version: "3"
+services:
+  redis:
+    image: redis:alpine
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+```
+
+#### update_config 更新配置
+
+配置如何更新服务，用于配置滚动更新。
+
+- `parallelism`：一次更新的容器数量。
+- `delay`：在更新一组容器之间等待的时间。。
+- `failure_action`：如果更新失败该怎么办。其中`continue`，`rollback`或`pause` ，默认：`pause`。
+- `monitor`：每次任务更新后，监控是否失败的时间`(ns|us|ms|s|m|h)`（默认为0）。
+- `max_failure_ratio`：在更新期间容忍的失败率。
+- `order`：更新期间的操作顺序。其中一个`stop-first`（旧的任务在开始新任务之前停止），或`start-first`（新的任务首先启动，并且正在运行的任务短暂重叠）（默认`stop-first`）**注意**：仅在v3.4和更高版本中受支持。
+
+> **注意**：`order`仅支持v3.4及更高版本的撰写文件格式。
+
+```yaml
+version: '3.4'
+services:
+  vote:
+    image: dockersamples/examplevotingapp_vote:before
+    depends_on:
+      - redis
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+        delay: 10s
+        order: stop-first
+```
+
+### 不支持 `DOCKER STACK DEPLOY`
+
+---
+
+下面的子选项（支持`docker compose up`和`docker compose run`）是*不支持*的`docker stack deploy`或`deploy`关键的。
+
+- [build](https://docs.docker.com/compose/compose-file/#build)
+- [cgroup_parent](https://docs.docker.com/compose/compose-file/#cgroup_parent)
+- [container_name](https://docs.docker.com/compose/compose-file/#container_name)
+- [devices](https://docs.docker.com/compose/compose-file/#devices)
+- [tmpfs](https://docs.docker.com/compose/compose-file/#tmpfs)
+- [external_links](https://docs.docker.com/compose/compose-file/#external_links)
+- [links](https://docs.docker.com/compose/compose-file/#links)
+- [network_mode](https://docs.docker.com/compose/compose-file/#network_mode)
+- [restart](https://docs.docker.com/compose/compose-file/#restart)
+- [security_opt](https://docs.docker.com/compose/compose-file/#security_opt)
+- [stop_signal](https://docs.docker.com/compose/compose-file/#stop_signal)
+- [sysctls](https://docs.docker.com/compose/compose-file/#sysctls)
+- [userns_mode](https://docs.docker.com/compose/compose-file/#userns_mode)
+
+> **提示：**请参阅关于[如何为服务，群集和docker-stack.yml文件配置卷](https://docs.docker.com/compose/compose-file/#volumes-for-services-swarms-and-stack-files)的部分。支持卷*，*但要与群集和服务一起使用，它们必须配置为命名卷或与限制为可访问必需卷的节点的服务相关联
 

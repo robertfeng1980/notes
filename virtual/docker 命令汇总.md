@@ -1,6 +1,103 @@
 # docker 常用命令
 
+```shell
+# image
+# 建立一个图像
+$ docker image build --rm=true .
+# 安装图像
+$ docker image pull ${IMAGE}
+#已安装图像的列表
+$ docker image ls
+# 已安装图像列表（详细列表）
+$ docker image ls --no-trunc
+# 删除图像
+$ docker image rm ${IMAGE_ID}
+# 删除未使用的图像
+$ docker image prune
+# 删除所有图像
+$ docker image rm $(docker image ls -aq)
+
+#container
+# 运行一个容器
+$ docker container run
+# 正在运行的容器列表
+$ docker container ls
+# 所有容器的列表
+$ docker container ls -a
+# 停止一个容器
+$ docker container stop ${CID}
+# 停止所有运行的容器
+$ docker container stop $(docker container ls -q)
+# 列出状态为1的所有退出的容器
+$ docker container ls -a --filter "exited=1"
+# 取出一个容器
+$ docker container rm ${CID}
+# 通过正则表达式删除容器
+$ docker container ls -a | grep wildfly | awk '{print $1}' | xargs docker container rm -f
+# 删除所有已退出的容器
+$ docker container rm -f $(docker container ls -a | grep Exit | awk '{ print $1 }')
+# 删除所有容器
+$ docker container rm $(docker container ls -aq)
+# 查找容器的IP地址
+$ docker container inspect --format '{{ .NetworkSettings.IPAddress }}' ${CID}
+# 附加到一个容器
+$ docker container attach ${CID}
+# 进入一个容器，打开一个shell
+$ docker container exec -it ${CID} bash
+# 通过正则表达式获取图像的容器标识
+$ docker container ls | grep wildfly | awk '{print $1}'
+```
+
+
+
+
+
 ## docker VM
+
+```shell
+$ docker-machine -h
+Usage: docker-machine.exe [OPTIONS] COMMAND [arg...]
+创建和管理运行Docker的机器.
+
+Options:
+  --debug, -D                                                   启用调试模式
+  --storage-path, -s "C:\Users\Administrator\.docker\machine"   配置存储路[$MACHINE_STORAGE_PATH]
+  --tls-ca-cert                                                 CA远程验证[$MACHINE_TLS_CA_CERT]
+  --tls-ca-key                                                生成证书的私钥[$MACHINE_TLS_CA_KEY]
+  --tls-client-cert                                用于TLS的客户端证书[$MACHINE_TLS_CLIENT_CERT]
+  --tls-client-key                                用于客户端TLS认证的私钥[$MACHINE_TLS_CLIENT_KEY]
+  --github-api-token                            令牌用于请求Github API[$MACHINE_GITHUB_API_TOKEN]
+  --native-ssh                                    使用本地（基于Go）的SSH实现[$MACHINE_NATIVE_SSH]
+  --bugsnag-api-token                  用于崩溃报告的BugSnag API令牌[$MACHINE_BUGSNAG_API_TOKEN]
+  --help, -h                                                    帮助
+  --version, -v                                                 打印版本
+
+Commands:
+  active                打印哪台机器处于活动状态
+  config                打印机器的连接配置
+  create                创建一台机器
+  env                   显示设置Docker客户端环境的命令
+  inspect               检查检查有关机器的信息
+  ip                    获取一台机器的IP地址
+  kill                  杀死一台机器
+  ls                    列出机器
+  provision             准备重新调配现有机器
+  regenerate-certs      重新生成证书为机器重新生成TLS证书
+  restart               重新启动重新启动机器
+  rm                    删除一台机器
+  ssh                   使用SSH登录或在机器上运行命令.
+  scp                   在机器之间复制文件
+  mount                 使用SSHFS挂载或卸载机器上的目录.
+  start                 开始启动一台机器
+  status                获取机器的状态
+  stop                  停止一台机器
+  upgrade               将计算机升级到最新版本的Docker
+  url                   获取一台机器的URL
+  version               Show the Docker Machine version or a machine docker version
+  help                  Shows a list of commands or help for one command
+```
+
+
 
 ```shell
 $ docker-machine ls						# 查看已安装的虚拟机
@@ -138,5 +235,83 @@ docker-machine ssh myvm1 "docker stack deploy -c <file> <app>"   # 使用ssh的�
 eval $(docker-machine env -u)     						# 从虚拟机断开shell，使用本地docker
 docker-machine stop $(docker-machine ls -q)               # 停止全部运行的虚拟机
 docker-machine rm $(docker-machine ls -q) 				# 删除所有运行的虚拟机，包括磁盘上的
+```
+
+## docker compose
+
+```shell
+$ docker-compose -h
+使用Docker定义和运行多容器应用程序
+
+Usage:
+  docker-compose [-f <arg>...] [options] [COMMAND] [ARGS...]
+  docker-compose -h|--help
+
+Options:
+  -f, --file FILE             指定一个备用的compose file
+                              (默认: docker-compose.yml)
+  -p, --project-name NAME     指定一个替代项目名称
+                              (默认: 目录名称)
+  --verbose                   显示更多输出
+  --log-level LEVEL           设置日志级别 (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  --no-ansi                   不要打印ANSI控制字符
+  -v, --version               打印版本并退出
+  -H, --host HOST             用于连接到的HOST守护程序套接字
+
+  --tls                       使用TLS;--tlsverify
+  --tlscacert CA_PATH         仅由此CA签署的信任证书
+  --tlscert CLIENT_CERT_PATH  证书文件的路径
+  --tlskey TLS_KEY_PATH       密钥文件的路径
+  --tlsverify                 使用TLS并验证远程
+  --skip-hostname-check       不要检查守护进程的主机名
+                              在客户端证书中指定的名称
+  --project-directory PATH    指定一个备用工作目录
+                              (默认: Compose file的路径)
+  --compatibility             如果设置，Compose将尝试转换部署
+                              将v3文件中的密钥添加到其非Swarm等效项
+
+Commands:
+  build              构建或重建服务
+  bundle             从Compose文件中生成一个Docker bundle
+  config             验证并查看Compose file
+  create             创建服务
+  down               停止并移除容器，网络，图像和卷
+  events             接收来自容器的实时事件
+  exec               在正在运行的容器中执行命令 
+  images             镜像列表
+  kill               杀死容器
+  logs               查看容器的日志输出
+  pause              暂停服务
+  port               打印端口绑定的公共端口
+  ps                 容器列表
+  pull               拉取服务镜像
+  push               推送服务镜像
+  restart            重启服务
+  rm                 移除停止的容器
+  run                运行一次性命令
+  scale              设置服务的容器数量
+  start              开始服务
+  stop               停止服务
+  top                显示正在运行的进程
+  unpause            暂停服务
+  up                 创建并启动容器 
+```
+
+
+
+```shell
+# 安装 docker-compose
+$ sudo curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+# 授权
+$ sudo chmod +x /usr/local/bin/docker-compose
+$ docker-compose migrate-to-labels				# 升级compose
+$ docker container rm -f -v myapp_web_1 myapp_db_1   # 删除容器
+$ docker-compose up							# 启动应用
+$ docker-compose up -d					# 后台模式启动应用
+$ docker-compose stop					# 停止应用
+$ docker-compose down					# 卸载应用
+$ docker-compose ps						# 查看应用状态
+$ docker-compose run web env			# 查看应用服务环境变量
+$ docker-compose down --volumes			# 卸载应用并删除data数据
 ```
 

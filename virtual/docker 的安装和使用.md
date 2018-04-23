@@ -367,7 +367,7 @@ This message shows that your installation appears to be working correctly.
 省略其他。。。。。。
 ```
 
-由于docker的`hello world`示例镜像在docker的官网，可能需要翻墙并且速度慢，这里可以使用国内阿里镜像，打开本地的刚才安装好的虚拟机`Oracle VM VirtualBox`，找到`default`。这是`default`已经在运行，直接右键点击**显示**即可，然后输入命令
+由于docker的`hello world`示例镜像在docker的官网，可能需要翻墙并且速度慢，这里可以使用国内阿里镜像，打开本地的刚才安装好的虚拟机`Oracle VM VirtualBox`，找到`default`。这时`default`已经在运行，直接右键点击**显示**即可，然后输入命令
 
 ```shell
 $ cd /etc/docker
@@ -392,9 +392,17 @@ $ docker image ls
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
 hello-world         latest              e38bc07ac18e        37 hours ago        1.85kB
 ```
-​
+### 查看镜像运行历史
 
-### 查看在容器中运行过的镜像信息
+---
+
+输入命令行查看镜像运行的历史情况
+
+```shell
+$ docker image history composesample_webapp
+```
+
+### 查看运行过的容器信息
 
 ---
 
@@ -406,9 +414,9 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 ff46aa1e0dc6        hello-world         "/hello"            9 minutes ago       Exited (0) 9 minutes ago                       priceless_vaughan
 
 ```
-​
 
-### 查看运行过的镜像容器`ID`信息
+
+### 查看运行过的容器`ID`信息
 
 ---
 
@@ -633,8 +641,52 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 ```
 
 ```shell
+# 停止匹配的
+$ docker container stop "docker container ps | grep myhello | awk '{print $1}'"
+# 停止所有的
+$ docker container stop $(docker container ps -q)
+# 只停止退出的容器：
+$ docker container ps -a -f "exited=-1"
+# 停止特定的
 $ docker container stop 77e422fa3978
 77e422fa3978
+```
+
+
+
+### 重启容器程序
+
+---
+
+格式是`-p hostPort:containerPort`。该选项将主机上的端口映射到容器中的端口。这允许我们访问主机上指定端口上的容器
+
+```shell
+docker container run -d -p 4000:80 --name myhello_container myhello
+```
+
+
+
+### 删除容器
+
+---
+
+通过id或名称删除特定容器：
+
+```shell
+$ docker container rm <CONTAINER_ID>
+$ docker container rm <NAME>
+```
+
+删除符合正则表达式的容器
+
+```shell
+$ docker container ps -a | grep hello | awk '{print $1}' | xargs docker container rm
+```
+
+删除所有容器，没有任何标准
+
+```shell
+$ docker container rm $(docker container ps -aq)
 ```
 
 
@@ -647,6 +699,8 @@ $ docker container stop 77e422fa3978
 
   ```shell
 $ docker run -d -p 4000:80 myhello
+# docker container run -d -p 4000:80 myhello
+# docker container run -d -P --name myhello_container myhello
 faf0d327cb8ba130fb69cd7719c8d2732ebe6f3f223e93afa68bc7b9e612b429
   ```
 
@@ -655,6 +709,59 @@ faf0d327cb8ba130fb69cd7719c8d2732ebe6f3f223e93afa68bc7b9e612b429
   ```shell
 $ docker container stop faf0d327cb8ba130fb69cd7719c8d2732ebe6f3f223e93afa68bc7b9e612b429
   ```
+
+
+
+### 交互式运行容器
+
+---
+
+以交互模式运行apache容器。
+
+```shell
+$ docker container run -it apache
+```
+
+
+
+### 后台独立容器模式
+
+---
+
+以分离模式重新启动容器：
+
+```shell
+$ docker container run -d apache
+254418caddb1e260e8489f872f51af4422bc4801d17746967d9777f565714600
+```
+
+
+
+### 查看容器日志
+
+---
+
+使用命令行：`docker container logs -f <ID | name> `可以查看容器运行的日志模式，适合在新窗口或者后天模式情况下运行。
+
+```shell
+$ docker container logs -f sad_ptolemy
+ * Running on http://0.0.0.0:80/ (Press CTRL+C to quit)
+
+```
+
+
+
+### 统计监控
+
+---
+
+可以查看容器的资源(CPU、内存、网络、硬盘、进程ID)占用情况
+
+```shell
+$ docker container stats sad_ptolemy
+$ docker stats
+$ docker container stats --format "{{.Container}}: {{.CPUPerc}}"
+```
 
 
 
@@ -872,6 +979,18 @@ Creating service run_hello_web
 
 
 
+### 扩展服务
+
+---
+
+将服务的副本扩展成指定数量
+
+```shell
+$ docker service scale run_hello_web=3
+```
+
+
+
 ### 查看服务
 
 ---
@@ -885,6 +1004,39 @@ ID                  NAME                MODE                REPLICAS            
 ```
 
 默认服务名称会在之前部署在堆栈`docker stack deploy -c docker-compose.yml run_hello`的时候的名称后面加上`web`，这里的服务名称应该是 `run_hello_web`。还列出了服务`ID`以及副本数，映射的名称和已公开端口。
+
+
+
+### 查看服务详细
+
+---
+
+可以使用获得有关该服务的详细信息`docker service inspect run_hello_web`
+
+```shell
+$ docker service inspect run_hello_web
+[
+    {
+        "ID": "36ij4xn4o4eoyde25zw86a9ty",
+        "Version": {
+            "Index": 14
+        },
+........
+```
+
+
+
+### 查看服务日志
+
+---
+
+可以使用`docker service logs -f run_hello_web`以下方式查看服务日志
+
+```shell
+$ docker service logs -f deploy_test_wordpress
+deploy_test_wordpress.2.9y4wqd0sjm0k@default    | WordPress not found in /var/www/html - copying now...
+deploy_test_wordpress.1.w38hwe65px6q@default    | WordPress not found in /var/www/html - copying now...
+```
 
 
 
@@ -1293,6 +1445,26 @@ $ docker-machine ls
 
 ## 清理和重启集群应用
 
+### 暂停应用程序
+
+---
+
+如果只想暂时停止应用程序，同时**保留应用程序一部分创建的任何网络**，建议的方法是将服务**副本数量设置为0**。
+
+```shell
+$ docker service ls
+$ docker service scale webapp_db=0 webapp_web=0
+```
+
+它显示输出：
+
+```
+webapp_db scaled to 0
+webapp_web scaled to 0
+Since --detach=false was not specified, tasks will be scaled in the background.
+In a future release, --detach=false will become the default.
+```
+
 ### 堆栈和集群
 
 ---
@@ -1395,9 +1567,9 @@ docker-machine rm $(docker-machine ls -q) 				# 删除所有运行的虚拟机�
 
 
 
-# docker 应用栈
+# docker 服务编排
 
-分布式应用程序层次结构的顶部：**应用堆栈（应用编排栈）**。堆栈是一组相互关联的服务，它们可以共享依赖关系，并且可以进行协调和伸缩。单个堆栈能够定义和协调整个应用程序的功能（尽管非常复杂的应用程序可能需要使用多个堆栈）。
+分布式应用程序层次结构的顶部：**应用堆栈（服务编排）**。堆栈是一组相互关联的服务，它们可以共享依赖关系，并且可以进行协调和伸缩。单个堆栈能够定义和协调整个应用程序的功能（尽管非常复杂的应用程序可能需要使用多个堆栈）。
 
 好消息是，从第3部分开始，在创建`Compose`文件并使用时，从技术上讲，已经在使用堆栈`docker stack deploy`。但是，这是在单个主机上运行的单个服务堆栈，通常不会发生在生产环境中。在这里，你可以把你学到的东西，使多个服务相互关联，并在多台机器上运行它们。
 
