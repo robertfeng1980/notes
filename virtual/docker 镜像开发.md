@@ -100,12 +100,15 @@ Docker可以通过从`Dockerfile`文本文件中读取指令自动构建镜像 �
 
 ## 准则和建议
 
+### 容器保持小巧轻盈
 
-### 容器应该是敏捷的
+---
 
 由`dockerfile`定义的镜像生成的容器应尽可能短暂。通过“短暂的”，我们的意思是它可以被停止并被销毁，并且一个新的建立和配置到位，并具有绝对最小的设置和配置。您可能需要查看**12因子**应用程序方法的[流程](https://12factor.net/processes)部分，以了解以这种无状态方式运行容器的动机。
 
 ### 构建上下文
+
+---
 
 当发出一个`docker build`命令时，当前的工作目录被称为*构建上下文*。默认情况下，假定`Dockerfile`位于此处，但可以使用文件选项（`-f`）指定不同的位置。无论`Dockerfile`文件实际在哪里，当前目录中的所有文件和目录的递归内容都将作为构建上下文发送到Docker守护进程。
 
@@ -135,11 +138,15 @@ Docker可以通过从`Dockerfile`文本文件中读取指令自动构建镜像 �
 Sending build context to Docker daemon  2.607kB
 ```
 
-### 使用.dockerignore文件
+### 使用`.dockerignore`文件
+
+---
 
 要**排除与构建无关的文件，而不重构源代码库**，请使用`.dockerignore`文件。该文件支持与`.gitignore`文件类似的排除模式。创建一个有关的信息，请参阅[.dockerignore文件](https://docs.docker.com/engine/reference/builder/#dockerignore-file)。除了使用`.dockerignore`文件外，请查看以下关于[多阶段构建的信息](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#use-multi-stage-builds)。
 
 ### 使用多阶段构建
+
+---
 
 如果使用Docker 17.05或更高版本，则可以使用 [多阶段构建](https://docs.docker.com/develop/develop-images/multistage-build/)来大幅**缩减最终镜像的大小**，而无需在构建过程中跳过环节以减少中间层数量或删除中间文件。
 
@@ -182,9 +189,13 @@ CMD ["--help"]
 
 ### 避免安装不必要的软件包
 
+---
+
 为了减少复杂性、依赖性、文件大小和构建时间，应该避免安装额外的或不必要的软件包，只是因为它们可能“很好”。例如，不需要在数据库镜像中包含文本编辑器或第三方编辑工具。
 
-### 每个容器应该只有一个问题
+### 每个容器一个进程
+
+---
 
 应用程序**解耦为多个容器使得横向扩展和重用容器**变得更容易。例如，Web应用程序编排服务可能由三个独立的容器组成，每个容器都有其独立的镜像，以分离的方式管理Web应用程序、数据库和内存缓存。
 
@@ -192,14 +203,18 @@ CMD ["--help"]
 
 **如果容器相互依赖，则可以使用[Docker容器网络](https://docs.docker.com/engine/userguide/networking/) 来确保这些容器可以通信**。
 
-### 最小化镜像图层数
+### 镜像图层最小化
+
+---
 
 在Docker 17.05之前，甚至更多的是在Docker 1.10之前，重要的是**尽量减少镜像中的图层数量**。以下改进缓解了这种需求：
 
 - 在docker 1.10和更高，只有`RUN`，`COPY`和`ADD`指令创建图层。其他动作指令会创建临时中间镜像，不再直接增加构建的大小。
 - Docker 17.05和更高版本添加了对[多阶段构建的](https://docs.docker.com/develop/develop-images/multistage-build/)支持 ，这允许只将需要的**构件复制到最终镜像中**。允许在**中间构建阶段包含工具和调试信息，而不增加最终图像的大小**。
 
-### 对多行参数进行排序
+### 多行参数进行排序
+
+---
 
 通过**按字母数字排序多行参数**来简化后面的更改。这有助于**避免软件包重复**并使列表更容易更新。这也使得PR更**容易阅读**和评论。在**反斜杠（`\`）之前添加一个空格**也有帮助。
 
@@ -216,6 +231,8 @@ RUN apt-get update && apt-get install -y \
 
 ### 建立缓存
 
+---
+
 在构建镜像的过程中，`Dockerfile`按照指定顺序执行每个指令。在检查每条指令时，**Docker会在其缓存中查找可重用的现有镜像**，而不是创建新的（重复）镜像。如果根本不想使用缓存，则可以使用命令中的`--no-cache=true`选项进行`docker build`。
 
 但是，如果确实让Docker使用了它的缓存，那么了解它何时可以并且无法找到匹配的镜像是非常重要的。Docker遵循的基本规则如下：
@@ -226,6 +243,8 @@ RUN apt-get update && apt-get install -y \
 - 除了`ADD`和`COPY`命令之外，缓存检查**不会查看容器中**的文件以确定缓存匹配。例如，在处理`RUN apt-get -y update`命令时，**不检查容器中更新的文件以确定是否存在缓存命中**。在这种情况下，只是**命令字符串本身**用于查找匹配。
 
 一旦缓存失效，所有后续的`Dockerfile`命令将**生成新图像**，并且不使用缓存。
+
+
 
 ## 用法
 
@@ -304,14 +323,17 @@ Successfully built 7ea8aef582cc
 
 
 
-
 ### FROM
+
+---
 
 [用于FROM指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#from)
 
 只要有可能，请使用当前的官方存储库作为基础镜像。我们推荐使用[Alpine图像](https://hub.docker.com/_/alpine/) 因为它的控制非常严格，并且保持最低限度（目前低于`5 MB`），同时仍然是完整的发行版。
 
 ### LABEL
+
+---
 
 [了解对象标签](https://docs.docker.com/config/labels-custom-metadata/)
 
@@ -348,6 +370,8 @@ LABEL vendor=ACME\ Incorporated \
 有关可接受的标签键和值的信息，请参阅[了解对象标签](https://docs.docker.com/config/labels-custom-metadata/)。有关查询标签的信息，请参阅[管理对象上的标签中](https://docs.docker.com/config/labels-custom-metadata/#managing-labels-on-objects)与过滤相关的项目。另请参阅 Dockerfile参考中的[LABEL](https://docs.docker.com/engine/reference/builder/#label)。
 
 ### RUN
+
+---
 
 [运行指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#run)
 
@@ -450,6 +474,8 @@ RUN ["/bin/bash", "-c", "set -o pipefail && wget -O - https://some.site | wc -l 
 
 ### CMD
 
+---
+
 [CMD指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#cmd)
 
 该`CMD`指令应该用于运行镜像像中包含的软件以及任何参数。`CMD`应该几乎总是以形式使用`CMD [“executable”, “param1”, “param2”…]`。因此，如果镜像是用于服务的，比如`Apache`和`Rails`，那么你可以运行类似的东西 `CMD ["apache2","-DFOREGROUND"]`。这种形式的指令被推荐用于任何基于服务的图像。
@@ -458,6 +484,8 @@ RUN ["/bin/bash", "-c", "set -o pipefail && wget -O - https://some.site | wc -l 
 
 ### EXPOSE
 
+---
+
 [EXPOSE指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#expose)
 
 该`EXPOSE`指令指示容器侦听连接的端口。因此，应该为应用程序使用通用的传统端口。例如，包含`Apache Web`服务器的镜像将使用`EXPOSE 80`，而包含`MongoDB`的图像将使用`EXPOSE 27017`等等。
@@ -465,6 +493,8 @@ RUN ["/bin/bash", "-c", "set -o pipefail && wget -O - https://some.site | wc -l 
 对于外部访问，用户可以执行`docker run`一个标志，指示如何将指定端口映射到他们选择的端口。对于容器链接，Docker为从收件人容器返回到源路径（即，`MYSQL_PORT_3306_TCP`）提供环境变量。
 
 ### ENV
+
+---
 
 [Dock指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#env)
 
@@ -513,6 +543,8 @@ $ docker run --rm -it test sh echo $ADMIN_USER
 
 ### ADD & COPY
 
+---
+
 - [Dock指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#add)
 - [适用于COPY指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#copy)
 
@@ -550,6 +582,8 @@ RUN mkdir -p /usr/src/things \
 对于其他不需要`ADD`自动解压功能的项目（文件，目录），应该始终使用`COPY`。
 
 ### ENTRYPOINT
+
+---
 
 [用于ENTRYPOINT指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#entrypoint)
 
@@ -629,11 +663,15 @@ $ docker run --rm -it postgres bash
 
 ### VOLUME
 
+---
+
 [VOLUME指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#volume)
 
 `VOLUME`指令应该用于公开任何数据库存储区域，配置存储或由docker容器创建的文件/文件夹。强烈建议将镜像的任何可变和用户可维修部分的使用`VOLUME`配置。
 
 ### USER
+
+---
 
 [用户指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#user)
 
@@ -649,11 +687,15 @@ $ docker run --rm -it postgres bash
 
 ### WORKDIR
 
+---
+
 [用于WORKDIR指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#workdir)
 
 为了清晰和可靠，应该**始终使用绝对路径 `WORKDIR`**。此外应该使用`WORKDIR`而不是`RUN cd … && do-something`繁琐的命令，这是很难阅读和维护。
 
 ### ONBUILD
+
+---
 
 [ONBUILD指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#onbuild)
 
@@ -667,7 +709,7 @@ Docker构建在子`Dockerfile`文件中的任何命令之前执行`ONBUILD`命�
 
 `ADD`或`COPY`时要小心`ONBUILD`。如果新构建的上下文缺少正在添加的资源，那么“构建”镜像就会发生灾难性的失败。按照上面的建议添加单独的标签，通过允许`Dockerfile`做出选择来帮助缓解这种情况。
 
-# 创建一个基础图像
+# 创建一个基础镜像
 
 大多数`Dockerfiles`从父镜像开始。如果需要完全控制图像的内容，则可能需要创建基础镜像。以下是区别：
 
@@ -703,7 +745,7 @@ DISTRIB_DESCRIPTION="Ubuntu 16.04 LTS"
 - CentOS / Scientific Linux CERN (SLC) [on Debian/Ubuntu](https://github.com/moby/moby/blob/master/contrib/mkimage/rinse) or [on CentOS/RHEL/SLC/etc.](https://github.com/moby/moby/blob/master/contrib/mkimage-yum.sh)
 - [Debian / Ubuntu](https://github.com/moby/moby/blob/master/contrib/mkimage/debootstrap)
 
-## 使用scratch创建一个简单的父图像
+## 使用scratch创建一个简单的父镜像
 
 
 可以使用Docker的保留最小镜像`scratch`作为构建容器的起点。使用`scratch`镜像构建过程中，希望下一个命令`Dockerfile`成为图像中的第一个文件系统层。
