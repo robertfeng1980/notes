@@ -8,8 +8,8 @@
 
 介绍以下内容的应用：
 
-- 学习[从Dockerfile构建图像](https://docs.docker.com/get-started/part2/)
-- 使用[多阶段构建](https://docs.docker.com/engine/userguide/eng-image/multistage-build/)来保持图像精简
+- 学习[从Dockerfile构建镜像](https://docs.docker.com/get-started/part2/)
+- 使用[多阶段构建](https://docs.docker.com/engine/userguide/eng-image/multistage-build/)来保持镜像精简
 - 使用[卷](https://docs.docker.com/engine/admin/volumes/volumes/)管理应用程序数据并[绑定挂载](https://docs.docker.com/engine/admin/volumes/bind-mounts/)
 - [应用扩展](https://docs.docker.com/get-started/part3/)为群集服务
 - 使用compose文件[定义应用程序堆栈](https://docs.docker.com/get-started/part5/)
@@ -90,7 +90,7 @@
 
 # 编写`Dockerfile`
 
-Docker可以通过从`Dockerfile`文本文件中读取指令自动构建镜像 ，以便构建给定镜像。`Dockerfile`是一个文本文档，其中包含用户可以在命令行上调用以组装图像的所有命令。`Dockerfile`遵循特定的格式并使用特定的指令集。可以在[Dockerfile Reference](https://docs.docker.com/engine/reference/builder/)页面上了解基础知识 。
+Docker可以通过从`Dockerfile`文本文件中读取指令自动构建镜像 ，以便构建给定镜像。`Dockerfile`是一个文本文档，其中包含用户可以在命令行上调用以组装镜像的所有命令。`Dockerfile`遵循特定的格式并使用特定的指令集。可以在[Dockerfile Reference](https://docs.docker.com/engine/reference/builder/)页面上了解基础知识 。
 
 本文档介绍了由`Docker Inc.`和Docker社区推荐的用于**构建高效镜像的最佳实践和方法**。要查看许多实践和建议，请查看Dockerfile for [buildpack-deps](https://github.com/docker-library/buildpack-deps/blob/master/jessie/Dockerfile)。
 
@@ -114,7 +114,7 @@ Docker可以通过从`Dockerfile`文本文件中读取指令自动构建镜像 �
 
 > **构建上下文示例**
 >
-> 为构建上下文创建一个目录，并`cd`进入文件目录。写入一个名为“hello”文本文件，内容是`hello`，并创建一个Dockerfile运行`cat`查看文件内容。从构建上下文（`.`）中构建图像：
+> 为构建上下文创建一个目录，并`cd`进入文件目录。写入一个名为“hello”文本文件，内容是`hello`，并创建一个Dockerfile运行`cat`查看文件内容。从构建上下文（`.`）中构建镜像：
 >
 > ```shell
 > $ mkdir sample && cd sample
@@ -124,7 +124,7 @@ Docker可以通过从`Dockerfile`文本文件中读取指令自动构建镜像 �
 > $ docker build -t hello_app:v1 .
 > ```
 >
-> 现在移动`Dockerfile`和`hello`到不同的目录，并建立了图像的第二个版本（不依赖于缓存中的最后一个版本）。使用`-f`指向Dockerfile并指定构建上下文的目录：
+> 现在移动`Dockerfile`和`hello`到不同的目录，并建立了镜像的第二个版本（不依赖于缓存中的最后一个版本）。使用`-f`指向Dockerfile并指定构建上下文的目录：
 >
 > ```shell
 > $ mkdir -p dockerfiles codes
@@ -132,7 +132,7 @@ Docker可以通过从`Dockerfile`文本文件中读取指令自动构建镜像 �
 > $ docker build --no-cache -t hello_app:v2 -f dockerfiles/Dockerfile codes
 > ```
 
-包含不需要构建图像的文件会**导致更大的构建上下文和更大的图像大小**。这可以**增加构建时间，拉取和推送图像的时间以及容器的运行时间大小**。要查看构建环境有多大，请在构建系统时查找这样的消息`Dockerfile`：
+包含不需要构建镜像的文件会**导致更大的构建上下文和更大的镜像大小**。这可以**增加构建时间，拉取和推送镜像的时间以及容器的运行时间大小**。要查看构建环境有多大，请在构建系统时查找这样的消息`Dockerfile`：
 
 ```shell
 Sending build context to Docker daemon  2.607kB
@@ -150,7 +150,7 @@ Sending build context to Docker daemon  2.607kB
 
 如果使用Docker 17.05或更高版本，则可以使用 [多阶段构建](https://docs.docker.com/develop/develop-images/multistage-build/)来大幅**缩减最终镜像的大小**，而无需在构建过程中跳过环节以减少中间层数量或删除中间文件。
 
-图像仅由最后阶段构建，**大多数时间都可以同时构建缓存和图像层**。
+镜像仅由最后阶段构建，**大多数时间都可以同时构建缓存和镜像层**。
 
 构建阶段可能包含多个图层，从较低频率更改为较常更改频率，例如：
 
@@ -180,7 +180,7 @@ RUN dep ensure -vendor-only
 COPY . /go/src/project/
 RUN go build -o /bin/project
 
-# 最终这导致了单层图像
+# 最终这导致了单层镜像
 FROM scratch
 COPY --from=build /bin/project /bin/project
 ENTRYPOINT ["/bin/project"]
@@ -210,7 +210,7 @@ CMD ["--help"]
 在Docker 17.05之前，甚至更多的是在Docker 1.10之前，重要的是**尽量减少镜像中的图层数量**。以下改进缓解了这种需求：
 
 - 在docker 1.10和更高，只有`RUN`，`COPY`和`ADD`指令创建图层。其他动作指令会创建临时中间镜像，不再直接增加构建的大小。
-- Docker 17.05和更高版本添加了对[多阶段构建的](https://docs.docker.com/develop/develop-images/multistage-build/)支持 ，这允许只将需要的**构件复制到最终镜像中**。允许在**中间构建阶段包含工具和调试信息，而不增加最终图像的大小**。
+- Docker 17.05和更高版本添加了对[多阶段构建的](https://docs.docker.com/develop/develop-images/multistage-build/)支持 ，这允许只将需要的**构件复制到最终镜像中**。允许在**中间构建阶段包含工具和调试信息，而不增加最终镜像的大小**。
 
 ### 多行参数进行排序
 
@@ -242,7 +242,7 @@ RUN apt-get update && apt-get install -y \
 - 对于`ADD`和`COPY`，将检查镜像中文件的内容，并为每个文件计算校验`checksum `。这些校验`checksum `不考虑文件的最后修改时间和最后访问时间。在缓存查找过程中，**将校验`checksum `与现有镜像中的校验`checksum `进行比较。如果文件中有任何内容已更改，如内容和元数据，则缓存将失效**。
 - 除了`ADD`和`COPY`命令之外，缓存检查**不会查看容器中**的文件以确定缓存匹配。例如，在处理`RUN apt-get -y update`命令时，**不检查容器中更新的文件以确定是否存在缓存命中**。在这种情况下，只是**命令字符串本身**用于查找匹配。
 
-一旦缓存失效，所有后续的`Dockerfile`命令将**生成新图像**，并且不使用缓存。
+一旦缓存失效，所有后续的`Dockerfile`命令将**生成新镜像**，并且不使用缓存。
 
 
 
@@ -292,13 +292,13 @@ Sending build context to Docker daemon 2.048 kB
 Error response from daemon: Unknown instruction: RUNCMD
 ```
 
-Docker守护进程会`Dockerfile`逐个运行指令，在必要时将每条指令的结果提交给新映像，最终输出新映像的标识。Docker守护进程将自动清理您发送的上下文。
+Docker守护进程会逐个运行`Dockerfile`指令，在必要时将每条指令的结果提交给新镜像，最终输出新镜像的标识。**Docker守护进程将自动清理发送的上下文**。
 
-请注意，每条指令都是独立运行的，并会创建一个新图像 - 所以`RUN cd /tmp`不会对下一条指令产生任何影响。
+请注意，**每条指令都是独立运行的，并会创建一个新镜像， 所以`RUN cd /tmp`不会对下一条指令产生任何影响**。
 
-只要有可能，Docker将重新使用中间映像（缓存），以`docker build`显着加速该过程。这由`Using cache`控制台输出中的消息指示。（有关更多信息，请参阅最佳做法指南中的 “ [构建缓存”部分](https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#build-cache)`Dockerfile`）：
+只要有可能Docker将重新使用中间镜像（缓存），以`docker build`显著加速该过程。这由`Using cache`控制台输出中的消息指示。（有关更多信息，请参阅最佳做法指南中的 “ [构建缓存”部分](https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#build-cache)`Dockerfile`）：
 
-```
+```shell
 $ docker build -t svendowideit/ambassador .
 Sending build context to Docker daemon 15.36 kB
 Step 1/4 : FROM alpine:3.2
@@ -315,9 +315,297 @@ Step 4/4 : CMD env | grep _TCP= | (sed 's/.*_PORT_\([0-9]*\)_TCP=tcp:\/\/\(.*\):
 Successfully built 7ea8aef582cc
 ```
 
-构建缓存仅用于具有本地父链的图像。这意味着这些图像是由以前的版本创建的，或者是整个图像链加载的`docker load`。如果您希望使用特定映像的构建缓存，则可以使用`--cache-from`选项指定它。指定的图像`--cache-from`不需要有父链，可以从其他注册表中提取。
+构建缓存仅用于具有本地父链的镜像。这意味着这些镜像是由以前的版本创建的，或者是整个镜像链`docker load`加载的。如果您希望使用特定镜像的构建缓存，则可以使用`--cache-from`选项指定它。指定的镜像`--cache-from`不需要有父链，可以从其他注册表中提取。
 
 当你完成你的构建时，你已经准备好考虑[*将存储库推送到它的注册表*](https://docs.docker.com/engine/tutorials/dockerrepos/#/contributing-to-docker-hub)。
+
+
+
+## 格式
+
+以下是`Dockerfile`格式：
+
+```dockerfile
+# Comment
+INSTRUCTION arguments
+```
+
+该指令**不区分大小写**。然而，约定是为了更容易将它们与其他文本区分开来。
+
+Docker按顺序运行 `Dockerfile`指令，`Dockerfile` **必须用`FROM`指令启动**。`FROM`指令指定正在构建的[*基本镜像*](https://docs.docker.com/engine/reference/glossary/#base-image)。`FROM`只可以在前面有一个或多个`ARG`指令，这些指令声明`Dockerfile`中来`FROM` 的参数
+
+docker以`＃`开头的行作为注释，除非该行是一个有效的[解析器指令](https://docs.docker.com/engine/reference/builder/#parser-directives)。`＃`标记被视为参数，这允许像这样的语句：
+
+```shell
+# Comment
+RUN echo 'we are running some # of cool things'
+```
+
+注释中不支持换行符。
+
+
+
+## 解析器指令
+
+解析器指令是可选的，并影响 `Dockerfile`中后续行的处理方式。**解析器指令不会向构建添加图层**，并且不会显示为构建步骤。解析器指令在表单中被写为特殊类型的注释`# directive=value`。单个指令只能使用一次。
+
+**一旦注释、空行或构建器指令已被处理**，Docker不再查找解析器指令。相反，它将格式化为分析器指令的任何内容视为注释，并且不会尝试验证它是否可能是解析器指令。因此，所有解析器指令都必须位于最顶端`Dockerfile`。
+
+解析器指令不区分大小写。但是，**约定是小写**。约定还包括在任何解析器指令之后的空白行。解析器指令不支持行连续字符。
+
+由于这些规则，以下示例都是无效的：
+
+由于行延续而无效：
+
+```
+# direc \
+tive=value
+```
+
+由于出现两次而无效：
+
+```
+# directive=value1
+# directive=value2
+
+FROM ImageName
+```
+
+由于出现在建造者指令之后，作为注释对待：
+
+```
+FROM ImageName
+# directive=value
+```
+
+由于在不是解析器指令的注释之后出现，所以作为注释处理：
+
+```
+# About my dockerfile
+# directive=value
+FROM ImageName
+```
+
+未知指令由于未被识别而被视为注释。另外，由于在不是解析器指令的注释之后出现，已知指令被视为注释。
+
+```
+# unknowndirective=value
+# knowndirective=value
+```
+
+解析器指令中允许使用非分行空白。因此，以下几行都是一致对待的：
+
+```
+#directive=value
+# directive =value
+#	directive= value
+# directive = value
+#	  dIrEcTiVe=value
+```
+
+以下解析器指令受支持：
+
+- `escape`
+
+```
+# escape=\ (backslash)
+```
+
+要么
+
+```
+# escape=` (backtick)
+```
+
+该`escape`指令设置**用于转义字符**的字符 `Dockerfile`。如果未指定，则默认转义字符为`\`。转义字符既用于转义一行中的字符，又用于转义换行符。这允许`Dockerfile`指令跨越多行。请注意，无论`escape`解析器指令是否包含在`Dockerfile`中，*转义都不在RUN命令中执行，除了在行的末尾。*
+
+将转义字符设置为在 `Windows`特别有用，其中`\`是目录路径分隔符。与[Windows PowerShell](https://technet.microsoft.com/en-us/library/hh847755.aspx)一致。
+
+考虑下面的例子，它将在Windows上以非明显的方式失败。在第二行结尾的第二个`\`将被解释为换行符的转义，而不是从第一个`\`的转义目标。同样，`\`假设它实际上是作为一条指令处理的，那么在第三行的末尾会导致它被视为连续行。这个dockerfile的结果是第二行和第三行被认为是一条指令：
+
+```dockerfile
+FROM microsoft/nanoserver
+COPY testfile.txt c:\\
+RUN dir c:\
+```
+
+结果是：
+
+```powershell
+PS C:\John> docker build -t cmd .
+Sending build context to Docker daemon 3.072 kB
+Step 1/2 : FROM microsoft/nanoserver
+ ---> 22738ff49c6d
+Step 2/2 : COPY testfile.txt c:\RUN dir c:
+GetFileAttributesEx c:RUN: The system cannot find the file specified.
+PS C:\John>
+```
+
+上述的一个解决方案将是`/`用作`COPY` 指令和目标`dir`。然而，这种语法充其量是令人困惑的，因为路径并不是自然的`Windows`，并且最坏的情况是容易出错，因为并非所有`Windows`支持的命令都 `/`作为路径分隔符。
+
+通过添加`escape`解析器指令，可以`Dockerfile`按照预期的方式成功执行以下文件路径的自然平台语义`Windows`：
+
+```dockerfile
+# escape=`
+
+FROM microsoft/nanoserver
+COPY testfile.txt c:\
+RUN dir c:\
+```
+
+结果是：
+
+```powershell
+PS C:\John> docker build -t succeeds --no-cache=true .
+Sending build context to Docker daemon 3.072 kB
+Step 1/3 : FROM microsoft/nanoserver
+ ---> 22738ff49c6d
+Step 2/3 : COPY testfile.txt c:\
+ ---> 96655de338de
+Removing intermediate container 4db9acbb1682
+Step 3/3 : RUN dir c:\
+ ---> Running in a2c157f842f5
+ Volume in drive C has no label.
+ Volume Serial Number is 7E6D-E0F7
+
+ Directory of c:\
+
+10/05/2016  05:04 PM             1,894 License.txt
+10/05/2016  02:22 PM    <DIR>          Program Files
+10/05/2016  02:14 PM    <DIR>          Program Files (x86)
+10/28/2016  11:18 AM                62 testfile.txt
+10/28/2016  11:20 AM    <DIR>          Users
+10/28/2016  11:20 AM    <DIR>          Windows
+           2 File(s)          1,956 bytes
+           4 Dir(s)  21,259,096,064 bytes free
+ ---> 01c7f3bef04f
+Removing intermediate container a2c157f842f5
+Successfully built 01c7f3bef04f
+PS C:\John>
+```
+
+
+
+## 环境替换
+
+环境变量（与声明[的`ENV`声明](https://docs.docker.com/engine/reference/builder/#env)），也可以在特定指令作为变量用来被解释 `Dockerfile`。转义也被处理为从字面上将类似于变量的语法包括到语句中。
+
+环境变量在`Dockerfile`中用 `$variable_name`或`${variable_name}`表示。它们被等同处理，大括号语法通常用于解决变量名称中没有空格的问题，如`${foo}_bar`。
+
+该`${variable_name}`语法还支持一些标准`bash` 修饰符，如下所示：
+
+- `${variable:-word}`表明如果`variable`设置，则结果将是该值。如果`variable`没有设置，那么`word`将会是结果。
+- `${variable:+word}`表示如果`variable`设置则返回`word`结果，否则结果为空字符串。
+
+在任何情况下，`word`都可以是任何字符串，包括其他环境变量。
+
+通过`\`在变量之前添加一个变量可以进行转义：`\$foo`或者`\${foo}`，例如分别转换为文字`$foo`和`${foo}`文字。
+
+示例（在之后显示解析的表示`#`）：
+
+```dockerfile
+FROM busybox
+ENV foo /bar
+WORKDIR ${foo}   # WORKDIR /bar
+ADD . $foo       # ADD . /bar
+COPY \$foo /quux # COPY $foo /quux
+```
+
+以下列出的指令支持环境变量`Dockerfile`：
+
+- `ADD`
+- `COPY`
+- `ENV`
+- `EXPOSE`
+- `FROM`
+- `LABEL`
+- `STOPSIGNAL`
+- `USER`
+- `VOLUME`
+- `WORKDIR`
+
+以及：
+
+- `ONBUILD` （当与上述支持的指令之一结合使用时）
+
+> **注意**：在1.4之前，`ONBUILD`说明**不**支持环境变量，即使与上面列出的任何指令结合使用。
+
+整个指令中的环境变量替换将对每个变量使用相同的值。换句话说，在这个例子中：
+
+```dockerfile
+ENV abc=hello
+ENV abc=bye def=$abc
+ENV ghi=$abc
+```
+
+将导致`def`的值为`hello`，而不是`bye`。然而`ghi`将具有`bye`值，因为它不是将`abc`设置为`bye`的同一指令的一部分。
+
+## .dockerignore文件
+
+在`docker CLI`将上下文发送到docker守护程序之前，它会查找`.dockerignore`上下文根目录中指定的文件。如果此文件存在，CLI会修改上下文以排除与其中的模式匹配的文件和目录。这有助于避免不必要地将大型或敏感文件和目录发送到守护进程，并可能使用`ADD`或将其添加到映像`COPY`。
+
+CLI将`.dockerignore`文件解释为与`Unix shell`文件大小相似的以换行符分隔的模式列表。为了匹配的目的，上下文的根被认为是工作目录和根目录。例如，这些模式 `/foo/bar`和`foo/bar`两者都不包含位于位于的git存储库`bar` 的`foo`子目录`PATH`或根目录中指定的文件或目录`URL`。两者都没有排除其他任何东西。
+
+如果`.dockerignore`文件中的一行以第一`#`列开始，那么该行将被视为注释，并在被CLI解释之前被忽略。
+
+这是一个示例`.dockerignore`文件：
+
+```
+# comment
+*/temp*
+*/*/temp*
+temp?
+```
+
+该文件导致以下构建行为：
+
+| 规则        | 行为                                                         |
+| ----------- | ------------------------------------------------------------ |
+| `# comment` | 忽略。                                                       |
+| `*/temp*`   | 排除名称以`temp`根目录的任何直接子目录开头的文件和目录。例如，普通文件`/somedir/temporary.txt`和目录一样被排除`/somedir/temp`。 |
+| `*/*/temp*` | `temp`从根目录下两个级别的任何子目录开始排除文件和目录。例如，`/somedir/subdir/temporary.txt`被排除在外。 |
+| `temp?`     | 排除名称为一个字符扩展名的根目录中的文件和目录`temp`。例如，`/tempa`与`/tempb`被排除在外。 |
+
+匹配是使用Go的 [filepath.Match](http://golang.org/pkg/path/filepath#Match)规则完成的。预处理步骤删除前导和尾随空白，`.`并`..`使用Go的[filepath.Clean](http://golang.org/pkg/path/filepath/#Clean)消除和元素 。预处理后空白的行将被忽略。
+
+除了Go的filepath.Match规则，Docker还支持`**`匹配任意数量目录（包括零）的特殊通配符字符串。例如，`**/*.go`将排除`.go` 以所有目录中包含的文件结尾的所有文件，包括构建上下文的根目录。
+
+以`!`（感叹号）开头的行可用于排除例外情况。以下是`.dockerignore`使用此机制的示例文件：
+
+```
+    *.md
+    !README.md
+```
+
+*除* `README.md`上下文*外*，所有文件均被排除在外，有点类似白名单的功能。
+
+`!`例外规则的放置会影响行为：`.dockerignore`匹配特定文件的最后一行确定是否包含或排除。考虑下面的例子：
+
+```
+    *.md
+    !README*.md
+    README-secret.md
+```
+
+上下文中除了包含README文件外，不包括任何降价文件 `README-secret.md`。
+
+现在考虑这个例子：
+
+```
+    *.md
+    README-secret.md
+    !README*.md
+```
+
+所有的README文件都包含在内。中间行不起作用，因为`!README*.md`与`README-secret.md`最终匹配成功。
+
+你甚至可以使用该`.dockerignore`文件来排除`Dockerfile` 和`.dockerignore`文件。这些文件仍然被发送到守护进程，因为它需要它们来完成它的工作。但是`ADD`和`COPY`指令不会将它们复制到镜像。
+
+最后，可能需要指定要在上下文中包含哪些文件，而不是要排除的文件。要实现这一点，请指定`*`第一个模式，然后指定一个或多个`!`异常模式。
+
+**注意**：由于历史原因，该模式`.`被忽略。
+
+
 
 ## Dockerfile 指令
 
@@ -329,10 +617,51 @@ Successfully built 7ea8aef582cc
 
 [用于FROM指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#from)
 
-只要有可能，请使用当前的官方存储库作为基础镜像。我们推荐使用[Alpine图像](https://hub.docker.com/_/alpine/) 因为它的控制非常严格，并且保持最低限度（目前低于`5 MB`），同时仍然是完整的发行版。
+只要有可能，请使用当前的官方存储库作为基础镜像。我们推荐使用[Alpine镜像](https://hub.docker.com/_/alpine/) 因为它的控制非常严格，并且保持最低限度（目前低于`5 MB`），同时仍然是完整的发行版。
+
+```dockerfile
+FROM <image> [AS <name>]
+FROM <image>[:<tag>] [AS <name>]
+FROM <image>[@<digest>] [AS <name>]
+
+example：
+FROM redis as firstBuild
+FROM redis:v2.3 as firstBuild
+FROM redis@digest as firstBuild
+```
+
+`FROM`指令初始化一个新的编译阶段并为后续指令设置 [*基础镜像*](https://docs.docker.com/engine/reference/glossary/#base-image)。因此，有效的`Dockerfile`必须以`FROM`指令开始。镜像可以是任何有效的镜像—通过从[*公共存储库中*](https://docs.docker.com/engine/tutorials/dockerrepos/)**拉取镜像**特别容易。
+
+- `ARG`是在`Dockerfile`中可能在`FROM`之前的唯一指令。
+- `FROM`可以在单个`Dockerfile`内出现多次以创建多个镜像，或者使用一个构建阶段作为另一个构建阶段的依赖项。只需在每条新`FROM`指令之前记录提交输出的最后一个镜像ID 。每条`FROM`指令都会清除以前指令创建的任何状态。
+- 通过`FROM`指令添加`AS name`，可以给新的构建阶段赋予名称。该名称可以用于后续`FROM`和`COPY --from=<name|index>`指令中，以引用此阶段中构建的镜像。
+- 该`tag`或`digest`值是可选的。如果忽略其中的任何一个，则默认情况下，构建器会采用`latest`标签。如果找不到`tag`值，构建器将返回错误。
+
+
+
+#### ARG 和 FROM 如何交互
+
+`FROM`指令支持由第一个`FROM`之前发生的任何`ARG`指令声明的变量。
+
+```dockerfile
+ARG  CODE_VERSION=latest
+FROM base:${CODE_VERSION}
+CMD  /code/run-app
+
+FROM extras:${CODE_VERSION}
+CMD  /code/run-extras
+```
+
+在`FROM`之前声明的`ARG`在构建阶段，它不能在`FROM`之后的任何指令使用。要使用在第一个`FROM`之前声明的`ARG`的默认值，在构建阶段中使用没有值的`ARG`指令：
+
+```dockerfile
+ARG VERSION=latest
+FROM busybox:$VERSION
+ARG VERSION
+RUN echo $VERSION > image_version
+```
 
 ### LABEL
-
 ---
 
 [了解对象标签](https://docs.docker.com/config/labels-custom-metadata/)
@@ -342,32 +671,46 @@ Successfully built 7ea8aef582cc
 > **注意**：如果你的字符串包含空格，那么它必须被引号包围或者**空格必须被转义**。如果你的字符串包含内部引号字符（`"`），也可以将它们转义。
 
 ```dockerfile
-# Set one or more individual labels
-LABEL com.example.version="0.0.1-beta"
-LABEL vendor="ACME Incorporated"
-LABEL com.example.release-date="2015-02-12"
-LABEL com.example.version.is-production=""
+LABEL <key>=<value> <key>=<value> <key>=<value> ...
 ```
 
-一个`LABEL`以有多个标签。在`Docker 1.10`之前，建议将所有标签合并为一条`LABEL`指令，以防止创建额外的图层。现在这不再是必要的，但组合标签仍然受支持。
+该`LABEL`指令将元数据添加到图像。 `LABEL`是一个键值对。要在`LABEL`值中包含空格，请像在命令行解析中一样使用引号和反斜杠。几个用法示例：
 
 ```dockerfile
-# Set multiple labels on one line
-LABEL com.example.version="0.0.1-beta" com.example.release-date="2015-02-12"
+LABEL "com.example.vendor"="ACME Incorporated"
+LABEL com.example.label-with-value="foo"
+LABEL version="1.0"
+LABEL description="This text illustrates \
+that label-values can span multiple lines."
 ```
 
-以上内容也可以写成：
+可以在一行中指定多个标签。在Docker 1.10之前，这减少了最终映像的大小，但现在不再是这种情况。仍然可以选择使用以下两种方法之一在单条指令中指定多个标签：
 
 ```dockerfile
-# Set multiple labels at once, using line-continuation characters to break long lines
-LABEL vendor=ACME\ Incorporated \
-      com.example.is-beta= \
-      com.example.is-production="" \
-      com.example.version="0.0.1-beta" \
-      com.example.release-date="2015-02-12"
+LABEL multi.label1="value1" multi.label2="value2" other="value3"
 ```
 
-有关可接受的标签键和值的信息，请参阅[了解对象标签](https://docs.docker.com/config/labels-custom-metadata/)。有关查询标签的信息，请参阅[管理对象上的标签中](https://docs.docker.com/config/labels-custom-metadata/#managing-labels-on-objects)与过滤相关的项目。另请参阅 Dockerfile参考中的[LABEL](https://docs.docker.com/engine/reference/builder/#label)。
+```dockerfile
+LABEL multi.label1="value1" \
+      multi.label2="value2" \
+      other="value3"
+```
+
+包含在基本图像或父图像中的标签（行中的图像`FROM`）由图像继承。**如果标签已经存在但使用不同的值，则最近应用的值将覆盖任何先前设置的值**。
+
+要查看图像的标签，请使用该`docker inspect`命令。
+
+```
+"Labels": {
+    "com.example.vendor": "ACME Incorporated"
+    "com.example.label-with-value": "foo",
+    "version": "1.0",
+    "description": "This text illustrates that label-values can span multiple lines.",
+    "multi.label1": "value1",
+    "multi.label2": "value2",
+    "other": "value3"
+},
+```
 
 ### RUN
 
@@ -376,6 +719,56 @@ LABEL vendor=ACME\ Incorporated \
 [运行指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#run)
 
 为了使`Dockerfile`可读性更强，易于理解并且可维护，可以`RUN`在**多行用反斜杠分隔长分或复杂语句**
+
+RUN有两种形式：
+
+- `RUN <command>`（`shell`形式，该命令在shell中运行，默认情况下`/bin/sh -c`在Linux或`cmd /S /C`Windows 上运行）
+- `RUN ["executable", "param1", "param2"]`（`exec`形式）
+
+该`RUN`指令将在当前镜像顶部的新图层中执行任何命令并提交结果。由此产生的提交镜像将用于下一步`Dockerfile`。
+
+分层`RUN`指令和生成提交符合Docker的核心概念，其中提交很方便，容器可以从镜像历史中的任意点创建，就像源代码控制一样。
+
+在*EXEC*形式使得能够避免`shell`串改写（munging），并使用不包含指定的`shell`可执行文件的基本镜像`RUN`命令。
+
+可以使用`shell`命令更改`shell`模式的默认`shell`。
+
+在*shell*模式中，可以使用`\`（反斜杠）将单个`RUN`指令继续到下一行。例如，考虑这两行：
+
+```dockerfile
+RUN /bin/bash -c 'source $HOME/.bashrc; \
+echo $HOME'
+```
+
+它们一起等同于：
+
+```dockerfile
+RUN /bin/bash -c 'source $HOME/.bashrc; echo $HOME'
+```
+
+> **注意**：
+>
+> 要使用不同于`/bin/sh` 的版本的`shell`命令行 ，请使用传递需要的shell 命令行客户端给*exec*模式。<br/>例如，`RUN ["/bin/bash", "-c", "echo hello"]`
+>
+> *exec*模式被解析为JSON数组，这意味着必须在单词周围使用双引号。<br/>例如，`RUN ["/bin/bash", "-c", "echo hello"]`
+>
+> 与*shell*形式不同，*exec*形式不会调用命令shell。这意味着正常的shell处理不会发生。<br/>例如，`RUN [ "echo", "$HOME" ]`不会对变量进行替换`$HOME`。<br/>如果想要进行shell处理，请使用*shell* 模式或直接执行shell，<br/>例如：`RUN [ "sh", "-c", "echo $HOME" ]` & `RUN /bin/sh -c echo $HOME`<br/>当使用exec模式并直接执行一个shell时（如shell格式的情况），它是在执行环境变量扩展的shell，而不是docker。
+>
+> 在*JSON*形式中，有必要避免反斜杠。反斜杠是路径分隔符在Windows上尤其重要。由于不是有效的JSON，以下行将被视为*shell*形式，并以意外的方式失败： `RUN ["c:\windows\system32\tasklist.exe"]` 此示例的正确语法是： `RUN ["c:\\windows\\system32\\tasklist.exe"]`
+
+`RUN`指令缓存在下一次构建期间不会自动失效。类似指令的缓存 `RUN apt-get dist-upgrade -y`将在下一次构建时重用。例如，`RUN`指令缓存可以通过使用`--no-cache` 标志来使其失效`docker build --no-cache`。
+
+说明的高速缓存`RUN`可能会因`ADD`指令而失效。详情请参阅 [下文](https://docs.docker.com/engine/reference/builder/#add)。
+
+**已知问题**
+
+- [问题783](https://github.com/docker/docker/issues/783)是关于使用AUFS文件系统时可能发生的文件权限问题。例如，可能会在尝试`rm`使用文件时注意到它。
+
+  对于具有最新aufs版本的系统（即，`dirperm1`可以设置安装选项），docker将尝试通过安装图层`dirperm1`选项来自动修复问题。有关`dirperm1`选项的更多详细信息，请参见[`aufs`手册页](https://github.com/sfjro/aufs3-linux/tree/aufs3.18/Documentation/filesystems/aufs)
+
+  如果您的系统不支持`dirperm1`，该问题描述了一种解决方法。
+
+  ​
 
 #### apt-get
 
@@ -456,7 +849,7 @@ RUN apt-get update && apt-get install -y \
 RUN wget -O - https://some.site | wc -l > /number
 ```
 
-Docker使用`/bin/sh -c`解释器执行这些命令，解释器只评估管道中最后一个操作的退出代码以确定是否成功。在上面的示例中，只要`wc -l`命令成功，即使`wget`命令失败，该构建步骤也会成功并生成新图像。
+Docker使用`/bin/sh -c`解释器执行这些命令，解释器只评估管道中最后一个操作的退出代码以确定是否成功。在上面的示例中，只要`wc -l`命令成功，即使`wget`命令失败，该构建步骤也会成功并生成新镜像。
 
 如果由于管道中任何阶段的错误而导致命令失败，请预先`set -o pipefail &&`确保意外错误可防止构建无意中成功。例如：
 
@@ -476,9 +869,61 @@ RUN ["/bin/bash", "-c", "set -o pipefail && wget -O - https://some.site | wc -l 
 
 [CMD指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#cmd)
 
-该`CMD`指令应该用于运行镜像像中包含的软件以及任何参数。`CMD`应该几乎总是以形式使用`CMD [“executable”, “param1”, “param2”…]`。因此，如果镜像是用于服务的，比如`Apache`和`Rails`，那么你可以运行类似的东西 `CMD ["apache2","-DFOREGROUND"]`。这种形式的指令被推荐用于任何基于服务的图像。
+该`CMD`指令应该用于运行镜像像中包含的软件以及任何参数。`CMD`应该几乎总是以`CMD [“executable”, “param1”, “param2”…]`形式使用。因此，如果镜像是用于服务的，比如`Apache`和`Rails`，那么你可以运行类似的 `CMD ["apache2","-DFOREGROUND"]`。这种形式的指令被推荐用于任何基于服务的镜像。
 
-在其他大多数情况下，`CMD`应该给出一个交互式`shell`，比如`bash`，`python`和`perl`。例如，`CMD ["perl", "-de0"]`，`CMD ["python"]`，或 `CMD [“php”, “-a”]`。使用这种形式意味着当你执行类似的东西时`docker run -it python`，你会被放入一个可用的`shell`中，随时可以使用。 `CMD`应该很少的方式使用`CMD [“param”, “param”]`会同[`ENTRYPOINT`](https://docs.docker.com/engine/reference/builder/#entrypoint)，除非你和你预期的用户已经非常熟悉如何`ENTRYPOINT` 工作的。
+在其他大多数情况下，`CMD`应该给出一个交互式`shell`，比如`bash`，`python`和`perl`。例如，`CMD ["perl", "-de0"]`，`CMD ["python"]`，或 `CMD [“php”, “-a”]`。使用这种形式意味着当你执行`docker run -it python`类似的东西时，你会被放入一个可用的`shell`中，随时可以使用。应该很少使用 `CMD`的方式`CMD [“param”, “param”]`会同[`ENTRYPOINT`](https://docs.docker.com/engine/reference/builder/#entrypoint)，除非你和你预期的用户已经非常熟悉如何`ENTRYPOINT` 工作的。
+
+该`CMD`指令有三种形式：
+
+- `CMD ["executable","param1","param2"]`（`exec`方式，这是首选方式）
+- `CMD ["param1","param2"]`（作为`ENTRYPOINT`*的默认参数*，每次都运行相同的可执行文件）
+- `CMD command param1 param2`（`shell`方式其实是 `/bin/sh -c`上执行）
+
+**`Dockerfile`只能有一条`CMD`指令。如果列出多个`CMD` 则只有最后一个`CMD`会生效。**
+
+**CMD的主要目的是为执行容器提供默认值。**这些默认值可以包含可执行文件，也可以省略可执行文件，在这种情况下，还必须指定一条`ENTRYPOINT` 指令。
+
+> **注意**：
+>
+> 如果`CMD`用于为`ENTRYPOINT` 指令提供缺省参数，则应该使用JSON数组格式指定`CMD`和`ENTRYPOINT`指令。
+>
+> *exec*形式被解析为JSON数组，这意味着必须在单词周围使用双引号。<br/>例如，`CMD ["/bin/bash", "-c", "echo hello"]`
+>
+> 与*shell*形式不同，*exec*形式不会调用命令shell。这意味着正常的shell处理不会发生。<br/>例如，`CMD [ "echo", "$HOME" ]`不会对变量进行替换`$HOME`。<br/>如果您想要进行shell处理，请使用*shell*方式或直接执行shell，<br/>例如：`CMD [ "sh", "-c", "echo $HOME" ]`。<br/>当使用exec方式并直接执行一个shell时（如shell格式的情况），它是在执行环境变量扩展的shell，而不是docker。
+
+当以shell或exec格式使用时，`CMD`指令设置运行映像时要执行的命令。<br/>如果你使用的是*shell的*形式`CMD`，那么`<command>`将执行在 `/bin/sh -c`：
+
+```
+FROM ubuntu
+CMD echo "This is a test." | wc -
+```
+
+如果想在 `<command>` **没有shell** **的情况下运行你的程序，**那么必须将该命令表示为一个**JSON数组并给出可执行文件的完整路径。 这个数组形式是的首选格式CMD。任何附加参数都必须单独表示为数组中的字符串**：
+
+```
+FROM ubuntu
+CMD ["/usr/bin/wc","--help"]
+```
+
+**如果希望容器每次都运行相同的可执行文件**，那么应该考虑`ENTRYPOINT`与其结合使用`CMD`。见 [*入口点*](https://docs.docker.com/engine/reference/builder/#entrypoint)。
+
+如果用户指定了`docker run`参数，那么它们将覆盖`CMD`中指定的默认值。
+
+> **注意**：<b color='red'>**不要混淆`RUN`使用`CMD`。`RUN`实际上运行一个命令并提交结果; `CMD`在构建时不执行任何操作，但指定图像的预期命令**。</b>
+
+### MAINTAINER
+
+```dockerfile
+MAINTAINER <name>
+```
+
+`MAINTAINER`指令设置生成图像的*作者*字段。`LABEL`指令是一个更加灵活的版本，应该使用它，因为它可以设置需要的任何元数据，并且可以很容易地查看，例如`docker inspect`。要设置与`MAINTAINER`可以使用的字段对应的标签 ：
+
+```
+LABEL maintainer="SvenDowideit@home.org.au"
+```
+
+这将从`docker inspect`其他标签中可见。
 
 ### EXPOSE
 
@@ -486,9 +931,40 @@ RUN ["/bin/bash", "-c", "set -o pipefail && wget -O - https://some.site | wc -l 
 
 [EXPOSE指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#expose)
 
-该`EXPOSE`指令指示容器侦听连接的端口。因此，应该为应用程序使用通用的传统端口。例如，包含`Apache Web`服务器的镜像将使用`EXPOSE 80`，而包含`MongoDB`的图像将使用`EXPOSE 27017`等等。
+该`EXPOSE`指令指示容器侦听连接的端口。因此，应该为应用程序使用通用的传统端口。例如，包含`Apache Web`服务器的镜像将使用`EXPOSE 80`，而包含`MongoDB`的镜像将使用`EXPOSE 27017`等等。
 
 对于外部访问，用户可以执行`docker run`一个标志，指示如何将指定端口映射到他们选择的端口。对于容器链接，Docker为从收件人容器返回到源路径（即，`MYSQL_PORT_3306_TCP`）提供环境变量。
+
+```dockerfile
+EXPOSE <port> [<port>/<protocol>...]
+```
+
+`EXPOSE`**指令通知Docker容器在运行时侦听指定的网络端口。可以指定端口是侦听TCP还是UDP，如果未指定协议，则默认为TCP。**
+
+该`EXPOSE`指令并不实际发布该端口，它用作构建映像的对象和运行容器的对象之间的文档类型，关于哪些端口打算发布。要在运行容器时发布实际端口，请使用此`-p`标志`docker run` 发布和映射一个或多个端口，或者使用`-P`标志发布所有公开的端口并将它们映射到高阶端口。
+
+默认情况下，假设`EXPOSE`TCP。你也可以指定UDP：
+
+```dockerfile
+EXPOSE 80/udp
+```
+
+要在TCP和UDP上公开，请包含两行：
+
+```dockerfile
+EXPOSE 80/tcp
+EXPOSE 80/udp
+```
+
+在这种情况下，如果使用`-P`与`docker run`，该端口将被一次TCP和一次UDP曝光。请记住，`-P`在主机上使用短暂的高阶主机端口，因此TCP和UDP的端口不会相同。
+
+`EXPOSE`无论如何设置，都可以使用该`-p`标志在运行时覆盖它们。例如
+
+```dockerfile
+docker run -p 80:80/tcp -p 80:80/udp ...
+```
+
+要在主机系统上设置端口重定向，请参阅[使用-P标志](https://docs.docker.com/engine/reference/run/#expose-incoming-ports)。该`docker network`命令支持为容器之间的通信创建网络，而无需公开或发布特定的端口，因为连接到网络的容器可以通过任何端口相互通信。有关详细信息，请参阅[此功能](https://docs.docker.com/engine/userguide/networking/)的 [概述](https://docs.docker.com/engine/userguide/networking/)）。
 
 ### ENV
 
@@ -499,6 +975,34 @@ RUN ["/bin/bash", "-c", "set -o pipefail && wget -O - https://some.site | wc -l 
 为了使新软件更容易运行，可以使用`ENV`更新容器安装软件的 `PATH`环境变量。例如，`ENV PATH /usr/local/nginx/bin:$PATH`确保`CMD [“nginx”]` 正常工作。
 
 `ENV`指令对于提供特定于你希望容器化的服务所需的环境变量也很有用，例如`Postgres's`  `PGDATA`。
+
+```
+ENV <key> <value>
+ENV <key>=<value> ...
+```
+
+`ENV`指令将环境变量`<key>`设置为值 `<value>`。这个值将在构建阶段的所有后续指令的环境中，并且可以在许多[内联](https://docs.docker.com/engine/reference/builder/#environment-replacement)中被[替换](https://docs.docker.com/engine/reference/builder/#environment-replacement)。
+
+`ENV`指令有两种形式：<br/>第一种形式是`ENV <key> <value>`，将一个变量设置为一个值。第一个空格后的整个字符串将被视为`<value>`包括空格字符。该值将被解释为其他环境变量，因此引号字符未被转义，则它们将被删除。<br/>第二种形式`ENV <key>=<value> ...`允许一次设置多个变量。请注意，第二种形式在语法中使用等号（=），而第一种形式不使用。与命令行解析一样，引号和反斜杠可用于包含值中的空格。
+
+例如：
+
+```dockerfile
+ENV myName="John Doe" myDog=Rex\ The\ Dog \
+    myCat=fluffy
+```
+
+```dockerfile
+ENV myName John Doe
+ENV myDog Rex The Dog
+ENV myCat fluffy
+```
+
+将在最终图像中产生相同的结果。
+
+`ENV`从结果图像运行容器时，使用的环境变量将保持不变。可以使用`docker inspect`查看这些值，并使用`docker run --env <key>=<value>`进行更改。
+
+> **注意**：环境持久性可能会导致意想不到的副作用。<br/>例如，设置`ENV DEBIAN_FRONTEND noninteractive`可能会将apt-get用户混淆在基于Debian的映像上。要为单个命令设置一个值，请使用 `RUN <key>=<value> <command>`。
 
 最后，`ENV`还可以用于设置常用版本号，以便版本变更中更容易维护，如以下示例所示：
 
@@ -523,7 +1027,6 @@ CMD sh
 
 ```shell
 $ docker run --rm -it test sh echo $ADMIN_USER
-
 mark
 ```
 
@@ -546,7 +1049,7 @@ $ docker run --rm -it test sh echo $ADMIN_USER
 - [Dock指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#add)
 - [适用于COPY指令的Dockerfile参考](https://docs.docker.com/engine/reference/builder/#copy)
 
-虽然`ADD`和`COPY`在功能上类似，**一般说来`COPY` 是优选的，这是因为它比`ADD`更透明**。`COPY`仅**支持将本地文件复制到容器中**，同时`ADD`还具有一些不明显的功能（如仅限本地的`tar`提取和远程`URL`支持）。因此，**最好的用`ADD`是将本地tar文件自动提取到图像中**，如`ADD rootfs.tar.xz /`。
+虽然`ADD`和`COPY`在功能上类似，**一般说来`COPY` 是优选的，这是因为它比`ADD`更透明**。`COPY`仅**支持将本地文件复制到容器中**，同时`ADD`还具有一些不明显的功能（如仅限本地的`tar`提取和远程`URL`支持）。因此，**最好的用`ADD`是将本地tar文件自动提取到镜像中**，如`ADD rootfs.tar.xz /`。
 
 如果有多个`Dockerfile`步骤使用来自上下文的不同文件，那么`COPY`它们是单独的，而不是一次使用全部。这可确保**每个步骤的构建缓存**仅在特定所需文件发生更改时才会失效（强制重新运行该步骤）。
 
@@ -560,7 +1063,7 @@ COPY . /tmp/
 
 导致`RUN`步骤中缓存失效的次数少于放弃 `COPY . /tmp/`之前的缓存失效次数。
 
-由于镜像大小很重要，因此`ADD`强烈建议**不要使用从远程`URL`获取软件包**; 你应该使用`curl`或`wget`代替。这样，可以**删除解压缩后不再需要的文件**，并且不必在图像中添加其他图层。例如，应该避免执行以下操作：
+由于镜像大小很重要，因此`ADD`强烈建议**不要使用从远程`URL`获取软件包**; 你应该使用`curl`或`wget`代替。这样，可以**删除解压缩后不再需要的文件**，并且不必在镜像中添加其他图层。例如，应该避免执行以下操作：
 
 ```dockerfile
 ADD http://example.com/big.tar.xz /usr/src/things/
@@ -578,6 +1081,144 @@ RUN mkdir -p /usr/src/things \
 ```
 
 对于其他不需要`ADD`自动解压功能的项目（文件，目录），应该始终使用`COPY`。
+
+
+
+#### ADD
+
+ADD 有两种形式：
+
+- `ADD [--chown=<user>:<group>] <src>... <dest>`
+- `ADD [--chown=<user>:<group>] ["<src>",... "<dest>"]` （此形式对于包含空格的路径是必需的）
+
+> **注意**：`--chown`仅在用于构建Linux容器的Dockerfiles上受支持，并且不适用于Windows容器。由于用户和组所有权概念不能在Linux和Windows之间进行转换，因此使用`/etc/passwd`和`/etc/group`将用户名和组名转换为ID会限制此功能仅适用于基于Linux操作系统的容器。
+
+`ADD`指令从`<src>`中复制新文件、目录或远程文件URL并将它们添加到路径`<dest>`中图像的文件系统中。
+
+可以指定多个`<src>`资源，但如果它们是文件或目录，则它们的路径将被解释为相对于构建的上下文来源。
+
+每个`<src>`可能包含通配符，匹配将使用Go的 [filepath.Match](http://golang.org/pkg/path/filepath#Match)规则完成。例如：
+
+```dockerfile
+ADD hom* /mydir/        # adds all files starting with "hom"
+ADD hom?.txt /mydir/    # ? is replaced with any single character, e.g., "home.txt"
+```
+
+`<dest>`是绝对路径或相对`WORKDIR`的路径，源将被复制到目标容器中。
+
+```dockerfile
+ADD test relativeDir/          # adds "test" to `WORKDIR`/relativeDir/
+ADD test /absoluteDir/         # adds "test" to /absoluteDir/
+```
+
+添加包含特殊字符（例如`[` 和`]`）的文件或目录时，需要按照Golang规则转义这些路径，以防止它们被视为匹配模式。例如，要添加一个名为的文件`arr[0].txt`，请参考以下内容;
+
+```dockerfile
+ADD arr[[]0].txt /mydir/    # copy a file named "arr[0].txt" to /mydir/
+```
+
+除非可选`--chown`标志指定给定的用户名、组名或`UID/GID`组合来请求所添加内容的特定所有权，否则所有新文件和目录均使用`UID/GID`创建。该`--chown`标志的格式允许使用用户名和组名字符串，或以任意组合形式直接使用整数`UID/GID`。提供没有组名的用户名或没有GID的UID将使用与GID相同的数字UID。如果提供了用户名或组名，容器的根文件系统 `/etc/passwd`和`/etc/group`文件将分别用于执行从名称到整数UID或GID的转换。以下示例显示`--chown`标志的有效定义：
+
+```dockerfile
+ADD --chown=55:mygroup files* /somedir/
+ADD --chown=bin files* /somedir/
+ADD --chown=1 files* /somedir/
+ADD --chown=10:11 files* /somedir/
+```
+
+如果容器根文件系统不包含任何文件`/etc/passwd`或 `/etc/group`文件，并且在该`--chown` 标志中使用了用户名或组名，则构建`ADD`操作将失败。使用数字标识不需要查找，也不依赖于容器根文件系统内容。
+
+在`<src>`远程文件URL 的情况下，目标将具有600的权限。如果正在检索的远程文件具有HTTP `Last-Modified`标头，则将使用来自该标头的时间戳来设置`mtime`目标文件上的时间戳。然而像`ADD`期间处理的任何其他文件一样，它`mtime`不会被包含在确定文件是否已经改变并且应该更新缓存中。
+
+> **注意**：如果通过传递`Dockerfile` `STDIN`（`docker build - < somefile`）来构建，则没有构建上下文，因此`Dockerfile` 只能包含基于URL的`ADD`指令。也可以通过`STDIN`传递一个压缩存档：（`docker build - < archive.tar.gz`），`Dockerfile`存档的根目录和存档的其余部分将用作构建的上下文。
+> 如果网址文件都使用认证保护，将需要使用`RUN wget`，`RUN curl`或使用其它工具从容器内的`ADD`指令不支持验证。
+> 如果`<src>`内容已更改，则第一次遇到`ADD`的指令将使Dockerfile中所有后续指令的缓存无效。这包括使`RUN`指令的缓存无效。
+
+`ADD` **遵守以下规则**：
+
+- 该`<src>`路径必须位于构建的上下文中； 你不能`ADD ../something /something`，因为 `docker build`的第一步是将上下文目录（和子目录）发送到docker守护进程。
+- 如果`<src>`是URL并且`<dest>`不以尾部斜线结尾，则从URL下载文件将被复制到`<dest>`中。
+- 如果`<src>`是一个URL并且`<dest>`以结尾的斜线结尾，那么文件名将从url中推断出来，并将该文件下载到该URL`<dest>/<filename>`。例如，`ADD http://example.com/foobar /`将创建该文件`/foobar`。该URL必须有一个不平凡的路径，以便在这种情况下可以找到适当的文件名（`http://example.com` 不起作用）。
+- 如果`<src>`是目录，则复制目录的全部内容，包括文件系统元数据。**目录本身不被复制，只是它的内容。**
+
+
+- 如果`<src>`是以可识别的压缩格式（`identity，gzip，bzip2、xz`）的*本地* tar归档文件，则将其解压缩为目录。来自*远程* URL的资源**不被**解压缩。当一个目录被复制或解包时，它的行为`tar -x`与结果相同，结果是：
+
+  1. 无论在目的地路径和目的地存在什么
+  2. 源代码树的内容，在逐个文件的基础上解决了冲突，支持“2.”。
+
+  > **注意**：文件是否被识别为可识别的压缩格式完全是基于文件的内容而不是文件的名称。例如，如果空文件碰巧以`.tar.gz`结尾，则不会将其识别为压缩文件，并且**不会**生成任何类型的解压缩错误消息，而是将该文件简单地复制到目标。
+
+- 如果`<src>`是其他类型的文件，则将其与其元数据一起单独复制。在这种情况下，如果`<dest>`以结尾斜线结尾`/`，它将被视为一个目录，其内容`<src>`将被写入`<dest>/base(<src>)`。
+
+- 如果`<src>`指定了多个资源（直接或由于使用通配符），则`<dest>`必须是目录，并且必须以斜线结尾`/`。
+
+- 如果`<dest>`不以尾部斜线结尾，则将其视为常规文件，`<src>`并将写入内容到`<dest>`。
+
+- 如果`<dest>`不存在，则会在其路径中创建所有缺少的目录。
+
+
+
+#### COPY
+
+COPY有两种形式：
+
+- `COPY [--chown=<user>:<group>] <src>... <dest>`
+- `COPY [--chown=<user>:<group>] ["<src>",... "<dest>"]` （此形式对于包含空格的路径是必需的）
+
+> **注意**：`--chown`仅在用于构建Linux容器的Dockerfiles上受支持，并且不适用于Windows容器。由于用户和组所有权概念不能在Linux和Windows之间进行转换，因此使用`/etc/passwd`和`/etc/group`将用户名和组名转换为ID会限制此功能仅适用于基于Linux操作系统的容器。
+
+`COPY`指令从`<src>` 复制新文件或目录并将其添加到路径`<dest>`中容器的文件系统。
+
+`COPY`可以指定多个`<src>`资源，但文件和目录的路径将被解释为与构建的上下文来源。
+
+每个`<src>`可能包含通配符，匹配将使用Go的 [filepath.Match](http://golang.org/pkg/path/filepath#Match)规则完成。例如：
+
+```dockerfile
+COPY hom* /mydir/        # adds all files starting with "hom"
+COPY hom?.txt /mydir/    # ? is replaced with any single character, e.g., "home.txt"
+```
+
+`<dest>`是一个绝对路径或相对`WORKDIR`的路径，源将被复制到目标容器中。
+
+```dockerfile
+COPY test relativeDir/   # adds "test" to `WORKDIR`/relativeDir/
+COPY test /absoluteDir/  # adds "test" to /absoluteDir/
+```
+
+在复制包含特殊字符（如`[` 和`]`）的文件或目录时，您需要按照Golang规则转义这些路径，以防止它们被视为匹配模式。例如，要复制一个名为的文件`arr[0].txt`，请参考以下内容;
+
+```dockerfile
+COPY arr[[]0].txt /mydir/    # copy a file named "arr[0].txt" to /mydir/
+```
+
+除非可选`--chown`标志指定给定的用户名、组名或`UID/GID`组合来请求所添加内容的特定所有权，否则所有新文件和目录均使用`UID/GID`创建。该`--chown`标志的格式允许使用用户名和组名字符串，或以任意组合形式直接使用整数`UID/GID`。提供没有组名的用户名或没有GID的UID将使用与GID相同的数字UID。如果提供了用户名或组名，容器的根文件系统 `/etc/passwd`和`/etc/group`文件将分别用于执行从名称到整数`UID/GID`的转换。以下示例显示`--chown`标志的有效定义：
+
+```dockerfile
+COPY --chown=55:mygroup files* /somedir/
+COPY --chown=bin files* /somedir/
+COPY --chown=1 files* /somedir/
+COPY --chown=10:11 files* /somedir/
+```
+
+如果容器根目录文件系统不包含任何文件`/etc/passwd`或 `/etc/group`文件，并且在该`--chown` 标志中使用了用户名或组名，则构建`COPY`操作将失败。**使用数字标识不需要查找，也不依赖于容器根文件系统内容**。
+
+> **注意**：如果使用STDIN（`docker build - < somefile`）构建，则没有构建上下文，因此`COPY`无法使用。
+
+可以选择`COPY`接受一个选项`--from=<name|index>`，该选项可用于将源位置设置为之前的构建阶段（使用创建的`FROM .. AS <name>`），这将用于代替用户发送的构建上下文。该选项还接受为以`FROM`指令开始的所有先前构建阶段分配的**数字索引**。如果**无法找到具有指定名称的构建阶段**，则尝试使用具有**相同名称的图像**。
+
+`COPY` 遵守以下规则：
+
+- 该`<src>`路径必须是内部*语境*的构建; 你不能`COPY ../something /something`，因为a的第一步 `docker build`是将上下文目录（和子目录）发送到docker守护进程。
+- 如果`<src>`是目录，则复制目录的全部内容，包括文件系统元数据。**目录本身不被复制，只是它的内容。**
+
+
+- 如果`<src>`是其他类型的文件，则将其与其元数据一起单独复制。在这种情况下，如果`<dest>`以结尾斜线结尾`/`，它将被视为一个目录，其内容`<src>`将被写入`<dest>/base(<src>)`。
+- 如果`<src>`指定了多个资源（直接或由于使用通配符），则`<dest>`必须是目录，并且必须以斜线结尾`/`。
+- 如果`<dest>`不以尾部斜线结尾，则将其视为常规文件，`<src>`并将写入其内容`<dest>`。
+- 如果`<dest>`不存在，则会在其路径中创建所有缺少的目录。
+
+
 
 ### ENTRYPOINT
 
@@ -610,7 +1251,7 @@ $ docker run s3cmd ls s3://mybucket
 
 该`ENTRYPOINT`指令还可以与辅助脚本结合使用，使其能够以类似于上述命令的方式工作，即使启动该工具可能需要多个步骤。
 
-例如，[Postgres官方图像](https://hub.docker.com/_/postgres/) 使用以下脚本作为它的`ENTRYPOINT`：
+例如，[Postgres官方镜像](https://hub.docker.com/_/postgres/) 使用以下脚本作为它的`ENTRYPOINT`：
 
 ```shell
 #!/bin/bash
@@ -675,7 +1316,7 @@ $ docker run --rm -it postgres bash
 
 如果服务可以在没有权限的情况下运行，则使用`USER`更改为非root用户。首先通过类似的方式在`dockerfile`中创建用户和组`RUN groupadd -r postgres && useradd --no-log-init -r -g postgres postgres`。
 
-> **注意**：图像中的用户和组会得到非确定性的UID/GID，因为无论镜像重建如何，都会分配“下一个”UID/GID。所以，如果这很关键，你应该分配一个明确的UID/GID。
+> **注意**：镜像中的用户和组会得到非确定性的UID/GID，因为无论镜像重建如何，都会分配“下一个”UID/GID。所以，如果这很关键，你应该分配一个明确的UID/GID。
 
 > **注意**：由于 `Go archive / tar`包处理松散文件时存在一个[未解决的错误](https://github.com/golang/go/issues/13548)，尝试在Docker容器内创建具有足够大`UID`的用户可能导致磁盘耗尽，因为`/var/log/faillog`容器层中充满了NUL（\ 0 ）字符。将该`--no-log-init `选项传递给`useradd`可以解决此问题。`Debian/Ubuntu` `adduser`包不支持该`--no-log-init`标志，应该避免。
 
@@ -709,7 +1350,7 @@ Docker构建在子`Dockerfile`文件中的任何命令之前执行`ONBUILD`命�
 
 # 创建一个基础镜像
 
-大多数`Dockerfiles`从父镜像开始。如果需要完全控制图像的内容，则可能需要创建基础镜像。以下是区别：
+大多数`Dockerfiles`从父镜像开始。如果需要完全控制镜像的内容，则可能需要创建基础镜像。以下是区别：
 
 - 一个[父镜像](https://docs.docker.com/glossary/?term=parent%20image)是你的镜像的基础镜像。它`FROM`指向`Dockerfile`中指令的内容。`Dockerfile`中的每个后续声明都会修改此父镜像。大多数`Dockerfiles`从父镜像开始，而不是基础镜像。但是，这些术语有时可以相互使用。
 - 基础镜像在Dockerfile中要么不具有`FROM`，或具有`FROM scratch`。
@@ -721,7 +1362,7 @@ Docker构建在子`Dockerfile`文件中的任何命令之前执行`ONBUILD`命�
 
 一般来说，从运行想要打包为父镜像的发行版的工作机器开始，尽管对于像`Debian`的[Debootstrap](https://wiki.debian.org/Debootstrap)这样的工具[来说](https://wiki.debian.org/Debootstrap)，你也可以使用它来构建`Ubuntu` 镜像，但这不是必需的 。
 
-它可以像创建`Ubuntu`父图像一样简单：
+它可以像创建`Ubuntu`父镜像一样简单：
 
 ```shell
 $ sudo debootstrap xenial xenial > /dev/null
@@ -746,9 +1387,9 @@ DISTRIB_DESCRIPTION="Ubuntu 16.04 LTS"
 ## 使用scratch创建一个简单的父镜像
 
 
-可以使用Docker的保留最小镜像`scratch`作为构建容器的起点。使用`scratch`镜像构建过程中，希望下一个命令`Dockerfile`成为图像中的第一个文件系统层。
+可以使用Docker的保留最小镜像`scratch`作为构建容器的起点。使用`scratch`镜像构建过程中，希望下一个命令`Dockerfile`成为镜像中的第一个文件系统层。
 
-当`scratch`出现在Docker存储库中时，无法将其拉出、运行或标记具有该名称的任何图像。相反，你可以参考你的`Dockerfile`。例如，要使用`scratch`以下命令创建最小容器 ：
+当`scratch`出现在Docker存储库中时，无法将其拉出、运行或标记具有该名称的任何镜像。相反，你可以参考你的`Dockerfile`。例如，要使用`scratch`以下命令创建最小容器 ：
 
 ```shell
 FROM scratch
@@ -774,13 +1415,13 @@ docker build --tag hello .
 > container# gcc -o hello -static -nostartfiles hello.c
 > ```
 
-要运行新图像，请使用以下`docker run`命令：
+要运行新镜像，请使用以下`docker run`命令：
 
 ```
 docker run --rm hello
 ```
 
-本示例将创建教程中使用的hello-world图像。如果你想测试它，你可以克隆 [图像回购](https://github.com/docker-library/hello-world)。
+本示例将创建教程中使用的hello-world镜像。如果你想测试它，你可以克隆 [镜像回购](https://github.com/docker-library/hello-world)。
 
 
 
@@ -791,7 +1432,7 @@ docker run --rm hello
 ## 不使用多阶段构建
 
 
-关于构建图像最具挑战性的事情之一是**保持图像的大小**。Dockerfile中的**每条指令都会为镜像添加一个图层**，并且需要记住在**移动到下一图层之前清理不需要的任何组件**。为了编写一个非常高效的Dockerfile，传统上需要使用shell技巧和其他逻辑来尽可能地减小层次，并确保每层都具有它需要的来自前一层的组件，而不是其他任何东西。
+关于构建镜像最具挑战性的事情之一是**保持镜像的大小**。Dockerfile中的**每条指令都会为镜像添加一个图层**，并且需要记住在**移动到下一图层之前清理不需要的任何组件**。为了编写一个非常高效的Dockerfile，传统上需要使用shell技巧和其他逻辑来尽可能地减小层次，并确保每层都具有它需要的来自前一层的组件，而不是其他任何东西。
 
 实际上，有一个Dockerfile用于开发（其中包含构建应用程序所需的所有内容）以及一个用于生产的瘦身客户端，它只包含应用程序以及运行它所需的内容。这被称为“建造者模式”。维护两个Dockerfiles并不理想。
 
@@ -807,7 +1448,7 @@ RUN go get -d -v golang.org/x/net/html \
   && CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
 ```
 
-请注意，此示例还使用`RUN`Bash `&&`运算符人为地压缩两个命令，以避免在图像中创建额外的图层。这很容易失败并且很难维护。例如，插入另一个命令并忘记继续使用该`\`字符行很容易。
+请注意，此示例还使用`RUN`Bash `&&`运算符人为地压缩两个命令，以避免在镜像中创建额外的图层。这很容易失败并且很难维护。例如，插入另一个命令并忘记继续使用该`\`字符行很容易。
 
 **Dockerfile**：
 
@@ -871,7 +1512,7 @@ $ docker build -t alexellis2/href-counter:latest .
 
 最终的结果是生产与以前相同的小型镜像，并显着降低了复杂性。不需要创建任何中间镜像，也不需要将任何组件提取到本地系统。
 
-它是如何工作的？第二`FROM`条指令以`alpine:latest`图像为基础开始新的构建阶段。**该`COPY --from=0`行只将前一阶段构建的组件复制到这个新阶段**。Go SDK和任何中间组件都被留下，并未保存在最终图像中。
+它是如何工作的？第二`FROM`条指令以`alpine:latest`镜像为基础开始新的构建阶段。**该`COPY --from=0`行只将前一阶段构建的组件复制到这个新阶段**。Go SDK和任何中间组件都被留下，并未保存在最终镜像中。
 
 ## 为构建阶段命名
 
@@ -896,7 +1537,7 @@ CMD ["./app"]
 ## 停止在特定的构建阶段
 
 
-当构建图像时，不一定需要构建包括每个阶段的整个Dockerfile。可以指定目标构建阶段。以下命令假定正在使用`previous`，`Dockerfile`但在名为的阶段停止`builder`：
+当构建镜像时，不一定需要构建包括每个阶段的整个Dockerfile。可以指定目标构建阶段。以下命令假定正在使用`previous`，`Dockerfile`但在名为的阶段停止`builder`：
 
 ```shell
 $ docker build --target builder -t alexellis2/href-counter:latest .
