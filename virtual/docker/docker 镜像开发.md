@@ -17,7 +17,7 @@
 
 ## 了解有关Docker语言特定的应用程序开发
 
-- [Docker for Java开发人员](https://github.com/docker/labs/tree/master/developer-tools/java/)实验室
+- [Docker for Java开发人员](https://github.com/docker/labs/tree/master/developer-tools/java/)实验
 - [将一个node.js应用程序移植到Docker](https://github.com/docker/labs/tree/master/developer-tools/nodejs/porting)
 
 ## 使用SDK或API进行高级开发
@@ -2266,6 +2266,286 @@ $ docker build --target builder -t alexellis2/href-counter:latest .
 # 复制nginx镜像中的/etc/nginx/nginx.conf 配置
 COPY --from=nginx:latest /etc/nginx/nginx.conf /nginx.conf
 ```
+
+
+
+# 使用JDK 9 开发Docker 镜像
+
+下面将介绍安装`jdk9`进行和在`jdk9`上运行java镜像程序。
+
+
+
+## 创建 JDK9 镜像
+
+
+
+### 编写 Dockerfile
+---
+在 `/d/docker/`下创建目录 `docker_jdk9`，然后创建Dockerfile 文件名称为 `jdk-9-debian-slim.Dockerfile`，内容如下：
+
+```dockerfile
+# A JDK 9 with Debian slim
+FROM debian:stable-slim
+
+# Download from http://jdk.java.net/9/
+ADD http://download.java.net/java/GA/jdk9/9/binaries/openjdk-9_linux-x64_bin.tar.gz /opt
+#ADD openjdk-9_linux-x64_bin.tar.gz /opt
+
+# Set up env variables
+ENV JAVA_HOME=/opt/jdk-9
+ENV PATH=$PATH:$JAVA_HOME/bin
+CMD ["jshell", "-J-XX:+UnlockExperimentalVMOptions", \
+               "-J-XX:+UseCGroupMemoryLimitForHeap", \
+               "-R-XX:+UnlockExperimentalVMOptions", \
+               "-R-XX:+UseCGroupMemoryLimitForHeap"]
+```
+
+该镜像以 `debian:stable-slim`为基础镜像，并为`Linux x64`安装`JDK`的`OpenJDK`版本。
+
+该镜像默认运行方式`Java REPL`配置为：`jshell`。阅读更多JShell [介绍JShell](https://docs.oracle.com/javase/9/jshell/introduction-jshell.htm)。配置选项`-XX:+UseCGroupMemoryLimitForHeap`被传递给`REPL`进程（前端Java进程管理用户输入，后端Java进程管理编译）。这个选项将确保容器内存限制。
+
+### 编译 Dockerfile 生成镜像
+---
+进入`docker_jdk9`目录，输入以下目录构建镜像：
+
+```shell
+$ cd /d/docker/docker_jdk9
+
+$ docker image build -t jdk-9-debian-slim:latest -f jdk-9-debian-slim.Dockerfile .
+#或者
+$ docker build -t jdk-9-debian-slim:latest -f jdk-9-debian-slim.Dockerfile .
+```
+
+查看可用的图像`docker image ls`：
+
+```shell
+$ docker image ls
+REPOSITORY                                      TAG                 IMAGE ID            CREATED             SIZE
+jdk-9-debian-slim                               latest              f3ad06a7ef48        3 minutes ago       261MB
+docker_file                                     test                886ffa683a17        3 hours ago         113MB
+debian                                          stable-slim         fa6d7e032617        6 weeks ago         55.3MB
+
+```
+
+从上面的镜像中可以看到已经编译好镜像 `jdk-9-debian-slim` 、`debian`，下面就启动镜像。
+
+### 运行镜像 & 启动容器
+---
+使用以下命令运行容器：
+
+```shell
+$ docker container run -m=200M -it --rm jdk-9-debian-slim:latest
+# 或者
+$ docker run -m=200M -it --rm jdk-9-debian-slim:latest
+```
+
+看到输出：
+
+```shell
+Apr 28, 2018 7:54:01 AM java.util.prefs.FileSystemPreferences$1 run
+INFO: Created user preferences directory.
+|  Welcome to JShell -- Version 9
+|  For an introduction type: /help intro
+
+jshell>
+```
+
+通过在Java REPL中键入以下表达式来查询Java进程的可用内存：
+
+```
+Runtime.getRuntime（）.maxMemory（）/（1 << 20）
+```
+
+看到输出：
+
+```
+jshell> Runtime.getRuntime().maxMemory() / (1 << 20)
+$1 ==> 100
+```
+
+要查看使用`JDK 9`的所有Java模块，请运行以下命令：
+
+```shell
+$ docker container run -m = 200M -it --rm jdk-9-debian-slim:latest java --list-modules
+```
+
+统计模块数量：
+
+```shell
+$ docker container run -m=200M -it --rm jdk-9-debian-slim:latest java --list-modules | wc -l
+```
+
+
+
+## 在JDK9上运行 Java 镜像程序
+
+### 创建或下载程序
+
+---
+
+克隆基于Java 9的项目的GitHib项目<https://github.com/PaulSandoz/helloworld-java-9>：
+
+```shell
+$ git clone https://github.com/PaulSandoz/helloworld-java-9.git
+```
+
+或者自己编写一个`Java9`的简单程序，新建一个`JavaProject-> helloworld -> App.java`
+
+```java
+package com.hoojo.examples;
+
+public class App {
+
+	public static void main(String[] args) {
+		System.out.println("Java hello world!");
+	}
+}
+```
+
+在` eclipse `中点击 导出` jar`包，或者 用`java jar` 编译成` jar` 包，将编译好的jar包放在 `D:\docker\docker_jdk9\target` 下即可。
+
+### 编写 Dockerfile
+
+---
+
+为此应用程序构建Docker镜像，请使用`helloworld-jdk-9.Dockerfile`文件构建图像。该文件的内容如下所示：
+
+```dockerfile
+# Hello world application with JDK 9 and Debian slim
+FROM jdk-9-debian-slim
+COPY target/helloworld.jar /opt/helloworld/helloworld.jar
+# Set up env variables
+CMD java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap \
+  -cp /opt/helloworld/helloworld.jar com.hoojo.examples.App
+```
+
+构建一个包含基于Docker镜像的简单Java应用程序的Docker镜像`jdk-9-debian-slim`：
+
+```shell
+$ docker image build -t helloworld-jdk-9 -f helloworld-jdk-9.Dockerfile .
+```
+
+查看刚才生成的镜像 `docker image ls`：
+
+```shell
+$ docker image ls
+REPOSITORY                                      TAG                 IMAGE ID            CREATED             SIZE
+helloworld-jdk-9                                latest              397adc963ffa        42 seconds ago      400MB
+```
+
+注意应用程序图像`helloworld-jdk-9`的size会很大。
+
+使用命令`docker-machine ssh` 连接到当前虚拟机，运行该`jdeps`工具以查看应用程序依赖于哪些模块：
+
+```shell
+$ docker container run -it --rm helloworld-jdk-9 jdeps --list-deps /opt/helloworld/helloworld.jar
+```
+
+并观察应用程序仅依赖于`java.base`模块。
+
+### 镜像瘦身
+
+---
+
+使用JDK 9和Java应用程序减少Docker镜像的大小，Java应用程序非常简单，因此只使用JDK 9发行版附带的少量功能，具体而言，应用程序仅取决于`java.base`模块中存在的功能。我们可以创建一个**定制的Java运行时**，它只包含`java.base`模块并将其包含在应用程序的Docker镜像中。
+
+使用命令`docker-machine ssh` 连接到当前虚拟机，创建一个很小且只包含`java.base` 模块的自定义Java运行时：
+
+```shell
+$ docker container run --rm \
+  --volume $PWD:/out \
+  jdk-9-debian-slim \
+  jlink --module-path /opt/jdk-9/jmods \
+    --verbose \
+    --add-modules java.base \
+    --compress 2 \
+    --no-header-files \
+    --output /out/target/openjdk-9-base_linux-x64
+```
+
+JDK 9工具`jlink`用于创建自定义Java运行时。阅读[参考jlink ](https://docs.oracle.com/javase/9/tools/jlink.htm)更多用法。该工具从包含JDK 9的容器和模块所在的目录`/opt/jdk-9/jmods`执行，在模块路径中声明只有 `java.base`模块被选中。
+
+自定义运行时输出到`target`目录：
+
+```shell
+docker@default:~$ du -k target/openjdk-9-base_linux-x64/
+44      target/openjdk-9-base_linux-x64/legal/java.base
+44      target/openjdk-9-base_linux-x64/legal
+24      target/openjdk-9-base_linux-x64/bin
+8       target/openjdk-9-base_linux-x64/conf/security/policy/unlimited
+12      target/openjdk-9-base_linux-x64/conf/security/policy/limited
+24      target/openjdk-9-base_linux-x64/conf/security/policy
+68      target/openjdk-9-base_linux-x64/conf/security
+76      target/openjdk-9-base_linux-x64/conf
+72      target/openjdk-9-base_linux-x64/lib/jli
+19824   target/openjdk-9-base_linux-x64/lib/server
+16      target/openjdk-9-base_linux-x64/lib/security
+31656   target/openjdk-9-base_linux-x64/lib
+31804   target/openjdk-9-base_linux-x64/
+```
+
+由于这里是在远程主机（虚拟机）上完成的动作，现在需要将生成好的 Java 运行时jdk拷贝到本地环境。需要需要挂载一个目录到虚拟机上，然后把文件拷贝到挂载目录。在本地客户端执行命令：
+
+```shell
+$ docker-machine ssh default "sudo mkdir /mnt/docker_jdk9"
+$ docker-machine ssh default "sudo chmod 755 /mnt/docker_jdk9"
+$ docker-machine ssh default "sudo mount -t vboxsf jdk9 /mnt/docker_jdk9"
+```
+
+使用命令`docker-machine ssh` 连接到当前虚拟机，将Java 运行时jdk拷贝到挂载目录。
+
+```shell
+docker@default:~$ sudo cp -rf target/openjdk-9-base_linux-x64 /mnt/docker_jdk9/openjdk-9-base_linux-x64
+```
+
+最终文件在本地电脑的挂载目标目录可以看到，将文件`openjdk-9-base_linux-x64`拷贝到`D:\docker\docker_jdk9\target`即可。
+
+重新编写 Dockerfile 文件：`helloworld-jdk-9-base.Dockerfile`，再次构建镜像，内容如下：
+
+```dockerfile
+# Hello world application with custom Java runtime with just the base module and Debian slim
+FROM debian:stable-slim
+COPY target/openjdk-9-base_linux-x64 /opt/jdk-9-base
+COPY target/helloworld.jar /opt/helloworld/helloworld.jar
+# Set up env variables
+ENV JAVA_HOME=/opt/jdk-9-base
+ENV PATH=$PATH:$JAVA_HOME/bin
+CMD java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap \
+  -cp /opt/helloworld/helloworld.jar com.hoojo.examples.App
+```
+
+构建Java应用程序的Docker镜像`jdk-9-debian-slim`：
+
+```shell
+$ docker image build -t helloworld-jdk-9 -f helloworld-jdk-9-base.Dockerfile .
+```
+
+查看刚才生成的镜像 `docker image ls`：
+
+```shell
+$ docker image ls
+REPOSITORY                                      TAG                 IMAGE ID            CREATED             SIZE
+helloworld-jdk-9                                latest              397adc963ffa        42 seconds ago      400MB
+```
+
+注意应用程序图像`helloworld-jdk-9`的size会小了很多
+
+### 运行镜像 & 启动容器
+
+---
+
+运行启动镜像
+
+```shell
+$ winpty docker container run -it --rm helloworld-jdk-9
+Java hello world!
+
+$ docker container run -m=200M -it --rm helloworld-jdk-9:latest
+# 或者
+$ docker run -m=200M -it --rm helloworld-jdk-9:latest
+```
+
+可以看到镜像运行成功，容器已经启动
 
 
 
