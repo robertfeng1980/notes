@@ -273,6 +273,7 @@ CMD bash
 #ENTRYPOINT ["./scripts.sh"]
 
 # 固定执行一段脚本，可接受交互参数
+# $ winpty docker run -it docker_file:test -c 'echo hi docker'
 COPY docker-entrypoint.sh ./
 RUN chmod +x ./docker-entrypoint.sh
 ENTRYPOINT ["./docker-entrypoint.sh"]
