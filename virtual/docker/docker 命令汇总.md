@@ -2,19 +2,19 @@
 
 ```shell
 # image
-# 建立一个图像
+# 建立一个镜像
 $ docker image build --rm=true .
-# 安装图像
+# 安装镜像
 $ docker image pull ${IMAGE}
-#已安装图像的列表
+#已安装镜像的列表
 $ docker image ls
-# 已安装图像列表（详细列表）
+# 已安装镜像列表（详细列表）
 $ docker image ls --no-trunc
-# 删除图像
+# 删除镜像
 $ docker image rm ${IMAGE_ID}
-# 删除未使用的图像
+# 删除未使用的镜像
 $ docker image prune
-# 删除所有图像
+# 删除所有镜像
 $ docker image rm $(docker image ls -aq)
 $ docker image rm -f $(docker image ls -a | grep alpine | awk '{ print $3 }')
 $ docker image rm -f $(docker images | grep "<none>" | awk '{ print $3 }')
@@ -46,7 +46,7 @@ $ docker container inspect --format '{{ .NetworkSettings.IPAddress }}' ${CID}
 $ docker container attach ${CID}
 # 进入一个容器，打开一个shell
 $ docker container exec -it ${CID} bash
-# 通过正则表达式获取图像的容器标识
+# 通过正则表达式获取镜像的容器标识
 $ docker container ls | grep wildfly | awk '{print $1}'
 ```
 
@@ -169,7 +169,7 @@ $ docker-machine ssh default 				# ssh 连接到default这台虚拟机
 ## docker 容器
 
 ```shell
-docker build -t friendlyhello .  # 使用此目录的Dockerfile创建图像
+docker build -t friendlyhello .  # 使用此目录的Dockerfile创建镜像
 docker run -p 4000:80 friendlyhello  # 运行“friendlyname”映射端口4000到80
 docker run -d -p 4000:80 friendlyhello         # 同上，但处于分离模式
 docker run --detach --publish 4000:80 --name webserver nginx
@@ -180,14 +180,14 @@ docker container stop <hash>           # 停止指定的容器
 docker container kill <hash>         # 强制关闭指定的容器
 docker container rm <hash>        	# 从本机中移除指定的容器
 docker container rm $(docker container ls -a -q)         # 删除所有容器
-docker image ls -a                             # 列出此机器上的所有图像
-docker image rm <image id>            # 从本机中删除指定的图像
-docker image rm $(docker image ls -a -q)   # 从本机中删除所有图像
+docker image ls -a                             # 列出此机器上的所有镜像
+docker image rm <image id>            # 从本机中删除指定的镜像
+docker image rm $(docker image ls -a -q)   # 从本机中删除所有镜像
 docker images myhello                      # 通过仓库查看镜像
 docker login             			# 登录
 docker tag <image> username/repository:tag  # 标签<image>用于上传到仓库
-docker push username/repository:tag            # 上传标记的图像到仓库
-docker run username/repository:tag                   # 从仓库运行图像，本地没有会先拉取镜像
+docker push username/repository:tag            # 上传标记的镜像到仓库
+docker run username/repository:tag                   # 从仓库运行镜像，本地没有会先拉取镜像
 docker push registry/username/repository:tag 
 docker run registry/username/repository:tag
 
@@ -277,7 +277,7 @@ Commands:
   bundle             从Compose文件中生成一个Docker bundle
   config             验证并查看Compose file
   create             创建服务
-  down               停止并移除容器，网络，图像和卷
+  down               停止并移除容器，网络，镜像和卷
   events             接收来自容器的实时事件
   exec               在正在运行的容器中执行命令 
   images             镜像列表
@@ -478,7 +478,7 @@ RUN ["ls", "/var/lib/apt/lists"]
 # CMD在构建时不执行任何操作，但指定镜像的预期命令。
 # 也就是说在构建阶段设置镜像在运行时触发的指令
 #
-# 可以使用CMD指令来运行图像中包含的软件，以及任何参数
+# 可以使用CMD指令来运行镜像中包含的软件，以及任何参数
 #
 # CMD 语法和 RUN 雷同
 # Dockerfile只能有一条CMD指令。如果列出多个CMD 则只有最后一个CMD会生效。
@@ -948,7 +948,7 @@ EXPOSE 7777 8888
 # 通过在容器中运行一个命令来检查容器的健康状况
 #
 # - HEALTHCHECK [OPTIONS] CMD command （通过在容器中运行一个命令来检查容器的健康状况）
-# - HEALTHCHECK NONE （禁用从基础映像继承的任何健康检查）
+# - HEALTHCHECK NONE （禁用从基础镜像继承的任何健康检查）
 #
 # 可以显示的选项CMD是：
 # 	- --interval=DURATION（运行间隔，默认值：30s）

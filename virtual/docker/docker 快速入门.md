@@ -2,7 +2,7 @@
 
 [TOC]
 
-本文的是Docker*入门教程* 教你如何：<br/>1. 设置Docker环境<br/>2. 构建一个图像并将其作为一个容器运行<br/>3. 扩展应用程序以运行多个容器<br/>4. 在整个集群中分配应用程序<br/>5. 通过添加后端数据库来堆叠编排服务<br/>6. 将应用部署到生产
+本文的是Docker*入门教程* 教你如何：<br/>1. 设置Docker环境<br/>2. 构建一个镜像并将其作为一个容器运行<br/>3. 扩展应用程序以运行多个容器<br/>4. 在整个集群中分配应用程序<br/>5. 通过添加后端数据库来堆叠编排服务<br/>6. 将应用部署到生产
 
    ​
 
@@ -486,7 +486,7 @@ CMD ["python", "app.py"]
 
 由于上面的 `Dockerfile`定义好了镜像的内容，这里需要对文件中的内容进行填充。
 
-创建两个文件，`requirements.txt`、`app.py`将它们放在和`Dockerfile`同一个文件夹中。完成应用程序的编码部分，这个取决于你的镜像需要运行什么代码内容。当上述`Dockerfile`被内置到的图像，`app.py`和 `requirements.txt`是因为存在`Dockerfile`文件的`ADD`命令中，而端口`80`是`app.py`是通过HTTP访问需要的，这个暴露端口需要使用`EXPOSE` 命令。而系统变量`ENV NAME World`则是`app.py`中需要访问的变量值。
+创建两个文件，`requirements.txt`、`app.py`将它们放在和`Dockerfile`同一个文件夹中。完成应用程序的编码部分，这个取决于你的镜像需要运行什么代码内容。当上述`Dockerfile`被内置到的镜像，`app.py`和 `requirements.txt`是因为存在`Dockerfile`文件的`ADD`命令中，而端口`80`是`app.py`是通过HTTP访问需要的，这个暴露端口需要使用`EXPOSE` 命令。而系统变量`ENV NAME World`则是`app.py`中需要访问的变量值。
 
 还是在`Dockerfile`同一个文件夹中创建`requirements.txt`文件，添加当前python程序的依赖软件
 
@@ -864,7 +864,7 @@ $ docker run -p 4000:80 hoojo/test:my_hello_world
 ## 本节命令汇总
 
 ```shell
-docker build -t friendlyhello .  # 使用此目录的Dockerfile创建图像
+docker build -t friendlyhello .  # 使用此目录的Dockerfile创建镜像
 docker run -p 4000:80 friendlyhello  # 运行“friendlyname”映射端口4000到80
 docker run -d -p 4000:80 friendlyhello         # 同上，但处于分离模式
 docker run --detach --publish 4000:80 --name webserver nginx
@@ -875,14 +875,14 @@ docker container stop <hash>           # 停止指定的容器
 docker container kill <hash>         # 强制关闭指定的容器
 docker container rm <hash>        	# 从本机中移除指定的容器
 docker container rm $(docker container ls -a -q)         # 删除所有容器
-docker image ls -a                             # 列出此机器上的所有图像
-docker image rm <image id>            # 从本机中删除指定的图像
-docker image rm $(docker image ls -a -q)   # 从本机中删除所有图像
+docker image ls -a                             # 列出此机器上的所有镜像
+docker image rm <image id>            # 从本机中删除指定的镜像
+docker image rm $(docker image ls -a -q)   # 从本机中删除所有镜像
 docker images myhello                      # 通过仓库查看镜像
 docker login             					# 登录
 docker tag <image> username/repository:tag  # 标签<image>用于上传到仓库
-docker push username/repository:tag            # 上传标记的图像到仓库
-docker run username/repository:tag                   # 从仓库运行图像，本地没有会先拉取镜像
+docker push username/repository:tag            # 上传标记的镜像到仓库
+docker run username/repository:tag                   # 从仓库运行镜像，本地没有会先拉取镜像
 docker push registry/username/repository:tag 
 docker run registry/username/repository:tag
 
@@ -931,7 +931,7 @@ networks:
 
 > 该`docker-compose.yml`文件告诉Docker执行以下操作：
 >
-> - 从注册表中拉出[我们在步骤2中上传的图像](https://docs.docker.com/get-started/part2/)。
+> - 从注册表中拉出[我们在步骤2中上传的镜像](https://docs.docker.com/get-started/part2/)。
 > - 运行该镜像的`5`个实例作为所调用的服务`web`，限制每个实例使用最多`10％`的`CPU`（跨所有核心）和`50MB`的`RAM`。
 > - 如果一个失败，立即重启容器。
 > - 将主机上的端口80映射到`web`端口80。
@@ -1422,7 +1422,7 @@ docker@my-vm-node-2:~$ curl http://192.168.99.102
 
 ---
 
-通过更改`docker-compose.yml`文件来更新集群应用程序。通过编辑程序原始代码更改应用程序行为，然后重新构建`build`并推送`push`新镜像。（要做到这一点，请按照之前用于[构建应用程序](https://docs.docker.com/get-started/part2/#build-the-app)和[发布图像](https://docs.docker.com/get-started/part2/#publish-the-image)的相同步骤）。
+通过更改`docker-compose.yml`文件来更新集群应用程序。通过编辑程序原始代码更改应用程序行为，然后重新构建`build`并推送`push`新镜像。（要做到这一点，请按照之前用于[构建应用程序](https://docs.docker.com/get-started/part2/#build-the-app)和[发布镜像](https://docs.docker.com/get-started/part2/#publish-the-image)的相同步骤）。
 
 无论哪种情况，只需`docker stack deploy`再次运行即可部署这些更改。
 

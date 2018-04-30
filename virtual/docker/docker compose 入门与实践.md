@@ -1,4 +1,4 @@
-# Docker Compose
+# Docker Compose 入门与实践
 
 [TOC]
 
@@ -269,8 +269,8 @@ CMD ["python", "app.py"]
 
 上面的文件内容告诉Docker：
 
-- 从Python 3.4图像开始构建一个图像。
-- 将当前目录添加`.`到`/code`图像的路径中。
+- 从Python 3.4镜像开始构建一个镜像。
+- 将当前目录添加`.`到`/code`镜像的路径中。
 - 将工作目录设置为`/code`。
 - 安装Python依赖项。
 - 将容器的默认命令设置为`python app.py`。
@@ -293,7 +293,7 @@ services:
 
 这个撰写文件定义了两个服务：`web`和`redis`服务：
 
-- 使用`Dockerfile`当前目录中构建的图像。
+- 使用`Dockerfile`当前目录中构建的镜像。
 - 将容器上的暴露端口`5000`转发到主机上的端口`5000`。我们使用`Flask Web`，服务器的默认端口`5000`。
 
 该`redis`服务使用从Docker Hub注册表中提取的公共 [Redis](https://registry.hub.docker.com/_/redis/)镜像。
@@ -326,7 +326,7 @@ web_1    |  * Restarting with stat
 web_1    |  * Debugger is active!
 ```
 
-`compose`会拉取`redis`的镜像，为代码构建图像，并启动定义的服务。在这种情况下，代码在构建时会复制到镜像中。
+`compose`会拉取`redis`的镜像，为代码构建镜像，并启动定义的服务。在这种情况下，代码在构建时会复制到镜像中。
 
 2、测试程序 http://192.168.99.100:5000/ ，如果是`win7` 电脑的情况，通过宿主主键访问 docker上的机器需要用 `machine` 机器的`ip`去访问。也可以直接到构建镜像的机器上运行curl访问
 
@@ -899,7 +899,7 @@ Step 3/5 : WORKDIR /code
 
 从Compose文件生成分布式应用程序包（DAB）。
 
-镜像必须存储摘要，需要与Docker注册表进行交互。如果未为所有图像存储摘要，可以使用`docker-compose pull` 或`docker-compose push`，打包时自动推送图像，通过`--push-images`。只有`build`指定选项的服务才会推送其图像。
+镜像必须存储摘要，需要与Docker注册表进行交互。如果未为所有镜像存储摘要，可以使用`docker-compose pull` 或`docker-compose push`，打包时自动推送镜像，通过`--push-images`。只有`build`指定选项的服务才会推送其镜像。
 
 ```shell
 $ docker login -u xxx -p xxxx
@@ -1123,7 +1123,7 @@ services:
     image: "redis:alpine"
 ```
 
-执行定义服务的拉取`docker-compose pull ServiceName`需要在`docker-compose.yml`文件的所在的目录中运行，则Docker会拉取关联的镜像。例如，要在我们的示例中调用`redis:alpine`配置为`redis`服务的映像，可以运行`docker-compose pull redis`。
+执行定义服务的拉取`docker-compose pull ServiceName`需要在`docker-compose.yml`文件的所在的目录中运行，则Docker会拉取关联的镜像。例如，要在我们的示例中调用`redis:alpine`配置为`redis`服务的镜像，可以运行`docker-compose pull redis`。
 
 ```shell
 $ docker-compose pull redis
@@ -1139,11 +1139,11 @@ Status: Image is up to date for redis:alpine
 
 ---
 
-将服务的图像推送到它们各自的位置`registry/repository`
+将服务的镜像推送到它们各自的位置`registry/repository`
 
 做出以下假设：
 
-- 您正在推送您在本地创建的图像
+- 您正在推送您在本地创建的镜像
 - 您可以访问构建密钥
 
 ```yaml
@@ -1484,7 +1484,7 @@ services:
 
 **这将产生一个名为`webapp`和`tag`标记为`first`的镜像，该镜像由目录`./sample`内容构建。**
 
-> **注意**：当 使用（版本3）Compose文件[在集群模式下部署编排堆栈服务时，](https://docs.docker.com/engine/reference/commandline/stack_deploy/)忽略此选项 。`docker stack`命令仅接受预先构建的图像。
+> **注意**：当 使用（版本3）Compose文件[在集群模式下部署编排堆栈服务时，](https://docs.docker.com/engine/reference/commandline/stack_deploy/)忽略此选项 。`docker stack`命令仅接受预先构建的镜像。
 
 
 
