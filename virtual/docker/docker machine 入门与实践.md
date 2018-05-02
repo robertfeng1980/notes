@@ -871,6 +871,8 @@ $ docker-machine ssh dev
 
 ```shell
 $ docker-machine ssh dev free
+$ docker-machine ssh dev "ls /home/"
+$ docker-machine ssh dev "docker swarm init --advertise-addr 192.168.99.101"
 ```
 
 如果端口冲突不能连接，可以进行端口映射访问，以下命令将端口8080从`default`机器转发到`localhost`主机上：
