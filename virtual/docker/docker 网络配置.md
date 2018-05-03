@@ -11,17 +11,17 @@ Docker容器和服务如此强大的原因之一是可以将它们连接在一�
 
 Docker的网络子系统是可插拔的，使用驱动程序。默认情况下存在几个驱动程序，并提供核心网络功能：
 
-- `bridge`：默认的网络驱动程序。如果您不指定驱动程序，则这是您正在创建的网络类型。**当您的应用程序运行在需要通信的独立容器中时，通常会使用桥接网络。**请参阅 [桥接网络](https://docs.docker.com/network/bridge/)。
+- `bridge`：默认的网络驱动程序。如果你不指定驱动程序，则这是你正在创建的网络类型。**当你的应用程序运行在需要通信的独立容器中时，通常会使用桥接网络。**请参阅 [桥接网络](https://docs.docker.com/network/bridge/)。
 - `host`：对于独立容器，删除容器和Docker主机之间的网络隔离，并直接使用主机的网络。`host` 仅适用于Docker 17.06及更高版本的群集服务。请参阅 [使用主机网络](https://docs.docker.com/network/host/)。
-- `overlay`：覆盖网络**将多个Docker守护进程连接在一起，并使群集服务能够相互通信**。您还可以使用覆盖网络来促进**swarm服务和独立容器之间的通信**，或者不同Docker守护进程上的两个独立容器之间的通信。这种策略消除了**在这些容器之间进行操作系统级路由**的需求。请参阅[覆盖网络](https://docs.docker.com/network/overlay/)。
-- `macvlan`：Macvlan网络允许您为容器**分配MAC地址，使其显示为网络上的物理设备**。Docker守护进程通过**MAC地址将流量路由到容器**。使用`macvlan` 驱动程序有时是处理希望直接连接到物理网络的传统应用程序的最佳选择，而不是通过Docker主机的网络堆栈进行路由。请参阅 [Macvlan网络](https://docs.docker.com/network/macvlan/)。
+- `overlay`：覆盖网络**将多个Docker守护进程连接在一起，并使群集服务能够相互通信**。你还可以使用覆盖网络来促进**swarm服务和独立容器之间的通信**，或者不同Docker守护进程上的两个独立容器之间的通信。这种策略消除了**在这些容器之间进行操作系统级路由**的需求。请参阅[覆盖网络](https://docs.docker.com/network/overlay/)。
+- `macvlan`：Macvlan网络允许你为容器**分配MAC地址，使其显示为网络上的物理设备**。Docker守护进程通过**MAC地址将流量路由到容器**。使用`macvlan` 驱动程序有时是处理希望直接连接到物理网络的传统应用程序的最佳选择，而不是通过Docker主机的网络堆栈进行路由。请参阅 [Macvlan网络](https://docs.docker.com/network/macvlan/)。
 - `none`：对于此容器，**禁用所有网络**。通常与自定义网络驱动程序一起使用。`none`不适用于群组服务。请参阅 [禁用容器联网](https://docs.docker.com/network/none/)。
-- [Network plugins 网络插件](https://docs.docker.com/engine/extend/plugins_services/)：您可以在Docker上安装和使用第三方网络插件。这些插件可从 [Docker Store](https://store.docker.com/search?category=network&q=&type=plugin) 或第三方供应商处获得。
+- [Network plugins 网络插件](https://docs.docker.com/engine/extend/plugins_services/)：你可以在Docker上安装和使用第三方网络插件。这些插件可从 [Docker Store](https://store.docker.com/search?category=network&q=&type=plugin) 或第三方供应商处获得。
 
 ### 网络驱动总结
 
 - **用户定义的网桥**：需要多个容器在同一个Docker主机上进行通信。
-- **主机网络**： 当网络堆栈不应该与Docker主机隔离时，但您希望隔离容器的其他方面。
+- **主机网络**： 当网络堆栈不应该与Docker主机隔离时，但你希望隔离容器的其他方面。
 - **覆盖网络**： 当需要运行在不同Docker主机上的容器进行通信，或者当多个应用程序使用群集服务一起工作。
 - **Macvlan网络**： 最适合从虚拟机设置迁移或需要容器看起来像网络上的物理主机，每个物理主机都有一个唯一的MAC地址。
 - **第三方网络插件**： 允许将Docker与专用网络堆栈集成。
@@ -31,19 +31,7 @@ Docker的网络子系统是可插拔的，使用驱动程序。默认情况下�
 以下两个功能只有在使用Docker EE和使用通用控制平面（UCP）管理Docker服务时才有可能：
 
 - 该[HTTP路由网格](https://docs.docker.com/datacenter/ucp/2.2/guides/admin/configure/use-domain-names-to-access-services/) 可以让你分享多个服务之间的相同的网络IP地址和端口。根据客户端的要求，UCP使用主机名和端口的组合将流量路由到相应的服务。
-- [会话粘性](https://docs.docker.com/datacenter/ucp/2.2/guides/user/services/use-domain-names-to-access-services/#sticky-sessions)允许您指定UCP用于将后续请求路由到相同服务任务的HTTP标头中的信息，用于需要有状态会话的应用程序。
-
-## 网络教程
-
-本主题定义了一些基本的Docker网络概念，并为您准备设计和部署应用程序以充分利用这些功能。
-大部分内容适用于所有Docker安装。但是 [一些高级功能](https://docs.docker.com/network/#docker-ee-networking-features)仅适用于Docker EE。
-
-现在已经了解了Docker网络的基本知识，使用以下教程加深理解：
-
-- [独立网络教程](https://docs.docker.com/network/network-tutorial-standalone/)
-- [主机网络教程](https://docs.docker.com/network/network-tutorial-host/)
-- [覆盖网络教程](https://docs.docker.com/network/network-tutorial-overlay/)
-- [Macvlan网络教程](https://docs.docker.com/network/network-tutorial-macvlan/)
+- [会话粘性](https://docs.docker.com/datacenter/ucp/2.2/guides/user/services/use-domain-names-to-access-services/#sticky-sessions)允许你指定UCP用于将后续请求路由到相同服务任务的HTTP标头中的信息，用于需要有状态会话的应用程序。
 
 # docker network 基本命令
 
@@ -80,7 +68,7 @@ Options:
 
 ---
 
-#### 查看
+#### 查看网络
 
 `docker network ls`查看网络列表，列举出已经存在的网络数据
 
@@ -98,7 +86,7 @@ qqabvnny71wz        my-overlay-inte-net                              overlay    
 91efc6379be0        none                                             null                local
 ```
 
-#### 过滤
+#### 查看过滤
 
 使用`filter`过滤查看
 
@@ -108,7 +96,7 @@ NETWORK ID          NAME                DRIVER              SCOPE
 99b53a220971        host                host                local
 ```
 
-过滤标志（`-f`或`--filter`）格式是一`key=value`对。如果有多个过滤器，则传递多个标志（例如`--filter "foo=bar" --filter "bif=baz"`）。多个过滤器标志被组合为一个`OR`过滤器。例如，`-f type=custom -f type=builtin`返回两者`custom`和`builtin`网络。
+过滤选项（`-f`或`--filter`）格式是一`key=value`对。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）。多个过滤器选项被组合为一个`OR`过滤器。例如，`-f type=custom -f type=builtin`返回两者`custom`和`builtin`网络。
 
 目前支持的过滤器是：
 
@@ -131,7 +119,7 @@ NETWORK ID          NAME                DRIVER              SCOPE
 91efc6379be0        none                null                local
 ```
 
-#### 格式化
+#### 查看格式化
 
 格式化输出列表
 
@@ -207,13 +195,13 @@ Options:
 
 ---
 
-创建一个新的网络。`DRIVER`接受内置网络驱动程序的`bridge`或者`overlay`。如果已经安装了第三方或自己的自定义网络驱动程序，也可以指定`DRIVER`。如果不指定该 `--driver`选项，该命令将自动创建一个`bridge`网络。当安装`Docker Engine`时，它会自动创建一个`bridge`网络。该网络对应于`docker0`引擎传统依赖的桥梁。当`docker run`启动一个新的容器时， 它会自动连接到这个网桥。您无法删除此默认桥接网络，但可以使用`network create`命令创建新桥接网络。
+创建一个新的网络。`DRIVER`接受内置网络驱动程序的`bridge`或者`overlay`。如果已经安装了第三方或自己的自定义网络驱动程序，也可以指定`DRIVER`。如果不指定该 `--driver`选项，该命令将自动创建一个`bridge`网络。当安装`Docker Engine`时，它会自动创建一个`bridge`网络。该网络对应于`docker0`引擎传统依赖的桥梁。当`docker run`启动一个新的容器时， 它会自动连接到这个网桥。你无法删除此默认桥接网络，但可以使用`network create`命令创建新桥接网络。
 
 ```shell
 $ docker network create -d bridge my-bridge-network
 ```
 
-桥接网络是单个引擎安装中的隔离网络。如果您想创建一个跨多个运行引擎的多个Docker主机的网络，则必须创建一个`overlay`网络。与`bridge`网络不同，`overlay`覆盖网络在创建之前需要一些预先存在的条件。这些条件是：
+桥接网络是单个引擎安装中的隔离网络。如果你想创建一个跨多个运行引擎的多个Docker主机的网络，则必须创建一个`overlay`网络。与`bridge`网络不同，`overlay`覆盖网络在创建之前需要一些预先存在的条件。这些条件是：
 
 - 访问键值存储。引擎支持`Consul`、`Etcd`和`ZooKeeper`（分布式存储）键值存储。
 - 连接到键值存储的主机集群。
@@ -227,7 +215,7 @@ $ docker network create -d bridge my-bridge-network
 
 要详细了解这些选项以及如何配置它们，请参阅[“ *多主机网络入门* ”](https://docs.docker.com/engine/userguide/networking/get-started-overlay)。
 
-虽然不是必需的，但安装`Docker Swarm`来管理组成网络的集群是一个不错的主意。`Swarm`提供了复杂的发现和服务器管理工具，可以帮助您实施。
+虽然不是必需的，但安装`Docker Swarm`来管理组成网络的集群是一个不错的主意。`Swarm`提供了复杂的发现和服务器管理工具，可以帮助你实施。
 
 准备好`overlay`网络必须条件后，只需在集群中选择Docker主机并发出以下命令即可创建网络：
 
@@ -239,7 +227,7 @@ $ docker network create -d overlay my-multihost-network
 
 #### 覆盖网络限制
 
-当您使用默认的基于VIP的端点模式创建网络时，您应该创建带有24个块（默认值）的覆盖网络，这会将您限制为256个IP地址。该建议解决了 [群集模式的限制](https://github.com/moby/moby/issues/30820)。如果您需要超过256个IP地址，请勿增加IP块大小。您可以通过`dnsrr`外部负载均衡器使用端点模式，也可以使用多个较小的覆盖网络。 有关不同端点模式的更多信息，请参阅 [配置服务发现](https://docs.docker.com/engine/swarm/networking/#configure-service-discovery)。
+当你使用默认的基于VIP的端点模式创建网络时，你应该创建带有24个块（默认值）的覆盖网络，这会将你限制为256个IP地址。该建议解决了 [群集模式的限制](https://github.com/moby/moby/issues/30820)。如果你需要超过256个IP地址，请勿增加IP块大小。你可以通过`dnsrr`外部负载均衡器使用端点模式，也可以使用多个较小的覆盖网络。 有关不同端点模式的更多信息，请参阅 [配置服务发现](https://docs.docker.com/engine/swarm/networking/#configure-service-discovery)。
 
 ### 示例
 
@@ -273,7 +261,7 @@ a1fcabf9c7b362ea558b4669bbb71b5c0b65661be8140200f4d36f33e20c1680
 
 #### 连接容器
 
-当您启动容器时，请使用`--network`选项将其连接到网络。本例将`busybox`容器添加到`mynet`网络中：
+当你启动容器时，请使用`--network`选项将其连接到网络。本例将`busybox`容器添加到`mynet`网络中：
 
 ```shell
 $ docker network create -d bridge mynet
@@ -282,9 +270,9 @@ $ docker run -itd --network=mynet busybox
 
 如果要将已经运行的容器添加到网络，请使用`docker network connect`命令。
 
-您可以将多个容器连接到同一个网络。连接后，容器只能使用另一个容器的IP地址或名称进行通信。对于`overlay`支持多主机连接的网络或自定义插件，连接到相同多主机网络但从不同引擎启动的容器也可以通过这种方式进行通信。
+你可以将多个容器连接到同一个网络。连接后，容器只能使用另一个容器的IP地址或名称进行通信。对于`overlay`支持多主机连接的网络或自定义插件，连接到相同多主机网络但从不同引擎启动的容器也可以通过这种方式进行通信。
 
-您可以使用`docker network disconnect`命令从网络断开容器。
+你可以使用`docker network disconnect`命令从网络断开容器。
 
 #### 高级选项
 
@@ -306,7 +294,7 @@ $ docker network create \
   br0
 ```
 
-如果您忽略该`--gateway`标志，引擎会从首选游泳池内为您选择一个。对于`overlay`网络和支持它的网络驱动程序插件，您可以创建多个子网。本示例使用两个`/25` 子网掩码来坚持当前的指导，即在单个覆盖网络中没有超过256个IP。每个子网络有126个可用地址。
+如果你忽略该`--gateway`选项，引擎会从首选游泳池内为你选择一个。对于`overlay`网络和支持它的网络驱动程序插件，你可以创建多个子网。本示例使用两个`/25` 子网掩码来坚持当前的指导，即在单个覆盖网络中没有超过256个IP。每个子网络有126个可用地址。
 
 ```shell
 $ docker network create -d overlay \
@@ -323,7 +311,7 @@ $ docker network create -d overlay \
 
 #### 桥模式选项
 
-在创建自定义网络时，默认网络驱动程序（即`bridge`）具有可以传递的其他选项。以下是用于docker0桥的那些选项和等效的docker守护进程标志：
+在创建自定义网络时，默认网络驱动程序（即`bridge`）具有可以传递的其他选项。以下是用于docker0桥的那些选项和等效的docker守护进程选项：
 
 | 选项                                             | 等价        | 描述                        |
 | ------------------------------------------------ | ----------- | --------------------------- |
@@ -353,7 +341,7 @@ $ docker network create \
 
 #### 网络内部模式
 
-默认情况下，当您将容器连接到`overlay`网络时，Docker也会将桥接网络连接到它以提供外部连接。如果您想创建一个外部隔离的`overlay`网络，您可以指定该 `--internal`选项。
+默认情况下，当你将容器连接到`overlay`网络时，Docker也会将桥接网络连接到它以提供外部连接。如果你想创建一个外部隔离的`overlay`网络，你可以指定该 `--internal`选项。
 
 ```shell
 $ docker network create --internal -d overlay my-overlay-inte-net
@@ -361,7 +349,7 @@ $ docker network create --internal -d overlay my-overlay-inte-net
 
 #### 网络入口模式
 
-您可以创建将用于在群集中提供路由网格的网络。您通过在创建网络时指定`--ingress`来完成此操作。当时只能创建一个入口网络。只有在没有服务依赖它的情况下才能删除网络。除了`--attachable`选项之外，在创建入口网络时，创建覆盖网络时可用的任何选项也可用。
+你可以创建将用于在群集中提供路由网格的网络。你通过在创建网络时指定`--ingress`来完成此操作。当时只能创建一个入口网络。只有在没有服务依赖它的情况下才能删除网络。除了`--attachable`选项之外，在创建入口网络时，创建覆盖网络时可用的任何选项也可用。
 
 ```shell
 $ docker network create -d overlay \
@@ -391,9 +379,9 @@ Options:
 
 ---
 
-将容器连接到网络。您可以按名称或ID连接容器。连接后，容器可以与同一网络中的其他容器进行通信。
+将容器连接到网络。你可以按名称或ID连接容器。连接后，容器可以与同一网络中的其他容器进行通信。
 
-#### 为正在运行的容器连接网络
+#### 正在运行的容器连接网络
 
 ```shell
 # 运行一个镜像，没有会自动去下载
@@ -406,7 +394,7 @@ $ docker network connect 61b951b60b24 91efc6379be0
 $ docker network connect my-bridge-net suspicious_kepler
 ```
 
-#### 将容器启动时连接到网络
+#### 启动容器时连接到网络
 
 可以使用`docker run --network=<network-name>`选项启动容器并立即将其连接到网络。
 
@@ -435,7 +423,7 @@ $ docker network connect --ip 192.168.5.122 my-bri-0 suspicious_kepler
 $ docker network connect --link silly_curie:my_container my-bridge suspicious_kepler
 ```
 
-#### 为容器连接网络创建别名
+#### 容器连接网络时创建别名
 
 `--alias` 选项可用于通过连接到的网络中的其他名称来解析容器。取别名方便查看链接的容器。
 
@@ -471,9 +459,9 @@ $ docker container inspect upbeat_ptolemy
 
 ```
 
-#### 停止，暂停或重新启动容器的网络
+#### 停止/暂停/重启 容器的网络
 
-您可以暂停，重新启动并停止连接到网络的容器。**容器运行时会连接到其配置的网络**。
+你可以暂停、重新启动并停止连接到网络的容器。**容器运行时会连接到其配置的网络**。
 
 如果设定过网络，则在**重新启动容器时重新应用**容器的IP地址。**如果IP地址不再可用，则容器无法启动**。确保IP地址可用的一种方法是`--ip-range`在创建网络时指定一个IP地址，并从该范围之外**选择静态IP**地址。这确保了当该容器不在网络上时，IP地址**不会被另一个容器占用**。
 
@@ -486,7 +474,7 @@ $ docker network connect --ip 172.20.128.2 multi-host-network container2
 
 在网络连接后，容器只能使用另一个容器的**IP地址或名称**进行通信。对于`overlay`支持多主机连接的网络或自定义插件，连接到相同多主机网络但从不同引擎启动的容器也可以通过这种方式进行通信。
 
-您可以将容器连接到一个或多个网络。网络不需要是相同的类型。例如，您可以连接单个容器桥和覆盖网络。
+你可以将容器连接到一个或多个网络。网络不需要是相同的类型。例如，你可以连接单个容器桥和覆盖网络。
 
 ## disconnect 断开
 
@@ -530,7 +518,7 @@ $ docker network inspect my-mac-net -v -f={{.Name}}
 my-mac-net
 ```
 
-## prune 未用删除
+## prune 删除未用
 
 删除所有未使用的网络。未使用的网络是那些没有被任何容器引用的网络，选项支持 `--filter` 过滤，`--force , -f`强制删除。
 
@@ -542,9 +530,9 @@ Deleted Networks:
 my-overlay-net
 ```
 
-### 过滤
+### 删除过滤
 
-过滤标志（`--filter`）格式为“key = value”。如果有多个过滤器，则传递多个标志（例如`--filter "foo=bar" --filter "bif=baz"`）
+过滤选项（`--filter`）格式为“key = value”。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）
 
 目前支持的过滤器是：
 
@@ -576,9 +564,9 @@ $ docker network rm 3695c422697f my-network
 
 就Docker而言，桥接网络使用允许连接到同一桥网络的容器进行通信的软件桥，同时提供与未连接到该桥网络的容器的隔离。Docker桥接驱动程序自动在主机中安装规则，以便不同桥接网络上的容器不能直接相互通信。
 
-桥接网络适用于在**同一个** Docker守护程序主机上运行的容器。对于在不同Docker守护进程主机上运行的容器之间的通信，您可以在操作系统级别管理路由，也可以使用[覆盖网络](https://docs.docker.com/network/overlay/)。
+桥接网络适用于在**同一个** Docker守护程序主机上运行的容器。对于在不同Docker守护进程主机上运行的容器之间的通信，你可以在操作系统级别管理路由，也可以使用[覆盖网络](https://docs.docker.com/network/overlay/)。
 
-启动Docker时，会自动创建一个[默认桥接网络](https://docs.docker.com/network/bridge/#use-the-default-bridge-network)（也称为`bridge`），除非另行指定，否则新启动的容器将连接到该网络。您还可以创建用户定义的自定义网桥。**用户定义的网桥优于默认bridge 网络。**
+启动Docker时，会自动创建一个[默认桥接网络](https://docs.docker.com/network/bridge/#use-the-default-bridge-network)（也称为`bridge`），除非另行指定，否则新启动的容器将连接到该网络。你还可以创建用户定义的自定义网桥。**用户定义的网桥优于默认bridge 网络。**
 
 ## 自定义网桥和默认网桥之间的差异
 
@@ -588,35 +576,35 @@ $ docker network rm 3695c422697f my-network
 
   想象一下带有Web前端和数据库后端的应用程序。外部世界需要访问Web前端（可能在端口80上），但只有前端本身需要访问数据库主机和端口。使用用户定义的桥接器，只需要打开Web端口，并且数据库应用程序不需要打开任何端口，因为Web前端可以通过用户定义的桥接器访问它。
 
-  如果您在默认桥接网络上运行相同的应用程序堆栈，则需要使用`-p`或`--publish` 每个标志打开Web端口和数据库端口。这意味着Docker主机需要通过其他方式阻止对数据库端口的访问。
+  如果你在默认桥接网络上运行相同的应用程序堆栈，则需要使用`-p`或`--publish` 每个选项打开Web端口和数据库端口。这意味着Docker主机需要通过其他方式阻止对数据库端口的访问。
 
 - **用户定义的网桥提供容器之间的自动DNS解析**。
 
-  默认网桥网络上的容器只能通过IP地址访问彼此，除非您使用该[`--link`选项](https://docs.docker.com/network/links/)，这被认为是遗留的。在用户定义的桥接网络上，容器可以通过名称或别名来解析对方。
+  默认网桥网络上的容器只能通过IP地址访问彼此，除非你使用该[`--link`选项](https://docs.docker.com/network/links/)，这被认为是遗留的。在用户定义的桥接网络上，容器可以通过名称或别名来解析对方。
 
   想象一下与前一点相同的应用程序，它具有Web前端和数据库后端。如果你打电话给你的容器`web`和`db`，Web容器可以在连接到数据库容器`db`，无论哪个码头工人托管应用程序堆栈上运行。
 
-  如果您在默认桥接网络上运行相同的应用程序堆栈，则需要在容器之间手动创建链接（使用旧`--link` 标志）。这些链接需要在两个方向上创建，所以您可以看到，这需要两个以上需要通信的容器。或者，您可以操纵`/etc/hosts`容器中的文件，但这会产生难以调试的问题。
+  如果你在默认桥接网络上运行相同的应用程序堆栈，则需要在容器之间手动创建链接（使用旧`--link` 选项）。这些链接需要在两个方向上创建，所以你可以看到，这需要两个以上需要通信的容器。或者，你可以操纵`/etc/hosts`容器中的文件，但这会产生难以调试的问题。
 
 - **容器可以在运行中与用户定义的网络连接和分离**。
 
-  在容器的生命周期中，您可以在运行中将其与用户定义的网络连接或断开连接。要从默认桥接网络中移除容器，您需要停止容器并使用不同的网络选项重新创建容器。
+  在容器的生命周期中，你可以在运行中将其与用户定义的网络连接或断开连接。要从默认桥接网络中移除容器，你需要停止容器并使用不同的网络选项重新创建容器。
 
 - **每个用户定义的网络都会创建一个可配置的网桥**。
 
-  如果您的容器使用默认桥接网络，则可以对其进行配置，但所有容器都使用相同的设置，例如MTU和`iptables`规则。另外，配置默认桥接网络发生在Docker本身之外，并且需要重新启动Docker。
+  如果你的容器使用默认桥接网络，则可以对其进行配置，但所有容器都使用相同的设置，例如MTU和`iptables`规则。另外，配置默认桥接网络发生在Docker本身之外，并且需要重新启动Docker。
 
   用户定义的网桥是使用 `docker network create`创建和配置的。如果不同的应用程序组具有不同的网络要求，则可以在创建时分别配置每个用户定义的桥接器。
 
 - **链接的容器在默认网桥共享环境变量上**。
 
-  最初，在两个容器之间共享环境变量的唯一方式是使用[`--link`标志](https://docs.docker.com/network/links/)链接它们。这种类型的变量共享对于用户定义的网络是不可能的。但是，有共享环境变量的更好方式做法：
+  最初，在两个容器之间共享环境变量的唯一方式是使用[`--link`选项](https://docs.docker.com/network/links/)链接它们。这种类型的变量共享对于用户定义的网络是不可能的。但是，有共享环境变量的更好方式做法：
 
   - 多个容器可以使用Docker**卷来挂载**包含**共享信息的文件或目录**。
   - 多个容器可以一起使用`docker-compose`，组合文件可以定义**共享变量**。
-  - 您可以使用**swarm服务**而不是独立容器，并利用共享[秘密](https://docs.docker.com/engine/swarm/secrets/)和 [配置](https://docs.docker.com/engine/swarm/configs/)。
+  - 你可以使用**swarm服务**而不是独立容器，并利用共享[秘密](https://docs.docker.com/engine/swarm/secrets/)和 [配置](https://docs.docker.com/engine/swarm/configs/)。
 
-连接到同一个用户定义的网桥网络的容器有效地将所有端口相互暴露。要使端口可以在不同容器网络上或非Docker主机上访问，必须使用`-p` `--publish`标志来**发布**该端口。
+连接到同一个用户定义的网桥网络的容器有效地将所有端口相互暴露。要使端口可以在不同容器网络上或非Docker主机上访问，必须使用`-p` `--publish`选项来**发布**该端口。
 
 ## 管理自定义网络
 
@@ -626,7 +614,7 @@ $ docker network rm 3695c422697f my-network
 $ docker network create my-net
 ```
 
-您可以指定子网、IP地址范围、网关和其他选项。
+你可以指定子网、IP地址范围、网关和其他选项。
 
 使用该`docker network rm`命令删除用户定义的网桥。如果有容器连接到当前网络， 请先断开它们。
 
@@ -637,11 +625,11 @@ $ docker network rm my-net
 
 > **docker做了什么？**
 >
-> 当您创建或删除自定义的网桥或连接或断开自定义的网桥的容器时，Docker使用特定于操作系统的工具来管理底层网络基础设施（例如`iptables`，在Linux上添加或删除网桥设备或配置规则）。这些细节应该被视为实施细节。让Docker为您管理自定义网络。
+> 当你创建或删除自定义的网桥或连接或断开自定义的网桥的容器时，Docker使用特定于操作系统的工具来管理底层网络基础设施（例如`iptables`，在Linux上添加或删除网桥设备或配置规则）。这些细节应该被视为实施细节。让Docker为你管理自定义网络。
 
 ## 连接到网络
 
-当你创建一个新的容器时，你可以指定一个或多个`--network`标志。本例将一个`Nginx`容器连接到`my-net`网络。它还将容器中的端口80发布到Docker主机上的端口8080，以便外部客户端可以访问该端口。连接到`my-net` 网络的任何其他容器都可以访问`my-nginx`容器上的所有端口，反之亦然。
+当你创建一个新的容器时，你可以指定一个或多个`--network`选项。本例将一个`Nginx`容器连接到`my-net`网络。它还将容器中的端口80发布到Docker主机上的端口8080，以便外部客户端可以访问该端口。连接到`my-net` 网络的任何其他容器都可以访问`my-nginx`容器上的所有端口，反之亦然。
 
 ```shell
 $ docker create --name my-nginx \
@@ -666,13 +654,13 @@ $ docker network disconnect my-net my-nginx
 
 ## 使用IPv6
 
-如果您需要对Docker容器进行IPv6支持，则需要在创建任何IPv6网络或分配容器IPv6地址之前，在Docker守护程序上[启用该选项](https://docs.docker.com/config/daemon/ipv6/)并重新加载其配置。
+如果你需要对Docker容器进行IPv6支持，则需要在创建任何IPv6网络或分配容器IPv6地址之前，在Docker守护程序上[启用该选项](https://docs.docker.com/config/daemon/ipv6/)并重新加载其配置。
 
-在创建网络时，可以指定`--ipv6`启用IPv6 的标志。不能有选择地禁用默认`bridge`网络上的IPv6支持。
+在创建网络时，可以指定`--ipv6`启用IPv6 的选项。不能有选择地禁用默认`bridge`网络上的IPv6支持。
 
 ## 启用从容器转发到外部网络
 
-默认情况下，来自连接到默认桥接网络的容器的数据**不会**转发到外部网络。要启用转发，您需要更改两个设置。这些不是Docker命令，它们影响Docker主机的内核。
+默认情况下，来自连接到默认桥接网络的容器的数据**不会**转发到外部网络。要启用转发，你需要更改两个设置。这些不是Docker命令，它们影响Docker主机的内核。
 
 1. 配置Linux内核以允许IP转发。
 
@@ -694,7 +682,7 @@ $ docker network disconnect my-net my-nginx
 
 ### 将容器连接到默认网桥
 
-如果没有使用`--network`指定网络，并且指定了网络驱动`--driver`程序，则默认情况下容器已连接到默认`bridge`网络。连接到默认`bridge`网络的容器可以进行通信，但只能通过**IP地址**进行通信，除非它们使用[旧`--link`标志](https://docs.docker.com/network/links/)进行链接。
+如果没有使用`--network`指定网络，并且指定了网络驱动`--driver`程序，则默认情况下容器已连接到默认`bridge`网络。连接到默认`bridge`网络的容器可以进行通信，但只能通过**IP地址**进行通信，除非它们使用[旧`--link`选项](https://docs.docker.com/network/links/)进行链接。
 
 ### 配置默认网桥
 
@@ -805,7 +793,7 @@ $ winpty docker attach alpine1
 / #
 ```
 
-提示符更改为`#`指示您是`root`容器内的用户。使用该`ip addr show`命令显示网络接口`alpine1`的容器内容：
+提示符更改为`#`指示你是`root`容器内的用户。使用该`ip addr show`命令显示网络接口`alpine1`的容器内容：
 
 ```shell
 / # ip addr show
@@ -826,7 +814,7 @@ $ winpty docker attach alpine1
 
 ---
 
-从`alpine1`内部，请确保您可以通过ping连接到互联网`github.com`。该`-c 2`选项将该命令限制为两次`ping` 尝试。
+从`alpine1`内部，请确保你可以通过ping连接到互联网`github.com`。该`-c 2`选项将该命令限制为两次`ping` 尝试。
 
 ```shell
 / # ping -c 2 github.com
@@ -905,7 +893,7 @@ e9261a8c9a19        alpine-net          bridge              local
 7092879f2cc8        none                null                local
 ```
 
-检查`alpine-net`网络。这会向您显示其IP地址以及未连接容器的事实：
+检查`alpine-net`网络。这会向你显示其IP地址以及未连接容器的事实：
 
 ```shell
 $ docker network inspect alpine-net
@@ -936,7 +924,7 @@ $ docker network inspect alpine-net
 
 ---
 
-创建你的四个容器，注意`--network`标志。只能在`docker run`命令期间连接到一个网络，因此需要`docker network attach`以后再使用 `alpine4`以连接到`bridge` 网络。
+创建你的四个容器，注意`--network`选项。只能在`docker run`命令期间连接到一个网络，因此需要`docker network attach`以后再使用 `alpine4`以连接到`bridge` 网络。
 
 ```shell
 $ docker run -dit --name alpine1 --network alpine-net alpine ash
@@ -1173,7 +1161,7 @@ $ docker network rm alpine-net
 
 你也可以使用一个`host`网络中的集群服务，通过将`--network host`传递给`docker container create`命令。在这种情况下，控制运输（管理集群和服务相关的运输）仍然通过覆盖网络发送，但各个群集服务容器使用Docker守护进程的主机网络和端口发送数据。这会产生一些额外的限制。例如，如果服务容器绑定到端口80，则只有一个服务容器可以在给定的群集节点上运行。
 
-如果您的容器或服务**没有发布端口，则主机网络不起作用**。
+如果你的容器或服务**没有发布端口，则主机网络不起作用**。
 
 ## 使用主机网络进行联网
 
@@ -1206,7 +1194,7 @@ $ curl http://192.168.99.100:80
 
 ---
 
-使用以下命令检查您的网络堆栈，首先连接到机器 `docker-machine ssh default`：
+使用以下命令检查你的网络堆栈，首先连接到机器 `docker-machine ssh default`：
 
 - 检查所有网络接口并验证没有创建新接口。
 
@@ -1214,7 +1202,7 @@ $ curl http://192.168.99.100:80
   $ ip addr show
   ```
 
-- 使用该`netstat`命令验证哪个进程绑定到端口80 。您需要使用，`sudo`因为该进程由Docker守护程序用户拥有，否则您将无法查看其名称或PID。
+- 使用该`netstat`命令验证哪个进程绑定到端口80 。你需要使用，`sudo`因为该进程由Docker守护程序用户拥有，否则你将无法查看其名称或PID。
 
   ```shell
   $ sudo netstat -tulpn | grep :80
@@ -1237,12 +1225,12 @@ $ docker container rm my_nginx
 
 在初始化集群或将Docker主机加入现有集群时，将在该Docker主机上**创建两个新网络**：
 
-- 覆盖网络`ingress`，用于处理与集群服务相关的控制和数据传输。当您创建集群服务并且不将其连接到自定义的覆盖网络时，它默认连接到网络`ingress` 。
+- 覆盖网络`ingress`，用于处理与集群服务相关的控制和数据传输。当你创建集群服务并且不将其连接到自定义的覆盖网络时，它默认连接到网络`ingress` 。
 - 桥接网络`docker_gwbridge`，它将单个Docker守护程序连接到集群中的其他守护程序。
 
-您可以使用创建自定义`overlay`网络`docker network create`的方式来创建自定义`bridge`网络。**服务或容器一次可以连接到多个网络**。服务或容器只能通过它们各自连接的网络进行通信。
+你可以使用创建自定义`overlay`网络`docker network create`的方式来创建自定义`bridge`网络。**服务或容器一次可以连接到多个网络**。服务或容器只能通过它们各自连接的网络进行通信。
 
-尽管您可以将swarm服务和独立容器连接到覆盖网络，但默认行为和配置方式是不同的。因此，本章节的其余部分分为适用于所有覆盖网络的操作，适用于集群服务网络的操作以及适用于独立容器使用的覆盖网络的操作。
+尽管你可以将swarm服务和独立容器连接到覆盖网络，但默认行为和配置方式是不同的。因此，本章节的其余部分分为适用于所有覆盖网络的操作，适用于集群服务网络的操作以及适用于独立容器使用的覆盖网络的操作。
 
 ## 默认和自定义overlay网络操作流程
 
@@ -1268,13 +1256,13 @@ $ docker container rm my_nginx
 $ docker network create -d overlay my-overlay
 ```
 
-要创建可以被 集群服务**或** 独立容器，用来运行在其他Docker守护程序上的独立容器通信的`overlay`覆盖网络，请添加`--attachable`标志：
+要创建可以被 集群服务**或** 独立容器，用来运行在其他Docker守护程序上的独立容器通信的`overlay`覆盖网络，请添加`--attachable`选项：
 
 ```sh
 $ docker network create -d overlay --attachable my-attachable-overlay
 ```
 
-您可以指定IP地址范围，子网，网关和其他选项。
+你可以指定IP地址范围，子网，网关和其他选项。
 
 ### 加密`overlay`网络上的数据传输
 
@@ -1325,7 +1313,7 @@ ingress
 
 #### 创建网络
 
-使用该`--ingress`标志创建一个新的`overlay`覆盖网络，以及要设置的自定义选项。本示例将MTU设置为1200，将子网设置为`10.11.0.0/16`，并将网关设置为`10.11.0.2`。
+使用该`--ingress`选项创建一个新的`overlay`覆盖网络，以及要设置的自定义选项。本示例将MTU设置为1200，将子网设置为`10.11.0.0/16`，并将网关设置为`10.11.0.2`。
 
 ```sh
 $ docker network create \
@@ -1401,15 +1389,15 @@ $ docker network create \
 
 ---
 
-默认情况下，发布端口的集群服务使用路由网格来完成。当您连接到任何swarm节点上的已发布端口（无论是否运行给定服务）时，都会透明地将您重定向到正在运行该服务的工作节点。实际上，Docker充当群集服务的负载平衡器。使用路由网格的服务以**虚拟IP（VIP）模式运行**。即使在每个节点上运行的服务（通过`--global`标志）也使用路由网格。**使用路由网格时，不能保证固定Docker节点服务客户端请求**。
+默认情况下，发布端口的集群服务使用路由网格来完成。当你连接到任何swarm节点上的已发布端口（无论是否运行给定服务）时，都会透明地将你重定向到正在运行该服务的工作节点。实际上，Docker充当群集服务的负载平衡器。使用路由网格的服务以**虚拟IP（VIP）模式运行**。即使在每个节点上运行的服务（通过`--global`选项）也使用路由网格。**使用路由网格时，不能保证固定Docker节点服务客户端请求**。
 
-要绕过路由网格，您可以使用**DNS循环（DNSRR）模式**启动服务，方法是将`--endpoint-mode`选项设置为`dnsrr`。**必须在服务前运行自己的负载均衡器**。Docker主机上的服务名称的DNS查询会返回运行该服务的**节点的IP地址列表**。配置**负载均衡器使用此列表并平衡各节点间**的流量。
+要绕过路由网格，你可以使用**DNS循环（DNSRR）模式**启动服务，方法是将`--endpoint-mode`选项设置为`dnsrr`。**必须在服务前运行自己的负载均衡器**。Docker主机上的服务名称的DNS查询会返回运行该服务的**节点的IP地址列表**。配置**负载均衡器使用此列表并平衡各节点间**的流量。
 
 ### 单独的控制和数据传输
 
 ---
 
-默认情况下，尽管集群控制数据传输是**加密**的，但集群管理和应用程序之间的控制数据传输运行在同一个网络上。您可以将Docker配置为使用**单独的网络接口**来处理两种不同类型的传输数据。当你初始化或者加入集群时分别指定`--advertise-addr`和`--datapath-addr`。必须为加入群的每个节点执行这个操作。
+默认情况下，尽管集群控制数据传输是**加密**的，但集群管理和应用程序之间的控制数据传输运行在同一个网络上。你可以将Docker配置为使用**单独的网络接口**来处理两种不同类型的传输数据。当你初始化或者加入集群时分别指定`--advertise-addr`和`--datapath-addr`。必须为加入群的每个节点执行这个操作。
 
 ## `overlay`网络上的独立容器
 
@@ -1417,7 +1405,7 @@ $ docker network create \
 
 ---
 
-`ingress`网络是创造无`--attachable`标志，这意味着**只有集群服务**可以使用它，而不是独立的容器。您可以将独立容器连接到用`--attachable`标志创建的自定义`overlay`覆盖网络。这使运行在不同Docker守护进程上的独立容器能够进行通信，而无需在各个Docker守护进程主机上设置路由。
+`ingress`网络是创造无`--attachable`选项，这意味着**只有集群服务**可以使用它，而不是独立的容器。你可以将独立容器连接到用`--attachable`选项创建的自定义`overlay`覆盖网络。这使运行在不同Docker守护进程上的独立容器能够进行通信，而无需在各个Docker守护进程主机上设置路由。
 
 ### 发布端口
 
@@ -1430,13 +1418,13 @@ $ docker network create \
 
 ### 容器发现
 
-对于大多数情况，您应该连接到服务名称，该服务名称是负载平衡的，并由支持服务的所有容器（“任务”）处理。要获取支持该服务的所有任务的列表，请执行DNS查找`tasks.<service-name>.`
+对于大多数情况，你应该连接到服务名称，该服务名称是负载平衡的，并由支持服务的所有容器（“任务”）处理。要获取支持该服务的所有任务的列表，请执行DNS查找`tasks.<service-name>.`
 
 ## 实例演示
 
 `overlay`网络涉及集群服务。这个演示包括四个不同的部分。可以在Linux，Windows或Mac上运行它们中的每一个，但对于最后两个，需要在别处运行的第二个Docker主机。
 
-- [使用默认的覆盖网络](https://docs.docker.com/network/network-tutorial-overlay/#use-the-default-overlay-network)演示如何使用Docker在初始化或加入群时自动为您设置的默认覆盖网络。这个网络不是生产系统的最佳选择。
+- [使用默认的覆盖网络](https://docs.docker.com/network/network-tutorial-overlay/#use-the-default-overlay-network)演示如何使用Docker在初始化或加入群时自动为你设置的默认覆盖网络。这个网络不是生产系统的最佳选择。
 - [使用用户定义的覆盖网络](https://docs.docker.com/network/network-tutorial-overlay/#use-a-user-defined-overlay-network)显示如何创建和使用自己的自定义覆盖网络来连接服务。建议用于在生产中运行的服务。
 - [为独立容器使用覆盖网络](https://docs.docker.com/network/network-tutorial-overlay/#use-an-overlay-network-for-standalone-containers) 显示了如何使用覆盖网络在不同Docker守护进程上的独立容器之间进行通信。
 - [通过容器和群集服务](https://docs.docker.com/network/network-tutorial-overlay/#communicate-between-a-container-and-a-swarm-service) 之间的通信，使用可附加覆盖网络，在独立容器和群集服务之间建立通信。这在Docker 17.06和更高版本中受支持。
@@ -1455,7 +1443,7 @@ $ docker-machine create worker-1 --driver virtualbox
 $ docker-machine create worker-1 --driver virtualbox
 ```
 
-如果您没有三台主机，那么一个简单的解决方案就是在云提供商（例如Amazon EC2）上设置三台Ubuntu主机，所有这些主机都位于同一网络上，并允许该网络上所有主机的所有通信（使用诸如EC2安全组），然后按照[Ubuntu上Docker CE](https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/)的[安装说明进行操作](https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/)。
+如果你没有三台主机，那么一个简单的解决方案就是在云提供商（例如Amazon EC2）上设置三台Ubuntu主机，所有这些主机都位于同一网络上，并允许该网络上所有主机的所有通信（使用诸如EC2安全组），然后按照[Ubuntu上Docker CE](https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/)的[安装说明进行操作](https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/)。
 
 #### 创建和加入集群
 
@@ -1463,7 +1451,7 @@ $ docker-machine create worker-1 --driver virtualbox
 
 在此过程结束时，所有三台Docker主机都将加入集群，并使用名为`ingress`覆盖网络连接在一起。
 
-1、在`master`主机上初始化集群体。如果主机只有一个网络接口，则该`--advertise-addr`标志是可选的。
+1、在`master`主机上初始化集群体。如果主机只有一个网络接口，则该`--advertise-addr`选项是可选的。
 
 ```shell
 $ docker-machine ip
@@ -1478,7 +1466,7 @@ To add a manager to this swarm, run 'docker swarm join-token manager' and follow
 
 记下打印的文本，因为这包含将用于加入`worker-1`和`worker-2`集群的数据和命令。**令牌是存储在密码管理器中**。
 
-2、在`worker-1`主机上执行加入集群命令。如果主机只有一个网络接口，则该`--advertise-addr`标志是可选的。
+2、在`worker-1`主机上执行加入集群命令。如果主机只有一个网络接口，则该`--advertise-addr`选项是可选的。
 
 ```shell
 $ docker swarm join --token <TOKEN> \
@@ -1527,7 +1515,7 @@ NETWORK ID          NAME                DRIVER              SCOPE
 74nmcp6kzzan        ingress             overlay             swarm
 ```
 
-`docker_gwbridge`将`ingress`网络连接到Docker主机的网络接口，以便数据流量可以流入和流出集群管理节点和工作节点。如果您创建集群服务并且未指定网络，则它们将连接到`ingress`网络。建议您为每个应用程序或一组可以一起工作的应用程序使用**单独的覆盖网络**。在下一个过程中，您将创建两个覆盖网络并将服务连接到每个覆盖网络。
+`docker_gwbridge`将`ingress`网络连接到Docker主机的网络接口，以便数据流量可以流入和流出集群管理节点和工作节点。如果你创建集群服务并且未指定网络，则它们将连接到`ingress`网络。建议你为每个应用程序或一组可以一起工作的应用程序使用**单独的覆盖网络**。在下一个过程中，你将创建两个覆盖网络并将服务连接到每个覆盖网络。
 
 #### 创建网络和服务
 
@@ -1539,7 +1527,7 @@ NETWORK ID          NAME                DRIVER              SCOPE
 $ docker network create -d overlay nginx-net
 ```
 
-您不需要在其他节点上创建覆盖网络，因为当其中一个节点开始运行需要它的服务任务时，它将自动创建。
+你不需要在其他节点上创建覆盖网络，因为当其中一个节点开始运行需要它的服务任务时，它将自动创建。
 
 2、在`manager`节点上面，创建一个5个副本的Nginx服务并连接`nginx-net`。该服务将向外界公布80端口。所有服务任务容器都可以相互通信而无需打开任何端口。
 
@@ -1554,7 +1542,7 @@ $ docker service create \
   nginx
 ```
 
-默认的发布模式是`ingress`，当没有为`--publish`指定模式时，意味着如果浏览`manager`、`worker-1`或`worker-2`上的端口80。你会被连接到端口80上的5项服务任务之一，任务正在你当前浏览到的节点上运行。如果你想发布端口使用 `host`模式，你可以添加到`--publish` `mode=host`输出。但是，由于只有一个服务任务可以绑定给定节点上的给定端口，因此您也应该使用`--mode global`而不是`--replicas=5`这种情况。
+默认的发布模式是`ingress`，当没有为`--publish`指定模式时，意味着如果浏览`manager`、`worker-1`或`worker-2`上的端口80。你会被连接到端口80上的5项服务任务之一，任务正在你当前浏览到的节点上运行。如果你想发布端口使用 `host`模式，你可以添加到`--publish` `mode=host`输出。但是，由于只有一个服务任务可以绑定给定节点上的给定端口，因此你也应该使用`--mode global`而不是`--replicas=5`这种情况。
 
 3、运行`docker service ls`以监视服务启动的进度
 
@@ -1564,7 +1552,7 @@ ID                  NAME                MODE                REPLICAS            
 ioqgplafut24        my-nginx            replicated          5/5                 nginx:latest        *:80->80/tcp
 ```
 
-4、检查`master`网络`nginx-net`，`worker-1`和`worker-2`。不需要手动创建它`worker-1`， `worker-2`。因为Docker为您创建了它。输出将很长，但注意`Containers`和`Peers`部分。`Containers`列出了从该主机连接到覆盖网络的所有服务任务（或独立容器）。
+4、检查`master`网络`nginx-net`，`worker-1`和`worker-2`。不需要手动创建它`worker-1`， `worker-2`。因为Docker为你创建了它。输出将很长，但注意`Containers`和`Peers`部分。`Containers`列出了从该主机连接到覆盖网络的所有服务任务（或独立容器）。
 
 ```shell
 $ docker network inspect nginx-net
@@ -1729,7 +1717,7 @@ $ docker swarm join --token SWMTKN-1-50ewgk565kwml1tighphq8r7u7vf78ssztfpy8tq1rh
 This node joined a swarm as a worker.
 ```
 
-如果节点未能加入群，则`docker swarm join`命令超时。要解决需要运行`docker swarm leave --force`，在`host2`上验证您的网络和防火墙设置，然后再试一次。
+如果节点未能加入群，则`docker swarm join`命令超时。要解决需要运行`docker swarm leave --force`，在`host2`上验证你的网络和防火墙设置，然后再试一次。
 
 #### 创建网络
 
@@ -1740,7 +1728,7 @@ $ docker network create --driver=overlay --attachable test-net
 uqsof8phj3ak0rq9k86zta6ht
 ```
 
-> **注意**：返回的**网络ID** - 当您连接到**网络**时，您将再次看到它。
+> **注意**：返回的**网络ID** - 当你连接到**网络**时，你将再次看到它。
 
 #### 启动容器
 
@@ -1815,7 +1803,7 @@ PING alpine1 (10.0.0.4): 56 data bytes
 round-trip min/avg/max = 0.068/0.090/0.112 ms
 ```
 
-这两个容器与连接两台主机的覆盖网络进行通信。如果您在`host2`上运行另一个未分离的`alpine`容器，则可以从`host2 `ping `alpine1`（添加用于自动清除容器的`remove`选项）：：
+这两个容器与连接两台主机的覆盖网络进行通信。如果你在`host2`上运行另一个未分离的`alpine`容器，则可以从`host2 `ping `alpine1`（添加用于自动清除容器的`remove`选项）：：
 
 ```shell
 $ docker run -it --rm --name alpine3 --network test-net alpine
@@ -1847,7 +1835,7 @@ round-trip min/avg/max = 0.116/0.122/0.128 ms
 
 #### 删除容器和网络
 
-您必须独立停止并移除每个主机上的容器，因为Docker守护进程独立运行，并且这些是独立的容器。你只需要删除网络，因为当你停下 `alpine2`，`test-net`消失。
+你必须独立停止并移除每个主机上的容器，因为Docker守护进程独立运行，并且这些是独立的容器。你只需要删除网络，因为当你停下 `alpine2`，`test-net`消失。
 
 在`host2`停止`alpine2`，检查`test-net`被自动删除，然后删除`alpine2`：
 
@@ -1870,7 +1858,7 @@ $ docker network rm test-net
 
 #### 查看网络
 
-打开一个终端窗口，列出当前的网络。如果您从未在此Docker守护程序中添加网络或初始化群集，可能会看到不同的网络，但您至少应该看到这些网络（网络ID将会不同）：
+打开一个终端窗口，列出当前的网络。如果你从未在此Docker守护程序中添加网络或初始化群集，可能会看到不同的网络，但你至少应该看到这些网络（网络ID将会不同）：
 
 ```sh
 $ docker network ls
@@ -1885,7 +1873,7 @@ ynu4c3182rby        ingress             overlay             swarm
 
 #### 启动容器
 
-启动两个运行`ash`的容器`alpine`，这是`alpine`的默认shell，而不是`bash`。该`-dit`标志意味着要首先分离容器在后台运行并可以互动（与输入到它的能力），并支持TTY（这样你就可以看到输入和输出）。由于使用后台分离模式，所以不会立即连接到容器进行交互，但容器的ID将被打印。由于没有指定任何 `--network`选项，因此容器将连接到默认`bridge`网络。
+启动两个运行`ash`的容器`alpine`，这是`alpine`的默认shell，而不是`bash`。该`-dit`选项意味着要首先分离容器在后台运行并可以互动（与输入到它的能力），并支持TTY（这样你就可以看到输入和输出）。由于使用后台分离模式，所以不会立即连接到容器进行交互，但容器的ID将被打印。由于没有指定任何 `--network`选项，因此容器将连接到默认`bridge`网络。
 
 ```sh
 $ docker run -dit --name alpine1 alpine ash
@@ -1945,7 +1933,7 @@ $ docker attach alpine1
 / #
 ```
 
-提示符更改为`#`指示您是`root`容器内的用户。使用该`ip addr show`命令显示网络接口`alpine1`的容器内容：
+提示符更改为`#`指示你是`root`容器内的用户。使用该`ip addr show`命令显示网络接口`alpine1`的容器内容：
 
 ```
 # ip addr show
@@ -1963,7 +1951,7 @@ $ docker attach alpine1
 
 #### ping 测试
 
-从内部`alpine1`，请确保您可以通过ping连接到互联网`github.com` 其中`-c 2`标志限制命令`ping` 两次尝试。
+从内部`alpine1`，请确保你可以通过ping连接到互联网`github.com` 其中`-c 2`选项限制命令`ping` 两次尝试。
 
 ```sh
 # ping -c 2 github.com
@@ -1999,24 +1987,24 @@ $ docker container rm alpine1 alpine2
 
 # macvlan 网络应用
 
-一些应用程序，尤其是监视网络流量的传统应用程序，希望直接连接到物理网络。在这种情况下，您可以使用`macvlan`网络驱动程序为每个容器的**虚拟网络接口分配MAC地址**，使其看起来像是直接连接到物理网络的物理网络接口。在这种情况下，您需要指定Docker主机上的物理接口用于Macvlan，以及Macvlan的子网和网关。您甚至可以使用不同的物理网络接口来隔离Macvlan网络。记住以下几点：
+一些应用程序，尤其是监视网络流量的传统应用程序，希望直接连接到物理网络。在这种情况下，你可以使用`macvlan`网络驱动程序为每个容器的**虚拟网络接口分配MAC地址**，使其看起来像是直接连接到物理网络的物理网络接口。在这种情况下，你需要指定Docker主机上的物理接口用于Macvlan，以及Macvlan的子网和网关。你甚至可以使用不同的物理网络接口来隔离Macvlan网络。记住以下几点：
 
-- 由于IP地址耗尽或“VLAN传播”（这种情况下，您的网络中存在不适当的大量唯一MAC地址）非常容易导致网络意外损坏。
-- 您的网络设备需要能够处理“混杂模式”，其中一个物理接口可以分配多个MAC地址。
-- 如果您的应用程序可以使用桥接器（在单个Docker主机上）或覆盖层（跨多个Docker主机进行通信）工作，那么这些解决方案长期来看可能会更好。
+- 由于IP地址耗尽或“VLAN传播”（这种情况下，你的网络中存在不适当的大量唯一MAC地址）非常容易导致网络意外损坏。
+- 你的网络设备需要能够处理“混杂模式”，其中一个物理接口可以分配多个MAC地址。
+- 如果你的应用程序可以使用桥接器（在单个Docker主机上）或覆盖层（跨多个Docker主机进行通信）工作，那么这些解决方案长期来看可能会更好。
 
 ## 创建一个macvlan网络
 
 当创建Macvlan网络时，它可以处于网桥模式或802.1q主干网桥模式。
 
 - 在网桥模式下，Macvlan流传输通过主机上的物理设备。
-- 在802.1q中继网桥模式下，流量传输通过Docker在运行中创建的802.1q子接口。这使您可以更细粒度地控制路由和过滤。
+- 在802.1q中继网桥模式下，流量传输通过Docker在运行中创建的802.1q子接口。这使你可以更细粒度地控制路由和过滤。
 
 ### 桥接模式
 
 ---
 
-要创建与给定物理网络接口桥接的Macvlan网络，请使用`docker network create` `--driver macvlan`命令。您还需要指定`parent`，这是流量在Docker主机上实际通过的接口。
+要创建与给定物理网络接口桥接的Macvlan网络，请使用`docker network create` `--driver macvlan`命令。你还需要指定`parent`，这是流量在Docker主机上实际通过的接口。
 
 ```sh
 $ docker network create -d macvlan \
@@ -2053,7 +2041,7 @@ $ docker network  create  -d macvlan \
 
 ---
 
-在上面的例子中，你仍然使用L3桥。您可以改为使用`ipvlan` ，并获得L2桥。指定`-o ipvlan_mode=l2`。
+在上面的例子中，你仍然使用L3桥。你可以改为使用`ipvlan` ，并获得L2桥。指定`-o ipvlan_mode=l2`。
 
 ```shell
 $ docker network create -d ipvlan \
@@ -2066,7 +2054,7 @@ $ docker network create -d ipvlan \
 
 ## 使用IPv6
 
-如果您已将[Docker守护程序配置为允许IPv6](https://docs.docker.com/config/daemon/ipv6/)，则可以使用`IPv4/IPv6` Macvlan网络。
+如果你已将[Docker守护程序配置为允许IPv6](https://docs.docker.com/config/daemon/ipv6/)，则可以使用`IPv4/IPv6` Macvlan网络。
 
 ```sh
 $ docker network  create  -d macvlan \
@@ -2085,7 +2073,7 @@ $ docker network  create  -d macvlan \
 
 ### Bridge 桥接网络
 
-在简单网桥中，您的流量传输经过`eth0`Docker并使用其MAC地址将流量**路由**到您的容器。要将网络中的设备联网，您的容器看起来就是物理连接到网络上的。
+在简单网桥中，你的流量传输经过`eth0`Docker并使用其MAC地址将流量**路由**到你的容器。要将网络中的设备联网，你的容器看起来就是物理连接到网络上的。
 
 1. 创建一个名为`my-macvlan-net`的`macvlan`网络。修改`subnet`，`gateway`和`parent`值。
 
@@ -2097,7 +2085,7 @@ $ docker network  create  -d macvlan \
      my-macvlan-net
    ```
 
-   您可以使用`docker network ls`和`docker network inspect pub_net` 命令来验证网络是否存在，并且是否是`macvlan`类型的网络。
+   你可以使用`docker network ls`和`docker network inspect pub_net` 命令来验证网络是否存在，并且是否是`macvlan`类型的网络。
 
 2. 启动一个`alpine`容器并将其连接到`my-macvlan-net`网络。，`-dit`选项在后台启动容器，`--rm`选项意味着当它停止时该容器即被删除。
 
@@ -2161,7 +2149,7 @@ $ docker network  create  -d macvlan \
 
 ---
 
-本示例中数据流量通过`eth0`（调用`eth0.10`）的子接口传输，并且Docker使用其MAC地址将流量路由到您的容器。要将网络中的设备联网，您的容器看起来就是物理连接到网络上的。
+本示例中数据流量通过`eth0`（调用`eth0.10`）的子接口传输，并且Docker使用其MAC地址将流量路由到你的容器。要将网络中的设备联网，你的容器看起来就是物理连接到网络上的。
 
 1. 创建一个名为`my-8021q-macvlan-net`的`macvlan`网络，修改 `subnet`，`gateway`和`parent`值。
 
@@ -2175,7 +2163,7 @@ $ docker network  create  -d macvlan \
 
    可以使用`docker network ls`和`docker network inspect my-8021q-macvlan-net` 命令来验证网络是否存在，是`macvlan`网络还是父级`eth0.10`。可以在Docker主机上使用`ip addr show`以验证接口`eth0.10`是否存在并具有单独的IP地址
 
-2. 启动一个`alpine`容器并将其连接到`my-8021q-macvlan-net` 网络。`-dit`标志在后台启动容器，`--rm`标志意味着当它停止容器就被删除。
+2. 启动一个`alpine`容器并将其连接到`my-8021q-macvlan-net` 网络。`-dit`选项在后台启动容器，`--rm`选项意味着当它停止容器就被删除。
 
    ```shell
    $ docker run --rm -itd \
@@ -2227,7 +2215,7 @@ $ docker network  create  -d macvlan \
    172.16.86.0/24 dev eth0 scope link  src 172.16.86.2
    ```
 
-5. 停止容器（由于`--rm`标志，Docker会将容器删除），并删除网络。
+5. 停止容器（由于`--rm`选项，Docker会将容器删除），并删除网络。
 
    ```shell
    $ docker container stop my-second-macvlan-alpine
@@ -2239,7 +2227,7 @@ $ docker network  create  -d macvlan \
 
 
 
-如果要完全禁用容器上的网络，则可以在启动容器时使用`--network none`标志。在容器内，仅创建回送设备。
+如果要完全禁用容器上的网络，则可以在启动容器时使用`--network none`选项。在容器内，仅创建回送设备。
 
 1. 创建容器。
 
@@ -2265,7 +2253,7 @@ $ docker network  create  -d macvlan \
 
    第二个命令返回空白，因为没有路由。
 
-3. 停止容器。它被自动删除，因为使用了`--rm`标志创建的。
+3. 停止容器。它被自动删除，因为使用了`--rm`选项创建的。
 
    ```sh
    $ docker container stop no-net-alpine
@@ -2303,7 +2291,7 @@ $ docker network  create  -d macvlan \
 
 ### 在Docker的规则之前添加iptables策略
 
-所有Docker的`iptables`规则都被添加到`DOCKER`链中。不要手动操作此配置。如果您需要添加在Docker规则之前加载的规则，请将其添加到`DOCKER-USER`链配置中。这些规则在Docker自动创建其他规则之前加载。
+所有Docker的`iptables`规则都被添加到`DOCKER`链中。不要手动操作此配置。如果你需要添加在Docker规则之前加载的规则，请将其添加到`DOCKER-USER`链配置中。这些规则在Docker自动创建其他规则之前加载。
 
 #### 限制连接到Docker守护进程
 
@@ -2313,19 +2301,19 @@ $ docker network  create  -d macvlan \
 $ iptables -I DOCKER-USER -i ext_if ! -s 192.168.1.1 -j DROP
 ```
 
-您可以改为允许来自子网的连接。以下规则仅允许从子网`192.168.1.0/24`进行访问：
+你可以改为允许来自子网的连接。以下规则仅允许从子网`192.168.1.0/24`进行访问：
 
 ```sh
 $ iptables -I DOCKER-USER -i ext_if ! -s 192.168.1.0/24 -j DROP
 ```
 
-最后，您可以使用`--src-range`指定一个可接受的IP地址范围 （请记住，在使用`--src-range`或`--dst-range`时还要添加`-m iprange`）：
+最后，你可以使用`--src-range`指定一个可接受的IP地址范围 （请记住，在使用`--src-range`或`--dst-range`时还要添加`-m iprange`）：
 
 ```sh
 $ iptables -I DOCKER-USER -m iprange -i ext_if ! --src-range 192.168.1.1-192.168.1.3 -j DROP
 ```
 
-您可以使用`-s`或`--src-range`与`-d`或`--dst-range`结合起来控制源和目标。例如，如果Docker守护进程同时监听`192.168.1.99`和`10.1.2.3`，则可以制定特定于`10.1.2.3`的规则并保持`192.168.1.99`处于打开状态。
+你可以使用`-s`或`--src-range`与`-d`或`--dst-range`结合起来控制源和目标。例如，如果Docker守护进程同时监听`192.168.1.99`和`10.1.2.3`，则可以制定特定于`10.1.2.3`的规则并保持`192.168.1.99`处于打开状态。
 
 ### 防止Docker操纵iptables
 
@@ -2349,15 +2337,15 @@ $ iptables -I DOCKER-USER -m iprange -i ext_if ! --src-range 192.168.1.1-192.168
 
 默认情况下，容器会为每个连接到Docker网络分配一个IP地址。IP地址分配是从网络池中获取的，因此Docker守护程序有效地充当每个容器的DHCP服务器。每个网络也有一个默认的子网掩码和网关。
 
-当容器启动时，它使用 `--network`只能连接到单个网络。但是，您可以使用运行的容器连接到多个网络`docker network connect`。使用`--network`选项启动容器时 ，可以使用`--ip`或`--ip6`选项指定分配给网络上容器的IP地址。
+当容器启动时，它使用 `--network`只能连接到单个网络。但是，你可以使用运行的容器连接到多个网络`docker network connect`。使用`--network`选项启动容器时 ，可以使用`--ip`或`--ip6`选项指定分配给网络上容器的IP地址。
 
-当使用现有容器连接到不同的网络时 ，可以使用`docker network connect`命令上的`--ip`或`--ip6`标志在附加网络上指定容器的IP地址。
+当使用现有容器连接到不同的网络时 ，可以使用`docker network connect`命令上的`--ip`或`--ip6`选项在附加网络上指定容器的IP地址。
 
-以同样的方式，容器的主机名默认为Docker中的容器名称。您可以使用`--hostname`覆盖主机名。使用`docker network connect`连接到现有网络时，可以使用该`--alias` 标志为网络上的容器指定附加网络别名。
+以同样的方式，容器的主机名默认为Docker中的容器名称。你可以使用`--hostname`覆盖主机名。使用`docker network connect`连接到现有网络时，可以使用该`--alias` 选项为网络上的容器指定附加网络别名。
 
 ### DNS服务
 
-默认情况下，容器会继承Docker守护程序的DNS设置，包括`/etc/hosts`和`/etc/resolv.conf`。您可以基于每个容器覆盖这些设置。
+默认情况下，容器会继承Docker守护程序的DNS设置，包括`/etc/hosts`和`/etc/resolv.conf`。你可以基于每个容器覆盖这些设置。
 
 | 选项           | 描述                                                         |
 | -------------- | ------------------------------------------------------------ |
@@ -2368,20 +2356,20 @@ $ iptables -I DOCKER-USER -m iprange -i ext_if ! --src-range 192.168.1.1-192.168
 
 ### 代理
 
-如果您的容器需要使用代理服务器，请参阅 [使用代理服务器](https://docs.docker.com/network/proxy/)。
+如果你的容器需要使用代理服务器，请参阅 [使用代理服务器](https://docs.docker.com/network/proxy/)。
 
 ## 使用代理服务
 
-如果您的容器需要使用HTTP、HTTPS、FTP代理服务器，则可以采用不同的方式对其进行配置：
+如果你的容器需要使用HTTP、HTTPS、FTP代理服务器，则可以采用不同的方式对其进行配置：
 
-- 在Docker 17.07及更高版本中，您可以 [配置Docker客户端](https://docs.docker.com/network/proxy/#configure-the-docker-client)以自动将代理信息传递给容器。
-- 在Docker 17.06及更低版本中，您必须 在容器中[设置适当的环境变量](https://docs.docker.com/network/proxy/#use-environment-variables)。您可以在构建图像时（这会使图像的可移植性降低）或创建或运行容器时执行此操作。
+- 在Docker 17.07及更高版本中，你可以 [配置Docker客户端](https://docs.docker.com/network/proxy/#configure-the-docker-client)以自动将代理信息传递给容器。
+- 在Docker 17.06及更低版本中，你必须 在容器中[设置适当的环境变量](https://docs.docker.com/network/proxy/#use-environment-variables)。你可以在构建镜像时（这会使镜像的可移植性降低）或创建或运行容器时执行此操作。
 
 ### 使用 Docker 客户端方式
 
-1. 在Docker客户端上，创建或编辑`~/.docker/config.json`启动容器的用户的主目录中的文件。添加JSON（如下所示），用代理服务器的类型`httpsProxy`或`ftpProxy`必要时替换代理服务器的类型，并替换代理服务器的地址和端口。您可以同时配置多个代理服务器。
+1. 在Docker客户端上，创建或编辑`~/.docker/config.json`启动容器的用户的主目录中的文件。添加JSON（如下所示），用代理服务器的类型`httpsProxy`或`ftpProxy`必要时替换代理服务器的类型，并替换代理服务器的地址和端口。你可以同时配置多个代理服务器。
 
-   通过将`noProxy`设置为一个或多个逗号分隔的IP地址或主机，您可以选择性地排除通过代理服务器的主机或范围。如本例所示，支持使用字符`*`作为通配符。
+   通过将`noProxy`设置为一个或多个逗号分隔的IP地址或主机，你可以选择性地排除通过代理服务器的主机或范围。如本例所示，支持使用字符`*`作为通配符。
 
    ```json
    {
@@ -2400,7 +2388,7 @@ $ iptables -I DOCKER-USER -m iprange -i ext_if ! --src-range 192.168.1.1-192.168
 
 ### 使用 Docker 环境变量方式
 
-当创建图像和在创建、运行容器时使用`--env`标记时，可以将一个或多个以下变量设置为适当的值。此方法使图像的**可移植性降低**，因此如果您的Docker 17.07或更高版本，则应该[配置Docker客户端](https://docs.docker.com/network/proxy/#configure-the-docker-client) 。
+当创建镜像和在创建、运行容器时使用`--env`标记时，可以将一个或多个以下变量设置为适当的值。此方法使镜像的**可移植性降低**，因此如果你的Docker 17.07或更高版本，则应该[配置Docker客户端](https://docs.docker.com/network/proxy/#configure-the-docker-client) 。
 
 | 变量          | Dockerfile示例                                    | `docker run` 例                                     |
 | ------------- | ------------------------------------------------- | --------------------------------------------------- |
@@ -2409,3 +2397,645 @@ $ iptables -I DOCKER-USER -m iprange -i ext_if ! --src-range 192.168.1.1-192.168
 | `FTP_PROXY`   | `ENV FTP_PROXY "ftp://127.0.0.1:3001"`            | `--env FTP_PROXY "ftp://127.0.0.1:3001"`            |
 | `NO_PROXY`    | `ENV NO_PROXY "*.test.example.com,.example2.com"` | `--env NO_PROXY "*.test.example.com,.example2.com"` |
 
+# 传统网络
+
+## 传统容器连接
+
+在安装Docker时自动创建的Docker默认`bridge`网络中的旧容器链接。可以使用Docker链接功能来允许容器相互发现并安全地将有关一个容器的信息传输到另一个容器。
+
+> **警告**：`--link`选项是Docker的遗留功能。它最终可能会被删除。除非你绝对需要继续使用它，否则我们建议你使用用户定义的网络来促进两个容器之间的通信而不是使用 `--link`。用户定义的网络不支持的一个功能是在容器之间共享环境变量。但是，你可以使用其他机制（如卷）以受控制的方式在容器之间共享环境变量。
+>
+> 请参阅[用户定义的网桥和默认网桥之间的差异](https://docs.docker.com/network/bridge/##differences-between-user-defined-bridges-and-the-default-bridge) 以获取一些使用替代方法`--link`。
+
+### 使用网络端口映射容器连接
+
+---
+
+#### 自动端口映射
+
+假设你使用此命令来运行简单的Python Flask应用程序：
+
+```sh
+$ docker run -d -P training/webapp python app.py
+```
+
+创建容器时`-P`选项用于**自动将其内部的任何网络端口**映射到Docker主机上**临时端口范围**内的随机端口。接下来运行`docker ps`时，可以看到容器中的端口5000已绑定到主机上的端口32768。
+
+```sh
+$ docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED              STATUS              PORTS                     NAMES
+aa4797af9359        training/webapp     "python app.py"     About a minute ago   Up About a minute   0.0.0.0:32768->5000/tcp   dazzling_mclean
+```
+
+#### 固定端口映射
+
+如何使用`-p`选项将容器的端口绑定到特定的端口，这里主机的端口80映射到容器的端口5000：
+
+```sh
+$ docker run -d -p 80:5000 training/webapp python app.py
+```
+
+这不是一个好主意，因为它将你**限制在特定端口**上的一个容器上。
+
+#### 随机范围映射
+
+可以指定一系列主机端口来绑定与默认**临时端口范围**不同的容器端口：
+
+```sh
+$ docker run -d -p 8000-9000:5000 training/webapp python app.py
+```
+
+容器中的端口5000绑定到主机上8000到9000之间的随机可用端口。
+
+#### 固定IP端口映射
+
+还有其他一些方法可以配置`-p`选项。默认情况下，`-p`选项将指定的端口绑定到主机上的所有接口。但是你也可以指定一个绑定到一个特定的接口，例如只对`localhost`。
+
+```sh
+$ docker run -d -p 127.0.0.1:80:5000 training/webapp python app.py
+```
+
+这会将容器内的端口5000绑定到主机`localhost`或`127.0.0.1`接口上的端口80 。
+
+#### 动态端口映射
+
+将容器的端口5000绑定到动态端口，但仅限于`localhost`端口可用：
+
+```sh
+$ docker run -d -p 127.0.0.1::5000 training/webapp python app.py
+```
+
+#### 端口协议映射
+
+还可以通过添加尾随`/udp`或绑定来绑定UDP和SCTP（通常由诸如SIGTRAN，Diameter和S1AP / X2AP等电信协议使用）端口`/sctp`。例如：
+
+```sh
+$ docker run -d -p 127.0.0.1:80:5000/udp training/webapp python app.py
+```
+
+#### 查看映射端口
+
+当前端口绑定的有用快捷方式，对于显示特定的端口配置`docker port`也很有用。例如，如果已经将容器端口绑定到 `localhost`主机上，那么`docker port`输出反映了这一点。
+
+```sh
+$ docker port naughty_turing
+5000/tcp -> 0.0.0.0:80
+
+$ docker port naughty_turing 5000
+0.0.0.0:80
+```
+
+> **注意**：该`-p`选项可以多次使用来配置多个端口。
+
+### 使用链接系统连接容器
+
+---
+
+网络端口映射不是Docker容器可以互相连接的唯一方式。Docker也有一个链接系统，允许你**将多个容器链接在一起**，并将连接信息从一个连接到另一个。当容器被链接时，关于**源容器的信息可以被发送到收件人容器**。这使得收件人可以查看描述源容器方面的特定数据。
+
+为了建立链接，Docker依赖于容器的名字。已经看到创建的每个容器都有一个自动创建的名称。你也可以自己命名容器，这个命名提供了两个有用的功能：
+
+1. 容器命名可以很方便地使用特定的功能，这样可以更容易记住它们，例如命名包含Web应用程序的容器`web`。
+2. 它为Docker提供了一个引用点，允许它引用其他容器，例如，可以指定将容器`web`链接到容器`db`。
+
+你可以使用`--name`选项为容器命名，例如：
+
+```sh
+$ docker run -d -P --name python_web training/webapp python app.py
+```
+
+这将启动一个新的容器并使用`--name`选项来命名该容器`python_web`。你可以使用该`docker ps`命令查看容器的名称 。
+
+```shell
+$ docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                     NAMES
+b39604ac20ee        training/webapp     "python app.py"     1 second ago        Up 3 seconds        0.0.0.0:32769->5000/tcp   python_web
+```
+
+也可以使用`docker inspect`返回容器的名称。
+
+> **注意**：容器名称必须是唯一的。这意味着你只能调用一个`python_web`容器。如果要重新使用容器名称，则必须先删除旧容器（`docker container rm`），然后才能创建具有相同名称的新容器。作为替代方案，你可以`--rm`在`docker run`命令中使用选项。这会在停止后立即删除容器。
+
+### 使用链接系统进行容器通信
+
+---
+
+链接允许容器**相互发现**并安全地将有关一个容器的信息传输到另一个容器。当你设置链接时，你会在源容器和收件人容器之间**创建管道**。接收者可以访问关于源的选择数据。要创建链接，请使用`--link` 选项。首先，创建一个包含数据库的新容器。
+
+```sh
+# -d 分离模式，后台运行
+$ docker run -d --name db training/postgres
+```
+
+这将从`training/postgres`镜像创建一个名为`db`的新容器，其中包含`PostgreSQL`数据库。
+
+现在，需要删除`web`先前创建的容器，以便将其替换为链接的容器：
+
+```sh
+# -f 强制删除
+$ docker container rm -f python_web
+```
+
+现在，创建一个新`python_web`容器并将其与`db`容器链接起来。
+
+```sh
+# --link 链接容器
+$ docker run -d -P --name python_web --link db:postgres_db training/webapp python app.py
+```
+
+这将新`python_web`容器与先前创建的容器`db`链接起来。该`--link`参数的形式是：
+
+```sh
+--link <name or id>:alias
+```
+
+其中`name`是我们链接到的容器的名称，而`alias`是链接名称的别名。`--link`选项也采用以下形式：
+
+```sh
+--link <name or id>
+```
+
+在这种情况下，别名与名称相同。也可以把前面的例子写成：
+
+```sh
+# 别名和容器相同
+$ docker run -d -P --name python_web --link db training/webapp python app.py
+```
+
+检查你的链接容器`docker inspect`：
+
+```sh
+$ docker inspect -f "{{ .HostConfig.Links }}" python_web
+[/db:/python_web/db]
+```
+
+可以看到`python_web`容器现在已链接到`db`容器 `python_web/db`。它允许它访问有关`db`容器的信息。
+
+那么连接容器究竟做了什么？已经了解到，链接允许源容器向收件人容器提供有关其自身的信息。在我们的例子中，收件人`python_web`可以访问关于`db`源的信息。因此，Docker在容器之间创建一个安全隧道，不需要在容器外部公开任何端口。当我们启动 `db`容器时，我们没有使用`-P`或 `-p`选项。这是链接的一大好处：**我们不需要将源容器（这里是PostgreSQL数据库）公开到网络中**。
+
+Docker通过两种方式将源容器的连接信息公开给收件人容器：
+
+- 环境变量
+- 更新`/etc/hosts`文件。
+
+#### 环境变量
+
+---
+
+当链接容器时，Docker会创建几个环境变量。Docker根据`--link`参数**自动在目标容器中创建环境变量**。它还**公开源容器中来自Docker的所有环境变量**。这些包括以下变量：
+
+- 源容器的`Dockerfile`中的`ENV`命令
+- 源容器启动时，`docker run`命令中的`-e`，`--env`和`--env-file`选项
+
+这些环境变量允许在目标容器内对与源容器相关的信息进行编程式发现。
+
+> **警告**：重要的是：源自容器内的Docker的**所有**环境变量都可供链接到它的**任何**容器使用。如果敏感数据存储在其中，这可能会产生严重的安全隐患。
+
+Docker为`--link`参数中列出的每个目标容器设置一个`<alias>_NAME`环境变量。例如，如果一个名为`web`的新容器通过`--link db：webdb`链接到一个名为`db`的数据库容器，那么Docker将在`Web`容器中创建一个`WEBDB_NAME=/web/webdb`变量。
+
+Docker还为源容器公开的每个端口定义一组环境变量。每个变量都有一个唯一的前缀形式：`<name>_PORT_<port>_<protocol>`  示例：`webdb_PORT_80_tcp`
+
+这个前缀中的组件是：
+
+- `<name>`：`--link`参数中指定的别名（例如`webdb`）
+- `<port>`：暴露的端口
+- `<protocol>`：是TCP或UDP协议方式
+
+Docker使用这个前缀格式来定义三个不同的环境变量：
+
+- 例如，`prefix_ADDR`变量包含来自URL的IP地址`WEBDB_PORT_5432_TCP_ADDR=172.17.0.82`。
+- 例如，`prefix_PORT`变量仅包含来自URL的端口号`WEBDB_PORT_5432_TCP_PORT=5432`。
+- 例如，`prefix_PROTO`变量仅包含来自URL的协议`WEBDB_PORT_5432_TCP_PROTO=tcp`。
+
+如果容器**暴露多个端口**，则为**每个端口定义一个环境变量集**。这意味着，如果一个容器暴露了4个端口，Docker创建了12个环境变量，每个端口3个。
+
+另外，Docker创建一个名为的环境变量`<alias>_PORT`。该变量包含源容器的第一个暴露端口的URL。这个“第一”端口被定义为具有**最小号码**的暴露端口。例如，考虑这个`WEBDB_PORT=tcp://172.17.0.82:5432`变量。如果该端口同时用于tcp和udp，则指定tcp。
+
+最后，Docker还将源容器中的**每个Docker源环境变量公开为目标中的环境变量**。对于每个变量，Docker 在目标容器中创建一个变量`<alias>_ENV_<name>`。变量的值设置为启动源容器时使用的值。
+
+回到我们的数据库示例，你可以运行`env` 命令来列出指定容器的环境变量。
+
+```sh
+$ docker run --rm --name web2 --link db:postgres_db training/webapp env
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HOSTNAME=ecf4255e74b9
+POSTGRES_DB_PORT=tcp://172.17.0.6:5432
+POSTGRES_DB_PORT_5432_TCP=tcp://172.17.0.6:5432
+POSTGRES_DB_PORT_5432_TCP_ADDR=172.17.0.6
+POSTGRES_DB_PORT_5432_TCP_PORT=5432
+POSTGRES_DB_PORT_5432_TCP_PROTO=tcp
+POSTGRES_DB_NAME=/web2/postgres_db
+POSTGRES_DB_ENV_PG_VERSION=9.3
+HOME=/root
+```
+
+你可以看到Docker创建了一系列包含`POSTGRES_DB`有关源容器的有用信息的环境变量。每个变量的前缀 `POSTGRES_DB_`都是从上面指定的`alias`填充的。如果`alias` 是`db1`，变量将以前缀`DB1_`。你可以**使用这些环境变量来配置应用程序**以连接到`db`容器上的数据库。连接是安全和私密的， 只有链接的`web`容器才能与`db`容器通信。
+
+#### 有关Docker环境变量的重要说明
+
+与[`/etc/hosts`文件](https://docs.docker.com/network/links/#updating-the-etchosts-file)中的主机host映射不同，**如果源容器重新启动，则存储在环境变量中的IP地址不会自动更新**。我们建议使用主机 `/etc/hosts`来解析链接容器的IP地址。
+
+这些环境变量仅为容器中的第一个进程设置。一些守护进程，比如`sshd`在产生shell连接时删除清理它们。
+
+#### 更新`/etc/hosts`文件
+
+除了环境变量外，Docker还将源容器的主机host映射添加到`/etc/hosts`文件中。以下是`web` 容器的条目：
+
+```sh
+$ winpty docker run -t -i --rm --link db:webdb training/webapp bash
+
+root@3e039a0513be:/opt/webapp# cat /etc/hosts
+....
+172.17.0.7  aed84ee21bde
+172.17.0.5  webdb 6e5cdeb2d300 db
+```
+
+你可以看到两个相关的主机host。第一个是`web` 使用`Container ID`作为主机名的容器条目。第二项使用链接别名来引用`db`容器的IP地址。除了你提供的别名之外，链接容器的**名称**（如果提供给`--link`参数的别名是唯一的）以及链接容器的**主机名**也会添加到`/etc/hosts`链接容器的IP地址。可以通过以下任一条目ping该主机：
+
+```shell
+root@3e039a0513be:/opt/webapp# ping -c 2 webdb
+PING webdb (172.17.0.6) 56(84) bytes of data.
+64 bytes from webdb (172.17.0.6): icmp_seq=1 ttl=64 time=0.099 ms
+64 bytes from webdb (172.17.0.6): icmp_seq=2 ttl=64 time=0.110 ms
+
+--- webdb ping statistics ---
+7 packets transmitted, 7 received, 0% packet loss, time 6232ms
+rtt min/avg/max/mdev = 0.099/0.127/0.140/0.019 ms
+
+root@3e039a0513be:/opt/webapp# ping -c 2 db
+PING webdb (172.17.0.6) 56(84) bytes of data.
+64 bytes from webdb (172.17.0.6): icmp_seq=1 ttl=64 time=0.133 ms
+64 bytes from webdb (172.17.0.6): icmp_seq=2 ttl=64 time=0.067 ms
+
+--- webdb ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1076ms
+rtt min/avg/max/mdev = 0.067/0.100/0.133/0.033 ms
+```
+
+没有安装**ping** 使用命令安装 `apt-get install -yqq inetutils-ping`
+
+在这里，用`ping`命令使用主机host来ping db容器，该host解析为`172.17.0.6`。你可以使用此主机host来配置应用程序以使用你的`db`容器。
+
+> **注意**：可以将多个收件人容器链接到单个来源容器。例如，可以将多个（不同名称）Web容器附加到 `db`容器。
+
+如果重新启动源容器，`/etc/hosts`链接容器上的文件将**自动更新**为源容器的新IP地址，从而允许进行链接通信。
+
+```sh
+$ docker restart db
+
+$ winpty docker run -t -i --rm --link db:webdb training/webapp bash
+root@ac40ee7d321f:/opt/webapp# cat /etc/hosts
+127.0.0.1       localhost
+::1     localhost ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+
+# db的 ip被刷新为容器的ip
+172.17.0.3      webdb 78b4131a38db db
+172.17.0.4      ac40ee7d321f
+
+# 跟容器的ip对应
+$ docker container inspect db --format={{.NetworkSettings.Networks.bridge.IPAddress}}
+172.17.0.3
+```
+
+## 多主机网络和独立集群
+
+### 独立集群
+
+如果你使用Docker的独立集群，而不是集群模式。独立集群（有时称为`Swarm Classic` 传统经典集群）依靠外部键值存储来存储网络信息。Docker集群模式在集群管理器中的`Raft`日志中存储网络信息。如果你使用集群模式，请参阅 [集群模式网络，](https://docs.docker.com/engine/swarm/networking/)而不是本文。
+
+通用客户端控制面板的用户**可以**使用外部键值存储，但UCP可以为你进行管理，而且你无需手动干预。如果遇到键值存储问题，请参阅 [解决etcd键值存储问题](https://docs.docker.com/datacenter/ucp/2.2/guides/admin/monitor-and-troubleshoot/troubleshoot-configurations/#troubleshoot-the-etcd-key-value-store)
+
+如果你正在使用独立集群而不使用UCP，则本文可能对你有用。本文使用一个示例来解释使用独立集群和`overlay`网络驱动程序，创建多主机网络的基础知识。与`bridge`网络不同，覆盖网络需要一些预先存在的条件才能创建一个：
+
+### 使用外部键值存储覆盖网络
+
+要将Docker与外部键值存储一起使用，你需要以下内容：
+
+- 访问键值存储。Docker支持`Consul`，`Etcd`和`ZooKeeper`（分布式存储）键值存储。这个例子使用Consul。
+- 连接到键值存储的主机集群。
+- Docker在集群中的每台主机上运行。
+- 集群中的主机必须具有唯一主机名，因为键值存储使用主机名来标识集群成员。
+
+Docker Machine和Docker Swarm不是强制性的，可以通过键值存储体验Docker多主机网络。但是，这个例子使用它们来说明它们如何被整合。你可以使用Machine使用独立集群创建键值存储服务器和主机集群。
+
+> **注意**：这些示例与在集群模式下运行的Docker无关，并且不适用于这种配置。
+
+#### 设置一个键值存储
+
+---
+
+`overlay`覆盖网络需要键值存储。键值存储保存有关网络状态的信息，其中包括自动发现、网络、端点、IP地址等。Docker支持`Consul`、`Etcd`和`ZooKeeper`键值存储。这个例子使用Consul。
+
+1. 登录到安装了Docker和Docker Machine的系统中。
+
+   ```sh
+   $ cd E:\Docker Toolbox
+   $ sh start.sh
+   ```
+
+2. 配置名为的VirtualBox机器`mh-keystore`。
+
+   ```sh
+   $ docker-machine create -d virtualbox mh-keystore
+   ```
+
+   当创建新机器时，会将Docker添加到主机。这意味着不是手动安装Consul，而是使用[Docker Hub](https://hub.docker.com/_/consul/)的[consul镜像](https://hub.docker.com/_/consul/)创建一个实例。下一步中执行此操作。
+
+3. 将本地环境设置为`mh-keystore`机器，让shell命令默认发送到本机器。
+
+   ```sh
+   $  eval "$(docker-machine env mh-keystore)"
+   ```
+
+4. 启动在`mh-keystore`Docker机器上运行的容器`consul`。
+
+   ```sh
+   $  docker run -d \
+     --name consul \
+     -p "8500:8500" \
+     -h "consul" \
+     consul agent -server -bootstrap -client "0.0.0.0"
+   ```
+
+   服务器被调用`consul`并正在侦听端口`8500`。
+
+5. 运行`docker ps`命令以查看`consul`容器。
+
+   ```sh
+   $ docker ps
+   ```
+
+#### 创建一个群集
+
+---
+
+在这一步中，将使用`docker-machine`网络配置主机。你实际上并没有创建网络。你在`VirtualBox`中创建了几个Docker机器。其中一台机器充当`swarm manager`，你首先创建该机器。在创建每台主机时，你需要在`overlay`网络驱动程序所需的机器选项上传递Docker守护进程。
+
+> **注意**：这会创建一个独立集群，而不是在集群模式下使用Docker。这些示例与在集群模式下运行的Docker无关，并且不适用于这种配置。
+
+1. 创建一个`swarm manager`。
+
+   ```sh
+   $ docker-machine create \
+   -d virtualbox \
+   --swarm --swarm-master \
+   --swarm-discovery="consul://$(docker-machine ip mh-keystore):8500" \
+   --engine-opt="cluster-store=consul://$(docker-machine ip mh-keystore):8500" \
+   --engine-opt="cluster-advertise=eth1:2376" \
+   mhs-demo0
+   ```
+
+   在创建时，你需要为Docker守护程序提供`--cluster-store` 选项。该选项告诉引擎`overlay`网络的键值存储位置。`$(docker-machine ip mh-keystore)` bash 解析为你在“步骤1”中创建的Consul服务器的IP地址。该`--cluster-advertise`选项通知网络上的机器。
+
+2. 创建另一个主机并将其添加到群中。
+
+   ```sh
+   $ docker-machine create \
+     -d virtualbox \
+     --swarm \
+     --swarm-discovery="consul://$(docker-machine ip mh-keystore):8500" \
+     --engine-opt="cluster-store=consul://$(docker-machine ip mh-keystore):8500" \
+     --engine-opt="cluster-advertise=eth1:2376" \
+     mhs-demo1
+   ```
+
+3. 列出你的Docker机器以确认它们全部正常运行。
+
+   ```sh
+   $ docker-machine ls
+
+   NAME         ACTIVE   DRIVER       STATE     URL                         SWARM
+   default      -        virtualbox   Running   tcp://192.168.99.100:2376
+   mh-keystore  *        virtualbox   Running   tcp://192.168.99.103:2376
+   mhs-demo0    -        virtualbox   Running   tcp://192.168.99.104:2376   mhs-demo0 (master)
+   mhs-demo1    -        virtualbox   Running   tcp://192.168.99.105:2376   mhs-demo0
+   ```
+
+此时，你的网络上正在运行一组主机。你已准备好使用这些主机为容器创建多主机网络。
+
+#### 创建覆盖网络
+
+---
+
+1. 将docker环境设置为`swarm manager`。
+
+   ```sh
+   $ eval $(docker-machine env --swarm mhs-demo0)
+   ```
+
+   使用`--swarm`选项`docker-machine`限制`docker` 命令单独输出集群信息。
+
+2. 使用该`docker info`命令查看群。
+
+   ```sh
+   $ docker info
+   Containers: 3
+    Running: 3
+    Paused: 0
+    Stopped: 0
+   Images: 2
+   Server Version: swarm/1.2.8
+   Role: primary
+   Strategy: spread
+   Filters: health, port, containerslots, dependency, affinity, constraint, whitelist
+   Nodes: 2
+    mhs-demo0: 192.168.99.104:2376
+     └ ID: HHV7:NLU7:Z4T7:NJSG:BZGQ:JSQC:RB24:JZFF:LNIO:OCME:Z6WK:L562|192.168.99.104:2376
+     └ Status: Healthy
+     └ Containers: 2 (2 Running, 0 Paused, 0 Stopped)
+     └ Reserved CPUs: 0 / 1
+     └ Reserved Memory: 0 B / 1.021 GiB
+     └ Labels: kernelversion=4.9.93-boot2docker, operatingsystem=Boot2Docker 18.03.1-ce (TCL 8.2.1); HEAD : cb77972 - Thu Apr 26 16:40:36 UTC 2018, ostype=linux, provider=virtualbox, storagedriver=aufs
+     └ UpdatedAt: 2018-05-03T02:18:33Z
+     └ ServerVersion: 18.03.1-ce
+    mhs-demo1: 192.168.99.105:2376
+     └ ID: DDSY:75LL:AGNE:5VVA:EO3X:JB4X:HIDK:YWVX:WIME:5U4R:WWCZ:277J|192.168.99.105:2376
+     └ Status: Healthy
+     └ Containers: 1 (1 Running, 0 Paused, 0 Stopped)
+     └ Reserved CPUs: 0 / 1
+     └ Reserved Memory: 0 B / 1.021 GiB
+     └ Labels: kernelversion=4.9.93-boot2docker, operatingsystem=Boot2Docker 18.03.1-ce (TCL 8.2.1); HEAD : cb77972 - Thu Apr 26 16:40:36 UTC 2018, ostype=linux, provider=virtualbox, storagedriver=aufs
+     └ UpdatedAt: 2018-05-03T02:18:27Z
+     └ ServerVersion: 18.03.1-ce
+   Kernel Version: 4.9.93-boot2docker
+   Operating System: linux
+   Architecture: amd64
+   CPUs: 2
+   Total Memory: 2.042GiB
+   Name: 854d81944ea5
+   ```
+
+   上面输出显示正在管理器上运行三个容器和两个镜像。
+
+3. 创建`overlay`网络。
+
+   ```sh
+   $ docker network create --driver overlay --subnet=10.0.9.0/24 my-net
+   ```
+
+   只需要在集群中的单个主机上创建网络。因为你使用了`swarm manager`，可以很容易地在swarm中的任何主机上运行它。
+
+   > **注意**：强烈建议在创建网络时使用`--subnet`选项。如果未指定`--subnet`，则Docker会自动选择并为网络分配一个子网，并且可能会与基础架构中未由Docker管理的另一个**子网重叠**。当容器连接到该网络时，这种重叠会导致连接问题或失败。
+
+4. 检查网络是否存在
+
+   ```sh
+   $ docker network ls
+
+   NETWORK ID          NAME                DRIVER
+   412c2496d0eb        mhs-demo1/host      host
+   dd51763e6dd2        mhs-demo0/bridge    bridge
+   6b07d0be843f        my-net              overlay
+   b4234109bd9b        mhs-demo0/none      null
+   1aeead6dd890        mhs-demo0/host      host
+   d0bb78cbe7bd        mhs-demo1/bridge    bridge
+   1c0eb8f69ebb        mhs-demo1/none      null
+   ```
+
+   由于位于`swarm manager`环境中，因此可以看到所有swarm参与者的所有网络：每个Docker守护程序和单个覆盖网络上的默认网络。每个网络都有唯一的ID和名称。
+
+5. 依次切换到每个群体代理并列出网络。
+
+   ```sh
+   $ eval $(docker-machine env mhs-demo0)
+   $ docker network ls
+   NETWORK ID          NAME                DRIVER
+   6b07d0be843f        my-net              overlay
+   dd51763e6dd2        bridge              bridge
+   b4234109bd9b        none                null
+   1aeead6dd890        host                host
+
+
+   $ eval $(docker-machine env mhs-demo1)
+   $ docker network ls
+   NETWORK ID          NAME                DRIVER
+   d0bb78cbe7bd        bridge              bridge
+   1c0eb8f69ebb        none                null
+   412c2496d0eb        host                host
+   6b07d0be843f        my-net              overlay
+   ```
+
+   两个节点都拥有`my-net`带有`6b07d0be843f`ID 的网络。现在有一个多主机容器网络正在运行！
+
+   ​
+
+#### 在网络上运行应用程序
+
+---
+
+网络创建完成后，可以在任何主机上启动容器，并自动将其作为网络的一部分。
+
+1. 将环境设置为`swarm manager`。
+
+   ```sh
+   $ eval $(docker-machine env --swarm mhs-demo0)
+   ```
+
+2. 在`mhs-demo0`实例上启动一个`Nginx Web`服务器，使用刚才创建的网络`my-net`。`constraint`代表约束规则。
+
+   ```sh
+   $ docker run -itd \
+     --name=web \
+     --network=my-net \
+     --env="constraint:node==mhs-demo0" \
+     nginx:alpine
+   ```
+
+3. 在`mhs-demo1`实例上运行`busybox`实例并获取`Nginx web`服务器主页的内容。
+
+   ```sh
+   $ docker run -it --rm \
+     --network=my-net \
+     --env="constraint:node==mhs-demo1" \
+     busybox wget -O- http://web
+     
+   Connecting to web (10.0.9.2:80)
+   <!DOCTYPE html>
+   <html>
+   <head>
+   <title>Welcome to nginx!</title>
+   <style>
+       body {
+           width: 35em;
+           margin: 0 auto;
+           font-family: Tahoma, Verdana, Arial, sans-serif;
+       }
+   </style>
+   </head>
+   <body>
+   <h1>Welcome to nginx!</h1>
+   <p>If you see this page, the nginx web server is successfully installed and
+   working. Further configuration is required.</p>
+
+   <p>For online documentation and support please refer to
+   <a href="http://nginx.org/">nginx.org</a>.<br/>
+   Commercial support is available at
+   <a href="http://nginx.com/">nginx.com</a>.</p>
+
+   <p><em>Thank you for using nginx.</em></p>
+   </body>
+   </html>
+   -                    100% |*******************************|   612   0:00:00 ETA  
+   ```
+
+#### 检查外部连接
+
+---
+
+Docker的内置覆盖网络驱动程序可在同一网络中多个主机上的容器之间提供开箱即用的连接。另外，连接到多主机网络的容器会自动连接到`docker_gwbridge`网络。该网络允许容器在集群外部具有外部连接。
+
+1. 将环境更改为`swarm agent`。
+
+   ```sh
+   $ eval $(docker-machine env mhs-demo1)
+   ```
+
+2. 通过列出网络来查看网络`docker_gwbridge`。
+
+   ```sh
+   $ docker network ls
+   NETWORK ID          NAME                DRIVER
+   6b07d0be843f        my-net              overlay
+   dd51763e6dd2        bridge              bridge
+   b4234109bd9b        none                null
+   1aeead6dd890        host                host
+   e1dbd5dff8be        docker_gwbridge     bridge
+   ```
+
+3. 重复swarm管理器上的步骤1和2。
+
+   ```sh
+   $ eval $(docker-machine env mhs-demo0)
+
+   $ docker network ls
+   NETWORK ID          NAME                DRIVER
+   6b07d0be843f        my-net              overlay
+   d0bb78cbe7bd        bridge              bridge
+   1c0eb8f69ebb        none                null
+   412c2496d0eb        host                host
+   97102a22e8d2        docker_gwbridge     bridge
+   ```
+
+4. 检查Nginx容器的网络接口。
+
+   ```sh
+   $ docker container exec web ip addr
+   1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN qlen 1
+       link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+       inet 127.0.0.1/8 scope host lo
+          valid_lft forever preferred_lft forever
+   13: eth0@if14: <BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN> mtu 1450 qdisc noqueue state UP
+       link/ether 02:42:0a:00:09:02 brd ff:ff:ff:ff:ff:ff
+       inet 10.0.9.2/24 brd 10.0.9.255 scope global eth0
+          valid_lft forever preferred_lft forever
+   16: eth1@if17: <BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN> mtu 1500 qdisc noqueue state UP
+       link/ether 02:42:ac:12:00:02 brd ff:ff:ff:ff:ff:ff
+       inet 172.18.0.2/16 brd 172.18.255.255 scope global eth1
+          valid_lft forever preferred_lft forever
+   ```
+
+该`eth0`接口表示连接到`my-net`覆盖网络的容器接口。`eth1`接口代表连接到容器的接口`docker_gwbridge`网络。
