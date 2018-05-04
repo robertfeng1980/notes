@@ -1,5 +1,7 @@
 # Docker 应用数据管理
 
+[TOC]
+
 # 概述
 
 默认情况下，容器内创建的所有文件都**存储在可写容器层**上。这意味着：
@@ -489,7 +491,7 @@ $ docker service rm devtest-service
 
 ### 服务的语法差异
 
-`docker service create`命令**不支持`-v`或`--volume`选项**。将卷安装到服务的容器中时，**必须使用该`--mount` 选项**。
+`docker service create`命令**不支持`-v`或`--volume`选项**。将卷安装到服务的容器中时，**必须使用`--mount` 选项**。
 
 ## 使用容器填充卷
 
@@ -897,7 +899,7 @@ $ docker container inspect tmptest --format '{{json .HostConfig.Tmpfs}}'
 $ docker container stop tmptest && docker container rm tmptest
 ```
 
-## tmpfs选项
+## `tmpfs`选项
 
 `tmpfs`挂载允许两个配置选项，这两者都不是必需的。如果需要指定这些选项，则必须使用`--mount`选项，因为`--tmpfs`选项不支持它们。
 
@@ -915,6 +917,353 @@ $ docker run -d \
   --mount type=tmpfs,destination=/app,tmpfs-mode=1770 \
   nginx:latest
 ```
+
+# 存储驱动
+
+要有效地使用存储驱动程序，了解Docker如何构建和存储图像以及容器如何使用这些图像很重要。可以使用这些信息做出明智的选择，以便从应用程序**持久**保存数据的**最佳方式**，并避免出现**性能问题**。
+
+存储驱动程序允许在容器的**可写层创建数据**。在容器停止后，这些文件将**不会保留**，并且**读取和写入速度**都很低。
+
+## 图像和图层
+
+Docker镜像是由一系列图层构建而成的。每个图层代表图像的Dockerfile中的指令。除**最后一层**以外的每个图层都是**只读**的。请看以下Dockerfile：
+
+```dockerfile
+FROM ubuntu:15.04
+COPY . /app
+RUN make /app
+CMD python /app/app.py
+```
+
+这个Dockerfile包含四个命令，每个命令**创建**一个图层。 `FROM`语句从`ubuntu：15.04`映像创建一个图层开始。`COPY`命令会从Docker客户端的当前目录中添加一些文件。`RUN`命令使用`make`命令构建应用程序。最后，最后一层指定在容器内运行的命令。
+
+每个图层与之前图层存在差异，这些图层堆叠在一起。当你创建一个新的容器时，你在**底层上添加一个新的可写层**。这个层通常被称为**“容器层”**。对正在运行的容器所做的所有更改（如写入新文件，修改现有文件和删除文件）都会**写入**此可写容器层。下图显示了一个基于`Ubuntu 15.04`映像的容器。
+
+![基于Ubuntu映像的容器层](https://docs.docker.com/storage/storagedriver/images/container-layers.jpg)
+
+**存储驱动程序**处理有关这些层相互交互方式的细节。不同的存储驱动程序是可用的，这在不同的情况下具有优点和缺点。
+
+## 容器和图层
+
+容器和图像之间的主要区别是**最高的可写层**。所有写入容器的添加新的或修改现有数据的内容都存储在该**可写层**中。当容器被删除时，可写层也被删除。底层镜像保持不变。
+
+由于**每个容器都有自己的可写容器层**，并且所有更改都存储在此容器层中，因此多个容器可以共享对相同**基础映像的访问权限**，并且拥有自己的数据状态。下图显示了共享相同`Ubuntu 15.04`映像的多个容器。
+
+![容器共享相同的图像](https://docs.docker.com/storage/storagedriver/images/sharing-layers.jpg)
+
+> **注意**：如果需要多个映像才能共享访问完全相同的数据，请将此数据存储在Docker**卷**中并将其装入容器中。
+
+Docker使用存储驱动程序来管理**图像层和可写容器层**的内容。每个存储驱动程序都以不同方式处理实现，但所有驱动程序都使用可堆叠的图像层和写入时复制（CoW）策略。
+
+## 磁盘上的容器大小
+
+要查看正在运行的容器的大小，可以使用该`docker ps -s` 命令。两个列与大小有关。
+
+- `size`：用于每个容器的**可写层**的数据大小（在磁盘上）
+- `virtual size`：用于容器加上容器的可写层的**只读图像数据**的数据大小。多个容器可能共享部分或全部只读图像数据。从同一图像开始的两个容器共享只读数据的100％，而具有不同图像的两个容器共享这些共同层。因此，你不能只总计虚拟尺寸。这会高估可能不重要的磁盘总使用量。
+
+磁盘上所有正在**运行的容器使用的总磁盘空间**是每个容器`size`和`virtual size`值的组合。如果多个容器从相同的精确映像启动，则这些容器在磁盘上的总大小将为SUM（容器`size`）加上一个图像大小（`virtual size`）。
+
+不会计算容器占用磁盘空间的方式：
+
+- 如果使用`json-file`日志记录驱动程序，则用于日志文件的磁盘空间。如果您的容器生成大量日志数据并且未配置日志轮转，这可能并不重要。
+- 容器使用的卷和绑定挂载。
+- 用于容器配置文件的磁盘空间，通常很小。
+- 写入磁盘的内存（如果启用了交换）。
+- 检查点，如果您使用的是实验性检查点/恢复功能。
+
+## 写时复制（CoW）策略
+
+写入时复制是一种**共享和复制**文件以实现**最高效率**的策略。如果文件或目录存在于映像的较低层中，而另一层（包括可写层）需要对其进行读取访问，则它只使用现有文件。第一次需要修改文件时（构建图像或运行容器时），该文件将被复制到该图层并进行修改。这最大限度地减少了每个后续层的`I/O`和大小。下面将更深入地解释这些优点。
+
+### 共享使图像变小
+
+---
+
+当使用`docker pull`从存储库中下拉图像时，或者从本地还不存在的图像创建容器时，每个图层都会单独拉下，并存储在Docker的本地存储区（通常位于Linux主机`/var/lib/docker/`上）中。在这个例子中你可以看到这些图层被拉出来了：
+
+```sh
+$ docker pull ubuntu:15.04
+
+15.04: Pulling from library/ubuntu
+1ba8ac955b97: Pull complete
+f157c4e5ede7: Pull complete
+0b7e98f84c4c: Pull complete
+a3ed95caeb02: Pull complete
+Digest: sha256:5e279a9df07990286cce22e1b0f5b0490629ca6d187698746ae5e28e604a640e
+Status: Downloaded newer image for ubuntu:15.04
+```
+
+每个层都存储在Docker主机本地存储区内的自己的目录中。要检查文件系统上的图层，请列出内容`/var/lib/docker/<storage-driver>/layers/`。以下示例使用`aufs`默认存储驱动程序：
+
+```sh
+$ ls /var/lib/docker/aufs/layers
+1d6674ff835b10f76e354806e16b950f91a191d3b471236609ab13a930275e24
+5dbb0cbe0148cf447b9464a358c1587be586058d9a4c9ce079320265e2bb94e7
+bef7199f2ed8e86fa4ada1309cfad3089e0542fec8894690529e4c04a7ca2d73
+ebf814eccfe98f2704660ca1d844e4348db3b5ccc637eb905d4818fbfb00a06a
+```
+
+目录名称不对应于层ID（自从Docker 1.10以来）。
+
+#### 实例论证
+
+现在想象有两个不同的Docker文件。使用第一个来创建一个名为的图像`acme/my-base-image:1.0`。
+
+```dockerfile
+FROM ubuntu:16.10
+COPY . /app
+```
+
+第二个是基于`acme/my-base-image:1.0`，但有一些额外的层次：
+
+```dockerfile
+FROM acme/my-base-image:1.0
+CMD /app/hello.sh
+```
+
+第二个图像包含第一个图像的所有图层，以及增加了`CMD`指令的新图层和一个读写容器图层。Docker已经拥有了第一张镜像中的所有图层，因此不需要再次拉取。这两个镜像共享他们共有的任何图层。
+
+如果您从两个Dockerfiles构建图像，则可以使用`docker image ls`和 `docker history`命令来验证共享图层的加密ID是否相同。
+
+1. 建立一个新的目录`cow-test/`
+
+   ```sh
+   $ cd /d/docker
+   $ mkdir cow-test
+   ```
+
+2. 在`cow-test/`目录中，使用以下内容创建一个新文件：
+
+   ```sh
+   #!/bin/sh
+   echo "hello"
+   ```
+
+   保存该文件，并使其可执行：
+
+   ```sh
+   chmod +x hello.sh
+   ```
+
+3. 将上面第一个Dockerfile的内容复制到一个名为`base.Dockerfile`的新文件中 。
+
+4. 将上面第二个Dockerfile的内容复制到一个名为`last.Dockerfile`的新文件中 。
+
+5. 在`cow-test/`目录中，建立第一张镜像。这设置了`PATH`，它告诉Docker在哪里查找需要添加到映像的文件
+
+   ```sh
+   $ docker build -t acme/my-base-image:1.0 -f base.Dockerfile .
+   Sending build context to Docker daemon  4.096kB
+   Step 1/2 : FROM ubuntu:latest
+    ---> c9d990395902
+   Step 2/2 : COPY . /app
+    ---> 257a26c2321b
+   Successfully built 257a26c2321b
+   Successfully tagged acme/my-base-image:1.0
+   ```
+
+6. 建立第二个镜像
+
+   ```sh
+   $ docker build -t acme/my-final-image:1.0 -f last.Dockerfile .
+   Sending build context to Docker daemon  4.096kB
+   Step 1/2 : FROM acme/my-base-image:1.0
+    ---> 257a26c2321b
+   Step 2/2 : CMD /app/hello.sh
+    ---> Running in cae17eb9dbde
+   Removing intermediate container cae17eb9dbde
+    ---> 77027ae1dd11
+   Successfully built 77027ae1dd11
+   Successfully tagged acme/my-final-image:1.0
+   ```
+
+7. 查看镜像的大小：
+
+   ```sh
+   $ docker image ls
+   REPOSITORY                                      TAG                 IMAGE ID            CREATED              SIZE
+   acme/my-final-image                             1.0                 77027ae1dd11        27 seconds ago       113MB
+   acme/my-base-image                              1.0                 257a26c2321b        About a minute ago   113MB
+   ```
+
+8. 查看构成图像的图层：
+
+   ```sh
+   $  docker history 77027ae1dd11
+   IMAGE               CREATED              CREATED BY                                      SIZE                COMMENT
+   77027ae1dd11        About a minute ago   /bin/sh -c #(nop)  CMD ["/bin/sh" "-c" "/app…   0B
+   257a26c2321b        3 minutes ago        /bin/sh -c #(nop) COPY dir:a9bd079439d13f0b6…   98B
+   c9d990395902        3 weeks ago          /bin/sh -c #(nop)  CMD ["/bin/bash"]            0B
+   <missing>           3 weeks ago          /bin/sh -c mkdir -p /run/systemd && echo 'do…   7B
+   <missing>           3 weeks ago          /bin/sh -c sed -i 's/^#\s*\(deb.*universe\)$…   2.76kB
+   <missing>           3 weeks ago          /bin/sh -c rm -rf /var/lib/apt/lists/*          0B
+   <missing>           3 weeks ago          /bin/sh -c set -xe   && echo '#!/bin/sh' > /…   745B
+   <missing>           3 weeks ago          /bin/sh -c #(nop) ADD file:4c266e490f4101f97…   113MB
+   
+   $  docker history 257a26c2321b
+   IMAGE               CREATED             CREATED BY                                      SIZE                COMMENT
+   257a26c2321b        3 minutes ago       /bin/sh -c #(nop) COPY dir:a9bd079439d13f0b6…   98B
+   c9d990395902        3 weeks ago         /bin/sh -c #(nop)  CMD ["/bin/bash"]            0B
+   <missing>           3 weeks ago         /bin/sh -c mkdir -p /run/systemd && echo 'do…   7B
+   <missing>           3 weeks ago         /bin/sh -c sed -i 's/^#\s*\(deb.*universe\)$…   2.76kB
+   <missing>           3 weeks ago         /bin/sh -c rm -rf /var/lib/apt/lists/*          0B
+   <missing>           3 weeks ago         /bin/sh -c set -xe   && echo '#!/bin/sh' > /…   745B
+   <missing>           3 weeks ago         /bin/sh -c #(nop) ADD file:4c266e490f4101f97…   113MB
+   ```
+
+   请注意，除第二个图像的最顶图层外，所有其他图层都相同。所有其他图层在两幅图像之间**共享**，并且只在`/var/lib/docker/`存储一次。新层实际上并不占用任何空间，因为它不会更改任何文件，而只是运行一个命令。
+
+   > **注意**：`docker history`输出中的`<missing>`行表示这些图层是在另一个系统上构建的，并且在本地不可用，这可以被忽略。
+
+### 复制使容器高效
+
+---
+
+当你启动一个容器时，一个**容器可写层被添加到其他层的顶部**。容器对文件系统所做的任何更改都存储在可写层。容器不会更改的文件都不会被复制到可写层中。这意味着可写层**尽可能小**。
+
+当容器中的现有文件被修改时，存储驱动程序执行**写入时复制**操作。涉及的具体步骤取决于具体的存储驱动程序。对于默认的`aufs`驱动程序和`overlay`和`overlay2` 驱动程序时，写入时复制操作遵循以下顺序：
+
+- 通过**图像层搜索要更新的文件**。该过程从最新层开始，一次处理一层基础层。找到结果后，它们将被**添加到缓存**中以加速后来的操作。
+- 对找到的文件的第一个副本执行`copy_up`操作，将文件**复制到容器的可写层**。
+- 对文件的**副本进行任何修改**，并且容器不能看到存在于**较低层中**的文件的**只读副本**。
+
+Btrfs、ZFS和其他驱动程序以不同方式处理写入时复制。
+
+编写大量数据的容器比不包含容器的容器消耗更多的空间。这是因为**大多数写入操作会在容器的可写顶层中占用新的空间**。
+
+> **注意**：对于大量写入的应用程序，不应将数据存储在容器中。相反，使用Docker**卷**，这些卷独立于正在运行的容器，并且设计为对`I/O`有效。另外，卷可以在容器间**共享**，不会**增加容器可写层的大小**。
+
+一个`copy_up`操作可能导致**性能显着的开销**。这个开销根据使用的存储驱动程序而不同。**大文件、大量图层和深层目录树**可以使影响更加明显。这可以通过每个`copy_up`操作只在第一次修改给定文件时发生。
+
+为了验证写入时复制的工作方式，以下过程根据我们之前构建的`acme/my-final-image:1.0`映像加速了5个容器，并检查它们占用的空间。
+
+> **注意**：此过程在Docker for Mac或Docker for Windows上不起作用。
+
+#### 实例论证
+
+1. 从Docker主机的终端上运行以下`docker run`命令
+
+   ```sh
+   $ docker run -dit --name my_container_1 acme/my-final-image:1.0 bash \
+     && docker run -dit --name my_container_2 acme/my-final-image:1.0 bash \
+     && docker run -dit --name my_container_3 acme/my-final-image:1.0 bash \
+     && docker run -dit --name my_container_4 acme/my-final-image:1.0 bash \
+     && docker run -dit --name my_container_5 acme/my-final-image:1.0 bash
+   ```
+
+2. 运行`docker ps`命令验证5个容器正在运行。
+
+   ```sh
+   $ docker ps
+   CONTAINER ID        IMAGE                     COMMAND                  CREATED             STATUS              PORTS               NAMES
+   9107286ddf07        acme/my-final-image:1.0   "bash"                   23 seconds ago      Up 27 seconds                           my_container_5
+   e6707c02616d        acme/my-final-image:1.0   "bash"                   23 seconds ago      Up 27 seconds                           my_container_4
+   5507689b2529        acme/my-final-image:1.0   "bash"                   24 seconds ago      Up 27 seconds                           my_container_3
+   fa7b232e9a59        acme/my-final-image:1.0   "bash"                   24 seconds ago      Up 28 seconds                           my_container_2
+   da1fcb552537        acme/my-final-image:1.0   "bash"                   24 seconds ago      Up 28 seconds                           my_container_1
+   ```
+
+3. 列出本地存储区的内容。
+
+   ```sh
+   # 去docker虚拟机
+   $ docker-machine ssh default
+   $ sudo ls /var/lib/docker/containers
+   1a174fc216cccf18ec7d4fe14e008e30130b11ede0f0f94a87982e310cf2e765
+   1e7264576d78a3134fbaf7829bc24b1d96017cf2bc046b7cd8b08b5775c33d0c
+   38fa94212a419a082e6a6b87a8e2ec4a44dd327d7069b85892a707e3fc818544
+   c36785c423ec7e0422b2af7364a7ba4da6146cbba7981a0951fcc3fa0430c409
+   dcad7101795e4206e637d9358a818e5c32e13b349e62b00bf05cd5a4343ea513
+   ```
+
+4. 现在检查他们的大小：
+
+   ```sh
+   $ sudo du -sh /var/lib/docker/containers/*
+   
+   32K  /var/lib/docker/containers/1a174fc216cccf18ec7d4fe14e008e30130b11ede0f0f94a87982e310cf2e765
+   32K  /var/lib/docker/containers/1e7264576d78a3134fbaf7829bc24b1d96017cf2bc046b7cd8b08b5775c33d0c
+   32K  /var/lib/docker/containers/38fa94212a419a082e6a6b87a8e2ec4a44dd327d7069b85892a707e3fc818544
+   32K  /var/lib/docker/containers/c36785c423ec7e0422b2af7364a7ba4da6146cbba7981a0951fcc3fa0430c409
+   32K  /var/lib/docker/containers/dcad7101795e4206e637d9358a818e5c32e13b349e62b00bf05cd5a4343ea513
+   ```
+
+   这些容器中的每一个只占用文件系统上的32k空间。
+
+不仅**写入时复制节省空间**，而且还**缩短了启动时间**。当你启动一个容器（或者来自同一个图像的多个容器）时，Docker只需要**创建可写的容器层**。**如果==Docker在每次启动一个新容器时都必须制作底层映像堆栈的整个副本，则容器启动时间和使用的磁盘空间将显着增加。这与虚拟机的工作方式类似，每个虚拟机具有一个或多个虚拟磁盘**。
+
+## 存储驱动的选择
+
+理想情况下，只有很少的数据写入容器的可写层，并且使用Docker卷来写入数据。但是，有些**工作负载要求能够写入容器的可写层**。这是需要存储驱动程序的原因。Docker支持多种不同的存储驱动程序，使用**可插拔**的架构。存储驱动程序控制图像和容器在Docker主机上的**存储和管理**方式。
+
+**为工作负载选择最佳的存储驱动程序**。在作出这一决定时，需要考虑三个高层次因素：
+
+- 如果内核支持多个存储驱动程序，那么假定满足该存储驱动程序的先决条件，则在没有明确配置存储驱动程序的情况下，Docker会列出要使用哪个存储驱动程序的**优先级**列表：
+
+  - 如果可能的话，使用**配置数量最少**的存储驱动程序，例如`btrfs`或`zfs`。这些依赖于正确配置的后备文件系统。
+  - 否则，请尝试在最常见的情况下使用具有**最佳整体性能和稳定性**的存储驱动程序。
+    - `overlay2`是**优选**的，随后是`overlay`。这些都不需要额外的配置。`overlay2`是Docker CE的默认选择。
+    - `devicemapper`是下一个，但是`direct-lvm`对于**生产环境**是必需的，因为`loopback-lvm`零配置的性能非常差。
+
+  选择顺序在Docker的源代码中定义。您可以通过查看[Docker CE 18.03的源代码](https://github.com/docker/docker-ce/blob/18.03/components/engine/daemon/graphdriver/driver_linux.go#L50)来查看清单。 
+
+- 您的选择可能会受到Docker版本，**操作系统和分发版的限制**。例如`aufs`仅在Ubuntu和Debian上受支持，并且可能需要安装额外的软件包，而`btrfs`仅在SLES上受支持，而SLES仅支持Docker EE。见 [每个Linux发行版支持存储驱动程序](https://docs.docker.com/storage/storagedriver/select-storage-driver/#supported-storage-drivers-per-linux-distribution)。
+
+- 某些存储驱动程序要求**支持文件系统使用特定格式**。如果您有使用特定支持文件系统的外部要求，这可能会限制您的选择。见 [支持后盾的文件系统](https://docs.docker.com/storage/storagedriver/select-storage-driver/#supported-backing-filesystems)。
+
+- 在缩小了可以选择的存储驱动程序之后，选择取决于工作负载的特征和所需的稳定级别。请参阅[其他注意事项](https://docs.docker.com/storage/storagedriver/select-storage-driver/#other-considerations)以帮助作出最终决定。
+
+### Linux 上的存储驱动选择
+
+---
+
+在较高级别上，可以使用的存储驱动程序部分取决于使用的Docker版本。此外，Docker**不建议任何需要禁用操作系统安全功能的配置**，例如在CentOS上使用`overlay`或`overlay2`驱动程序时需要禁用`selinux`。
+
+如果可能，`overlay2`是推荐的存储驱动程序。首次安装Docker时，`overlay2`默认使用。 最好的是全面配置是使用带有支持`overlay2`存储驱动程序的**内核的现代Linux发行版**，并将Docker卷用于写入繁重的工作负载，而不是依赖将数据写入容器的可写层。 
+
+### 适合的工作负载
+
+---
+
+除此之外，每个存储驱动程序都有其自身的性能特征，使其更适合不同的工作负载。考虑下面的概括：
+
+- `aufs`、`overlay`、`overlay2`全部在文件级而不是**块级**操作。这更有效地使用内存，但容器的可写层可能在写入繁重的工作负载中增长得相当大。
+- **块级存储驱动程序**（如`devicemapper`，`btrfs`）和`zfs`更适合**写入繁重**的工作负载（尽管不如Docker卷）。
+- 对于许多具有许多图层或深层文件系统的小型写入或容器， `overlay`可能会比`overlay2`更好 。
+- `btrfs`和`zfs`需要大量的内存。
+- `zfs` 对于`PaaS`等**高密度工作负载**来说是一个不错的选择。
+
+有关性能，适用性和最佳做法的更多信息可在每个存储驱动程序的文档中找到。
+
+### 稳定性
+
+---
+
+对于一些用户来说，稳定性比性能更重要。虽然Docker认为这里提到的所有存储驱动都是稳定的，但有些更新，并且仍在积极开发中。一般来说`aufs`，`overlay`和`devicemapper`是具有**最高稳定性**的选择。
+
+## 查看当前docker的存储驱动
+
+要查看Docker当前使用的存储驱动程序，请使用`docker info`并查找该`Storage Driver`行：
+
+```sh
+$ docker info
+Containers: 25
+ Running: 7
+ Paused: 0
+ Stopped: 18
+Images: 56
+Server Version: 18.04.0-ce
+Storage Driver: aufs
+ Root Dir: /mnt/sda1/var/lib/docker/aufs
+ Backing Filesystem: extfs
+ Dirs: 132
+ Dirperm1 Supported: true
+```
+
+要更改存储驱动程序，请参阅新存储驱动程序的具体说明。某些驱动程序需要额外配置，包括配置到Docker主机上的物理或逻辑磁盘。
+
+> **重要提示**：更改存储驱动程序时，任何现有的图像和容器都将**无法访问**。这是因为他们的**图层不能被新的存储驱动程序使用**。如果恢复更改，则可以再次访问旧图像和容器，但是**使用新驱动程序拉出或创建的任何内容都无法访问**。
 
 # 参考资料
 

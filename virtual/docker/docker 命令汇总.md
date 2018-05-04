@@ -137,7 +137,7 @@ $ docker-machine mount dev:/home/docker/foo foo		# 挂载目录
 
 
 
-## docker 安装
+## docker 测试
 
 ```shell
 ## List Docker CLI commands
@@ -238,6 +238,216 @@ eval $(docker-machine env -u)     						# 从虚拟机断开shell，使用本地
 docker-machine stop $(docker-machine ls -q)               # 停止全部运行的虚拟机
 docker-machine rm $(docker-machine ls -q) 				# 删除所有运行的虚拟机，包括磁盘上的
 ```
+
+## docker networks
+
+```sh
+$ docker network -h
+管理网络
+Usage:  docker network COMMAND
+
+命令：
+  connect     # 将容器连接到网络
+  create      # 创建一个网络
+  disconnect  # 从网络断开容器
+  inspect     # 在一个或多个网络上显示详细信息
+  ls          # 列出网络
+  prune       # 删除所有未使用的网络
+  rm          # 删除一个或多个网络
+-----------------------------------------------------------------
+
+$ docker network ls
+Options:
+  -f, --filter filter   #提供过滤器值 (e.g. 'driver=bridge')
+      --format string   #使用Go模板的漂亮打印网络
+      --no-trunc        #不要截断输出
+  -q, --quiet           #只显示网络ID
+  
+$ docker network ls --filter 'driver=host'		# 使用filter过滤查看
+$ docker network ls --filter 'driver=host'
+$ docker network ls --filter scope=swarm
+# 查看自定义网络
+$ docker network ls -f type=custom
+$ docker network ls -f type=builtin
+
+# 格式化输出
+$ docker network ls --format "{{.Name}} \t {{.Driver}} \t {{.IPv6}} \t {{.Internal}} \t
+# 长id
+$ docker network ls --filter 'driver=host' -q
+# 短 id
+$ docker network ls --filter 'driver=host' -q --no-trunc
+-----------------------------------------------------------------
+$ docker network create -h
+Usage:  docker network create [OPTIONS] NETWORK
+
+创建一个网络
+
+Options:
+      --attachable           # 启用手动容器附件
+      --aux-address map      # 使用的辅助IPv4或IPv6地址网络驱动程序（默认 map[])
+      --config-from string   # 复制配置的网络
+      --config-only          # 创建仅配置网络
+  -d, --driver string        # Driver管理网络 (default "bridge")
+      --gateway strings      # 主站子网的IPv4或IPv6网关
+      --ingress              # 创建群组路由 - 网状集群网络
+      --internal             # 限制对网络的外部访问
+      --ip-range strings     # 从子网范围分配容器ip
+      --ipam-driver string   # IP地址管理驱动程序 (default "default")
+      --ipam-opt map         # 设置IPAM驱动程序特定选项 (default map[])
+      --ipv6                 # 启用IPv6网络
+      --label list           # 在网络上设置元数据
+  -o, --opt map              # 设置驱动程序特定的选项 (default map[])
+      --scope string         # 控制网络的范围
+      --subnet strings       # 以CIDR格式表示的子网串网段
+
+# 创建网络，默认桥接网络
+$ docker network create my-default-bri-net
+# 创建桥接网络
+$ docker network create -d bridge my-bridge-net
+$ docker network create -d host my-host-net
+# 创建覆盖型网络
+$ docker network create -d overlay my-overlay-net
+# 创建mac网络
+$ docker network create -d macvlan my-mac-net
+
+$ docker run -itd --network=mynet busybox		# 将busybox容器添加到mynet网络
+$ docker network create --driver=bridge --subnet=192.168.0.0/18 my-bri-0  #使用--subnet选项指定子网值
+# 指定--gateway --ip-range和--aux-address 选项
+$ docker network create \
+  --driver=bridge \
+  --subnet=172.28.0.0/16 \
+  --ip-range=172.28.5.0/24 \
+  --gateway=172.28.5.254 \
+  br0
+# 两个/25 子网掩码
+$ docker network create -d overlay \
+  --subnet=192.168.1.0/25 \
+  --subnet=192.170.2.0/25 \
+  --gateway=192.168.1.100 \
+  --gateway=192.170.2.100 \
+  --aux-address="my-router=192.168.1.5" --aux-address="my-switch=192.168.1.6" \
+  --aux-address="my-printer=192.170.1.5" --aux-address="my-nas=192.170.1.6" \
+  my-multihost-network
+#使用-o或--opt选项在发布端口时指定IP地址绑定
+$ docker network create \
+    -o "com.docker.network.bridge.host_binding_ipv4"="172.19.0.1" \
+    simple-network
+# 网络内部模式
+$ docker network create --internal -d overlay my-overlay-inte-net
+# 网络ingress模式
+$ docker network create -d overlay \
+  --subnet=10.11.0.0/16 \
+  --ingress \
+  --opt com.docker.network.driver.mtu=9216 \
+  --opt encrypted=true \
+  my-ingress-network
+-----------------------------------------------------------------
+$ docker network connect [options] network container
+Options:
+      --alias strings           # 为容器添加网络范围的别名
+      --ip string               # IPv4地址 (e.g., 172.30.100.104)
+      --ip6 string              # IPv6地址 (e.g., 2001:db8::33)
+      --link list               # 将链接添加到其他容器
+      --link-local-ip strings   # 为容器添加链接本地地址
+      
+# 使用id 
+$ docker network connect 61b951b60b24 91efc6379be0
+# 使用name
+$ docker network connect my-bridge-net suspicious_kepler
+# 使用docker run --network=<network-name>选项启动容器并立即将其连接到网络
+$ docker run -it --network=my-bridge-net helloworld-jdk-9:latest
+$ docker run -itd --network=multi-host-network busybox
+# 连接网络使用固定IP
+$ docker network inspect my-bri-0 --format={{.IPAM.Config}}
+[{192.168.0.0/18   map[]}]
+$ docker network connect --ip 192.168.5.122 my-bri-0 suspicious_kepler
+# 使用--link选项将另一个容器与首选别名链接起来
+$ docker network connect --link silly_curie:my_container my-bridge suspicious_kepler
+# 连接网络时创建网络别名
+$ docker network connect --alias db --alias mysql multi-host-network container2
+$ docker network connect --alias linux_os --alias ubuntu ps upbeat_ptolemy
+# 区间网络
+$ docker network create --subnet 172.20.0.0/16 --ip-range 172.20.240.0/20 multi-host-network
+
+# 断开容器网络连接
+$ docker network disconnect -f my-bridge-net friendly_jepsen
+# 或者用id
+$ docker network disconnect -f 568e61b512d0 c7fd77e7f301
+
+$ docker network inspect my-mac-net		# 检查
+$ docker network prune				# 删除未用
+$ docker network prune --force --filter until=5m # 超过5分钟前创建的网络
+```
+
+
+
+## docker  volumes
+
+```sh
+$ docker volume create -h
+--driver , -d	#默认值：local，指定卷驱动程序名称
+--label		    #设置卷的元数据
+--name		    #指定卷名称
+--opt , -o		#设置驱动程序特定选项
+
+
+$ docker volume create my-vol			# 创建卷
+$ docker volume create hello			# 创建一个卷，然后配置容器以使用它
+$ docker run -d -v hello:/world busybox ls /world
+# 驱动程序特定的选项
+$ docker volume create --driver fake \
+    --opt tardis=blue \
+    --opt timey=wimey \
+    foo
+# 创建一个名为foo的tmpfs卷，其大小为100兆字节，uid为1000
+$ docker volume create --driver local \
+    --opt type=tmpfs \
+    --opt device=tmpfs \
+    --opt o=size=100m,uid=1000 \
+    foo
+# type=btrfs 
+$ docker volume create --driver local \
+    --opt type=btrfs \
+    --opt device=/dev/sda2 \
+    foo
+# 使用nfs从192.168.1.1开始以rw模式挂载/path/to/dir
+$ docker volume create --driver local \
+    --opt type=nfs \
+    --opt o=addr=192.168.1.1,rw \
+    --opt device=:/path/to/dir \
+    foo
+    
+
+$ docker volume ls -f dangling=true			# 过滤器上没有任何容器引用的所有匹配卷
+$ docker volume ls -f driver=local			# 匹配使用该local驱动程序创建的卷
+# 标签过滤器
+$ docker volume create the-doctor --label is-timelord=yes
+$ docker volume create daleks --label is-timelord=no
+$ docker volume ls --filter label=is-timelord
+$ docker volume ls --filter label=is-timelord=yes
+$ docker volume ls --filter label=is-timelord=yes --filter label=is-timelord=no
+$ docker volume ls -f name=rose 			# 匹配所有包含该rose字符串的名称的卷
+
+# 使用--format选项时，volume ls命令将按照模板声明输出数据
+$ docker volume ls --format "{{.Name}}: {{.Driver}}"
+$ docker volume ls --format "table {{.Name}}: {{.Driver}}"
+
+# 检查
+$ docker volume inspect my-vol				
+$ docker volume inspect --format '{{ .Mountpoint }}' my-vol
+$ docker volume inspect foo --format='{{json .Options}}'
+$ docker volume inspect foo --format '{{json .Options}}'
+
+
+$ docker volume rm hello e425b890f45			# 删除多个
+$ docker volume rm -f hello e425b890f45			# 强制删除
+
+$ docker volume prune				# 剪裁
+$ docker volume prune -f			# 强制删除，不提示输入
+$ docker volume prune -f --filter driver=local		## 过滤裁剪
+```
+
+
 
 ## docker compose
 
