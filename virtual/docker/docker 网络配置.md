@@ -191,7 +191,7 @@ Options:
       --subnet strings       # 以CIDR格式表示的子网串网段
 ```
 
-### 扩充阅读
+### 延伸阅读
 
 ---
 
