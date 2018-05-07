@@ -69,7 +69,7 @@
   - [添加或更新群集节点的标签](https://docs.docker.com/engine/reference/commandline/node_update/#add-label-metadata-to-a-node)
   - [检查群集节点的标签](https://docs.docker.com/engine/reference/commandline/node_inspect/)
   - [通过标签过滤swarm节点](https://docs.docker.com/engine/reference/commandline/node_ls/#filtering)
-- 群体服务
+- 集群服务
   - [创建群集服务时添加标签](https://docs.docker.com/engine/reference/commandline/service_create/#set-metadata-on-a-service-l-label)
   - [更新swarm服务的标签](https://docs.docker.com/engine/reference/commandline/service_update/)
   - [检查群集服务的标签](https://docs.docker.com/engine/reference/commandline/service_inspect/)
