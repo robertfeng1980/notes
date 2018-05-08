@@ -2907,9 +2907,7 @@ Docker Machine和Docker Swarm不是强制性的，可以通过键值存储体验
    6b07d0be843f        my-net              overlay
    dd51763e6dd2        bridge              bridge
    b4234109bd9b        none                null
-   1aeead6dd890        host                host
-   ```
-
+   1aeead6dd890        host                host  
 
    $ eval $(docker-machine env mhs-demo1)
    $ docker network ls
