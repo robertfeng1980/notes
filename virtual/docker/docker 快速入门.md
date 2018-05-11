@@ -280,12 +280,12 @@ $ docker-machine create --engine-registry-mirror=https://8kzs1r91.mirror.aliyunc
 对于已经安装创建过虚拟机的，可以先`docker-machine ssh default`链接到`default`虚拟机如下处理
 
 ```shell
-sudo sed -i "s|EXTRA_ARGS='|EXTRA_ARGS='--registry-mirror=https://8kzs1r91.mirror.aliyuncs.com |g" /var/lib/boot2docker/profile
+$ sudo sed -i "s|EXTRA_ARGS='|EXTRA_ARGS='--registry-mirror=https://8kzs1r91.mirror.aliyuncs.com |g" /var/lib/boot2docker/profile
 
 # 退出
-exit
+$ exit
 # 重启虚拟机
-docker-machine restart default
+$ docker-machine restart default
 ```
 
 
@@ -293,9 +293,9 @@ docker-machine restart default
 查看机器的环境配置，并配置到本地，并通过Docker客户端访问Docker服务。
 
 ```shell
-docker-machine env default
-eval "$(docker-machine env default)"
-docker info
+$ docker-machine env default
+$ eval "$(docker-machine env default)"
+$ docker info
 ```
 
 针对安装了`Docker for Windows`的用户，您可以参考以下配置步骤：
@@ -783,6 +783,7 @@ Login Succeeded
 
 # 或者登陆其他仓库
 $ sudo docker login --username=xxx -p xxxx registry.cn-hangzhou.aliyuncs.com
+$ winpty docker login --username xxx registry.cn-hangzhou.aliyuncs.com
 ```
 
 
