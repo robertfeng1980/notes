@@ -4,22 +4,22 @@
 
 # 集群模式概述
 
-当前版本的Docker包括*swarm模式，*用于本地管理称为群集的Docker引擎*群集*。使用Docker CLI创建群集，将应用程序服务部署到群集，并管理群体行为。
+当前版本的Docker包括*swarm模式，*用于本地管理称为集群的Docker引擎*集群*。使用Docker CLI创建集群，将应用程序服务部署到集群，并管理群体行为。
 
-如果您之前使用的是Docker版本`1.12.0`，则可以使用[独立群集](https://docs.docker.com/swarm/)，但我们建议进行更新。
+如果你之前使用的是Docker版本`1.12.0`，则可以使用[独立集群](https://docs.docker.com/swarm/)，但我们建议进行更新。
 
 ## 集群特点
 
 - **与Docker Engine集成的集群管理：** 使用Docker Engine CLI创建一群Docker引擎，可以在其中部署应用程序服务。不需要额外的编排软件来创建或管理群。
-- **分散式设计：** Docker Engine在部署时不需要处理节点角色之间的差异，而是在运行时处理任何专业化。您可以使用Docker Engine部署这两种节点，管理员和工作人员。这意味着您可以从单个磁盘映像构建整个群集。
-- **声明式服务模型：** Docker Engine使用声明式方法让您在应用程序堆栈中定义各种服务的所需状态。例如，您可能会描述一个由带有消息队列服务和数据库后端的Web前端服务组成的应用程序。
-- **伸缩：** 对于每个服务，您可以声明要运行的任务数量。当您向上或向下缩放时，swarm管理器会通过添加或删除任务来自动调整以保持所需的状态。
-- **期望的状态协调：** swarm manager节点持续监视集群状态，并协调实际状态与表达期望状态之间的任何差异。例如，如果您设置了一个服务来运行容器的10个副本以及承载其中两个副本崩溃的工作计算机，则该管理器会创建两个新副本来替换发生崩溃的副本。swarm manager将新副本分配给正在运行且可用的工作人员。
-- **多主机联网：** 您可以为您的服务指定覆盖网络。swarm管理器在初始化或更新应用程序时自动为覆盖网络上的容器分配地址。
-- **服务发现：** Swarm管理器节点为swarm中的每个服务分配一个唯一的DNS名称并负载平衡正在运行的容器。您可以通过群集中嵌入的DNS服务器查询群集中运行的每个容器。
-- **负载平衡：** 您可以将服务的端口暴露给外部负载平衡器。在群集内部，您可以指定如何在节点之间分发服务容器。
-- **默认情况下为安全：** 群中的每个节点都强制进行TLS相互认证和加密，以保护其自身与所有其他节点之间的通信。您可以选择使用自定义根证书或来自自定义根CA的证书。
-- **滚动更新：** 在推出时，您可以逐步将服务更新应用于节点。swarm管理器允许您控制服务部署到不同节点集之间的延迟。如果出现任何问题，您可以将任务回滚到以前版本的服务。
+- **分散式设计：** Docker Engine在部署时不需要处理节点角色之间的差异，而是在运行时处理任何专业化。你可以使用Docker Engine部署这两种节点，管理员和工作人员。这意味着你可以从单个磁盘镜像构建整个集群。
+- **声明式服务模型：** Docker Engine使用声明式方法让你在应用程序堆栈中定义各种服务的所需状态。例如，你可能会描述一个由带有消息队列服务和数据库后端的Web前端服务组成的应用程序。
+- **伸缩：** 对于每个服务，你可以声明要运行的任务数量。当你向上或向下缩放时，swarm管理器会通过添加或删除任务来自动调整以保持所需的状态。
+- **期望的状态协调：** swarm manager节点持续监视集群状态，并协调实际状态与表达期望状态之间的任何差异。例如，如果你设置了一个服务来运行容器的10个副本以及承载其中两个副本崩溃的工作计算机，则该管理器会创建两个新副本来替换发生崩溃的副本。swarm manager将新副本分配给正在运行且可用的工作人员。
+- **多主机联网：** 你可以为你的服务指定覆盖网络。swarm管理器在初始化或更新应用程序时自动为覆盖网络上的容器分配地址。
+- **服务发现：** Swarm管理器节点为swarm中的每个服务分配一个唯一的DNS名称并负载平衡正在运行的容器。你可以通过集群中嵌入的DNS服务器查询集群中运行的每个容器。
+- **负载平衡：** 你可以将服务的端口暴露给外部负载平衡器。在集群内部，你可以指定如何在节点之间分发服务容器。
+- **默认情况下为安全：** 群中的每个节点都强制进行TLS相互认证和加密，以保护其自身与所有其他节点之间的通信。你可以选择使用自定义根证书或来自自定义根CA的证书。
+- **滚动更新：** 在推出时，你可以逐步将服务更新应用于节点。swarm管理器允许你控制服务部署到不同节点集之间的延迟。如果出现任何问题，你可以将任务回滚到以前版本的服务。
 
 # 群模式关键概念
 
@@ -27,43 +27,43 @@
 
 嵌入在Docker Engine中的集群管理和编排功能是使用[swarmkit构建的](https://github.com/docker/swarmkit/)。Swarmkit是一个独立的项目，它实现了Docker的编排层，并直接在Docker中使用。
 
-一个集群由多个Docker主机组成，这些主机以**集群模式**运行并充当管理 者（管理成员和委派）和工作 者（运行 [群集服务](https://docs.docker.com/engine/swarm/key-concepts/#services-and-tasks)）。给定的Docker主机可以是管理员、工作者或执行这两种角色。当您创建服务时，可以定义最佳状态（副本数量，可用的网络和存储资源，将服务暴露给外界等等）。Docker的工作是维持这个理想的状态。例如，如果工作节点变得不可用，Docker会在其他节点上调度该节点的任务。一个**任务** 是运行的容器集群服务的一部分，并通过集群管理节点管理，而不是一个独立的容器。
+一个集群由多个Docker主机组成，这些主机以**集群模式**运行并充当管理 者（管理成员和委派）和工作 者（运行 [集群服务](https://docs.docker.com/engine/swarm/key-concepts/#services-and-tasks)）。给定的Docker主机可以是管理员、工作者或执行这两种角色。当你创建服务时，可以定义最佳状态（副本数量，可用的网络和存储资源，将服务暴露给外界等等）。Docker的工作是维持这个理想的状态。例如，如果工作节点变得不可用，Docker会在其他节点上调度该节点的任务。一个**任务** 是运行的容器集群服务的一部分，并通过集群管理节点管理，而不是一个独立的容器。
 
-群集服务相对于独立容器的主要优势之一是**可以修改服务的配置**，包括连接的**网络和卷**，而**无需手动重新启动**服务。**Docker将更新配置，停止使用过时配置的服务任务，并创建与所需配置相匹配的新服务**。
+集群服务相对于独立容器的主要优势之一是**可以修改服务的配置**，包括连接的**网络和卷**，而**无需手动重新启动**服务。**Docker将更新配置，停止使用过时配置的服务任务，并创建与所需配置相匹配的新服务**。
 
-当Docker以群集模式运行时，仍然可以在参与群集的任何Docker主机以及群集服务上运行独立容器。独立容器和群集服务之间的一个**主要区别**是，只有群集管理员可以管理群集，而独立容器可以在任何守护进程上启动。Docker守护进程可以作为管理者，工作者或两者参与群体。
+当Docker以集群模式运行时，仍然可以在参与集群的任何Docker主机以及集群服务上运行独立容器。独立容器和集群服务之间的一个**主要区别**是，只有集群管理员可以管理集群，而独立容器可以在任何守护进程上启动。Docker守护进程可以作为管理者，工作者或两者参与群体。
 
-与使用[Docker Compose](https://docs.docker.com/compose/)定义和运行容器的方式相同，您可以定义并运行swarm [堆栈](https://docs.docker.com/get-started/part5/)服务。
+与使用[Docker Compose](https://docs.docker.com/compose/)定义和运行容器的方式相同，你可以定义并运行swarm [堆栈](https://docs.docker.com/get-started/part5/)服务。
 
 ## 节点
 
-一个**节点**是docker引擎参与集群的一个实例。您也可以将其视为Docker节点。您可以在单台物理计算机或云服务器上运行一个或多个节点，但生产群部署通常包括分布在多台物理机和云计算机上的Docker节点。
+一个**节点**是docker引擎参与集群的一个实例。你也可以将其视为Docker节点。你可以在单台物理计算机或云服务器上运行一个或多个节点，但生产群部署通常包括分布在多台物理机和云计算机上的Docker节点。
 
-要将您的应用程序部署到群集，您需要向**管理节点**提交服务定义 。管理节点将称为[任务](https://docs.docker.com/engine/swarm/key-concepts/#services-and-tasks)的工作单元分派 给工作节点。
+要将你的应用程序部署到集群，你需要向**管理节点**提交服务定义 。管理节点将称为[任务](https://docs.docker.com/engine/swarm/key-concepts/#services-and-tasks)的工作单元分派 给工作节点。
 
-Manager节点还执行维护群体所需状态所需的编排和群集管理功能。经理节点选择一位领导者来执行编排任务。
+Manager节点还执行维护群体所需状态所需的编排和集群管理功能。管理节点选择一位领导者来执行编排任务。
 
-**工作者节点**接收并执行从管理器节点分派的任务。默认情况下，管理器节点也可以将服务作为工作节点运行，但您可以将它们配置为独占运行管理器任务，并且是纯管理器节点。代理在每个工作节点上运行并报告分配给它的任务。工作节点通知管理节点其分配任务的当前状态，以便管理人员可以维护每个工作人员所需的状态。
+**工作者节点**接收并执行从管理器节点分派的任务。默认情况下，管理器节点也可以将服务作为工作节点运行，但你可以将它们配置为独占运行管理器任务，并且是纯管理器节点。代理在每个工作节点上运行并报告分配给它的任务。工作节点通知管理节点其分配任务的当前状态，以便管理人员可以维护每个工作人员所需的状态。
 
 ## 服务和任务
 
-一个**服务**是任务的定义，经理或工作节点上执行。它是群体系统的中心结构，也是群体与用户互动的主要根源。
+一个**服务**是任务的定义，管理或工作节点上执行。它是群体系统的中心结构，也是群体与用户互动的主要根源。
 
-在创建服务时，您可以指定要使用哪个容器映像以及要在正在运行的容器中执行哪些命令。
+在创建服务时，你可以指定要使用哪个容器镜像以及要在正在运行的容器中执行哪些命令。
 
-在**复制服务**模型中，swarm管理器根据您在所需状态中设置的比例在节点之间分配特定数量的副本任务。
+在**复制服务**模型中，swarm管理器根据你在所需状态中设置的比例在节点之间分配特定数量的副本任务。
 
-对于**全局服务**，群集为群集中每个可用节点上的服务运行一个任务。
+对于**全局服务**，集群为集群中每个可用节点上的服务运行一个任务。
 
 **任务**携带docker容器和在容器内部运行的命令。它是群体的原子调度单位。管理器节点根据服务规模中设置的副本数量将任务分配给工作节点。一旦任务分配给节点，它就不能移动到另一个节点。它只能在分配的节点上运行或失败。
 
 ## 负载均衡
 
-swarm管理器使用**入口负载平衡**来公开要在群集外部提供的服务。swarm manager可以自动为服务分配一个**PublishedPort，**或者您可以为该服务配置一个PublishedPort。您可以指定任何未使用的端口。如果您不指定端口，那么swarm管理器将为该服务分配一个30000-32767范围内的端口。
+swarm管理器使用**入口负载平衡**来公开要在集群外部提供的服务。swarm manager可以自动为服务分配一个**PublishedPort，**或者你可以为该服务配置一个PublishedPort。你可以指定任何未使用的端口。如果你不指定端口，那么swarm管理器将为该服务分配一个30000-32767范围内的端口。
 
-外部组件（如云负载平衡器）可以访问群集中任何节点的PublishedPort上的服务，而不管该节点当前是否正在运行该服务的任务。集群路由中的**所有节点都会连接到正在运行的任务实例**。
+外部组件（如云负载平衡器）可以访问集群中任何节点的PublishedPort上的服务，而不管该节点当前是否正在运行该服务的任务。集群路由中的**所有节点都会连接到正在运行的任务实例**。
 
-Swarm模式有一个**内部DNS组件**，可自动为群集中的每个服务分配一个DNS条目。swarm管理器使用**内部负载平衡**根据服务的**DNS名称在群集内的服务之间分配请求**。
+Swarm模式有一个**内部DNS组件**，可自动为集群中的每个服务分配一个DNS条目。swarm管理器使用**内部负载平衡**根据服务的**DNS名称在集群内的服务之间分配请求**。
 
 # docker swarm 基本命令
 
@@ -79,7 +79,7 @@ Commands:
   join        # 加入群体作为节点或管理
   join-token  # 管理连接令牌
   leave       # 离开集群
-  unlock      # 解锁群集
+  unlock      # 解锁集群
   unlock-key  # 管理解锁密钥
   update      # 更新集群
 ```
@@ -88,7 +88,7 @@ Commands:
 
 ## ca 证书
 
-查看或轮转当前**群集CA证书**。该命令必须以**管理节点**为目标。
+查看或轮转当前**集群CA证书**。该命令必须以**管理节点**为目标。
 
  
 
@@ -108,11 +108,11 @@ Commands:
 
 ### `--rotate`
 
-如果一个或多个**群集管理节点遭到入侵，建议使用根CA轮换**，以便这些管理节点**不能再连接到群集中的任何其他节点**或受其信任。或者，可以使用**根CA旋转来将群集CA控制权授予外部CA**，或从**外部CA获取控制权**。
+如果一个或多个**集群管理节点遭到入侵，建议使用根CA轮换**，以便这些管理节点**不能再连接到集群中的任何其他节点**或受其信任。或者，可以使用**根CA旋转来将集群CA控制权授予外部CA**，或从**外部CA获取控制权**。
 
-`--rotate`标志不需要任何参数进行轮换，但可以选择**指定证书和密钥**，或者**证书和外部CA URL**，并且将使用这些参数代替自动生成的证书/密钥对。
+`--rotate`选项不需要任何参数进行轮换，但可以选择**指定证书和密钥**，或者**证书和外部CA URL**，并且将使用这些参数代替自动生成的证书/密钥对。
 
-由于根CA密钥应该保密，如果提供，通过CLI或API查看群集任何信息时都不可见。直到**所有注册节点**都旋转了他们的TLS证书后，根CA轮换才能完成。如果旋转**没有在合理的时间**内完成，请尝试运行`docker node ls --format '{{.ID}} {{.Hostname}} {{.Status}} {{.TLSStatus}}'`以查看是否有节点关闭或无法旋转TLS证书。
+由于根CA密钥应该保密，如果提供，通过CLI或API查看集群任何信息时都不可见。直到**所有注册节点**都旋转了他们的TLS证书后，根CA轮换才能完成。如果旋转**没有在合理的时间**内完成，请尝试运行`docker node ls --format '{{.ID}} {{.Hostname}} {{.Status}} {{.TLSStatus}}'`以查看是否有节点关闭或无法旋转TLS证书。
 
 ```sh
 $ docker node ls --format '{{.ID}} {{.Hostname}} {{.Status}} {{.TLSStatus}}'
@@ -150,7 +150,7 @@ CVjyhJCYGgNONh1c/RzztCXuYguJwWOjNxAx/n+aLA==
 
 #### 轮转证书
 
-传递`--rotate`标志（以及可选的 `--ca-cert`，连同一个`--ca-key`或 `--external-ca`参数标志），以便轮转当前集群根CA.
+传递`--rotate`选项（以及可选的 `--ca-cert`，连同一个`--ca-key`或 `--external-ca`参数选项），以便轮转当前集群根CA.
 
 ```sh
 $ docker swarm ca --rotate
@@ -196,23 +196,23 @@ er3hEhPf6PRvToBfD7Scy49EpBVkB9OCcNJqENg26g==
 
 #### `--autolock`
 
-该标志可以使用加密密钥**自动锁定管理节点**。所有管理节点存储的私钥和数据将受到输出中打印的加密密钥的保护，如果没有它，将**无法访问**。因此，为了在重新启动后激活管理器，存储此密钥非常重要。密钥可以传递给`docker swarm unlock`重新激活管理器。自动锁定可以通过运行`docker swarm update --autolock=false`禁用 。在禁用它之后，加密密钥不再需要启动管理器，并且它将在没有用户干预的情况下自行启动。
+该选项可以使用加密密钥**自动锁定管理节点**。所有管理节点存储的私钥和数据将受到输出中打印的加密密钥的保护，如果没有它，将**无法访问**。因此，为了在重新启动后激活管理器，存储此密钥非常重要。密钥可以传递给`docker swarm unlock`重新激活管理器。自动锁定可以通过运行`docker swarm update --autolock=false`禁用 。在禁用它之后，加密密钥不再需要启动管理器，并且它将在没有用户干预的情况下自行启动。
 
 #### `--cert-expiry`
 
-该标志设置节点证书的**有效期**。
+该选项设置节点证书的**有效期**。
 
 #### `--dispatcher-heartbeat`
 
-该标志设置节点被告知使用的频率作为**报告健康状况**的时间段。
+该选项设置节点被告知使用的频率作为**报告健康状况**的时间段。
 
 #### `--external-ca`
 
-此标志设置群体使用**外部CA颁发节点**证书。该值采取的形式`protocol=X,url=Y`。值`protocol`指定应使用什么协议将签名请求发送到外部CA. 目前，唯一支持的值是`cfssl`。该URL指定了应该提交签名请求的端点。
+此选项设置群体使用**外部CA颁发节点**证书。该值采取的形式`protocol=X,url=Y`。值`protocol`指定应使用什么协议将签名请求发送到外部CA. 目前，唯一支持的值是`cfssl`。该URL指定了应该提交签名请求的端点。
 
 #### `--force-new-cluster`
 
-此标志强制作为单个节点管理器重新启动时丢失的管理的一部分的现有节点**不丢失数据**。
+此选项强制作为单个节点管理器重新启动时丢失的管理的一部分的现有节点**不丢失数据**。
 
 #### `--listen-addr`
 
@@ -222,7 +222,7 @@ er3hEhPf6PRvToBfD7Scy49EpBVkB9OCcNJqENg26g==
 
 #### `--advertise-addr`
 
-该标志指定将**通知给群集的其他成员进行API访问和覆盖网络的地址**。如果未指定，Docker将检查系统是否具有**单个IP地址**，并将该IP地址与侦听端口一起使用（请参阅参考资料`--listen-addr`）。如果系统有多个IP地址，则`--advertise-addr`必须指定该地址， 以便为经理间通信和覆盖网络选择正确的地址。
+该选项指定将**通知给集群的其他成员进行API访问和覆盖网络的地址**。如果未指定，Docker将检查系统是否具有**单个IP地址**，并将该IP地址与侦听端口一起使用（请参阅参考资料`--listen-addr`）。如果系统有多个IP地址，则`--advertise-addr`必须指定该地址， 以便为管理间通信和覆盖网络选择正确的地址。
 
 也可以指定一个网络接口来通告该接口的地址; 例如`--advertise-addr eth0:2377`。
 
@@ -230,25 +230,25 @@ er3hEhPf6PRvToBfD7Scy49EpBVkB9OCcNJqENg26g==
 
 #### `--data-path-addr`
 
-此标志指定**全局范围网络驱动程序**将发布到其他节点的地址，以便到达在此节点上运行的容器。然后使用此参数可以将容器的**数据流量与群集的管理流量分开**。如果未指定，Docker将使用与**广播地址相同的IP地址或接口**。
+此选项指定**全局范围网络驱动程序**将发布到其他节点的地址，以便到达在此节点上运行的容器。然后使用此参数可以将容器的**数据流量与集群的管理流量分开**。如果未指定，Docker将使用与**广播地址相同的IP地址或接口**。
 
 #### `--task-history-limit`
 
-此标志设置**任务历史保留**限制。
+此选项设置**任务历史保留**限制。
 
 #### `--max-snapshots`
 
-除了当前的**Raft快照**之外，该标志还设置要保留的旧Raft快照的数量。默认情况下，**不保留旧的快照**。该选项可用于**调试**，或用于存储swarm状态的旧快照以实现**灾难恢复**。
+除了当前的**Raft快照**之外，该选项还设置要保留的旧Raft快照的数量。默认情况下，**不保留旧的快照**。该选项可用于**调试**，或用于存储swarm状态的旧快照以实现**灾难恢复**。
 
 #### `--snapshot-interval`
 
-该标志指定在**Raft快照之间允许的日志条目数量**。将其设置为**更高的数字将会减少快照次数**。快照缩小了Raft日志，并允许更高效地将状态转移给新管理节点。但是，经常拍摄快照会带来**性能**成本。
+该选项指定在**Raft快照之间允许的日志条目数量**。将其设置为**更高的数字将会减少快照次数**。快照缩小了Raft日志，并允许更高效地将状态转移给新管理节点。但是，经常拍摄快照会带来**性能**成本。
 
 #### `--availability`
 
-该标志指定**节点加入主设备时节点的可用性**。可能的可用性值`active`，`pause`或`drain`。
+该选项指定**节点加入主设备时节点的可用性**。可能的可用性值`active`，`pause`或`drain`。
 
-这个标志在某些情况下很有用。例如，群集可能希望具有**专用管理节点**，这些节点**不用作工作节点**。这可以通过传递`--availability=drain`来实现`docker swarm init`。
+这个选项在某些情况下很有用。例如，集群可能希望具有**专用管理节点**，这些节点**不用作工作节点**。这可以通过传递`--availability=drain`来实现`docker swarm init`。
 
 ### 示例
 
@@ -268,13 +268,13 @@ To add a worker to this swarm, run the following command:
 To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
 ```
 
-`docker swarm init`生成两个随机令牌，一个工作节点令牌和一个关键节点令牌。当新节点加入到群中时，该节点将根据传递给[群集加入](https://docs.docker.com/engine/reference/commandline/swarm_join/)的令牌作为工作节点或管理节点[加入](https://docs.docker.com/engine/reference/commandline/swarm_join/)。
+`docker swarm init`生成两个随机令牌，一个工作节点令牌和一个关键节点令牌。当新节点加入到群中时，该节点将根据传递给[集群加入](https://docs.docker.com/engine/reference/commandline/swarm_join/)的令牌作为工作节点或管理节点[加入](https://docs.docker.com/engine/reference/commandline/swarm_join/)。
 
-创建群集后，可以使用[群集连接令牌](https://docs.docker.com/engine/reference/commandline/swarm_join_token/)显示或旋转该 [令牌](https://docs.docker.com/engine/reference/commandline/swarm_join_token/)。
+创建集群后，可以使用[集群连接令牌](https://docs.docker.com/engine/reference/commandline/swarm_join_token/)显示或旋转该 [令牌](https://docs.docker.com/engine/reference/commandline/swarm_join_token/)。
 
 ## join 加入
 
-将一个节点加入集群中。根据使用`--token`标志传递的令牌，该节点将作为管理节点或工作节点加入。如果传递管理令牌，则该节点将作为管理节点加入。如果传递工作令牌，则该节点将作为工作节点加入。
+将一个节点加入集群中。根据使用`--token`选项传递的令牌，该节点将作为管理节点或工作节点加入。如果传递管理令牌，则该节点将作为管理节点加入。如果传递工作令牌，则该节点将作为工作节点加入。
 
 ### 命令参数选项
 
@@ -290,25 +290,25 @@ To add a manager to this swarm, run 'docker swarm join-token manager' and follow
 
 ### `--listen-addr value`
 
-如果该节点是经理，它将监听此地址上的入站群管理器流量。默认是在0.0.0.0:2377上进行监听。也可以指定一个网络接口来侦听该接口的地址; 例如`--listen-addr eth0:2377`。
+如果该节点是管理，它将监听此地址上的入站群管理器流量。默认是在0.0.0.0:2377上进行监听。也可以指定一个网络接口来侦听该接口的地址; 例如`--listen-addr eth0:2377`。
 
 指定端口是可选的。如果该值为裸IP地址或接口名称，则将使用默认端口2377。
 
-加入现有群体时，此标志通常不是必需的。
+加入现有群体时，此选项通常不是必需的。
 
 ### `--advertise-addr value`
 
-此标志指定将通告给群集的其他成员进行API访问的地址。如果未指定，Docker将检查系统是否具有单个IP地址，并将该IP地址与侦听端口一起使用（请参阅参考资料 `--listen-addr`）。如果系统有多个IP地址，则`--advertise-addr` 必须指定该地址，以便为经理间通信和覆盖网络选择正确的地址。
+此选项指定将通告给集群的其他成员进行API访问的地址。如果未指定，Docker将检查系统是否具有单个IP地址，并将该IP地址与侦听端口一起使用（请参阅参考资料 `--listen-addr`）。如果系统有多个IP地址，则`--advertise-addr` 必须指定该地址，以便为管理间通信和覆盖网络选择正确的地址。
 
 也可以指定一个网络接口来通告该接口的地址; 例如`--advertise-addr eth0:2377`。
 
 指定端口是可选的。如果该值为裸IP地址或接口名称，则将使用默认端口2377。
 
-加入现有群体时，此标志通常不是必需的。如果您通过负载平衡器加入新节点，则应使用此标志来确保节点通告其IP地址，而不是负载平衡器的IP地址。
+加入现有群体时，此选项通常不是必需的。如果你通过负载平衡器加入新节点，则应使用此选项来确保节点通告其IP地址，而不是负载平衡器的IP地址。
 
 ### `--data-path-addr`
 
-此标志指定全局范围网络驱动程序将发布到其他节点的地址，以便到达在此节点上运行的容器。然后使用此参数可以将容器的数据流量与群集的管理流量分开。如果未指定，Docker将使用与广告地址相同的IP地址或接口。
+此选项指定全局范围网络驱动程序将发布到其他节点的地址，以便到达在此节点上运行的容器。然后使用此参数可以将容器的数据流量与集群的管理流量分开。如果未指定，Docker将使用与广告地址相同的IP地址或接口。
 
 ### `--token string`
 
@@ -316,9 +316,9 @@ To add a manager to this swarm, run 'docker swarm join-token manager' and follow
 
 ### `--availability`
 
-该标志指定节点加入主设备时节点的可用性。可能的可用性值`active`，`pause`或`drain`。
+该选项指定节点加入主设备时节点的可用性。可能的可用性值`active`，`pause`或`drain`。
 
-这个标志在某些情况下很有用。例如，群集可能希望具有专用管理器节点，这些节点不用作工作者节点。这可以通过传递`--availability=drain`来实现`docker swarm join`。
+这个选项在某些情况下很有用。例如，集群可能希望具有专用管理器节点，这些节点不用作工作者节点。这可以通过传递`--availability=drain`来实现`docker swarm join`。
 
  ### 示例
 
@@ -337,7 +337,7 @@ dkp8vy1dq1kxleu9g4u78tlag *  manager2  Ready   Active        Reachable
 dvfxp4zseq4s0rih1selh0d20    manager1  Ready   Active        Leader
 ```
 
-一个集群最多只能有**3-7个管理节点**，因为大多数管理者必须可以使集群发挥作用。不打算参与此管理法定人数的节点应该以工作节点身份加入。管理员应该是具有**静态IP地址的稳定主机**。
+一个集群最多只能有**3-7个管理节点**，因为大多数管理节点必须可以使集群发挥作用。不打算参与此管理法定人数的节点应该以工作节点身份加入。管理员应该是具有**静态IP地址的稳定主机**。
 
 #### 加入工作节点
 
@@ -408,9 +408,9 @@ SWMTKN-1-0d3bbbyzap5snxrtfdlabfjkaeateg39qzcurj9xgtdnmu7r06-d7cbnxkkru5p9wh3qxzf
 
 ## leave 离开
 
-当在工作节点上运行此命令时，该工作节点离开群集。
+当在工作节点上运行此命令时，该工作节点离开集群。
 
-可以使用`--force`管理器上的选项将其从群中删除。但是，这不会重新配置群体以确保有足够的管理节点维护群体中的法定人数。从群体中删除经理的安全方法是将其**降级为工作节点**，然后指定离开法定人数而不使用`--force`。仅在管理节点离开后不再使用集群的情况下使用，例如在单节点群中。
+可以使用`--force`管理器上的选项将其从群中删除。但是，这不会重新配置群体以确保有足够的管理节点维护群体中的法定人数。从群体中删除管理的安全方法是将其**降级为工作节点**，然后指定离开法定人数而不使用`--force`。仅在管理节点离开后不再使用集群的情况下使用，例如在单节点群中。
 
 ### 命令参数选项
 
@@ -529,7 +529,7 @@ $ docker node demote my-vm-node-1
 
 ## promote 升级
 
-将节点提升为经理。
+将节点提升为管理。
 
  ```sh
 $ docker node promote my-vm-node-1
@@ -559,7 +559,7 @@ $ docker node inspect --pretty node-1
 
 ## ls 列表
 
-列出Docker Swarm经理知道的所有节点。您可以使用`-f`或`--filter`标志进行过滤。有关可用过滤器选项的更多信息，请参阅[过滤](https://docs.docker.com/engine/reference/commandline/node_ls/#filtering)部分。
+列出Docker Swarm管理知道的所有节点。你可以使用`-f`或`--filter`选项进行过滤。有关可用过滤器选项的更多信息，请参阅[过滤](https://docs.docker.com/engine/reference/commandline/node_ls/#filtering)部分。
 
  ### 命令参数选项
 
@@ -589,7 +589,7 @@ e216jshn25ckzbvmwlnh5jr3g *  swarm-manager1  Ready   Active        Leader
 
 #### 过滤
 
-过滤标志（`-f`或`--filter`）格式为“key = value”。如果有多个过滤器，则传递多个标志（例如`--filter "foo=bar" --filter "bif=baz"`）
+过滤选项（`-f`或`--filter`）格式为“key = value”。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）
 
 目前支持的过滤器是：
 
@@ -639,7 +639,7 @@ $ docker node ls --format "table {{.ID}}: {{.Hostname}} {{.TLSStatus}}"
 
 ## ps 查看任务
 
-列出Docker 发现的节点上的所有任务。可以使用`-f`或`--filter`标志进行过滤。有关可用过滤器选项的更多信息，请参阅[过滤](https://docs.docker.com/engine/reference/commandline/node_ps/#filtering)部分。
+列出Docker 发现的节点上的所有任务。可以使用`-f`或`--filter`选项进行过滤。有关可用过滤器选项的更多信息，请参阅[过滤](https://docs.docker.com/engine/reference/commandline/node_ps/#filtering)部分。
 
  ### 命令参数选项
 
@@ -667,7 +667,7 @@ redis.1.7q92v0nr1hcgts2amcjyqg3pq   redis:3.0.6  swarm-manager1  Running        
 
 #### 过滤
 
-过滤标志（`-f`或`--filter`）格式为“key = value”。如果有多个过滤器，则传递多个标志（例如`--filter "foo=bar" --filter "bif=baz"`）
+过滤选项（`-f`或`--filter`）格式为“key = value”。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）
 
 目前支持的过滤器是：
 
@@ -731,7 +731,7 @@ $ docker node rm --force swarm-node-03
 Node swarm-node-03 removed from swarm
 ```
 
-管理员节点**必须先降级到工作节点**（使用`docker node demote`），然后才能将其从群集中删除。
+管理员节点**必须先降级到工作节点**（使用`docker node demote`），然后才能将其从集群中删除。
 
 ## update 更新
 
@@ -752,13 +752,13 @@ Node swarm-node-03 removed from swarm
 
 ---
 
-使用节点标签将元数据添加到swarm节点。您可以将节点标签指定为具有空值的键：
+使用节点标签将元数据添加到swarm节点。你可以将节点标签指定为具有空值的键：
 
 ```sh
 $ docker node update --label-add foo worker1
 ```
 
-要将多个标签添加到节点，请`--label-add`为每个标签传递标志：
+要将多个标签添加到节点，请`--label-add`为每个标签传递选项：
 
 ```sh
 $ docker node update --label-add foo --label-add bar worker1
@@ -889,11 +889,11 @@ dmu1ept4cxcf  redis   replicated  1/1       redis:3.0.6
 a8q9dasaafud  redis2  global      1/1       redis:3.0.6
 ```
 
-#### 使用私人注册表中的图像创建服务
+#### 使用私人注册表中的镜像创建服务
 
 ---
 
-如果图像在需要登录的私人注册表中可用，请在登录后使用该 `--with-registry-auth`标志`docker service create`。如果图像存储在`registry.example.com`哪个私有注册表中，请使用类似以下的命令：
+如果镜像在需要登录的私人注册表中可用，请在登录后使用该 `--with-registry-auth`选项`docker service create`。如果镜像存储在`registry.example.com`哪个私有注册表中，请使用类似以下的命令：
 
 ```sh
 $ docker login registry.example.com
@@ -906,13 +906,13 @@ $ docker service  create \
   registry.cn-hangzhou.aliyuncs.com/acme/my_image:latest
 ```
 
-这使用加密的WAL日志将登录令牌从本地客户端传递到部署服务的群集节点。有了这些信息，这些节点就能够登录到注册表并提取图像。
+这使用加密的WAL日志将登录令牌从本地客户端传递到部署服务的集群节点。有了这些信息，这些节点就能够登录到注册表并提取镜像。
 
 #### 创建5个副本任务的服务
 
 ---
 
-使用`--replicas`标志设置复制服务的副本任务数量。以下命令`redis`使用`5`副本任务创建服务：
+使用`--replicas`选项设置复制服务的副本任务数量。以下命令`redis`使用`5`副本任务创建服务：
 
 ```sh
 $ docker service create --name redis --replicas=5 redis:latest
@@ -941,7 +941,7 @@ ID            NAME   MODE        REPLICAS  IMAGE
 
 ---
 
-使用`--secret`标志可以让容器访问 [私密](https://docs.docker.com/engine/reference/commandline/secret_create/)。
+使用`--secret`选项可以让容器访问 [私密](https://docs.docker.com/engine/reference/commandline/secret_create/)。
 
 创建一个指定私密的服务：
 
@@ -961,7 +961,7 @@ $ docker service create --name redis \
 4cdgfyky7ozwh3htjfw0d12qv
 ```
 
-授予服务访问多个秘密，使用多个`--secret`标志。
+授予服务访问多个秘密，使用多个`--secret`选项。
 
 秘密位于`/run/secrets`容器中。如果未指定目标，则秘密的名称将用作容器中的内存文件。如果指定了目标，那将是文件名。在上面的例子中，将创建两个文件：`/run/secrets/ssh`以及 `/run/secrets/app`指定的每个秘密目标。
 
@@ -994,7 +994,7 @@ $ docker service create \
   redis:latest
 ```
 
-要指定多个环境变量，请指定多个`--env`标志，每个标志都有一个单独的键 - 值对。
+要指定多个环境变量，请指定多个`--env`选项，每个选项都有一个单独的键 - 值对。
 
 ```sh
 $ docker service create \
@@ -1044,11 +1044,11 @@ Docker支持三种不同的挂载方式，它们允许容器在主机操作系�
 
 **绑定挂载**使可被挂载在容器内的主机上的文件或目录。绑定挂载可以是**只读的或读写**的。例如，容器可能通过主机的绑定挂载来**共享主机的DNS信息**，`/etc/resolv.conf`或者容器可能会将日志写入其主机的`/var/log/myContainerLogs`目录。如果使用绑定挂载并且主机和容器具有不同的权限，访问控制或其他此类详细信息，则会遇到**可移植性**问题。
 
-**卷是一种机制**，用于将容器所需的持久性数据与用于创建容器的映像和主机分离。命名卷由Docker创建和管理，即使当前没有容器正在使用它，命名卷仍然存在。命名卷中的数据可以在容器和主机之间共享，也可以在多个容器之间共享。Docker使用*卷驱动*来创建，管理和安装卷。您可以使用Docker命令备份或恢复卷。
+**卷是一种机制**，用于将容器所需的持久性数据与用于创建容器的镜像和主机分离。命名卷由Docker创建和管理，即使当前没有容器正在使用它，命名卷仍然存在。命名卷中的数据可以在容器和主机之间共享，也可以在多个容器之间共享。Docker使用*卷驱动*来创建，管理和安装卷。你可以使用Docker命令备份或恢复卷。
 
 **tmpfs**在容器内安装tmpfs以获取易失性数据。
 
-考虑一下你的图像启动一个轻量级web服务器的情况。您可以将该图像用作基础图像，复制网站的HTML文件并将其打包到另一个图像中。每次您的网站更改时，您都需要更新新映像并重新部署为您的网站提供服务的所有容器。更好的解决方案是将网站存储在每个Web服务器容器启动时附加的命名卷中。要更新网站，只需更新指定的卷。
+考虑一下你的镜像启动一个轻量级web服务器的情况。你可以将该镜像用作基础镜像，复制网站的HTML文件并将其打包到另一个镜像中。每次你的网站更改时，你都需要更新新镜像并重新部署为你的网站提供服务的所有容器。更好的解决方案是将网站存储在每个Web服务器容器启动时附加的命名卷中。要更新网站，只需更新指定的卷。
 
 下表介绍了适用于服务中绑定安装和命名卷的选项：
 
@@ -1097,12 +1097,12 @@ Docker支持三种不同的挂载方式，它们允许容器在主机操作系�
 
 ##### **`--MOUNT`和`--VOLUME`的区别**
 
-`--mount`标志支持`docker run`的`-v` 或`--volume`的大多数选项，有一些重要的例外情况：
+`--mount`选项支持`docker run`的`-v` 或`--volume`的大多数选项，有一些重要的例外情况：
 
-- `--mount`标志允许您为**每个卷**指定卷驱动程序和卷驱动程序选项，而无需预先创建卷。相反`docker run`允许您使用`--volume-driver`标志来指定由**所有**卷共享的**单个**卷驱动程序。
-- `--mount`标志允许您在卷创建之前指定卷的**自定义元数据**（“标签”）。
-- 在使用`--mount` `type=bind`时，主机路径必须引用主机上的**现有* *路径。路径将**不会为您创建**，如果路径不存在，服务将**失败**并显示错误。
-- `--mount`标志**不允许**您重新标记用于标记的卷`Z`或`z`标志`selinux`。
+- `--mount`选项允许你为**每个卷**指定卷驱动程序和卷驱动程序选项，而无需预先创建卷。相反`docker run`允许你使用`--volume-driver`选项来指定由**所有**卷共享的**单个**卷驱动程序。
+- `--mount`选项允许你在卷创建之前指定卷的**自定义元数据**（“标签”）。
+- 在使用`--mount` `type=bind`时，主机路径必须引用主机上的**现有* *路径。路径将**不会为你创建**，如果路径不存在，服务将**失败**并显示错误。
+- `--mount`选项**不允许**你重新标记用于标记的卷`Z`或`z`选项`selinux`。
 
 ##### 使用命名卷创建服务
 
@@ -1176,7 +1176,7 @@ $ docker service create \
 | `node.labels`   | 用户定义的节点标签 | `node.labels.security == high`                  |
 | `engine.labels` | Docker引擎的标签   | `engine.labels.operatingsystem == ubuntu 14.04` |
 
-`engine.labels`适用于Docker Engine标签，例如操作系统、驱动程序等。群集管理员通过使用[`docker node update`](https://docs.docker.com/engine/reference/commandline/node_update/)命令添加`node.labels`用于操作。
+`engine.labels`适用于Docker Engine标签，例如操作系统、驱动程序等。集群管理员通过使用[`docker node update`](https://docs.docker.com/engine/reference/commandline/node_update/)命令添加`node.labels`用于操作。
 
 例如，以下限制对节点类型标签等于队列的节点执行`redis`服务的任务：
 
@@ -1191,7 +1191,7 @@ $ docker service create \
 
 ---
 
-您可以设置服务，将任务**均匀分配**到不同类别的节点上。在一组数据中心或可用区域上平衡分布任务，下面的例子说明了这一点：
+你可以设置服务，将任务**均匀分配**到不同类别的节点上。在一组数据中心或可用区域上平衡分布任务，下面的例子说明了这一点：
 
 ```sh
 $ docker service create \
@@ -1213,7 +1213,7 @@ $ docker service create \
 
 布局首选项支持**引擎标签和节点标签**。上面的示例使用节点标签，因为标签是以引用的 `node.labels.datacenter`。要分布引擎标签的值，请使用 `--placement-pref spread=engine.labels.<labelname>`。
 
-可以向服务添加**多个分布位置**偏好设置。这建立了偏好的层次结构，因此任务首先被划分为一个类别，然后进一步划分为其他类别。这可能有用的一个例子是在数据中心之间公平地分配任务，然后将每个数据中心内的任务分成多个架构。要添加多个分布位置选项，请`--placement-pref`多次指定标志。**顺序非常重要，布置选项将按进行排定决策时的顺序应用**。
+可以向服务添加**多个分布位置**偏好设置。这建立了偏好的层次结构，因此任务首先被划分为一个类别，然后进一步划分为其他类别。这可能有用的一个例子是在数据中心之间公平地分配任务，然后将每个数据中心内的任务分成多个架构。要添加多个分布位置选项，请`--placement-pref`多次指定选项。**顺序非常重要，布置选项将按进行排定决策时的顺序应用**。
 
 以下示例使用多个分布位置选项设置服务。任务首先在各个数据中心上传播，然后在架构上传播（如各个标签所示）：
 
@@ -1239,7 +1239,7 @@ $ docker network create --driver overlay my-network
 etjpu59cykrptrgw0z0hk5snf
 ```
 
-**在群集模式下创建覆盖网络后，所有管理节点都可以访问网络**。当创建服务并通过`--network`标志将**服务附加到覆盖网络**时：
+**在集群模式下创建覆盖网络后，所有管理节点都可以访问网络**。当创建服务并通过`--network`选项将**服务附加到覆盖网络**时：
 
 ```sh
 $ docker service create \
@@ -1260,7 +1260,7 @@ $ docker service create \
 
 ---
 
-可以使用`--publish` 或 `-p`标志发布服务端口，使其在**群集外部可访问**。`--publish`标志可以采用两种不同类型的参数。短语法版本是下面的，并且允许指定由**冒号分隔**的已发布端口和目标端口。
+可以使用`--publish` 或 `-p`选项发布服务端口，使其在**集群外部可访问**。`--publish`选项可以采用两种不同类型的参数。短语法版本是下面的，并且允许指定由**冒号分隔**的已发布端口和目标端口。
 
 ```sh
 $ docker service create --name my_web --replicas 3 --publish 8080:80 nginx
@@ -1286,7 +1286,7 @@ $ docker service create --name my_web --replicas 3 --publish published=8080,targ
 | 模式           | 无法使用简短语法进行设置。 | `--publish published = 8080，target = 80，mode = host`    | 用于绑定端口的模式，无论是`ingress`还是`host`。默认为`ingress` 以使用路由网格。 |
 | 协议           | `-p 8080：80 / tcp`        | `--publish published = 8080，target = 80，protocol = tcp` | 要使用的协议，`tcp`，`udp`或`sctp`。默认为 `tcp`。要为两种协议绑定端口，请指定`-p`或 `--publish`标志两次。 |
 
-当使用`ingress`模式发布服务端口时，**群集路由网格使服务可以在每个节点上的已发布端口上访问**，而不管该节点上是否存在运行该服务的任务。如果使用`host`模式，**端口仅绑定在运行服务的节点上**，并且节点上的给定端口**只能绑定一次**。只能使用长语法设置发布模式。有关更多信息，请参阅 [使用群模式路由网格](https://docs.docker.com/engine/swarm/ingress/)。
+当使用`ingress`模式发布服务端口时，**集群路由网格使服务可以在每个节点上的已发布端口上访问**，而不管该节点上是否存在运行该服务的任务。如果使用`host`模式，**端口仅绑定在运行服务的节点上**，并且节点上的给定端口**只能绑定一次**。只能使用长语法设置发布模式。有关更多信息，请参阅 [使用群模式路由网格](https://docs.docker.com/engine/swarm/ingress/)。
 
 #### 提供托管服务帐户的凭证规格（仅限Windows）
 
@@ -1306,9 +1306,9 @@ HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Virtualization\Containers\Cred
 
 ---
 
-可以使用`service create`Go的[文本/模板](http://golang.org/pkg/text/template/)软件包提供的语法来为某些标志使用[模板](http://golang.org/pkg/text/template/)。
+可以使用`service create`Go的[文本/模板](http://golang.org/pkg/text/template/)软件包提供的语法来为某些选项使用[模板](http://golang.org/pkg/text/template/)。
 
-受支持的标志如下：
+受支持的选项如下：
 
 - `--hostname`
 - `--mount`
@@ -1349,7 +1349,7 @@ x3ti0erg11rjpg64m75kej2mz-hosttempl
 
 ---
 
-默认情况下，Windows节点上计划任务使用为此特定节点配置的默认隔离模式运行。要**强制使用特定的隔离模式**，可以使用以下`--isolation`标志：
+默认情况下，Windows节点上计划任务使用为此特定节点配置的默认隔离模式运行。要**强制使用特定的隔离模式**，可以使用以下`--isolation`选项：
 
 ```sh
 $ docker service create --name myservice --isolation=process microsoft/nanoserver
@@ -1365,7 +1365,7 @@ Windows上支持的隔离模式是：
 
 ---
 
-可以通过使用`--generic-resource`标志来缩小任务可以登陆的节点种类 （如果节点通告这些资源）：
+可以通过使用`--generic-resource`选项来缩小任务可以登陆的节点种类 （如果节点通告这些资源）：
 
 ```sh
 $ docker service create \
@@ -1411,7 +1411,7 @@ $ docker service inspect dmu1ept4cxcf
 
 #### 格式化
 
-您可以使用以下`--pretty`选项以可读格式而不是默认JSON输出打印检查输出：
+你可以使用以下`--pretty`选项以可读格式而不是默认JSON输出打印检查输出：
 
 ```sh
 $ docker service inspect --pretty hosttempl
@@ -1552,7 +1552,7 @@ $ docker service logs --details my-web --since "1441018800"
 
 ## ls 列表
 
-在以管理员身份运行时列出服务正在群集中运行。
+在以管理员身份运行时列出服务正在集群中运行。
 
  ### 命令参数选项
 
@@ -1584,7 +1584,7 @@ iwe3278osahj  mongo     global      7/7         mongo:3.3
 
 #### 过滤
 
-过滤标志（`-f`或`--filter`）格式为“key = value”。如果有多个过滤器，则传递多个标志（例如`--filter "foo=bar" --filter "bif=baz"`）
+过滤选项（`-f`或`--filter`）格式为“key = value”。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）
 
 目前支持的过滤器是：
 
@@ -1661,7 +1661,7 @@ ID             NAME      IMAGE        NODE      DESIRED STATE  CURRENT STATE    
 bk658fpbex0d   redis.2   redis:3.0.5  worker2   Running        Running 9 seconds
 ```
 
-除了**运行**任务外，输出还显示任务**历史记录**。例如，在更新服务使用`redis:3.0.6`图像之后，输出可能如下所示：
+除了**运行**任务外，输出还显示任务**历史记录**。例如，在更新服务使用`redis:3.0.6`镜像之后，输出可能如下所示：
 
 ```sh
 $ docker service ps redis
@@ -1674,11 +1674,11 @@ nvjljf7rmor4   \_ redis.2  redis:3.0.6  worker2   Shutdown       Rejected 23 sec
 vtiuz2fpc0yb   \_ redis.2  redis:3.0.5  worker2   Shutdown       Shutdown 1 second ago
 ```
 
-任务历史记录中的项目数由`--task-history-limit`初始化群时设置的选项决定 。您可以使用该[`docker swarm update`](https://docs.docker.com/engine/reference/commandline/swarm_update/)命令更改任务历史保留限制 。 
+任务历史记录中的项目数由`--task-history-limit`初始化群时设置的选项决定 。你可以使用该[`docker swarm update`](https://docs.docker.com/engine/reference/commandline/swarm_update/)命令更改任务历史保留限制 。 
 
 #### 过滤
 
-过滤标志（`-f`或`--filter`）格式是一`key=value`对。如果有多个过滤器，则传递多个标志（例如`--filter "foo=bar" --filter "bif=baz"`）。多个过滤器标志被组合为一个`OR`过滤器。例如，`-f name=redis.1 -f name=redis.7`返回两者`redis.1`和`redis.7`任务。
+过滤选项（`-f`或`--filter`）格式是一`key=value`对。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）。多个过滤器选项被组合为一个`OR`过滤器。例如，`-f name=redis.1 -f name=redis.7`返回两者`redis.1`和`redis.7`任务。
 
 目前支持的过滤器是：
 
@@ -1735,7 +1735,7 @@ $ docker service rm redis redis2
 
  ## rollback 回滚
 
-将指定的服务从群集中回滚到其以前的版本。该命令必须以管理节点为目标运行。
+将指定的服务从集群中回滚到其以前的版本。该命令必须以管理节点为目标运行。
 
  ### 命令参数选项
 
@@ -1847,7 +1847,7 @@ ID            NAME      MODE        REPLICAS  IMAGE
 
 按照指定的参数描述更新服务。该命令必须在管理器节点运行。参数与[`docker service create`](https://docs.docker.com/engine/reference/commandline/service_create/)。相同。请参阅那里的描述以获取更多信息。
 
-通常，更新服务只会**导致服务的任务被替换为新服务**，如果对服务的更改需要重新创建任务才能生效。例如，只更改`--update-parallelism`设置不会重新创建任务，因为单个任务不受此设置的影响。但是`--force`标志将导致任务被重新创建。这可以用来执行滚动重启，而不会对服务参数进行任何更改。
+通常，更新服务只会**导致服务的任务被替换为新服务**，如果对服务的更改需要重新创建任务才能生效。例如，只更改`--update-parallelism`设置不会重新创建任务，因为单个任务不受此设置的影响。但是`--force`选项将导致任务被重新创建。这可以用来执行滚动重启，而不会对服务参数进行任何更改。
 
 ### 命令参数选项
 
@@ -1952,7 +1952,7 @@ $ docker service update --limit-cpu 2 redis
 $ docker service update --force --update-parallelism 1 --update-delay 30s redis
 ```
 
-在这个例子中，`--force`标志导致服务的任务**被关闭并被新的替换**，即使其他参数通常都不会导致这种情况发生。`--update-parallelism 1`设置确保一次只替换一个任务（这是默认行为）。 `--update-delay 30s`设置在任务之间引入了30秒的延迟，以便滚动重启逐渐发生。
+在这个例子中，`--force`选项导致服务的任务**被关闭并被新的替换**，即使其他参数通常都不会导致这种情况发生。`--update-parallelism 1`设置确保一次只替换一个任务（这是默认行为）。 `--update-delay 30s`设置在任务之间引入了30秒的延迟，以便滚动重启逐渐发生。
 
 #### 添加或删除挂载
 
@@ -1960,8 +1960,8 @@ $ docker service update --force --update-parallelism 1 --update-delay 30s redis
 
 以下示例创建一个将`test-data`卷 挂载到的服务`/somewhere`。下一步更新服务以将`other-volume` 卷挂接到`/somewhere-else`卷，最后一步卸载`/somewhere`挂载点，从而有效地移除`test-data`卷。每个命令都会返回服务名称。
 
-- `--mount-add`标志与`service create`时的`--mount`标志具有相同的参数。
-- `--mount-rm`标志采用`target`安装路径。
+- `--mount-add`选项与`service create`时的`--mount`选项具有相同的参数。
+- `--mount-rm`选项采用`target`安装路径。
 
 ```sh
 $ docker service create \
@@ -1982,7 +1982,7 @@ myservice
 
 #### 添加或删除已发布的服务端口
 
-使用`--publish-add`或`--publish-rm`标志添加或删除服务的已发布端口。以下示例将已发布的服务端口添加到现有服务。
+使用`--publish-add`或`--publish-rm`选项添加或删除服务的已发布端口。以下示例将已发布的服务端口添加到现有服务。
 
 ```sh
 $ docker service update \
@@ -1992,7 +1992,7 @@ $ docker service update \
 
 #### 添加或删除网络
 
-使用`--network-add`或`--network-rm`标志为服务添加或删除网络。以下示例将新的别名添加到已连接到网络my-network的现有服务：
+使用`--network-add`或`--network-rm`选项为服务添加或删除网络。以下示例将新的别名添加到已连接到网络my-network的现有服务：
 
 ```sh
 $ docker service update \
@@ -2035,7 +2035,7 @@ $ docker service update \
 
 服务也可以设置为在**更新失败时自动回滚到以前的版本**。要设置自动回滚服务，请使用`--update-failure-action=rollback`。如果成功更新失败的部分任务超过了给定的值，将会触发回滚`--update-max-failure-ratio`。
 
-回滚操作的速率，并行性和其他参数由通过以下标志传递的值确定：
+回滚操作的速率，并行性和其他参数由通过以下选项传递的值确定：
 
 - `--rollback-delay`
 - `--rollback-failure-action`
@@ -2108,7 +2108,7 @@ $ docker stack deploy --compose-file docker-compose.yml vossibility
 $ cat docker-compose.yml | docker stack deploy --compose-file - vossibility
 ```
 
-如果配置在多个Compose文件之间拆分，例如基本配置和特定于环境的覆盖，则可以提供多个 `--compose-file`标志。
+如果配置在多个Compose文件之间拆分，例如基本配置和特定于环境的覆盖，则可以提供多个 `--compose-file`选项。
 
 ```sh
 $ docker stack deploy --compose-file docker-compose.yml -f docker-compose.prod.yml vossibility
@@ -2228,7 +2228,7 @@ $ docker inspect $(docker stack ps -q voting)
 
 #### 过滤
 
-过滤标志（`-f`或`--filter`）格式是一`key=value`对。如果有多个过滤器，则传递多个标志（例如`--filter "foo=bar" --filter "bif=baz"`）。多个过滤器标志被组合为一个`OR`过滤器。例如，`-f name=redis.1 -f name=redis.7`返回两者`redis.1`和`redis.7`任务。
+过滤选项（`-f`或`--filter`）格式是一`key=value`对。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）。多个过滤器选项被组合为一个`OR`过滤器。例如，`-f name=redis.1 -f name=redis.7`返回两者`redis.1`和`redis.7`任务。
 
 目前支持的过滤器是：
 
@@ -2314,7 +2314,7 @@ ID            NAME            REPLICAS  IMAGE                                   
 
 #### 过滤
 
-过滤标志（`-f`或`--filter`）格式是一`key=value`对。如果有多个过滤器，则传递多个标志（例如`--filter "foo=bar" --filter "bif=baz"`）。多个过滤器标志被组合为一个`OR`过滤器。
+过滤选项（`-f`或`--filter`）格式是一`key=value`对。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）。多个过滤器选项被组合为一个`OR`过滤器。
 
 以下命令显示`web`和`db`服务：
 
@@ -2358,7 +2358,7 @@ fm6uf97exkul: global 5/5
 
 本章节将介绍Docker Engine Swarm模式的功能。 并将完成以下操作：
 
-- 以群集模式初始化Docker引擎群集
+- 以集群模式初始化Docker引擎集群
 - 向群体添加节点
 - 将应用服务部署到群中
 - 管理集群
@@ -2367,21 +2367,21 @@ fm6uf97exkul: global 5/5
 
 ## 创建集群
 
-当首次安装并开始使用Docker Engine时，群集模式默认处于禁用状态。当启用群集模式时，将使用通过`docker service`命令管理的服务概念。 
+当首次安装并开始使用Docker Engine时，集群模式默认处于禁用状态。当启用集群模式时，将使用通过`docker service`命令管理的服务概念。 
 
-当在本地计算机上以群集模式运行引擎时，可以根据自己创建的映像或其他可用映像来创建和测试服务。在生产环境中，群集模式提供具有**群集管理功能**的**容错平台**，以保持服务正常运行。 
+当在本地计算机上以集群模式运行引擎时，可以根据自己创建的镜像或其他可用镜像来创建和测试服务。在生产环境中，集群模式提供具有**集群管理功能**的**容错平台**，以保持服务正常运行。 
 
-当运行命令**创建群集**时，Docker引擎开始以**群集模式运行**。运行[`docker swarm init`](https://docs.docker.com/engine/reference/commandline/swarm_init/) 以在**当前节点**上**创建单节点集群**。引擎的工作流程如下：
+当运行命令**创建集群**时，Docker引擎开始以**集群模式运行**。运行[`docker swarm init`](https://docs.docker.com/engine/reference/commandline/swarm_init/) 以在**当前节点**上**创建单节点集群**。引擎的工作流程如下：
 
-- 将当前节点切换到群集模式。
+- 将当前节点切换到集群模式。
 - 创建一个名为`default`的集群。
 - 指定**当前节点**作为该群的**领导者管理者节点**。
 - 用机器**主机名**命名节点。
 - 配置管理器在**端口2377**上监听活动网络接口。
 - 将**当前节点设置为`Active`可用性**，这意味着它可以从调度程序**接收任务**。
-- 为参与群体的引擎**启动**一个**内部分布式数据存储**，以维护群集及其上运行的所有服务的一致**视图**。
+- 为参与群体的引擎**启动**一个**内部分布式数据存储**，以维护集群及其上运行的所有服务的一致**视图**。
 - 默认情况下，为群体生成一个**自签名的根CA**。
-- 默认情况下，为worker和manager节点**生成令牌**以加入群集。
+- 默认情况下，为worker和manager节点**生成令牌**以加入集群。
 - 创建一个**覆盖网络`ingress`**，该网络命名为发布群体外部的服务端口。
 
 在创建集群之前，确保Docker Engine守护进程在主机上启动。
@@ -2407,13 +2407,13 @@ eval $("docker-machine.exe" env manager1)
 $ docker-machine ssh manager1
 ```
 
-4、输出`docker swarm init`用于提供将新工作节点加入群集时使用的连接命令。运行以下命令来创建一个新的群集：
+4、输出`docker swarm init`用于提供将新工作节点加入集群时使用的连接命令。运行以下命令来创建一个新的集群：
 
 ```sh
 $ docker swarm init --advertise-addr <MANAGER-IP>
 ```
 
-> **注意**：如果使用Docker for Mac或Docker for Windows测试单节点群集，只需运行`docker swarm init`不带任何参数。`--advertise-addr`在这种情况下不需要指定。
+> **注意**：如果使用Docker for Mac或Docker for Windows测试单节点集群，只需运行`docker swarm init`不带任何参数。`--advertise-addr`在这种情况下不需要指定。
 
 以下命令在`manager1` 机器上创建一个swarm ：
 
@@ -2428,11 +2428,11 @@ To add a worker to this swarm, run the following command:
 To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
 ```
 
-`--advertise-addr`标志配置管理节点将其地址发布为`$(docker-machine ip manager1)` `192.168.99.106`集群中的其他节点必须能够访问IP地址的管理节点。
+`--advertise-addr`选项配置管理节点将其地址发布为`$(docker-machine ip manager1)` `192.168.99.106`集群中的其他节点必须能够访问IP地址的管理节点。
 
-输出包括将新节点加入群集的命令。根据`--token` 的值，节点将作为管理或工人的角色加入。
+输出包括将新节点加入集群的命令。根据`--token` 的值，节点将作为管理或工人的角色加入。
 
-5、运行`docker info`以查看群集的当前状态： 
+5、运行`docker info`以查看集群的当前状态： 
 
 ```sh
 $ docker info
@@ -2475,7 +2475,7 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
 
    
 
-2. 运行[创建群组](https://docs.docker.com/engine/swarm/swarm-tutorial/create-swarm/)教程步骤中的`docker swarm init`输出 产生的命令，以创建一个加入到现有群集的工作节点：
+2. 运行[创建群组](https://docs.docker.com/engine/swarm/swarm-tutorial/create-swarm/)教程步骤中的`docker swarm init`输出 产生的命令，以创建一个加入到现有集群的工作节点：
 
    ```sh
    $ docker swarm join --token SWMTKN-1-2ldbs2xa31qzzojby6cylvw0fw681z7sipvbt4qi27clmjfnut-58r3fwrqac9eoogbigink6zmo 192.168.99.106:2377
@@ -2494,7 +2494,7 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
 
 3. 打开终端并将ssh放入要运行第二个工作节点`worker2`的机器中。如同第一步的操作方式。
 
-4. 运行“ [创建群组](https://docs.docker.com/engine/swarm/swarm-tutorial/create-swarm/)教程”步骤中的`docker swarm init`输出所 生成的命令，以创建加入到现有群集的第二个工作节点：
+4. 运行“ [创建群组](https://docs.docker.com/engine/swarm/swarm-tutorial/create-swarm/)教程”步骤中的`docker swarm init`输出所 生成的命令，以创建加入到现有集群的第二个工作节点：
 
    ```sh
    $ docker swarm join --token SWMTKN-1-2ldbs2xa31qzzojby6cylvw0fw681z7sipvbt4qi27clmjfnut-58r3fwrqac9eoogbigink6zmo 192.168.99.106:2377
@@ -2528,8 +2528,8 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
    ```
 
    - `docker service create` 命令创建服务。
-   - `--name`标志服务命名`helloworld`。
-   - `--replicas`标志指定了正在运行的实例的所需副本比例。
+   - `--name`选项服务命名`helloworld`。
+   - `--replicas`选项指定了正在运行的实例的所需副本比例。
    - 参数`alpine ping baidu.com`将服务定义为执行命令的Alpine Linux容器`ping baidu.com`。
 
 3. 运行`docker service ls`以查看正在运行的服务的列表：
@@ -2542,7 +2542,7 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
 
 ## 检查集群上的服务
 
-当为群集[部署服务时](https://docs.docker.com/engine/swarm/swarm-tutorial/deploy-service/)，可以使用Docker CLI查看集群中运行的服务的详细信息。
+当为集群[部署服务时](https://docs.docker.com/engine/swarm/swarm-tutorial/deploy-service/)，可以使用Docker CLI查看集群中运行的服务的详细信息。
 
 1. 如果还没有，请打开一个终端并将ssh连接到运行管理节点`manager1`的机器中。
 
@@ -2575,7 +2575,7 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
    Endpoint Mode:  vip
    ```
 
-   > **提示**：要以json格式返回服务详细信息，请运行没有`--pretty`标志的相同命令。
+   > **提示**：要以json格式返回服务详细信息，请运行没有`--pretty`选项的相同命令。
 
    ```sh
    $ docker service inspect helloworld
@@ -2589,7 +2589,7 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
    xe2d3sypfvk1        helloworld.1        alpine:latest       manager1            Running             Running 56 seconds ago
    ```
 
-   在这种情况下，服务的一个实例`helloworld`正在`manager1`节点上运行 。可能会看到服务在您的管理节点上运行。默认情况下，群中的**管理节点可以像工作节点**一样执行任务。
+   在这种情况下，服务的一个实例`helloworld`正在`manager1`节点上运行 。可能会看到服务在你的管理节点上运行。默认情况下，群中的**管理节点可以像工作节点**一样执行任务。
 
    集群也显示`DESIRED STATE`和`CURRENT STATE`服务任务的状态，以便可以根据服务定义查看任务是否正在运行。
 
@@ -2606,11 +2606,11 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
 
 ## 扩展集群中的服务
 
-为群集[部署了服务](https://docs.docker.com/engine/swarm/swarm-tutorial/deploy-service/)，就可以使用Docker CLI来扩展服务中的容器数量。在服务中运行的容器被称为**任务**。
+为集群[部署了服务](https://docs.docker.com/engine/swarm/swarm-tutorial/deploy-service/)，就可以使用Docker CLI来扩展服务中的容器数量。在服务中运行的容器被称为**任务**。
 
-1. 如果您还没有，请打开一个终端并将ssh连接到运行管理节点`manager1`的机器中。
+1. 如果你还没有，请打开一个终端并将ssh连接到运行管理节点`manager1`的机器中。
 
-2. 运行以下命令以更改在群集中运行的服务的所需副本数量：
+2. 运行以下命令以更改在集群中运行的服务的所需副本数量：
 
    ```sh
    $ docker service scale <SERVICE-ID>=<NUMBER-OF-TASKS>
@@ -2675,11 +2675,11 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
 
 ## 滚动更新应用于服务
 
-部署基于`Redis 3.0.6`容器映像的服务。然后，使用滚动更新升级服务以使用`Redis 3.0.7`容器映像。
+部署基于`Redis 3.0.6`容器镜像的服务。然后，使用滚动更新升级服务以使用`Redis 3.0.7`容器镜像。
 
 1. 如果还没有连接到`manager1`，请打开一个终端并将ssh连入运行管理节点`manager1`的机器中。
 
-2. 将`Redis 3.0.6`部署到群集，并配置`10秒更新延迟`的群集：
+2. 将`Redis 3.0.6`部署到集群，并配置`10秒更新延迟`的集群：
 
    ```sh
    $ docker service create \
@@ -2693,11 +2693,11 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
 
    可以在服务部署时配置滚动更新策略。
 
-   `--update-delay`标志配置更新**服务任务或多组任务**之间的时间延迟。可以将时间描述为`T`，秒数`Ts`，分钟数`Tm`或小时数的组合`Th`。因此 `10m30s`表示延迟10分30秒。
+   `--update-delay`选项配置更新**服务任务或多组任务**之间的时间延迟。可以将时间描述为`T`，秒数`Ts`，分钟数`Tm`或小时数的组合`Th`。因此 `10m30s`表示延迟10分30秒。
 
-   默认情况下，调度程序一次更新1个任务。可以通过 `--update-parallelism`标志来配置**调度程序同时更新的最大服务任务数**。
+   默认情况下，调度程序一次更新1个任务。可以通过 `--update-parallelism`选项来配置**调度程序同时更新的最大服务任务数**。
 
-   默认情况下，当对单个任务的更新返回`RUNNING`状态时，调度程序调度另一个任务进行更新，直到更新所有任务。如果在更新期间任何时候任务返回`FAILED`，则调度程序会**暂停更新**。您可以使用`docker service create`或`docker service update`的`--update-failure-action`标志来**控制行为**。
+   默认情况下，当对单个任务的更新返回`RUNNING`状态时，调度程序调度另一个任务进行更新，直到更新所有任务。如果在更新期间任何时候任务返回`FAILED`，则调度程序会**暂停更新**。你可以使用`docker service create`或`docker service update`的`--update-failure-action`选项来**控制行为**。
 
 3. 检查`redis`服务：
 
@@ -2727,7 +2727,7 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
    Endpoint Mode:  vip
    ```
 
-4. 现在可以更新`redis`容器图像了。swarm manager根据`UpdateConfig`策略将更新应用于节点：
+4. 现在可以更新`redis`容器镜像了。swarm manager根据`UpdateConfig`策略将更新应用于节点：
 
    ```sh
    $ docker service update --image redis:3.0.7 redis
@@ -2742,7 +2742,7 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
    - 如果任务更新返回`RUNNING`，请等待指定的延迟时间，然后开始下一个任务。
    - 如果在更新过程中的任何时间任务返回`FAILED`，暂停更新。
 
-5. 运行`docker service inspect --pretty redis`以查看所需状态下的新图像：
+5. 运行`docker service inspect --pretty redis`以查看所需状态下的新镜像：
 
    ```sh
    $ docker service inspect --pretty redis
@@ -2769,7 +2769,7 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
    $ docker service update redis
    ```
 
-   为避免重复某些更新失败，可能需要通过`docker service update`传递标志来**重新配置**服务。
+   为避免重复某些更新失败，可能需要通过`docker service update`传递选项来**重新配置**服务。
 
 6. 运行`docker service ps <SERVICE-ID>`观看滚动更新：
 
@@ -2790,7 +2790,7 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
 
 有时，例如计划的维护时间，需要将节点设置为`DRAIN` 可用性。**`DRAIN`可用性阻止节点从群管理器接收新任务**。这也意味着管理节点可以停止在节点上运行的任务，并在具有`ACTIVE`可用性的节点上启动副本任务。
 
-> **重要提示**：将节点设置为`DRAIN`不会从该节点**删除独立容器**，例如使用`docker run`，`docker-compose up`或Docker Engine API创建的容器。节点的状态（包括`DRAIN`）仅影响节点调度群集服务工作**负载**的能力。
+> **重要提示**：将节点设置为`DRAIN`不会从该节点**删除独立容器**，例如使用`docker run`，`docker-compose up`或Docker Engine API创建的容器。节点的状态（包括`DRAIN`）仅影响节点调度集群服务工作**负载**的能力。
 
 1. 如果还没有连接到`manager1`，请打开一个终端并将ssh连入运行管理节点`manager1`的机器中。
 
@@ -2848,7 +2848,7 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
 
    可以看到排除的节点`worker1`的`AVAILABILITY`为`Drain`。
 
-7. 运行`docker service ps redis`以查看swarm经理如何更新服务的任务分配`redis`：
+7. 运行`docker service ps redis`以查看swarm管理如何更新服务的任务分配`redis`：
 
    ```sh
    $ docker service ps redis
@@ -2892,20 +2892,20 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
 
 ## 使用集群路由网络
 
-Docker Engine群集模式可以轻松发布服务端口，使其可以用于群集外部的资源。所有节点都参与入口**路由网格**。路由网格使集群中的**每个节点**都可以接受群集中**运行**的任何**服务**的**已发布端口**的连接，即使节点上**没有**运行任何**任务**。路由网格将所有**传入请求**路由到**可用节点**上的**已发布端口**以**激活**容器。
+Docker Engine集群模式可以轻松发布服务端口，使其可以用于集群外部的资源。所有节点都参与入口**路由网格**。路由网格使集群中的**每个节点**都可以接受集群中**运行**的任何**服务**的**已发布端口**的连接，即使节点上**没有**运行任何**任务**。路由网格将所有**传入请求**路由到**可用节点**上的**已发布端口**以**激活**容器。
 
-要使用群集中的 **ingress **网络，在启用群集模式之前，需要在群集节点之间打开以下端口：
+要使用集群中的 **ingress **网络，在启用集群模式之前，需要在集群节点之间打开以下端口：
 
 - 端口`7946`TCP/UDP用于容器网络发现。
 - 端口`4789`UDP用于容器入口网络。
 
-还必须打开群集节点与需要访问端口的任何外部资源（如外部负载平衡器）之间的发布端口。
+还必须打开集群节点与需要访问端口的任何外部资源（如外部负载平衡器）之间的发布端口。
 
 ### 发布服务的端口
 
 ---
 
-创建服务时，使用`--publish`标志**发布端口**。`target` 用于指定**容器内**的端口，并`published`用于指定**绑定到路由网格上的端口**。如果没有`published` 端口，则为每个服务任务绑定一个**随机的高编号**端口。需要检查任务以确定端口。
+创建服务时，使用`--publish`选项**发布端口**。`target` 用于指定**容器内**的端口，并`published`用于指定**绑定到路由网格上的端口**。如果没有`published` 端口，则为每个服务任务绑定一个**随机的高编号**端口。需要检查任务以确定端口。
 
 ```sh
 $ docker service create \
@@ -2918,7 +2918,7 @@ $ docker service create \
 
 `<PUBLISHED-PORT>`是群体提供服务的端口。如果省略它，则绑定一个**随机**的高编号端口。`<CONTAINER-PORT>`是**容器监听的端口**，参数是**必需的**。
 
-例如，以下命令将nginx容器中的端口80发布到群集中的任何节点的8080端口：
+例如，以下命令将nginx容器中的端口80发布到集群中的任何节点的8080端口：
 
 ```sh
 $ docker service create \
@@ -2928,11 +2928,11 @@ $ docker service create \
   nginx
 ```
 
-当访问任何节点上的端口8080时，Docker会**将请求路由到_活动_容器**。在群集节点本身，端口8080可能实际上**并未被绑定**，但路由网格知道如何路由数据流量并防止发生任何端口冲突。
+当访问任何节点上的端口8080时，Docker会**将请求路由到_活动_容器**。在集群节点本身，端口8080可能实际上**并未被绑定**，但路由网格知道如何路由数据流量并防止发生任何端口冲突。
 
 路由网格在**发布的端口**上侦听分配给该节点的**任何IP地址**。对于外部可路由的IP地址，该端口可在**主机外部**使用。对于所有其他IP地址，访问只能在**主机内**使用。
 
-![服务入口图像](https://docs.docker.com/engine/swarm/images/ingress-routing-mesh.png)
+![服务入口镜像](https://docs.docker.com/engine/swarm/images/ingress-routing-mesh.png)
 
 可以使用以下命令发布现有服务的端口：
 
@@ -3036,17 +3036,17 @@ $ docker service create --name dns-cache \
 
 ---
 
-可以为群集服务配置**外部负载平衡器**，可以与路由网格结合使用，也可以根本不使用路由网格。
+可以为集群服务配置**外部负载平衡器**，可以与路由网格结合使用，也可以根本不使用路由网格。
 
 #### 使用路由网格
 
-可以**配置外部负载平衡器以将请求路由到群集服务**。例如，可以配置[HAProxy](http://www.haproxy.org/)以平衡对发布到端口8080的nginx服务的请求。
+可以**配置外部负载平衡器以将请求路由到集群服务**。例如，可以配置[HAProxy](http://www.haproxy.org/)以平衡对发布到端口8080的nginx服务的请求。
 
-![带有外部负载平衡器映像的入口](https://docs.docker.com/engine/swarm/images/ingress-lb.png)
+![带有外部负载平衡器镜像的入口](https://docs.docker.com/engine/swarm/images/ingress-lb.png)
 
 在这种情况下，端口8080必须在负载平衡器和群中的节点之间打开。集群节点可以**驻留在代理服务器**可访问的专用网络上，但这不是**公共**可访问的。
 
-可以配置负载均衡器来平衡群集中每个节点之间的请求，即使节点上没有任何计划任务。例如，可以在以下位置使用HAProxy配置`/etc/haproxy/haproxy.cfg`：
+可以配置负载均衡器来平衡集群中每个节点之间的请求，即使节点上没有任何计划任务。例如，可以在以下位置使用HAProxy配置`/etc/haproxy/haproxy.cfg`：
 
 ```properties
 global
@@ -3068,9 +3068,9 @@ backend http_back
    server node3 192.168.99.102:8080 check
 ```
 
-当在端口80上访问HAProxy负载平衡器时，它会将请求**转发**给集群中的节点。**集群路由**将请求路由到活动任务。如果由于某种原因，群集调度程序将**任务分派**到不同的节点，则无需重新配置负载均衡器。
+当在端口80上访问HAProxy负载平衡器时，它会将请求**转发**给集群中的节点。**集群路由**将请求路由到活动任务。如果由于某种原因，集群调度程序将**任务分派**到不同的节点，则无需重新配置负载均衡器。
 
-可以配置**任何类型的负载均衡器**以将请求路由到群集节点。要了解有关HAProxy的更多信息，请参阅[HAProxy文档](https://cbonte.github.io/haproxy-dconv/)。
+可以配置**任何类型的负载均衡器**以将请求路由到集群节点。要了解有关HAProxy的更多信息，请参阅[HAProxy文档](https://cbonte.github.io/haproxy-dconv/)。
 
 #### 没有路由网格
 
@@ -3082,13 +3082,13 @@ backend http_back
 
 ## 节点的用途
 
-Docker Engine 1.12引入了swarm模式，使可以创建一个或多个名为swarm的Docker引擎群集。群集由一个或多个节点组成：运行Docker Engine 1.12或更高版本的群集模式的物理或虚拟机器。
+Docker Engine 1.12引入了swarm模式，使可以创建一个或多个名为swarm的Docker引擎集群。集群由一个或多个节点组成：运行Docker Engine 1.12或更高版本的集群模式的物理或虚拟机器。
 
 有两种类型的节点：[**管理节点**](https://docs.docker.com/engine/swarm/how-swarm-mode-works/nodes/#manager-nodes) 和 [**工作节点**](https://docs.docker.com/engine/swarm/how-swarm-mode-works/nodes/#worker-nodes)。
 
-![群模式群集](https://docs.docker.com/engine/swarm/images/swarm-diagram.png)
+![群模式集群](https://docs.docker.com/engine/swarm/images/swarm-diagram.png)
 
-如果您尚未阅读 [群体模式概述](https://docs.docker.com/engine/swarm/)和 [关键概念](https://docs.docker.com/engine/swarm/key-concepts/)。
+如果你尚未阅读 [群体模式概述](https://docs.docker.com/engine/swarm/)和 [关键概念](https://docs.docker.com/engine/swarm/key-concepts/)。
 
 ### 管理节点
 
@@ -3098,9 +3098,9 @@ Manager节点处理集群管理任务：
 
 - 维护集群状态
 - 调度服务
-- 提供群集模式[HTTP API端点](https://docs.docker.com/engine/api/)
+- 提供集群模式[HTTP API端点](https://docs.docker.com/engine/api/)
 
-使用[Raft](https://raft.github.io/raft.pdf)实施，管理人员可以保持整个集群及其上运行的所有服务的**一致内部状态**。出于测试目的，可以使用单个管理器运行群集。如果单管理器群中的管理器出现**故障**，服务将**继续**运行，但需要创建一个**新群集**才进行**恢复**。
+使用[Raft](https://raft.github.io/raft.pdf)实施，管理人员可以保持整个集群及其上运行的所有服务的**一致内部状态**。出于测试目的，可以使用单个管理器运行集群。如果单管理器群中的管理器出现**故障**，服务将**继续**运行，但需要创建一个**新集群**才进行**恢复**。
 
 为了利用群模式的**容错**功能，Docker建议根据组织的**高可用性**要求实施**奇数**个节点。当你有多个管理器时，你可以在没有停机时间的情况下从管理器节点的**故障中恢复**。
 
@@ -3136,23 +3136,23 @@ Manager节点处理集群管理任务：
 
 ## 服务的用途
 
-要在Docker Engine处于**群集模式**时**部署**应用程序**映像**，请**创建**一个**服务**。在某些更大的应用程序中，服务通常是**微服务的映像**。服务实例对象可能包括HTTP服务器、数据库或希望在分布式环境中运行的任何其他类型的可执行程序。
+要在Docker Engine处于**集群模式**时**部署**应用程序**镜像**，请**创建**一个**服务**。在某些更大的应用程序中，服务通常是**微服务的镜像**。服务实例对象可能包括HTTP服务器、数据库或希望在分布式环境中运行的任何其他类型的可执行程序。
 
-当创建服务时，可以指定要使用哪个**容器映像**以及要在**正在运行**的容器中执行哪些命令。还可以**定义服务**的选项，包括：
+当创建服务时，可以指定要使用哪个**容器镜像**以及要在**正在运行**的容器中执行哪些命令。还可以**定义服务**的选项，包括：
 
 - 群体在群体外提供服务的**端口**
 - 服务的**覆盖网络**连接到群中的其他**服务**
 - **CPU和内存**限制和保留
 - **滚动更新**政策
-- 要在群中运行的图像**副本的数量**
+- 要在群中运行的镜像**副本的数量**
 
 ### 服务、任务和容器
 
 ---
 
-将服务部署到群集时，群集管理节点接受服务定义作为服务的所需状态。然后它将集群中的节点上的服务作为一个或多个**副本任务**进行调度。这些任务在群中的**节点上**彼此**独立运行**。
+将服务部署到集群时，集群管理节点接受服务定义作为服务的所需状态。然后它将集群中的节点上的服务作为一个或多个**副本任务**进行调度。这些任务在群中的**节点上**彼此**独立运行**。
 
-例如，假设您想要在HTTP侦听器的三个实例之间进行负载平衡。下图显示了具有三个副本的HTTP侦听器服务。监听的三个**实例**中的每一个都是集群中的一个**任务**。
+例如，假设你想要在HTTP侦听器的三个实例之间进行负载平衡。下图显示了具有三个副本的HTTP侦听器服务。监听的三个**实例**中的每一个都是集群中的一个**任务**。
 
 ![服务图](https://docs.docker.com/engine/swarm/images/services-diagram.png)
 
@@ -3166,7 +3166,7 @@ Manager节点处理集群管理任务：
 
 任务是一个**单向**机制。它通过一系列状态单调进行：分配，准备，运行等。如果任务失败，则协调员**删除任务及其容器**，然后**创建一个新任务**以根据服务指定的期望状态进行**替换**。
 
-Docker群集模式的基础逻辑是通用**调度器和协调器**。服务和任务抽象本身并不知道它们实现的容器。假设你可以实现其他类型的任务，例如虚拟机任务或非集装箱化的任务。调度程序和协调器对于任务的类型是不可知的。但是，当前版本的Docker仅支持容器任务。
+Docker集群模式的基础逻辑是通用**调度器和协调器**。服务和任务抽象本身并不知道它们实现的容器。假设你可以实现其他类型的任务，例如虚拟机任务或非集装箱化的任务。调度程序和协调器对于任务的类型是不可知的。但是，当前版本的Docker仅支持容器任务。
 
 下图显示了swarm模式如何接受服务**创建请求**并为工作节点**调度任务**。
 
@@ -3192,19 +3192,19 @@ Docker群集模式的基础逻辑是通用**调度器和协调器**。服务和�
 
 对于复制服务，可以指定要运行的**相同任务的数量**。例如，决定部署一个具有三个副本的HTTP服务，每个副本服务于相同的内容。
 
-**全局服务是在每个节点上运行一项任务的服务**。**没有**预先**指定**的**任务数量**。每次将节点添加到swarm中时，编排器都将**创建**一个任务，并且调度程序将该任务**分配给新节点**。*全局服务的优秀案例是监控或代理*，希望在群集中的每个节点上运行的防病毒扫描程序或其他类型的容器。
+**全局服务是在每个节点上运行一项任务的服务**。**没有**预先**指定**的**任务数量**。每次将节点添加到swarm中时，编排器都将**创建**一个任务，并且调度程序将该任务**分配给新节点**。*全局服务的优秀案例是监控或代理*，希望在集群中的每个节点上运行的防病毒扫描程序或其他类型的容器。
 
 下图显示了黄色的副本服务和灰色的全局服务。
 
 ![全球与复制服务](https://docs.docker.com/engine/swarm/images/replicated-vs-global.png)
 
-## 使用公钥基础设施（PKI）管理群集安全
+## 使用公钥基础设施（PKI）管理集群安全
 
-Docker中内置的群集模式**公钥基础结构（PKI）系统**使**安全部署**容器编排系统变得非常简单。集群中的节点使用**传输层**安全性（TLS）来验证，**授权和加密**与集群中其他节点的通信。
+Docker中内置的集群模式**公钥基础结构（PKI）系统**使**安全部署**容器编排系统变得非常简单。集群中的节点使用**传输层**安全性（TLS）来验证，**授权和加密**与集群中其他节点的通信。
 
-当通过运行`docker swarm init`创建swarm时，Docker**将自己指定为管理节点**。默认情况下，管理节点会**生成**一个新的**根证书颁发机构（CA）和一个密钥对**，用于**保护与加入**该群体的其他节点的通信。也可以使用[docker swarm init](https://docs.docker.com/engine/reference/commandline/swarm_init/)命令的`--external-ca`标志 来指定自己的**外部生成的根CA**证书。
+当通过运行`docker swarm init`创建swarm时，Docker**将自己指定为管理节点**。默认情况下，管理节点会**生成**一个新的**根证书颁发机构（CA）和一个密钥对**，用于**保护与加入**该群体的其他节点的通信。也可以使用[docker swarm init](https://docs.docker.com/engine/reference/commandline/swarm_init/)命令的`--external-ca`选项 来指定自己的**外部生成的根CA**证书。
 
-当其他节点加入群集时，**管理节点还会生成两个令牌**：一个**工作人员令牌**和一个**管理员令牌**。每个令牌都**包含**根CA证书的**摘要和*随机*生成的秘钥**。当节点加入群集时，加入节点使用**摘要**来**验证来**自远程管理器的根CA证书。远程管理员使用该秘钥来**确保**加入节点是**批准**的节点。
+当其他节点加入集群时，**管理节点还会生成两个令牌**：一个**工作人员令牌**和一个**管理员令牌**。每个令牌都**包含**根CA证书的**摘要和*随机*生成的秘钥**。当节点加入集群时，加入节点使用**摘要**来**验证来**自远程管理器的根CA证书。远程管理员使用该秘钥来**确保**加入节点是**批准**的节点。
 
 每当新节点**加入**集群时，管理员都会向节点**发出证书**。证书包含一个**随机**生成的**节点ID**，用于标识证书**公用名称**（CN）下的**节点*以及*组织单位**（OU）下的角色。**节点ID**用作当前群中节点生存期的**密码安全节点标识**。
 
@@ -3235,9 +3235,9 @@ Certificate:
 
 ---
 
-如果**群集CA密钥或管理器节点受到损害**，可以**轮换群集根CA**，以便任何节点都**不再信任由旧的**根CA签署的证书。
+如果**集群CA密钥或管理器节点受到损害**，可以**轮换集群根CA**，以便任何节点都**不再信任由旧的**根CA签署的证书。
 
-运行`docker swarm ca --rotate`以生成新的CA证书和密钥。你可以传递`--ca-cert`和`--external-ca`标志来指定根证书，并使用群集外部的根CA。或者可以通过`--ca-cert`和`--ca-key`标志来指定希望群体使用的**确切证书和密钥**。
+运行`docker swarm ca --rotate`以生成新的CA证书和密钥。你可以传递`--ca-cert`和`--external-ca`选项来指定根证书，并使用集群外部的根CA。或者可以通过`--ca-cert`和`--ca-key`选项来指定希望群体使用的**确切证书和密钥**。
 
 当发出这个`docker swarm ca --rotate`命令时，下面的事情**按顺序**发生：
 
@@ -3245,7 +3245,7 @@ Certificate:
 
 2. 在Docker 17.06及更高版本中，Docker还告诉所有节点立即**更新**TLS证书。此过程可能需要几分钟时间，具体取决于群中节点的数量。
 
-   > **注意**：如果您的swarm具有不同Docker版本的节点，会有以下两种情况：
+   > **注意**：如果你的swarm具有不同Docker版本的节点，会有以下两种情况：
    >
    > - 只有作为领导者运行**且**运行Docker 17.06或更高版本的管理员告诉节点更新他们的TLS证书。
    > - 只有运行Docker 17.06或更高版本的节点才遵守此指令。
@@ -3301,728 +3301,3 @@ owsz0yp6z375        webserver.1         nginx               UbuntuVM            
 j91iahr8s74p         \_ webserver.1     nginx               UbuntuVM            Shutdown            Failed 50 seconds ago    "No such container: webserver.…"
 7dyaszg13mw2         \_ webserver.1     nginx               UbuntuVM            Shutdown            Failed 5 hours ago       "No such container: webserver.…"
 ```
-
-# 集群的应用
-
-上面介绍过集群的创建和应用，这里详细介绍集群的原理和流程，以及需要注意的问题。
-
-## 在群集模式下运行Docker引擎
-
-当首次安装并开始使用Docker Engine时，群集模式默认处于禁用状态。当启用群集模式时，将使用通过`docker service`命令管理的服务概念。 
-
-当在本地计算机上以群集模式运行引擎时，可以根据自己创建的映像或其他可用映像来创建和测试服务。在生产环境中，群集模式提供具有**群集管理功能**的**容错平台**，以保持服务正常运行。 
-
-当运行命令**创建群集**时，Docker引擎开始以**群集模式运行**。运行[`docker swarm init`](https://docs.docker.com/engine/reference/commandline/swarm_init/) 以在**当前节点**上**创建单节点集群**。引擎的工作流程如下：
-
-- 将当前节点切换到群集模式。
-- 创建一个名为`default`的集群。
-- 指定**当前节点**作为该群的**领导者管理者节点**。
-- 用机器**主机名**命名节点。
-- 配置管理器在**端口2377**上监听活动网络接口。
-- 将**当前节点设置为`Active`可用性**，这意味着它可以从调度程序**接收任务**。
-- 为参与群体的引擎**启动**一个**内部分布式数据存储**，以维护群集及其上运行的所有服务的一致**视图**。
-- 默认情况下，为群体生成一个**自签名的根CA**。
-- 默认情况下，为worker和manager节点**生成令牌**以加入群集。
-- 创建一个**覆盖网络`ingress`**，网络命名为发布群体外部的服务端口。
-
-输出用于`docker swarm init`提供将新工作节点加入群集时使用的连接命令：
-
-```sh
-$ docker swarm init
-Swarm initialized: current node (dxn1zf6l61qsb1josjja83ngz) is now a manager.
-To add a worker to this swarm, run the following command:
-
-    docker swarm join \
-    --token SWMTKN-1-49nj1cmql0jkz5s954yi3oex3nedyz0fb0xx14ie39trti4wxv-8vxv8rssmk743ojnwacrr2e7c \
-    192.168.99.100:2377
-
-To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
-```
-
-### 配置通知地址
-
----
-
-管理器节点使用**通知地址**允许集群中的**其他节点访问Swarmkit API并覆盖网络**。集群中的**其他节点**必须能够在其**广播**地址上**访问管理器节点**。
-
-如果**未指定**通知地址，则Docker将**检查**系统是否具有**单个IP地址**。如果存在单个IP地址，默认情况下Docker使用侦听端口`2377`的IP地址 。如果系统有**多个IP**地址，则必须**指定确切**的`--advertise-addr`以启用管理员间通信和覆盖网络：
-
-```sh
-$ docker swarm init --advertise-addr <MANAGER-IP>
-```
-
-如果**其他节点**到达**第一个管理器节点**的地址与管理员认为的**地址不同**，那么还必须指定`--advertise-addr`。例如，在跨越不同区域的云设置中，主机具有用于在该区域内访问的**内部地址**以及用于从该区域外访问的**外部地址**。在这种情况下，使用`--advertise-addr`指定外部地址，以便节点可以将信息传播到随后连接到节点的其他节点。
-
-### 查看加入命令或更新加入令牌
-
----
-
-节点需要一个**秘密的令牌**来加入群。工作节点的标记与管理器节点的标记不同。节点在加入群时只使用**连接**令牌。在节点已经加入群体之后**旋转连接令牌**不会影响节点的群集**成员资格**。令牌轮转可确保任何**尝试加入**群集的**新节点**都不能使用**旧令牌**。
-
-要检索包含工作节点的连接令牌的连接命令，请运行：
-
-```sh
-$ docker swarm join-token worker
-To add a worker to this swarm, run the following command:
-
-    docker swarm join \
-    --token SWMTKN-1-49nj1cmql0jkz5s954yi3oex3nedyz0fb0xx14ie39trti4wxv-8vxv8rssmk743ojnwacrr2e7c \
-    192.168.99.100:2377
-
-This node joined a swarm as a worker.
-```
-
-要查看管理器节点的连接命令和令牌，请运行：
-
-```sh
-$ docker swarm join-token manager
-
-To add a worker to this swarm, run the following command:
-
-    docker swarm join \
-    --token SWMTKN-1-59egwe8qangbzbqb3ryawxzk3jn97ifahlsrw01yar60pmkr90-bdjfnkcflhooyafetgjod97sz \
-    192.168.99.100:2377
-```
-
-通过`--quiet`标志只打印令牌：
-
-```sh
-$ docker swarm join-token --quiet worker
-
-SWMTKN-1-49nj1cmql0jkz5s954yi3oex3nedyz0fb0xx14ie39trti4wxv-8vxv8rssmk743ojnwacrr2e7c
-```
-
-**加入令牌时要小心，因为它们是加入群集所必需的秘钥**。特别是将一个检查秘密到版本控制是一个不好的做法，因为它允许任何有权访问应用**程序源代码**的人员向群体添加新节点。**管理令牌特别敏感**，因为它们允许新的管理节点加入并获得**整个群体的控制权**。
-
-建议在以下情况下**轮换联合令牌**：
-
-- 如果令牌偶然签入版本控制系统，**群聊或意外打印到日志**中。
-- 如果怀疑某个节点已**受到攻击**。
-- 如果你想保证**没有新的节点可以加入**群。
-
-此外，对包括群集加入令牌在内的任何秘密实施**定期轮换**计划是最佳做法。我们建议您至少**每6个月**轮换一次令牌。
-
-运行`swarm join-token --rotate`使**旧的令牌失效并生成新的令牌**。指定是否要旋转`worker`或`manager` 节点的标记：
-
-```sh
-# docker swarm join-token  --rotate manager
-$ docker swarm join-token  --rotate worker
-To add a worker to this swarm, run the following command:
-
-    docker swarm join \
-    --token SWMTKN-1-2kscvs0zuymrsc9t0ocyy1rdns9dhaodvpl639j2bqx55uptag-ebmn5u927reawo27s3azntd44 \
-    192.168.99.100:2377
-```
-
-## 将节点加入集群
-
-当第一次创建swarm时，将Docker Engine（引擎）开启swarm模式。要充分利用集群模式，可以向集群添加节点：
-
-- **添加工作节点会增加容量**。将服务部署到群集时，引擎会调度可用节点上的任务，无论它们是工作节点还是管理节点。当将工作节点添加到集群中时，可以增加集群的**规模**以处理任务，而不会影响管理节点的**一致性**。
-- **管理节点增加了容错能力**。Manager节点为集群执行**编排和群集管理**功能。在管理节点中，**单个管理领导节点**执行编排任务。如果一个管理节点**出现故障**，其余的管理者节点会**选举一个新的领导者**并**恢复**协调和**维护**群体状态。默认情况下，**管理节点也运行任务**。
-
-在将节点添加到群集之前，必须在主机上安装Docker Engine 1.12或更高版本。
-
-Docker引擎根据提供给`docker swarm join`命令的**连接令牌**加入群集。该节点仅在**连接时**使用该令牌。如果**随后**旋转该标记，则**不会影响现有**的群集节点。请参考以[群集模式运行Docker Engine](https://docs.docker.com/engine/swarm/swarm-mode/#view-the-join-command-or-update-a-swarm-join-token)。
-
-### 作为工作节点加入
-
----
-
-要查看包含工作节点的连接令牌的连接命令，请在管理节点上运行以下命令：
-
-```sh
-$ docker swarm join-token worker
-To add a worker to this swarm, run the following command:
-
-    docker swarm join \
-    --token SWMTKN-1-49nj1cmql0jkz5s954yi3oex3nedyz0fb0xx14ie39trti4wxv-8vxv8rssmk743ojnwacrr2e7c \
-    192.168.99.100:2377
-```
-
-在`worker`节点上的输出运行命令加入群集：
-
-```sh
-$ docker swarm join \
-  --token SWMTKN-1-49nj1cmql0jkz5s954yi3oex3nedyz0fb0xx14ie39trti4wxv-8vxv8rssmk743ojnwacrr2e7c \
-  192.168.99.100:2377
-
-This node joined a swarm as a worker.
-```
-
-`docker swarm join`命令执行以下操作：
-
-- 将当前节点上的Docker引擎**切换到群集**模式。
-- 向管理节点**申请TLS证书**。
-- 用机器**主机名命名节点**
-- 基于群集**令牌**将当前节点**加入**管理节点监听地址上的群集。
-- 将**当前节点设置为`Active`可用性**，这意味着它可以从调度程序**接收任务**。
-- 将`ingress`覆盖网络**扩展**到**当前节点**。
-
-### 作为管理节点加入
-
----
-
-当运行`docker swarm join`并传递管理器令牌时，Docker引擎将**切换到群集模式**，与工作节点相同。管理节点也参与Raft共识。新的节点应该是`Reachable`，但现有的经理仍然是群体`Leader`。
-
-Docker为每个集群推荐**三个或五个**管理节点来实现**高可用性**。由于群模式管理节点使用Raft共享数据，因此**必须有奇数个管理器**。只要**超过一半**的管理节点的法定数量**可用**，群集可以继续运行。
-
-有关集群管理员和管理集群的更多详细信息，请参阅 [管理和维护一群Docker引擎](https://docs.docker.com/engine/swarm/admin_guide/)。
-
-要查看包含**管理节点**的连接令牌的连接命令，请在管理器节点上运行以下命令：
-
-```sh
-$ docker swarm join-token manager
-To add a manager to this swarm, run the following command:
-
-    docker swarm join \
-    --token SWMTKN-1-61ztec5kyafptydic6jfc1i33t37flcl4nuipzcusor96k7kby-5vy9t8u35tuqm7vh67lrz9xp6 \
-    192.168.99.100:2377
-```
-
-在**准**管理节点的输出的运行命令以加入群集：
-
-```sh
-$ docker swarm join \
-  --token SWMTKN-1-61ztec5kyafptydic6jfc1i33t37flcl4nuipzcusor96k7kby-5vy9t8u35tuqm7vh67lrz9xp6 \
-  192.168.99.100:2377
-
-This node joined a swarm as a manager.
-```
-
-## 管理群中的节点
-
-节点的管理作为群体管理生命周期的一部分，需要掌握：列出群中的节点、检查单个节点、更新节点、离开集群。
-
-### 列出节点
-
----
-
-`docker node ls`从管理节点查看群集中的节点列表：
-
-```sh
-$ docker node ls
-ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
-4ukl6wl714uljl43m51zji80f *   manager1            Ready               Active              Leader              18.03.1-ce
-rp87bhtw4qmtg9i3k4o53b4xi     worker1             Ready               Active                                  18.03.1-ce
-occde76c7oiv93zhds0x8ij5u     worker2             Ready               Active                                  18.03.1-ce
-```
-
-`AVAILABILITY`列显示调度程序是否可以将任务分配给节点：
-
-- `Active` 意味着调度程序**可以**将任务分配给节点。
-- `Pause` 意味着调度程序**不会**将新任务分配给节点，但**现有任务仍在运行**。
-- `Drain`意味着调度程序**不会**将新任务分配给节点。调度程序**关闭所有现有任务**并在可用节点上调度它们。
-
-`MANAGER STATUS`列显示节点参与Raft共识：
-
-- `没有值`表示不参与集群管理的**工作节点**。
-- `Leader` 意味着节点是为群体进行所有群集管理和编排决策的主要**管理节点**。
-- `Reachable`意味着该节点是**参与Raft共识**法定人数的**管理节点**。如果**领导者节点变得不可用，该节点有资格被选为新领导者**。
-- `Unavailable`意味着节点是一个**不能与其他管理沟通**的管理。如果管理节点变得不可用，则应该将新管理节点加入到群集中，或者将**工作节点提升为管理节点**。
-
-有关群体管理的更多信息，请参阅[群体管理指南](https://docs.docker.com/engine/swarm/admin_guide/)。
-
-### 检查单个节点
-
----
-
-可以在管理节点上运行`docker node inspect <NODE-ID>`以查看单个节点的详细信息。输出默认为JSON格式，但可以传递该`--pretty`标记以便以可读格式打印结果。例如：
-
-```sh
-$ docker service inspect --pretty helloworld
-
-ID:             qkexf88msvohybd6pico0t4g0
-Name:           helloworld
-Service Mode:   Replicated
- Replicas:      1
-Placement:
-UpdateConfig:
- Parallelism:   1
- On failure:    pause
- Monitoring Period: 5s
- Max failure ratio: 0
- Update order:      stop-first
-RollbackConfig:
- Parallelism:   1
- On failure:    pause
- Monitoring Period: 5s
- Max failure ratio: 0
- Rollback order:    stop-first
-ContainerSpec:
- Image:         alpine:latest@sha256:7df6db5aa61ae9480f52f0b3a06a140ab98d427f86d8d5de0bedab9b8df6b1c0
- Args:          ping baidu.com
-Resources:
-Endpoint Mode:  vip
-```
-
-### 更新节点
-
----
-
-可以修改节点属性，如下所示：
-
-- [更改节点可用性](https://docs.docker.com/engine/swarm/manage-nodes/#change-node-availability)
-- [添加或删除标签元数据](https://docs.docker.com/engine/swarm/manage-nodes/#add-or-remove-label-metadata)
-- [更改节点角色](https://docs.docker.com/engine/swarm/manage-nodes/#promote-or-demote-a-node)
-
-#### 更改节点可用性
-
-更改节点可用性：
-
-- `drain`  耗尽**管理器节点**，以便**仅**执行**群集管理**任务并且**不**可用于**任务分配**。
-- `drain`  排空一个**节点**，这样你就可以把它**拿下来进行维护**。
-- `pause`  暂停一个节点，以便它**不**能接**收新的任务**。
-- `active` 恢复**不可用或暂停**的节点可用状态。
-
-例如，要将管理节点更改为`Drain`可用性：
-
-```sh
-$ docker node update --availability drain manager-1
-node-1
-```
-
-#### 添加或删除标签元数据
-
-节点标签提供了一种灵活的**组织节点方法**。也可以在服务**约束**中使用节点标签。创建服务时应用约束，以**限制**调度程序为服务分配任务的节点。
-
-`docker node update --label-add`在管理节点上运行以将标签元数据添加到节点。`--label-add`标志支持`<key>`或`<key>=<value>` 。为要添加的每个节点标签传递一次`--label-add`标志：
-
-```sh
-$ docker node update --label-add foo --label-add bar=baz node-1
-node-1
-```
-
-使用docker节点更新设置的标签仅适用于**集群内的节点**。不要将它们与[dockerd的docker](https://docs.docker.com/engine/userguide/labels-custom-metadata/#daemon-labels)守护进程标签 [混淆](https://docs.docker.com/engine/userguide/labels-custom-metadata/#daemon-labels)。因此，可以使用节点标签将**关键任务限制为满足特定要求的节点**。例如，仅在需要运行特殊工作负载的机器上进行调度，例如符合[PCI-SS合规性的机器](https://www.pcisecuritystandards.org/)。受影响的工作节点无法损拖累这类特殊工作负载，因为它被约束，且无法更改节点标签。
-
-然而，**引擎标签**仍然很有用，因为一些不影响容器安全编排的功能可能更好地分散方式设置。例如，引擎可以有一个标签来表明它具有某种类型的磁盘设备，这可能与安全性无关。这些标签更容易被swarm协调器“信任”。
-
-#### 升级或降级节点
-
-可以将工作节点提升为经理角色。**当管理节点变得不可用或者想让管理节点进行维护**时，这非常有用。同样，可以将管理节点降级为辅助角色。
-
-> **注意**：无论提升或降级节点的理由如何，都必须始终维护群体中的管理节点的法定人数。
-
-要提升一个节点或一组节点，请在管理器节点运行`docker node promote`：
-
-```sh
-$ docker node promote node-3 node-2
-Node node-3 promoted to a manager in the swarm.
-Node node-2 promoted to a manager in the swarm.
-```
-
-要降级一个节点或一组节点，请从管理器节点运行`docker node demote`：
-
-```sh
-$ docker node demote node-3 node-2
-
-Manager node-3 demoted in the swarm.
-Manager node-2 demoted in the swarm.
-```
-
-`docker node promote`和`docker node demote`是为了方便的命令 `docker node update --role manager`和`docker node update --role worker` 。
-
-### 在群集节点上安装插件
-
----
-
-> **仅限Edge**：此选项仅在Docker CE Edge版本中可用。请参阅[Docker CE Edge](https://docs.docker.com/edge/)。
-
-如果swarm服务依赖于一个或多个 [插件](https://docs.docker.com/engine/extend/plugin_api/)，则这些插件需要在可能部署服务的每个节点上可用。可以在每个节点上**手动安装插件或编写安装脚本**。在Docker 17.07及更高版本中，也可以使用Docker API以类似于**全局服务的方式部署插件**，只需指定一个`PluginSpec`而不是 `ContainerSpec`。
-
-> **注意**：目前没有办法使用Docker CLI或Docker Compose将插件部署到swarm。另外，从私有存储库安装插件是不可能的。
-
-[`PluginSpec`](https://docs.docker.com/engine/extend/plugin_api/#json-specification) 是由插件开发人员定义的。要将插件添加到所有Docker节点，请使用[`service/create`](https://docs.docker.com/engine/api/v1.31/#operation/ServiceCreate)API，并传递在`TaskTemplate`中定义的`PluginSpec` JSON 。
-
-### 离开集群
-
----
-
-在节点上运行命令`docker swarm leave`将其从群集中删除。
-
-```sh
-$ docker swarm leave
-Node left the swarm.
-```
-
-当一个节点离开群集时，Docker引擎**停止以群集模式**运行。Orchestrator不再将任务安排到节点。
-
-如果节点是**管理节点**，则会收到有关维护**法定人数**的警告。要覆盖警告，请传递`--force`标志。如果**最后一个管理器节点离开**群集，则群集变得**不可用**，要求您采取灾难恢复措施。
-
-有关维护仲裁和灾难恢复的信息，请参阅 [Swarm管理指南](https://docs.docker.com/engine/swarm/admin_guide/)。
-
-节点离开群集后，可以在管理器节点上运行命令`docker node rm`以从节点列表中删除该节点。例如：
-
-```sh
-$ docker node rm node-2
-```
-
-## 将服务部署到群集
-
-Swarm服务使用**声明性**模型，这意味着您可以定义所需的**服务状态**，并依靠Docker来维护此状态。状态包括诸如（但不限于）的信息：
-
-- 服务容器应该运行的映像名称和标记
-- 有多少个容器参与服务
-- 是否有任何端口暴露给群体外的客户
-- 当Docker启动时服务是否应该自动启动
-- 服务重新启动时发生的特定行为（例如是否使用滚动重启）
-- 服务可以运行的节点的特性（例如资源约束和布局偏好）
-
-### 创建一个服务
-
----
-
-要创建**没有额外配置的单副本服务**，只需提供映像名称即可。命令启动一个带有**随机生成名称**并且**没有发布端口**的Nginx服务。
-
-```sh
-$ docker service create nginx
-```
-
-该服务安排在可用节点上。要确认服务已成功创建并启动，请使用以下`docker service ls`命令：
-
-```sh
-$ docker service ls
-ID                  NAME                MODE                REPLICAS            IMAGE                                                                                             PORTS
-a3iixnklxuem        quizzical_lamarr    replicated          1/1                 docker.io/library/nginx@sha256:41ad9967ea448d7c2b203c699b429abe1ed5af331cd92533900c6d77490e0268
-```
-
-创建的服务并不总是立即运行。如果服务的图像不可用，如果没有节点满足您为服务配置的要求或其他原因，服务可能处于**挂起状态**。
-
-要为服务提供名称，请使用以下`--name`标志：
-
-```sh
-$ docker service create --name my_web nginx
-```
-
-就像使用独立容器一样，可以通过在映像名称后面添加它来指定服务容器应该**运行的命令**。此示例启动一个名为`helloworld`使用`alpine`图像并运行以下命令的服务`ping docker.com`：
-
-```sh
-$ docker service create --name helloworld alpine ping docker.com
-```
-
-也可以指定要使用的服务的图像标签。这个例子修改了前一个使用`alpine:3.6`标签：
-
-```sh
-$ docker service create --name helloworld alpine:3.6 ping docker.com
-```
-
-#### 使用私人注册表中的图像创建服务
-
-如果图像在需要登录的私人注册表中可用，请在登录后使用 `--with-registry-auth`标志。如果图像存储在`registry.example.com`私有注册表中，请使用类似以下的命令：
-
-```sh
-$ docker login registry.example.com
-
-$ docker service  create \
-  --with-registry-auth \
-  --name my_service \
-  registry.example.com/acme/my_image:latest
-```
-
-这使用加密的WAL日志将**登录令牌**从本地客户端**传递到部署服务的群集节点**。有了这些信息，这些节点就能够登录到注册表并提取图像。
-
-### 更新服务
-
----
-
-可以使用`docker service update`命令更改现有服务 。当**更新服务时**，Docker会**停止**容器并使用新配置**重启**它们。
-
-由于Nginx是一个Web服务，如果将端口80发布到群集外的客户端，它会更好。可以在创建服务时使用`-p`或`--publish`标志来指定。**更新**现有服务时，标志是`--publish-add`。还有一个`--publish-rm`标志可以**删除**以前发布的端口。
-
-假设`my_web`来自上一节的服务仍然存在，请使用以下命令将更新为发布端口80。
-
-```sh
-$ docker service update --publish-add 80 my_web
-```
-
-要验证它是否有效，请使用`docker service ls`：
-
-```sh
-$ docker service ls
-ID                  NAME                MODE                REPLICAS            IMAGE                                                                                             PORTS
-4nhxl7oxw5vz        my_web              replicated          1/1                 docker.io/library/nginx@sha256:41ad9967ea448d7c2b203c699b429abe1ed5af331cd92533900c6d77490e0268   *:0->80/tcp
-```
-
-可以更新有关现有服务的几乎每个配置详细信息，包括其运行的图像名称和标记。请参阅 [创建后更新服务的图像](https://docs.docker.com/engine/swarm/services/#update-a-services-image-after-creation)。
-
-### 删除服务
-
----
-
-要删除服务，请使用`docker service remove`命令。可以通过ID或名称来删除服务，如`docker service ls` 命令的输出中所示。以下命令将删除该`my_web`服务。
-
-```sh
-$ docker service remove my_web
-$ docker service remove 4nhxl7oxw5vz
-$ docker service remove 4nhxl7oxw5vz my_web2
-```
-
-### 服务配置细节
-
----
-
-以下各节提供有关服务配置的详细信息。在几乎所有可以在服务创建时定义配置的情况下，也可以用类似的方式更新现有服务的配置。
-
-#### 配置运行时环境
-
-可以在**容器中为运行时环境**配置以下选项：
-
-- 使用`--env`标志的**环境变量**
-- 使用`--workdir`标志的容器内的**工作目录**
-- 使用`--user`标志的**用户名或UID**
-
-以下服务的容器的环境变量`$MYVAR` 设置为`myvalue`，在`/tmp/`目录运行，并以`my_user`用户身份运行 。
-
-```sh
-$ docker service create --name helloworld \
-  --env MYVAR=myvalue \
-  --workdir /tmp \
-  --user my_user \
-  alpine ping docker.com
-```
-
-#### 更新已有服务
-
-更新现有服务运行的命令，可以使用`--args`标志。下面的示例更新一个已调用的现有服务`helloworld`，以便它运行命令`ping docker.com`而不是之前运行的任何命令：
-
-```sh
-$ docker service update --args "ping docker.com" helloworld
-```
-
-#### 指定服务使用的映像版本
-
-当**创建**服务时**未指定**要使用的**图像版本**的任何详细信息时，该服务将**使用`latest`标签**的版本。可以**强制**服务以几种不同的方式**使用特定**版本的图像，具体取决于您想要的结果。
-
-图像版本可以用几种不同的方式：
-
-- 如果指定了一个标签，那么管理器（或Docker客户端，如果使用 [内容信任](https://docs.docker.com/engine/swarm/services/#image_resolution_with_trust)）将该**标签解析为摘要**。当在工作节点上接收到创建容器任务的请求时，工作节点只会看到**摘要，而不是标签**。
-
-  ```sh
-  $ docker service create --name="myservice" ubuntu:16.04
-  ```
-
-  一些标签代表迭代的版本，例如`ubuntu:16.04`。像这样的标签几乎总是会随着时间的推移逐渐成为稳定的版本， **建议尽可能使用这种固定版本的标签**。
-
-  其他类型的标签（如`latest`或`nightly`）可能经常会解析为新的版本，具体取决于图像作者更新标签的频率。**建议不要使用经常更新的标签**来运行服务，以防止**使用不同映像版本**的不同服务副本任务。
-
-- 如果**完全不指定版本**，则按照惯例，图像的`latest`标记将被解析为摘要。创建服务任务时，工作人员使用此摘要中的图像。因此，以下两个命令是相同的：
-
-  ```sh
-  $ docker service create --name="myservice" ubuntu
-  $ docker service create --name="myservice" ubuntu:latest
-  ```
-
-- 如果**直接指定版本和摘要**，则在创建服务任务时始终**使用**图像的**确切**版本。
-
-  ```sh
-  $ docker service create \
-      --name="myservice" \
-      ubuntu:16.04@sha256:35bc48a1ca97c3971611dc4662d08d131869daa692acb281c7e9e052924e38b1
-  ```
-
-当创建服务时，图像的标记将被解析为标记在创建服务时指向的**特定版本摘要**。服务的工作节点永远使用**特定版本**的摘要，除非服务被更新。如果使用经常更改的标签（例如`latest`），则此功能尤其重要，因为它可**确保**所有服务任务使用**相同版本的图像**。
-
-> **注意**：如果启用了[内容信任](https://docs.docker.com/engine/security/trust/content_trust/)，客户端实际上会在联系swarm管理器之前将图像的标签解析为摘要，以验证图像是否已签名。因此，如果使用内容信任，swarm管理器会收到预先解决的请求。在这种情况下，如果客户端无法将图像解析为摘要，则请求失败。
-
-如果**管理器无法将标签解析为摘要，则每个工作节点负责将标签解析为摘要**，并且**不同节点可以使用不同版本的图像**。如果发生这种情况，会输出下面的警告，用占位符代替真实信息。
-
-```sh
-unable to pin image <IMAGE-NAME> to digest: <REASON>
-```
-
-要**查看图像的当前摘要**，请执行命令 `docker inspect <IMAGE>:<TAG>`并查找`RepoDigests`行。以下是`ubuntu:latest`此内容写入时的当前摘要。为了清晰起见，输出被截断。
-
-```sh
-$ docker inspect ubuntu:latest
-"RepoDigests": [
-    "ubuntu@sha256:35bc48a1ca97c3971611dc4662d08d131869daa692acb281c7e9e052924e38b1"
-],
-```
-
-创建服务之后，除非明确`docker service update`使用`--image`标志运行，否则其**映像不会更新** 。其他更新操作（如扩展服务，添加或删除网络或卷，重命名服务或任何其他类型的更新操作）不会更新服务的映像。
-
-#### 更新服务的图像
-
-每个标签代表一个摘要，类似于Git哈希。一些标签，如 `latest`更新通常指向一个新的摘要。比如`ubuntu:16.04`，代表一个已发布的软件版本，并且预计不会更新以经常指向新的摘要。在Docker 1.13及更高版本中，当创建服务时，它将被限制为使用图像的**特定摘要创建任务**，直到**使用**`service update` `--image`标志更新服务为止。如果使用较**旧版本的Docker Engine，则必须删除并重新创建**服务以更新其映像。
-
-当`service update`使用`--image`标志运行时，swarm管理器会查询Docker Hub或您的私人Docker注册中心以获取**标签记当前指向的摘要**并**更新服务任务**使用新摘要。
-
-> **注意**：如果使用[内容信任](https://docs.docker.com/engine/swarm/services/#image_resolution_with_trust)，Docker客户端解析图像，swarm管理器接收图像和摘要，而不是标签。
-
-通常，**管理节点可以将标签解析为新的摘要和服务**更新，**重新部署每个任务以使用新图像**。如果管理器无法解决标签或发生其他问题，将会发生以下情况：
-
-**如果管理器成功解析标签**
-
-如果swarm manager可以将image标签解析为摘要，它会**指示工作节点重新部署任务并使用新摘要中的图像**。
-
-- 如果工作人员在摘要中**缓存**了图像，则会使用缓存的图像。
-- 如果不是，它会尝试从Docker Hub或私有注册表中**提取**图像。
-  - 如果**成功**，则使用新映像**部署相关任务**。
-  - 如果工作节点**无法拉取**图像，则服务**无法**在工作人员节点上**部署**。Docker**再次尝试**部署任务，可能**在不同**的工作节点上。
-
-**如果管理器无法解析标签**
-
-如果swarm manager无法将图像解析为摘要，则全部不会丢失：
-
-- 管理员指示工作节点**使用该标签**处的图像**重新**部署任务。
-- 如果工作人员**拥有**解析为标记的**本地缓存图像**，则它会**使用该图像**。
-- 如果工作人员**没有解析**为标签的本地高速缓存映像，则工作人员会尝试连接到Docker Hub或私有注册表以在该标签处**拉取图像**。
-  - 如果这**成功**了，工作人员将**使用该图像**。
-  - 如果**失败**，该任务将**无法部署**，并且管理员**再次尝试**部署该任务，可能位于**不同**的工作节点上。
-
-### 发布端口
-
----
-
-在创建群集服务时，可以通过两种方式将服务的端口发布到群集外的主机：
-
-- [可以依靠路由网格](https://docs.docker.com/engine/swarm/services/#publish-a%20services-ports-using-the-routing-mesh)。当发布服务端口时，无论在节点上运行的服务是否有任务，群集都可以**在每个节点上的目标端口上访问该服务**。这并不复杂，是许多类型服务都是这种方式。
-- [可以直接在](https://docs.docker.com/engine/swarm/services/#publish-a-services-ports-directly-on-the-swarm-node) 运行服务[的群集节点上发布服务任务的端口](https://docs.docker.com/engine/swarm/services/#publish-a-services-ports-directly-on-the-swarm-node)。此功能在Docker 1.13和更高版本中可用。这**绕过了路由网格**，并提供了最大的灵活性，包括**开发自己的路由框架**的能力。但是，有责任跟踪每个任务的运行位置，并将请求路由到任务，并在各个节点之间进行负载平衡。
-
-#### 使用路由网格发布服务的端口
-
-要从外部向群发布服务的端口，请使用 `--publish <PUBLISHED-PORT>:<SERVICE-PORT>`标志。群集使服务可以在**每个群集节点**的发布端口**上**访问。如果外部主机连接到任何群集节点上的该端口，则路由网格会将其**路由到任务**。外部主机不需要知道**服务任务的IP地址**或内部使用**端口**就可以与服务交互。当用户或进程连接到服务时，任何运行服务任务的工作节点都可能会响应。有关群集服务网络的更多详细信息，请参阅 [管理群集服务网络](https://docs.docker.com/engine/swarm/networking/)。
-
-##### 示例：在10个节点群上运行三任务Nginx服务
-
-假设有一个10节点的群集，并且部署了一个在10节点群集上运行三个任务的Nginx服务：
-
-```sh
-$ docker service create \
-	--name my_web \
-	--replicas 3 \
-	--publish published=8080,target=80 \
-nginx
-```
-
-三个任务在最多三个节点上运行。不需要知道哪些节点正在运行任务; 在10个节点中的**任何**节点上连接到8080端口都可以将连接到三个`nginx`任务之一。你可以使用测试`curl`。以下示例假定这`localhost`是群集节点之一。如果情况并非如此，或者`localhost`无法解析到主机上的IP地址，请使用主机的IP地址或可解析的主机名称。
-
-HTML输出被截断：
-
-```sh
-$ curl localhost:8080
-
-<!DOCTYPE html>
-<html>
-<head>
-<title>Welcome to nginx!</title>
-...truncated...
-</html>
-```
-
-后续连接可能会**路由**到同一个群集节点或不同的节点。
-
-#### 直接在集群节点上发布服务的端口
-
-如果需要根据**应用程序状态**做出路由决策，或者需要**完全控制将请求路由到服务任务**的流程，则使用路由网格可能不是应用程序的正确选择。要直接在**正在运行的节点上**发布服务端口，请使用标 志 `--publish` 选项`mode=host`。
-
-> **注意：**如果使用`mode = host`直接在群集节点上发布服务的端口，并设置`published = <PORT>`，则会创建隐式限制，只能在**给定群集节点上为服务运行一个任务**。可以通过指定发布而不使用端口定义来解决此问题，这会导致Docker为每个任务**分配一个随机**端口。
->
-> 另外，如果使用`mode = host`，并且在`docker service create`上不使用`--mode = global`标志，则**很难知道哪些节点正在运行**服务以将工作路由到它们。
-
-##### 示例：`nginx`在每个群集节点上运行Web服务
-
-[nginx](https://hub.docker.com/_/nginx/)是一个开源的反向代理，负载均衡器，HTTP缓存和一个Web服务器。如果使用路由网格将nginx作为服务运行，则连接到任何swarm节点上的nginx端口将显示（有效）运行该服务**的随机群集节点**的网页。
-
-以下示例在群集中的每个节点上运行nginx作为服务，并在每个群集节点上本地公开nginx端口。
-
-```sh
-$ docker service create \
-  --mode global \
-  --publish mode=host,target=80,published=8080 \
-  --name=nginx \
-  nginx:latest
-```
-
-可以在每个群集节点的端口8080上访问nginx服务器。如果向群集添加节点，则会启动一个nginx任务。不能在任何绑定到端口8080的群集节点上启动另一个服务或容器。
-
-> **注意**：这是一个极端的例子。为多层服务创建应用程序层路由框架非常复杂，超出了本主题的范围。
-
-#### 将服务连接到覆盖网络
-
-可以使用覆盖网络连接群中的一个或多个服务。
-
-首先，使用`docker network create` 带有`--driver overlay`标志的命令在**管理器节点**上创建覆盖网络。
-
-```sh
-$ docker network create --driver overlay my-network
-```
-
-在群集模式下创建覆盖网络后，**所有管理节点都可以访问网络**。可以创建新服务并传递该`--network`标志以将**服务附加到覆盖网络**：
-
-```sh
-$ docker service create \
-  --replicas 3 \
-  --network my-network \
-  --name my-web \
-  nginx
-```
-
-集群扩展`my-network`到运行服务的每个节点。
-
-还可以使用`--network-add`标志**将现有服务连接到覆盖网络** 。
-
-```sh
-$ docker service update --network-add my-network my-web
-```
-
-要**断开**正在运行的服务与网络的连接，请使用`--network-rm`标志。
-
-```sh
-$ docker service update --network-rm my-network my-web
-```
-
-有关覆盖网络和服务发现的更多信息，请参阅 [将服务附加到覆盖网络](https://docs.docker.com/engine/swarm/networking/)和 [Docker群集模式覆盖网络安全模型](https://docs.docker.com/engine/userguide/networking/overlay-security-model/)。
-
-#### 授予对秘密的服务访问权限
-
-要创建一个访问Docker管理的机密的服务，请使用`--secret` 标志。有关更多信息，请参阅 [管理Docker服务的敏感字符串（机密）](https://docs.docker.com/engine/swarm/secrets/)
-
-#### 自定义服务的隔离模式
-
-Docker 17.12 CE和更高版本允许指定群集服务的隔离模式。**设置仅适用于Windows主机，Linux主机将忽略此设置。**隔离模式可以是以下之一：
-
-- `default`：使用由`-exec-opt`标志或`exec-opts`阵列所配置的默认隔离模式为Docker主机配置`daemon.json`。如果守护进程未指定隔离技术，`process`则它是Windows Server `hyperv`的默认设置，并且是Windows 10的默认（且唯一）选择。
-
-- `process`：将服务任务作为主机上的单独进程运行。
-
-  > **注意**：`process`隔离模式仅在Windows Server上受支持。Windows 10仅支持`hyperv`隔离模式。
-
-- `hyperv`：将服务任务作为独立的`hyperv`任务运行。这增加了开销但提供了更多的隔离。
-
-可以在使用该`--isolation`标志创建或更新新服务时指定隔离模式。
-
-
-
-
-
-
-
-
-
-
-
-
-如果还没有连接到`manager1`，请打开一个终端并将ssh连入运行管理节点`manager1`的机器中。
-
-管理者、管理员、管理器-管理节点
-
-工作人员、工作者——工作节点
-
-经理-管理
-
-群集-集群
-
-群体-集群
-
-您-你
-
-标志-选项
-
-映像、图像、图片-镜像
-
-秘密-私密
-
-网格--网络
-
-其
