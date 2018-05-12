@@ -471,7 +471,13 @@ Please enter unlock key:
 
 ```sh
 $ docker swarm unlock-key
-no unlock key is set
+To unlock a swarm manager after it restarts, run the `docker swarm unlock`
+command and provide the following key:
+
+    SWMKEY-1-ubaYsVMAc50QnKA0RWOOxOFkzye9Bp9U29Vz9LiQR0M
+
+Please remember to store this key in a password manager, since without it you
+will not be able to restart the manager.
 ```
 
 ## update 更新
@@ -498,6 +504,9 @@ no unlock key is set
 
 ```sh
 $ docker swarm update --cert-expiry 720h
+# 自动锁定集群
+$ docker swarm update --autolock=false
+$ docker swarm update --autolock=true
 ```
 
 # docker node 基本命令
