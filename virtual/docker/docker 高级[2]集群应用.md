@@ -671,7 +671,7 @@ Swarm服务为提供了几种不同的方式来**控制不同节点上服务的�
 
 - 可以配置服务的 [CPU或内存要求](https://docs.docker.com/engine/swarm/services/#reserve-memory-or-cpus-for-a-service)，并且服务**仅在满足**这些要求的节点上运行。
 
-- [分布约束](https://docs.docker.com/engine/swarm/services/#placement-constraints)使可以将服务配置为**仅在具有特定（任意）元数据**集的节点上运行，并且如果适当的节点**不存在**，则会*导致部署失败**。例如，可以指定服务只应在任意标签`pci_compliant`设置为的节点上运行 `true`。
+- [分布约束](https://docs.docker.com/engine/swarm/services/#placement-constraints)使可以将服务配置为**仅在具有特定（任意）元数据**集的节点上运行，并且如果适当的节点**不存在**，则会**导致部署失败**。例如，可以指定服务只应在任意标签`pci_compliant`设置为的节点上运行 `true`。
 
 - [“分布位置”偏好设置](https://docs.docker.com/engine/swarm/services/#placement-preferences)允许每个节点应用一系列值的**任意标签**，并使用**算法**将服务的任务分散到这些节点上。目前，唯一支持的算法是`spread`尝试将它们**均匀**地分布。例如，如果`rack`使用值为1-10的标签为每个节点添加标签，则指定一个位置偏好设置`rack`，然后`rack`在采用其他**放置约束**后，服务任务尽可能均匀地分布在**具有标签**的所有节点上，放置偏好以及其他节点**特定**的限制。
 

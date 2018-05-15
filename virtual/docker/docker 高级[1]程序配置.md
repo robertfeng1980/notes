@@ -1265,7 +1265,7 @@ $ docker run --it --cpu-rt-runtime=950000 \
 
 如果内核或Docker守护进程未正确配置，则会发生错误。
 
-# 日志
+# docker 日志配置
 
 ## 查看容器或服务的日志
 
@@ -1568,7 +1568,7 @@ alpine echo hello world
 | `env`                    | 在启动Docker守护进程时适用。此守护程序接受的与日志相关的环境变量的逗号分隔列表。用于高级[日志标记选项](https://docs.docker.com/config/containers/logging/log_tags/)。 | `--log-opt env=os,customer`                                  |
 | `env-regex`              | 在启动Docker守护进程时适用。类似于并兼容`env`。一个正则表达式来匹配与日志相关的环境变量。用于高级[日志标记选项](https://docs.docker.com/config/containers/logging/log_tags/)。 | `--log-opt env-regex=^(os\|customer)`                        |
 
-### journald `日志驱动
+### `journald `日志驱动
 
 ---
 
@@ -1673,3 +1673,540 @@ reader.add_match('CONTAINER_NAME=web')
 for msg in reader:
     print '{CONTAINER_ID_FULL}: {MESSAGE}'.format(**msg)
 ```
+# docker 安全配置
+
+## Docker 安全性
+
+在审查Docker安全性时，需要考虑四个主要方面：
+
+- 内核的**内在安全性**及其对**命名空间**和**cgroups**的支持;
+- Docker**守护进程**本身的攻击;
+- 容器**配置文件**中的漏洞，默认情况下或用户自定义文件。
+- 内核的“强化”安全功能以及它们如何与容器交互。
+
+### 内核命名空间
+
+------
+
+Docker容器与LXC容器非常相似，并且它们具有类似的安全功能。当你`docker run`启动一个容器时 ，Docker为这个容器创建一组**命名空间和控制组**。
+
+**命名空间提供了第一个也是最直接的隔离形式**：在容器中运行的进程看不到，甚至更少影响在另一个容器或主机系统中运行的进程。
+
+**每个容器也都有自己的网络堆栈**，这意味着容器不会获得对另一个容器的**套接字或接口的特权**访问。当然，如果主机系统相应设置，容器可以通过**各自的网络接口相互交互** - 就像他们可以与外部主机进行交互一样。当您为容器指定公共端口或使用 [*链接时*](https://docs.docker.com/engine/userguide/networking/default_network/dockerlinks/) ，容器之间允许IP流量。它们可以互相ping通，发送/接收UDP数据包，并建立TCP连接，但如果需要可以限制它们。从网络体系结构的角度来看，给定Docker主机上的所有容器都位于网桥接口上。这意味着它们就像通过普通以太网交换机连接的物理机器一样，不多也不少。
+
+### 控制组
+
+------
+
+控制组是Linux容器的另一个关键组件。他们执行**资源审计和限制**。它们提供了许多有用的度量标准，但它们也有助于确保每个**容器获得其公平的内存，CPU和磁盘IO**; 更重要的是，单个容器**不能耗尽**这些资源中的一个来降低系统的性能。
+
+因此，尽管它们不能阻止一个容器访问或影响另一个容器的数据和进程，但它们对**抵御一些拒绝服务攻击**至关重要。它们对于多租户平台尤其重要，例如公共和私有PaaS，即使在某些应用程序开始出现故障时也能保证一致的正常运行时间（和性能）。
+
+### Docker 守护进程攻击
+
+------
+
+使用Docker运行容器（和应用程序）意味着运行Docker守护进程。这个守护进程当前**需要`root`特权**，因此你应该知道一些重要的细节。
+
+首先，**应该只允许受信任的用户来控制你的Docker守护进程**。这是一些强大的Docker功能的直接后果。具体来说，Docker允许在Docker主机和访客容器之间**共享一个目录**; 它允许在**不限制容器访问权限**的情况下这样做。这意味着可以启动一个容器，其`/host`目录是`/`主机上的目录; 容器可以不受任何限制地**改变你的主机文件系统**。这与虚拟化系统如何允许文件系统资源共享类似。没有什么能够阻止你与虚拟机共享你的根文件系统（甚至你的根块设备）。
+
+这具有很强的安全意义：例如，如果您通过Web服务器来监控Docker以通过API配置容器，则应该比平时更加仔细地进行参数检查，以确保恶意用户无法传递控制的参数，从而导致Docker创建任意容器。
+
+出于这个原因，Docker 0.5.2中更改了REST API端点（由Docker CLI用于与Docker守护进程通信），现在使用UNIX套接字而不是127.0.0.1上绑定的TCP套接字（后者容易发生如果碰巧在本地机器上直接运行Docker，而不是在虚拟机之外），则可以**发起跨站请求伪造攻击**。然后，可以使用**传统的UNIX权限检查**来限制对控制套接字的访问。
+
+如果明确决定这么做，还可以通过HTTP公开REST API。但是，如果这样做，请注意上述安全隐患。确保它只能从**受信任的网络或VPN访问**，或者使用诸如**`stunnel`和客户端SSL证书**等机制进行保护。还可以使用[HTTPS和证书](https://docs.docker.com/engine/security/https/)来保护API端点。
+
+守护进程也可能容易受到其他输入的影响，例如从磁盘`docker load`或从网络 加载磁盘的映像`docker pull`。从Docker 1.3.2开始，图像现在在Linux / Unix平台的chrooted子进程中提取，这是实现特权分离更广泛工作的第一步。从Docker 1.10.0开始，所有图像都通过其内容的**加密校验和进行存储和访问**，从而限制了攻击者与现有图像发生冲突的可能性。
+
+最后，如果在服务器上运行Docker，则**建议在服务器上专门运行Docker**，并将所有其他服务移动到由Docker控制的容器中。当然，保留最喜欢的管理工具（可能至少是SSH服务器）以及现有的监控/监督流程（如NRPE和collectd）是很好的。
+
+### Linux内核功能
+
+------
+
+默认情况下，Docker会使用一组受限制的功能启动容器。那是什么意思？
+
+功能将二元“根/非根”二分法转变为一个细粒度的访问控制系统。只需要**绑定在1024以下端口**上的进程（如Web服务器）不需要以root身份运行：它们可以被赋予权限`net_bind_service`。对于几乎所有需要root权限的特定领域，还有许多其他功能。
+
+这对于容器安全意义重大。让我们看看为什么！
+
+典型的服务器运行多个`root`进程，包括SSH守护进程， `cron`守护进程，日志守护进程，内核模块，网络配置工具等。容器是不同的，因为几乎所有这些任务都是由容器周围的基础设施处理的：
+
+- SSH访问通常由运行在Docker主机上的**单个服务器**管理;
+- `cron`在必要时应作为**用户进程**运行，专门针对需要其**调度服务**的应用程序专门定制，而不是作为平台范围的设施;
+- 日志管理通常也交给Docker，或Loggly或Splunk等第三方服务;
+- 硬件管理是无关紧要的，这意味着你永远不需要`udevd`在容器中运行或等效的守护进程;
+- 网络管理发生在容器的外面，执行关注点尽可能的分离，这意味着一个容器不应该需要执行`ifconfig`， `route`或IP命令（当容器被特别设计，以表现得象一个路由器或防火墙除外） 。
+
+这意味着，在大多数情况下，**容器并不需要“真正的” root 权限**。因此，容器可以运行一个能力较低的集合。 这意味着容器中的“root”比真正的“root”要少得多。例如，有可能：
+
+- 否认所有“挂载”操作;
+- 拒绝访问原始套接字（以防止数据包欺骗）;
+- 拒绝访问某些文件系统操作，如创建新设备节点，更改文件所有者或更改属性（包括不可变标志）;
+- 拒绝模块加载;
+- 和其他许多
+
+这意味着即使入侵者设法升级到容器内的根目录，要做到严重的破坏或升级到主机也要困难得多。
+
+这不会影响常规的Web应用程序，但会大大减少恶意用户的攻击媒介。默认情况下，Docker将删除除[所需](https://github.com/moby/moby/blob/master/oci/defaults.go#L14-L30)功能之外的所有功能，即白名单而不是黑名单方法。可以在[Linux手册页中](http://man7.org/linux/man-pages/man7/capabilities.7.html)看到完整的可用功能列表。
+
+运行Docker容器的一个主要风险是给容器**默认的一组功能和挂载可能会独立提供不完全的隔离，或者与内核漏洞结合使用**。
+
+Docker支持添加和删除功能，允许使用**非默认配置**文件。这可能会通过删除功能使Docker更安全，或者通过增加功能降低Docker的安全性。对于用户来说，最好的做法是去除**除了他们的进程明确需要的所有功能**。
+
+### 其他内核安全功能
+
+------
+
+功能只是现代Linux内核提供的许多安全功能之一。还可以利用Docker等现有知名系统，如`TOMOYO，AppArmor，SELinux，GRSEC`等。
+
+虽然Docker目前仅支持功能，但不会干扰其他系统。这意味着有很多不同的方法来加固Docker主机。这里有一些例子。
+
+- 可以**使用GRSEC和PAX运行内核**。这在编译时和运行时都增加了许多**安全检查**; 它也击败了许多漏洞，这要归功于地址随机化等技术。它不需要特定于Docker的配置，因为这些安全特性适用于**系统范围，独立于容器**。
+- 如果发行版带有Docker容器的**安全模型模板**，可以**直接使用**它们。例如，我们发布了一个可与AppArmor配合使用的模板，而Red Hat提供了适用于Docker的SELinux策略。这些模板提供了一个额外的安全网（尽管它与功能重叠）。
+- 可以使用最喜欢的**访问控制机制**来定义自己的策略。
+
+就像可以使用第三方工具来扩充Docker容器（包括特殊网络拓扑或共享文件系统）一样，存在用于Docker容器而无需修改Docker本身的工具。
+
+从Docker 1.10起，Docker守护进程直接支持**用户命名空间**。此功能允许将容器中的**根用户映射到容器外部的非uid-0用户**，这有助于减轻容器突破的风险。该工具可用，但默认情况下不启用。
+
+有关此功能的更多信息，请参阅命令行参考中的[守护程序命令](https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-user-namespace-options)。有关Docker中用户命名空间实现的其他信息可以在[此博客文章中](https://integratedcode.us/2015/10/13/user-namespaces-have-arrived-in-docker/)找到 。
+
+### 结论
+
+------
+
+默认情况下，Docker容器非常安全; 特别是如果在容器内将进程作为**非特权用户**运行时。可以通过**启用AppArmor，SELinux，GRSEC**或其他适当的**强化系统**来添加额外的安全层。
+
+## 保护Docker守护进程套接字
+
+默认情况下，Docker通过**非联网的Unix套接字**运行。它也可以选择使用**HTTP套接字**进行通信。
+
+如果需要通过网络以安全的方式访问Docker，则可以通过指定`tlsverify`标志并将Docker `tlscacert`标志指向 **受信任的CA证书来启用TLS **。
+
+在守护进程模式下，它只允许客户端通过由CA签名的证书进行身份验证。在客户端模式下，它仅连接到具有由该CA签名的证书的服务器。
+
+> **高级话题**：使用TLS和管理CA是一个高级主题。在使用它之前，请熟悉OpenSSL，x509和TLS。
+
+### 使用OpenSSL创建CA，服务器和客户端密钥
+
+------
+
+> **注意**：将`$HOST`以下示例中的所有实例替换为Docker守护进程主机的DNS名称。
+
+#### 创建 CA 证书
+
+首先，在**Docker守护进程的主机上**生成CA私钥和公钥：
+
+```sh
+# 10.0.2.3
+$ winpty openssl genrsa -aes256 -out ca-key.pem 4096
+Generating RSA private key, 4096 bit long modulus
+............................................................................................................................................................................................++
+........++
+e is 65537 (0x10001)
+Enter pass phrase for ca-key.pem:
+Verifying - Enter pass phrase for ca-key.pem:
+
+$ winpty openssl req -new -x509 -days 365 -key ca-key.pem -sha256 -out ca.pem
+Enter pass phrase for ca-key.pem:
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:
+State or Province Name (full name) [Some-State]:Queensland
+Locality Name (eg, city) []:Brisbane
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:Docker Inc
+Organizational Unit Name (eg, section) []:Sales
+Common Name (e.g. server FQDN or YOUR name) []:$HOST
+Email Address []:Sven@home.org.au
+```
+
+#### 创建服务器端秘钥
+
+现在拥有一个CA，可以创建一个服务器密钥和证书签名请求（CSR）。确保“通用名称”与用于连接到Docker的主机名相匹配：
+
+```sh
+$ winpty openssl genrsa -out server-key.pem 4096
+Generating RSA private key, 4096 bit long modulus
+.....................................................................++
+.................................................................................................++
+e is 65537 (0x10001)
+
+$ winpty openssl req -sha256 -new -key server-key.pem -out server.csr
+```
+
+接下来，我们将用我们的CA签署公钥：
+
+由于TLS连接可以通过IP地址和DNS名称进行，因此创建证书时需要指定IP地址。例如，要允许`10.10.10.20`和`127.0.0.1`连接：
+
+```sh
+$ echo subjectAltName = DNS:$HOST,IP:10.10.10.20,IP:127.0.0.1 >> extfile.cnf
+# echo subjectAltName = DNS:10.0.2.3,IP:192.168.99.100,IP:127.0.0.1 >> extfile.cnf
+```
+
+将Docker守护进程密钥的扩展使用属性设置为仅用于服务器身份验证：
+
+```sh
+$ echo extendedKeyUsage = serverAuth >> extfile.cnf
+```
+
+现在，生成签名证书：
+
+```sh
+$ winpty openssl x509 -req -days 365 -sha256 -in server.csr -CA ca.pem -CAkey ca-key.pem \
+  -CAcreateserial -out server-cert.pem -extfile extfile.cnf
+```
+
+[授权插件](https://docs.docker.com/engine/extend/plugins_authorization)提供更细致的控制，以补充相互TLS的认证。除了上述文档中介绍的其他信息之外，在Docker守护程序上运行的授权插件会接收用于连接Docker客户端的证书信息。
+
+#### 创建客户端秘钥
+
+对于客户端身份验证，请创建客户端密钥和证书签名请求：
+
+> **注意：**为了简化接下来的几个步骤，您也可以在Docker守护进程的主机上执行此步骤。
+
+```sh
+$ winpty openssl genrsa -out key.pem 4096
+$ winpty openssl req -subj '/CN=client' -new -key key.pem -out client.csr
+```
+
+要使密钥适合客户端认证，请创建一个扩展配置文件：
+
+```sh
+$ echo extendedKeyUsage = clientAuth >> extfile.cnf
+```
+
+现在，生成签名证书：
+
+```sh
+$ winpty openssl x509 -req -days 365 -sha256 -in client.csr -CA ca.pem -CAkey ca-key.pem \
+  -CAcreateserial -out cert.pem -extfile extfile.cnf
+```
+
+#### 清理签名/控制权限
+
+生成后`cert.pem`，`server-cert.pem`可以安全地删除两个证书签名请求：
+
+```sh
+$ rm -v client.csr server.csr
+```
+
+默认`umask`值为022时，密钥是**全局可读**和可写的。
+
+为防止意外损坏密钥，请删除其写入权限。要让它们只能被你读取，请按如下方式更改文件模式：
+
+```sh
+$ chmod -v 0400 ca-key.pem key.pem server-key.pem
+```
+
+证书可以是全局可读的，但可能想要删除写入访问以防止意外损坏：
+
+```sh
+$ chmod -v 0444 ca.pem server-cert.pem cert.pem
+```
+
+现在可以让Docker守护进程只接受来自提供你的CA信任的证书的客户端的连接：
+
+```sh
+$ sudo dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376
+```
+
+要连接到Docker并验证其证书，请提供您的客户端密钥，证书和可信CA：
+
+> **在客户机上运行它**<br/>这一步应该在你的Docker客户端机器上运行。因此，需要将CA证书，服务器证书和客户端证书复制到该机器。
+
+```sh
+$ docker --tlsverify --tlscacert=ca.pem --tlscert=cert.pem --tlskey=key.pem \
+  -H=$HOST:2376 version
+```
+
+> **注意**：通过TLS的Docker应该在TCP端口2376上运行。
+
+> **警告**：如上例所示，当您使用证书身份验证时，无需`docker`使用`sudo`或`docker`组运行客户端。这意味着任何拥有密钥的人都可以给你的Docker守护进程提供任何指令，让他们可以访问托管守护进程的机器。**保护这些密钥，就像你使用root密码一样**！
+
+### 默认安全模式
+
+------
+
+如果想默认保护Docker客户端连接，可以将文件移动到`.docker`的主目录中的目录，并设置 `DOCKER_HOST`和`DOCKER_TLS_VERIFY`变量（而不是传递 `-H=tcp://$HOST:2376`和`--tlsverify`每次调用）。
+
+```sh
+$ mkdir -pv ~/.docker
+$ cp -v {ca,cert,key}.pem ~/.docker
+
+$ export DOCKER_HOST=tcp://$HOST:2376 DOCKER_TLS_VERIFY=1
+```
+
+Docker默认安全连接：
+
+```sh
+$ docker ps
+```
+
+### 其他模式
+
+------
+
+如果你不想有完整的双向认证，你可以通过混合标志来以各种其他模式运行Docker。
+
+#### 守护进程模式
+
+- `tlsverify`，`tlscacert`，`tlscert`，`tlskey`集：验证客户端
+- `tls`，`tlscert`，`tlskey`：不要验证客户端
+
+#### 客户端模式
+
+- `tls`：基于公共/默认CA池对服务器进行身份验证
+- `tlsverify`，`tlscacert`：根据给定的CA验证服务器
+- `tls`，`tlscert`，`tlskey`：以验证客户端证书，不验证服务器基于给定CA
+- `tlsverify`，`tlscacert`，`tlscert`，`tlskey`：以验证客户端证书并认证服务器基于给定CA
+
+如果找到，客户端发送它的客户端证书，所以你只需要放下你的密钥`~/.docker/{ca,cert,key}.pem`。或者，如果您想将密钥存储在其他位置，则可以使用环境变量指定该位置`DOCKER_CERT_PATH`。
+
+```sh
+$ export DOCKER_CERT_PATH=~/.docker/zone1/
+$ docker --tlsverify ps
+```
+
+#### 使用 `curl`连接到安全的Docker端口
+
+要使用`curl`测试API请求，需要使用三个额外的命令行标志：
+
+```sh
+$ curl https://$HOST:2376/images/json \
+  --cert ~/.docker/cert.pem \
+  --key ~/.docker/key.pem \
+  --cacert ~/.docker/ca.pem
+```
+
+## 用证书验证存储库客户端
+
+在[使用HTTPS运行Docker时](https://docs.docker.com/engine/security/https/)，默认情况下，Docker通过**非联网的Unix套接字**运行，并且必须**启用TLS**才能让Docker客户端和后台进程通过HTTPS进行安全通信。**TLS**确保注册表端点的**真实性**，并且**加密注入/流出**注册表的流量。
+
+如何确保Docker注册服务器和Docker守护进程（注册服务器的客户端）之间的通信使用**基于证书的客户端 - 服务器身份**验证进行**加密和正确验证**。<br/>下面将操作如何为注册表安装证书颁发机构（CA）根证书以及如何设置客户端TLS证书以进行验证。
+
+### 了解配置
+
+------
+
+通过`/etc/docker/certs.d`使用与**注册表主机名相同的名称**创建目录来配置自定义证书 ，例如 `localhost`。所有`*.crt`文件都作为CA根添加到此目录。
+
+> **注意**：从Docker 1.13开始，在Linux上，任何根证书颁发机构都会与系统默认值合并，包括作为主机的根CA集。在以前版本的Docker和Docker Enterprise Edition for Windows Server上，仅在未配置自定义根证书时才使用系统默认证书。
+
+`<filename>.key/cert`一对或多对对象表示Docker有访问所需存储库所需的自定义证书。
+
+> **注意**：如果存在多个证书，则按**字母顺序**尝试每个证书。如果存在4xx级别或5xx级别的身份验证错误，则Docker会继续尝试使用下一个证书。
+
+以下说明了具有自定义证书的配置：
+
+```sh
+    /etc/docker/certs.d/        <-- Certificate directory
+    └── localhost:5000          <-- Hostname:port
+       ├── client.cert          <-- Client certificate
+       ├── client.key           <-- Client key
+       └── ca.crt               <-- Certificate authority that signed
+                                    the registry certificate
+```
+
+前面的示例是特定于操作系统的，仅用于说明目的。应该查阅操作系统文档以创建一个os提供的捆绑证书链。
+
+### 创建客户端证书
+
+------
+
+使用OpenSSL `genrsa`和`req`命令首先生成RSA密钥，然后使用密钥创建证书。
+
+```sh
+$ openssl genrsa -out client.key 4096
+$ openssl req -new -x509 -text -key client.key -out client.cert
+```
+
+> **注意**：这些TLS命令仅在Linux上生成一组工作证书。macOS中的OpenSSL版本与Docker所需的证书类型不兼容。
+
+### 疑难解答提示
+
+------
+
+Docker守护程序将`.crt`文件解释为CA证书和`.cert`文件作为客户端证书。如果CA证书意外地被赋予扩展名 `.cert`而不是正确的`.crt`扩展名，那么Docker守护程序会记录以下错误消息：
+
+```sh
+Missing key KEY_NAME for client certificate CERT_NAME. CA certificates should use the extension .crt.
+```
+
+如果没有端口号访问Docker注册表，请不要将端口添加到目录名称。以下显示了默认端口443上的注册表的配置，该端口可通过`docker login my-https.registry.example.com`以下方式访问：
+
+```sh
+    /etc/docker/certs.d/
+    └── my-https.registry.example.com          <-- Hostname without port
+       ├── client.cert
+       ├── client.key
+       └── ca.crt
+```
+
+## 利用命名空间隔离容器
+
+Linux命名空间为正在运行的进程提供了**隔离**，**限制**了他们对**系统资源**的**访问**，而运行进程没有意识到这些限制。有关Linux命名空间的更多信息，请参阅 [Linux命名空间](https://www.linux.com/news/understanding-and-securing-linux-namespaces)。
+
+**防止容器内的特权升级攻击**的最佳方法是将容器的应用程序配置为以**非特权用户身份**运行。对于其进程必须`root`以容器中的用户身份运行的容器，可以将此**用户重新映射到Docker主机上权限较低**的用户。映射的用户被分配了一系列UID，这些UID在名称空间内作为从0到65536的普通UID运行，但**对主机本身没有特权**。
+
+### 关于重新映射和从属用户和组ID
+
+------
+
+重新映射本身由两个文件处理：`/etc/subuid`和`/etc/subgid`。每个文件的工作原理都是一样的，但其中一个关注用户ID范围，另一个关注组ID范围。考虑下列条目`/etc/subuid`：
+
+```sh
+testuser:231072:65536
+```
+
+这意味着将`testuser`为其分配一个从属用户ID范围`231072` 和下一个65536个整数。UID `231072`映射到名称空间（在本例中为容器内）为UID `0`（`root`）。UID `231073` 被映射为UID `1`等等。如果某个进程尝试在**名称空间外部提升特权**，则该进程将作为主机上无特权的高数字UID运行，该超级用户甚至**不映射到真实用户**。这意味着该进程**完全没有**主机系统的权限。
+
+> **多个范围**<br/>通过为`/etc/subuid`或`/etc/subgid`文件中的同一用户或组添加多个不重叠的映射，可以为给定的用户或组分配多个从属范围。在这种情况下，根据内核对`/proc/self/uid_map`和`/proc/self/gid_map`中**只有五个条目的限制，Docker仅使用前五个映射**。
+
+当将Docker配置为使用`userns-remap`功能时，可以选择指定现有的用户或组，也可以指定`default`。如果指定`default`，则会为此创建并使用用户和组`dockremap`。
+
+> **警告**：某些发行版（如RHEL和CentOS 7.3）不会自动将新组添加到`/etc/subuid`和`/etc/subgid`文件。在这种情况下，负责编辑这些文件并分配不重叠的范围。[先决条件中](https://docs.docker.com/engine/security/userns-remap/#prerequisites)介绍了此步骤。
+
+范围不重叠非常重要，这样一个进程无法在不同的名称空间中访问。在大多数Linux发行版中，当添加或删除用户时，系统实用程序会为你管理这些范围。
+
+这种重新映射对容器是透明的，但是在容器需要访问Docker主机上的资源的情况下引入了一些配置复杂性，例如绑定到系统用户无法写入的文件系统区域。从安全角度来看，最好避免这些情况。
+
+### 先决条件
+
+------
+
+1. 即使关联是实现细节，下级UID和GID范围也必须与现有用户关联。用户拥有`/var/lib/docker/`下的名称空间存储目录。如果你不想使用现有的用户，Docker可以为你创建一个并使用它。如果您想使用现有的用户名或用户标识，它必须已经存在。通常，这意味着相关条目需要位于`/etc/passwd`和`/etc/group`中，但如果您使用的是不同的身份验证后端，则此需求可能会有所不同。
+
+   要验证这一点，请使用以下`id`命令：
+
+   ```sh
+   $ id testuser
+   uid=1001(testuser) gid=1001(testuser) groups=1001(testuser)
+   ```
+
+2. 在主机上处理名称空间重映射的方式是使用两个文件`/etc/subuid`和`/etc/subgid`。这些文件通常在添加或删除用户或组时自动管理，但在少数发行版（如RHEL和CentOS 7.3）中，可能需要手动管理这些文件。
+
+   每个文件包含三个字段：用户的用户名或ID，后跟一个开始UID或GID（在名称空间内被视为UID或GID 0）以及用户可用的最大数量的UID或GID。例如，给出以下条目：
+
+   ```sh
+   testuser:231072:65536
+   ```
+
+   这意味着通过296608（231072 + 65536）启动的用户名空间进程`testuser`由主机UID `231072`（它看起来像`0`名称空间内的UID ）拥有。这些范围不应该重叠，以确保名称空间的进程不能访问彼此的名称空间。
+
+   添加用户后，请检查`/etc/subuid`并`/etc/subgid`查看用户是否有每个条目。如果不是，你需要添加它，小心避免重叠。
+
+   如果想使用`dockremap`由Docker自动创建的用户，请**在** 配置并重新启动Docker **后**检查`dockremap`这些文件中的条目。
+
+3. 如果在非特权用户需要写入的Docker主机上有任何位置，请相应地调整这些位置的权限。如果你想使用`dockremap`由Docker自动创建的用户，这也是正确的，但是在配置和重新启动Docker之后才能修改权限。
+
+4. 使`userns-remap`有效现有的图像和容器的层，以及`/var/lib/docker/`内的其它docker对象。这是因为Docker需要调整这些资源的所有权并实际将它们存储在其中的子目录`/var/lib/docker/`中。最好在新的Docker安装中启用此功能，而不是现有的。
+
+   沿着相同的路线，如果禁用`userns-remap`，则无法访问启用时创建的任何资源。
+
+5. 检查用户名空间的[限制](https://docs.docker.com/engine/security/userns-remap/#user-namespace-known-restrictions)，以确保您的用例可行。
+
+## 在守护程序上启用用户名重新映射
+
+你可以开始`dockerd`用`--userns-remap`标志或遵循此过程配置使用守护进程`daemon.json`的配置文件。`daemon.json`建议使用该方法。如果您使用该标志，请使用以下命令作为模型：
+
+```sh
+$ dockerd --userns-remap="testuser:testuser"
+```
+
+1. 编辑`/etc/docker/daemon.json`。假设文件先前为空，则以下条目将使用名为`testuser`的用户和组启用`userns-remap`。可以通过ID或名称来寻址用户和组。如果与用户名或ID不同，只需指定组名或ID。如果同时提供用户和组名称或ID，请使用冒号`:`字符分隔它们。假设`testuser`的UID和GID是`1001`，以下格式都适用于该值：
+
+   - `testuser`
+   - `testuser:testuser`
+   - `1001`
+   - `1001:1001`
+   - `testuser:1001`
+   - `1001:testuser`
+
+   ```sh
+   {
+     "userns-remap": "testuser"
+   }
+   ```
+
+   > **注意**：要使用`dockremap`用户并让Docker为您创建它，请将该值设置为`default`而不是`testuser`。
+
+   保存该文件并重新启动Docker。
+
+2. 如果使用的是`dockremap`用户，请验证Docker是否使用`id`命令创建它。
+
+   ```sh
+   $ id dockremap
+   uid=112(dockremap) gid=116(dockremap) groups=116(dockremap)
+   ```
+
+   验证条目是否已添加到`/etc/subuid`和`/etc/subgid`：
+
+   ```sh
+   $ grep dockremap /etc/subuid
+   dockremap:231072:65536
+   
+   $ grep dockremap /etc/subgid
+   dockremap:231072:65536
+   ```
+
+   如果这些条目不存在，请以`root`用户身份编辑这些文件，并分配一个起始UID和GID，该起始UID和GID是最高分配的一个加上偏移量（在本例中为`65536`）。小心不要在范围内有任何重叠。
+
+3. 使用`docker image ls` 命令验证以前的图像不可用。输出应该是空的。
+
+4. 从`hello-world`图像启动一个容器。
+
+   ```sh
+   $ docker run hello-world
+   ```
+
+5. `/var/lib/docker/`使用该UID和GID拥有的名称空间用户的UID和GID，验证名称空间目录中是否存在名称空间目录，而不是组或全局可读的。一些子目录仍然拥有`root`并具有不同的权限。
+
+   ```sh
+   $ sudo ls -ld /var/lib/docker/231072.231072/
+   drwx------ 11 231072 231072 11 Jun 21 21:19 /var/lib/docker/231072.231072/
+   
+   $ sudo ls -l /var/lib/docker/231072.231072/
+   total 14
+   drwx------ 5 231072 231072 5 Jun 21 21:19 aufs
+   drwx------ 3 231072 231072 3 Jun 21 21:21 containers
+   drwx------ 3 root   root   3 Jun 21 21:19 image
+   drwxr-x--- 3 root   root   3 Jun 21 21:19 network
+   drwx------ 4 root   root   4 Jun 21 21:19 plugins
+   drwx------ 2 root   root   2 Jun 21 21:19 swarm
+   drwx------ 2 231072 231072 2 Jun 21 21:21 tmp
+   drwx------ 2 root   root   2 Jun 21 21:19 trust
+   drwx------ 2 231072 231072 3 Jun 21 21:19 volumes
+   ```
+
+   您的目录列表可能有一些差异，特别是如果您使用不同的`aufs`容器存储驱动程序。
+
+   使用重映射用户所拥有的目录而不是直接位于`/var/lib/docker/`下的相同目录，并且可以删除未使用的版本（例如此处的示例中的`/var/lib/docker/tmp/`）。在启用userns-remap时，Docker不使用它们。
+
+### 禁用容器的命名空间重新映射
+
+------
+
+如果在**守护进程上启用用户命名空间**，则**所有容器**都将默认启用用户命名空间。在某些情况下，例如特权容器，可能需要**禁用特定容器**的用户命名空间。有关这些限制的其中一部分，请参阅 [用户名称空间已知限制](https://docs.docker.com/engine/security/userns-remap/#user-namespace-known-restrictions)
+
+要**禁用用户名称空间**为特定容器，添加`--userns=host` 标志到`docker container create`，`docker container run`或`docker container exec`命令。
+
+### 用户命名空间已知限制
+
+------
+
+以下标准Docker功能与启用用户命名空间的Docker守护程序不兼容：
+
+- 与主机共享PID或NET命名空间（`--pid = host`或`--network = host`）。
+- 外部（卷或存储）驱动程序不知道或不能使用守护程序用户映射。
+- 在`docker run`上使用`--privileged mode`标志，而不指定`--userns = host`。
+
+用户名称空间是一项高级功能，需要与其他功能协调。例如，如果卷从主机挂载，则必须预先安排文件所有权，以便对卷内容进行读取或写入访问。
+
+尽管用户名容器过程中的root用户具有容器中**超级用户的许多期望特权**，但Linux内核根据内部知识限制这是一个用户名空间过程。一个显着的限制是无法使用`mknod`命令。由`root`用户运行时，容器内的设备创建权限被拒绝。
+
