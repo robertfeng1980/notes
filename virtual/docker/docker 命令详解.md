@@ -1,8 +1,5 @@
 # docker 命令详解
 
-Table of Contents
-=================
-
 * [docker 命令详解](#docker-%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3)
 * [docker 命令简介](#docker-%E5%91%BD%E4%BB%A4%E7%AE%80%E4%BB%8B)
   * [命令参数选项](#%E5%91%BD%E4%BB%A4%E5%8F%82%E6%95%B0%E9%80%89%E9%A1%B9)
@@ -672,6 +669,8 @@ Docker管理配置目录中的大部分文件，不应修改它们。但是，�
 
 ### 自定义快捷键
 
+---
+
 一旦连接到一个容器，用户要脱离它并使用`CTRL-p-q`键序列让它继续运行。此分离键序列可使用`detachKeys`属性进行自定义。为属性指定一个`<sequence>`值。`<sequence>`的格式是以逗号分隔的一个字母`[a-Z]`或者`ctrl-`与以下任意一个组合的列表：
 
 - `a-z` （一个小写字母字符）
@@ -683,7 +682,9 @@ Docker管理配置目录中的大部分文件，不应修改它们。但是，�
 
 你的自定义适用于你的Docker客户端启动的所有容器。用户可以基于每个容器覆盖自定义或默认的按键顺序。要做到这一点，用户指定`--detach-keys`旗`docker attach`，`docker exec`，`docker run`或`docker start`命令。
 
-###`config.json` 文件示例
+### `config.json` 文件示例
+
+---
 
 ```json
 {
@@ -843,6 +844,8 @@ bash-4.2#
 
 #### 初始化卷
 
+---
+
 从v1.4.0开始，容器卷在`docker create`阶段被**初始化**（`docker run`也是）。例如，这允许创建容器数据卷，然后在另一个容器中使用它： 
 
 ```sh
@@ -886,6 +889,7 @@ Error response from daemon: --storage-opt is not supported for aufs
 这个（大小）将允许在创建时将容器`rootfs`大小设置为`120G`。此选项仅适用于`devicemapper`，`btrfs`，`overlay2`，`windowsfilter`和`zfs`驱动程序。对于`devicemapper`，`btrfs`，`windowsfilter`和`zfs`驱动程序，用户无法通过的尺寸小于默认尺寸`BaseFS`。对于`overlay2`存储驱动程序，只有当后备`fs`为`xfs`并使用`pquota`安装选项安装时，`size`选项才可用。在这些条件下，用户可以传递小于后备`fs`大小的任何大小。
 
 #### 处理动态创建的设备`（--device-cgroup-rule）`
+---
 
 在创建时分配可用于容器的设备。分配的设备都将被添加到`cgroup.allow`文件，并在运行后创建到容器中。当需要将新设备添加到正在运行的容器时，这会造成问题。
 
@@ -935,7 +939,6 @@ $ docker create --device-cgroup-rule='c 42:* rmw' -name my-container my-image
 ---
 
 #### 更新容器的`cpu-shares`
-
 要将容器的`cpu-shares`限制为`512`，请首先标识容器名称或标识。可以使用`docker ps`查找这些值。也可以使用从`docker run`命令返回的ID 。然后，执行以下操作：
 
 ```sh
@@ -943,7 +946,7 @@ $ docker update --cpu-shares 512 abebf7571666
 ```
 
 #### 使用`cpu-shares`和内存更新容器
-
+---
 要更新多个容器的多个资源配置：
 
 ```sh
@@ -951,7 +954,7 @@ $ docker update --cpu-shares 512 -m 300M abebf7571666 hopeful_morse
 ```
 
 #### 更新容器的内核内存限制
-
+---
 可以使用`--kernel-memory` 选项更新容器的**内核内存限制**。在4.6以前的内核版本上，只有容器启动时才能在正在运行的容器上更新此选项`--kernel-memory`。如果容器启动时**不需要** `--kernel-memory`在更新内核内存之前停止容器。
 
 例如，如果使用此命令启动了一个容器：
@@ -977,7 +980,7 @@ $ docker run -dit --name test2 --memory 300M ubuntu bash
 比（include）4.6更新的内核版本没有此限制，可以使用`--kernel-memory`与其他选项相同的方式。
 
 #### 更新容器的重新启动策略
-
+---
 可以在正在运行的容器上更改容器的重新启动策略。新的重新启动策略`docker update`在容器上运行后立即生效。
 
 要更新一个或多个容器的重新启动策略：
@@ -1033,7 +1036,7 @@ test/my_busybox     v1                  059eb58c8c55        Less than a second a
 ```
 
 #### 提交新配置的容器
-
+---
 ```sh
 $ docker ps
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
@@ -1058,7 +1061,7 @@ $ docker inspect -f "{{ .Config.Env }}" e4f3423f0309
 ```
 
 #### 提交修改后的`CMD`和`EXPOSE`容器
-
+---
 ```sh
 $ docker ps
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
@@ -1081,7 +1084,7 @@ CONTAINER ID        IMAGE                COMMAND                  CREATED       
 
 复制容器和本地文件系统之间的文件/文件夹
 
- ### 命令参数选项
+### 命令参数选项
 
 ---
 
@@ -1191,7 +1194,7 @@ $ docker rm /redis
 ```
 
 #### 删除在默认网桥上使用`--link`指定的链接
-
+---
 这将删除`/webapp`和默认桥接网络上的`/redis`容器之间的**基础链接**，从而移除两个容器之间的**所有网络通信**。当`--link`与用户指定的网络一起使用时，这不适用。
 
 ```sh
@@ -1200,7 +1203,7 @@ $ docker rm --link /webapp/redis
 ```
 
 #### 强制删除正在运行的容器
-
+---
 该命令将强制删除正在运行的容器。
 
 ```sh
@@ -1211,7 +1214,7 @@ redis
 链接下引用的容器内的主进程`redis`将收到 `SIGKILL`，然后该容器将被删除。
 
 #### 删除所有停止的容器
-
+---
 ```sh
 $ docker rm $(docker ps -a -q)
 ```
@@ -1219,7 +1222,7 @@ $ docker rm $(docker ps -a -q)
 该命令将删除所有停止的容器。命令 `docker ps -a -q`将返回**所有现有的容器ID**并将它们传递给`rm`将删除它们的命令。任何正在运行的容器都不会被删除。
 
 #### 删除出容器及数据卷
-
+---
 ```sh
 $ docker rm -v redis
 redis
@@ -1228,7 +1231,7 @@ redis
 该命令将删除容器及与其**相关的任何卷**。请注意，如果卷是使用名称指定的，则不会被删除。
 
 #### 删除容器并选择性的删除卷
-
+---
 ```sh
 $ docker create -v awesome:/foo -v /bar --name hello redis
 hello
@@ -1278,7 +1281,7 @@ $ docker rename my_container my_new_container
 
 这些`a`，`ctrl-a`，`X`，或`ctrl-\\`值都是有效密钥序列的示例。要为所有容器配置不同的配置默认密钥序列，请参阅配置文件部分。
 
-###命令参数选项
+### 命令参数选项
 
 ---
 
@@ -1318,7 +1321,7 @@ $ docker ps -a | grep topdemo
 ```
 
 #### 获取容器命令的退出代码
-
+---
 可以看到`bash` 进程返回的退出代码也被`docker attach`命令返回给其调用者：
 
 ```sh
@@ -1455,7 +1458,7 @@ $ docker exec -it -w /root ubuntu_bash pwd
 ```
 
 #### 在暂停的容器上运行
-
+---
 如果容器暂停，那么该`docker exec`命令将**失败并出现错误**：
 
 ```sh
@@ -1513,7 +1516,7 @@ $ docker import http://example.com/exampleimage.tgz
 ```
 
 #### 从本地文件导入
-
+---
 - 通过管道和`STDIN`导入到docker。
 
   ```sh
@@ -1534,13 +1537,13 @@ $ docker import http://example.com/exampleimage.tgz
   ```
 
 #### 从本地目录导入
-
+---
 ```sh
 $ sudo tar -c . | docker import - exampleimagedir
 ```
 
 #### 从具有新配置的本地目录导入
-
+---
 ```sh
 $ sudo tar -c . | docker import --change "ENV DEBUG true" - exampleimagedir
 ```
@@ -1566,7 +1569,7 @@ $ docker kill my_container
 ```
 
 #### 将自定义信号发送到容器
-
+---
 以下示例向名为`my_container`的容器发送一个`SIGHUP`信号 ：
 
 ```sh
@@ -1589,7 +1592,7 @@ $ docker kill --signal=1 my_container
 
 > **注意**：该命令仅适用于使用`json-file`或`journald`日志记录驱动程序启动的容器。
 
- ### 命令参数选项
+### 命令参数选项
 
 ---
 
@@ -1617,7 +1620,7 @@ $ docker logs my-web --follow
 ```
 
 #### 指定行数
-
+---
 传递一个负数或一个非整数`--tail`是无效的，`all`在这种情况下值被设置为。
 
 ```sh
@@ -1625,7 +1628,7 @@ $ docker logs my-web --tail 2
 ```
 
 #### 时间戳
-
+---
 `docker logs --timestamps`命令将增加一个[RFC3339Nano时间戳](https://golang.org/pkg/time/#pkg-constants) ，例如`2014-09-16T06:17:46.000000000Z`，每个日志条目。为确保时间戳对齐，必要时，时间戳的纳秒部分将填充零。
 
 ```sh
@@ -1633,7 +1636,7 @@ $ docker logs my-web --tail 2 --timestamps
 ```
 
 #### 详细信息
-
+---
 `docker logs --details`命令将添加额外的属性，例如`--log-opt`创建容器时提供的环境变量和标签。
 
 ```sh
@@ -1641,7 +1644,7 @@ $ docker logs --details my-web
 ```
 
 #### 日期过滤
-
+---
 `--since`选项仅显示给定日期后生成的服务日志。如果这个应用运行时间过长，比如3天，那么指定日志的开始时间是非常有必要的。可以使用--since，让容器日志只输出指定日期之后的时间。这个时间可以是RFC 3339时间，也可以是UNIX timestamp，你可以结合使用 `--since`选择具有的一种或两种`--follow`或`--tail`选项。例如： 
 
 ```sh
@@ -1767,7 +1770,7 @@ d7886598dbe2        crosbymichael/redis:latest   /redis-server --dir    33 minut
 ```
 
 #### 显示所有容器
-
+---
 `docker ps`命令仅默认显示正在运行的容器。要查看所有容器，请使用`-a`（或`--all`）选项：
 
 ```sh
@@ -1777,7 +1780,7 @@ $ docker ps -a
 `docker ps`如果可能，将暴露的端口分组到单个范围。例如，`100, 101, 102`显示TCP端口的容器显示`100-102/tcp`在`PORTS`列中。
 
 #### 显示最后和最新的容器
-
+---
 ```sh
 $ docker ps -l
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
@@ -1795,7 +1798,7 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 
 
 #### 过滤
-
+---
 过滤选项（`-f`或`--filter`）格式是一`key=value`对。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）
 
 目前支持的过滤器是：
@@ -1806,7 +1809,7 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 | `name`              | 容器的名称                                                   |
 | `label`             | 表示键或键值对的任意字符串。表示为`<key>`或`<key>=<value>`   |
 | `exited`            | 表示容器退出代码的整数。只用于`--all`。                      |
-| `status`            | 一`created`，`restarting`，`running`，`removing`，`paused`，`exited`，或者`dead` |
+| `status`            | `created`，`restarting`，`running`，`removing`，`paused`，`exited`，或者`dead` |
 | `ancestor`          | 筛选共享给定镜像的容器作为祖先。表现为`<image-name>[:<tag>]`， `<image id>`或`<image@digest>` |
 | `before` / `since`  | 过滤在给定容器ID或名称之前或之后创建的容器                   |
 | `volume`            | 过滤运行已安装给定卷或绑定安装的容器。                       |
@@ -1819,7 +1822,7 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 
 
 **标签过滤**
-
+---
 ```sh
 # color标签的容器
 $ docker ps --filter "label=color"
@@ -1841,7 +1844,7 @@ $ docker ps -a --filter 'exited=137'
 ```
 
 **状态过滤**
-
+---
 `status`过滤器的状态相匹配的容器。<br/>可以使用筛选`created`，`restarting`，`running`，`removing`，`paused`，`exited`和`dead`。<br/>例如，要过滤`running`容器：
 
 ```sh
@@ -1850,7 +1853,7 @@ $ docker ps --filter status=paused
 ```
 
 **`ancestor`**
-
+---
 `ancestor`过滤器匹配基于它的形象或它的**后代**在容器上。该过滤器支持以下镜像表示形式：
 
 - `image`
@@ -1871,7 +1874,7 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 ```
 
 **创建时间**
-
+---
 ```sh
 # before过滤器只显示与给定id或名称容器之前创建的容器
 $ docker ps -f before=9c3527ed70ce
@@ -1880,7 +1883,7 @@ $ docker ps -f since=6e63f6ff38b0
 ```
 
 **卷**
-
+---
 `volume`筛选器仅显示装载特定卷或将卷装入特定路径的容器：
 
 ```sh
@@ -1894,7 +1897,7 @@ CONTAINER ID        MOUNTS
 ```
 
 **网络**
-
+---
 `network`过滤器仅显示了连接到网络的具有给定名称或ID的容器。
 
 以下过滤器匹配连接到名称包含`net1`的网络的所有容器。
@@ -1916,7 +1919,7 @@ $ docker ps --filter network=8c0b4110ae930dbe26b258de9bc34a03f98056ed6f27f991d32
 ```
 
 **发布/公开**
-
+---
 `publish`和`expose`过滤器仅显示**已发布或暴露**端口与**给定的端口**号，端口范围，或协议的容器。默认协议是`tcp`没有指定的时候。
 
 以下过滤器匹配发布端口为80的所有容器：
@@ -1944,7 +1947,7 @@ $ docker ps --filter publish=80/udp
 ```
 
 #### 格式化
-
+---
 格式化选项（`--format`）使用Go模板漂亮地打印容器输出。下面列出了Go模板的有效占位符：
 
 | 占位符        | 描述                                                         |
@@ -1990,7 +1993,7 @@ a87ecb4f327c        com.docker.swarm.node=ubuntu,com.docker.swarm.storage=ssd
 
 > **注意**：在Linux上，Docker CLI通过从**总内存使用量**中**减去**页面**缓存使用情况**来报告内存使用情况。API不执行此类计算，而是提供内存使用**总量和页面缓存中的数量**，以便客户端可以根据需要使用这些数据。
 
- ### 命令参数选项
+### 命令参数选项
 
 ---
 
@@ -2052,7 +2055,7 @@ big_heisenberg           0.00%               0B / 0B
 ```
 
 #### 格式化
-
+---
 格式化选项（`--format`）可以使用Go模板打印容器输出。下面列出了Go模板的有效占位符：
 
 | 占位符       | 描述                          |
@@ -2166,7 +2169,7 @@ PID                 USER                COMMAND
 `URL`参数可以引用三种资源：Git仓库，预打包的tarball上下文和纯文本文件。
 
 #### Git 仓库
-
+---
 当`URL`参数指向Git 仓库的位置时，仓库将充当构建上下文。系统递归地获取仓库及其子模块。提交历史记录不会保留。首先将仓库**拉入本地主机的临时目录**中。在成功之后，目录将**作为上下文**发送到**Docker守护进程**。本地副本能够使用本地用户凭证、VPN等访问私人仓库。
 
 > **注意：** 如果`URL`参数包含一个片段，则系统将使用`git clone --recursive`命令递归地克隆仓库及其子模块。
@@ -2195,7 +2198,7 @@ $ docker build https://github.com/docker/rootfs.git#container:docker
 
 
 #### Tarball上下文
-
+---
 如果将URL传递到远程tarball，则URL本身会发送到守护进程：
 
 ```sh
@@ -2205,7 +2208,7 @@ $ docker build http://server/context.tar.gz
 下载操作将在运行Docker**守护进程的主机**上执行，它**不一定是发出构建命令的主机**。Docker守护进程将获取`context.tar.gz`并使用它作为构建上下文。Tarball上下文必须是符合标准`tar`UNIX格式的tar档案， 并且可以使用`'xz'，'bzip2'，'gzip'或'identity'（无压缩）`格式中的任何一种进行压缩。
 
 #### 文本文件
-
+---
 可以在URL中传递一个`Dockerfile`，或者通过`STDIN`传输文件，而不是指定上下文。从`STDIN`管道`Dockerfile`：
 
 ```sh
@@ -2268,7 +2271,7 @@ Removing intermediate container 02071fceb21b
 如果希望在构建完成后**保留中间容器**，则必须使用`--rm = false`。这不会影响构建缓存。
 
 #### 用 URL 构建
-
+---
 ```sh
 $ docker build github.com/creack/docker-firefox
 ```
@@ -2294,7 +2297,7 @@ Successfully built 377c409b35e4
 这会将**URL发送`http://server/ctx.tar.gz`到Docker守护进程**，Docker守护进程会**下载并提取**引用的tarball。`-f ctx/ Dockerfile`参数在`ctx.tar.gz`中指定用于构建镜像的`Dockerfile`中的路径。该`Dockerfile`中引用本地路径的任何`ADD`命令都必须与`ctx.tar.gz`内的根目录相关。在上面的示例中，tarball包含一个目录`ctx/`，因此`ADD ctx/container.cfg /`操作按预期工作。
 
 #### 用` - `构建
-
+---
 ```sh
 $ docker build - < Dockerfile
 ```
@@ -2308,7 +2311,7 @@ $ docker build - < context.tar.gz
 这将为从`STDIN`读取的**压缩上下文**构建一个镜像。支持的格式是：`bzip2，gzip和xz`。
 
 #### 使用`.dockerignore`文件
-
+---
 ```sh
 $ docker build .
 
@@ -2337,7 +2340,7 @@ Successfully built 99cc1ad10469
 上面显示使用`.dockerignore`文件从上下文中**排除`.git`目录**。其效果可以在**上传的上下文的改变大小**容量空间看到。
 
 #### 镜像标签 `(-t)`
-
+---
 ```sh
 $ docker build -t vieux/apache:2.0 .
 ```
@@ -2351,7 +2354,7 @@ $ docker build -t whenry/fedora-jboss:latest -t whenry/fedora-jboss:v2.1 .
 ```
 
 #### 指定Dockerfile `(-f)`
-
+---
 ```sh
 $ docker build -f Dockerfile.debug .
 ```
@@ -2386,11 +2389,11 @@ $ docker build -f ../../../../dockerfiles/debug /home/me/myapp
 当`docker build`使用`--cgroup-parent`选项运行时，构建中使用的容器将与[相应的`docker run` 选项](https://docs.docker.com/engine/reference/run/#specifying-custom-cgroups)一起运行。
 
 #### 在容器中设置ulimits `（--ulimit）`
-
+---
 在Docker构建中使用`--ulimit`选项将会使用`--ulimit`选项值来启动每个构建步骤的容器。
 
 #### 设置生成时间变量 `（--build-arg）`
-
+---
 可以在`Dockerfile`中使用`ENV`指令来定义**变量值**。这些值**持久在构建的镜像**中。但是，往往持久不是我们想要的。用户想要根据他们在哪个主机上构建镜像来**指定不同的变量**。
 
 下面的例子是用于`pull`中间文件的`http_proxy`或源版本。`ARG`指令允许`Dockerfile`作者定义用户可以在构建时使用`--build-arg`选项设置的值：
@@ -2406,11 +2409,11 @@ $ docker build --build-arg HTTP_PROXY=http://10.20.30.2:1234 .
 有关使用`ARG`和`ENV`指令的详细信息，请参阅 [Dockerfile参考](https://docs.docker.com/engine/reference/builder/)。
 
 #### 可选的安全选项`（--security-opt）`
-
+---
 该选项仅在Windows上运行的守护程序上受支持，并且只支持`credentialspec`选项。在`credentialspec`必须在格式`file://spec.txt`或`registry://keyname`。
 
 #### 指定容器的隔离 `（ - isolation）`
-
+---
 在Windows上运行Docker容器的情况下，此选项很有用。`--isolation=<value>`选项设置容器的隔离技术。在Linux上，唯一支持的是`default`使用**Linux命名空间**的选项。在Microsoft Windows上，可以指定这些值：
 
 | 值        | 描述                                                         |
@@ -2422,7 +2425,7 @@ $ docker build --build-arg HTTP_PROXY=http://10.20.30.2:1234 .
 <br/>指定不带值的`--isolation`选项与设置`--isolation =default`相同。
 
 #### 将键值添加到容器host文件`（--add-host）`
-
+---
 可以使用一个或多个`--add-host`选项将其他主机添加到容器的`/etc/hosts`文件中。本示例为名为`docker`的主机添加一个静态地址：
 
 ```sh
@@ -2430,7 +2433,7 @@ $ docker build --add-host=docker:10.180.0.1 .
 ```
 
 #### 指定目标构建阶段`（--target）`
-
+---
 在构建具有**多个构建阶段的Dockerfile时**，可以使用`--target`通过**名称**指定**中间构建阶段**作为结果镜像的最后阶段。目标阶段之后的命令将被**跳过**。
 
 ```sh
@@ -2443,7 +2446,7 @@ $ docker build -t mybuildimage --target build-env .
 ```
 
 #### 挤压镜像的图层 `(--squash) (experimental)`
-
+---
 **概述**
 
 ---
@@ -2558,7 +2561,7 @@ IMAGE               CREATED             CREATED BY                              
 可以使用名称和标签将镜像分组在一起，然后将其上传到[*通过仓库共享镜像*](https://docs.docker.com/engine/tutorials/dockerrepos/#/contributing-to-docker-hub)。
 
 ### 标记由ID引用的镜像
-
+---
 使用ID`0e5574283393`将本地镜像标记到`版本1.0`的`fedora`仓库中：
 
 ```sh
@@ -2566,7 +2569,7 @@ $ docker tag 0e5574283393 fedora/httpd:version1.0
 ```
 
 ### 标记名称引用的镜像
-
+---
 要将名为`httpd`的本地镜像标记为`版本1.0`的`fedora`仓库：
 
 ```sh
@@ -2576,7 +2579,7 @@ $ docker tag httpd fedora/httpd:version1.0
 请注意，未指定标记名称，因此会为现有本地版本创建别名`httpd:latest`。
 
 ### 标记名称和标签引用的镜像
-
+---
 使用名称`httpd`标记本地镜像并用`version1.0.test`将标签`test`标记到`fedora`仓库中：
 
 ```sh
@@ -2584,7 +2587,7 @@ $ docker tag httpd:test fedora/httpd:version1.0.test
 ```
 
 ### 为私人仓库标记镜像
-
+---
 要将镜像推送到私有注册表而不是中央Docker注册表，你必须使用注册表主机名和端口（如果需要）对其进行标记。
 
 ```sh
@@ -2614,15 +2617,15 @@ Docker镜像具**有中间层**，`docker build`通过允许**缓存**每个步�
 ---
 
 #### 列出镜像
-
+---
 ##### 列出最近创建的镜像
-
+---
 ```sh
 $ docker images
 ```
 
 ##### 按名称和标签列出镜像
-
+---
 `docker images`命令采用可选`[REPOSITORY[:TAG]]`参数，将列表限制为与参数匹配的镜像。如果指定 `REPOSITORY`但不是`TAG`，则`docker images`命令会列出给定仓库中的所有镜像。
 
 例如，要列出`python`仓库中的所有镜像，请运行以下命令：
@@ -2652,7 +2655,7 @@ REPOSITORY          TAG                 IMAGE ID            CREATED             
 ```
 
 ##### 列出镜像全长ID
-
+---
 ```
 $ docker images --no-trunc
 REPOSITORY                    TAG                 IMAGE ID                                                                  CREATED             SIZE
@@ -2661,7 +2664,7 @@ committest                    latest              sha256:b6fa739cedf5ea12a620a43
 ```
 
 ##### 列出镜像摘要
-
+---
 使用`v2`或更高版本格式的镜像具有称为**摘要的内容可寻址标识符**。只要用于生成镜像的输入不变，摘要值就可以预测。要列出镜像摘要值，请使用`--digests`选项：
 
 ```sh
@@ -2673,7 +2676,7 @@ localhost:5000/test/busybox        <none>              sha256:cbbf2f9a99b47fc460
 `推或拉`到`2.0`注册表时，`push`或`pull`命令输出包含镜像摘要。你可以使用摘要值进行`pull`。还可以通过`create`，`run`和`rmi`命令中的摘要，以及`Dockerfile`中的`FROM`镜像引用。
 
 #### 过滤
-
+---
 过滤选项（`-f`或`--filter`）格式为`key = value`。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）
 
 目前支持的过滤器是：
@@ -2685,7 +2688,7 @@ localhost:5000/test/busybox        <none>              sha256:cbbf2f9a99b47fc460
 - reference （镜像参考的图案） - 过滤引用与指定模式匹配的镜像
 
 ##### 显示未加标签的镜像
-
+---
 ```sh
 $ docker images --filter "dangling=true"
 
@@ -2716,7 +2719,7 @@ dea752e4e117
 > **注意**：如果存在任何使用这些未标记镜像的容器，Docker会警告你。
 
 ##### 显示给定的标签镜像
-
+---
 过滤器匹配`label`基础上的存在的镜像单独`label`或`label`和值。
 
 以下过滤器将镜像与`com.example.version`标签进行匹配，而不管其值如何。
@@ -2744,7 +2747,7 @@ REPOSITORY          TAG                 IMAGE ID            CREATED             
 ```
 
 ##### 按时间过滤镜像
-
+---
 `before`过滤器仅显示在具有给定ID或引用的镜像**之前创建**的镜像。例如，拥有这些镜像：
 
 ```sh
@@ -2774,7 +2777,7 @@ image2              latest              dea752e4e117        9 minutes ago       
 ```
 
 ##### 通过引用过滤镜像
-
+---
 `reference`过滤器仅显示引用与指定模式匹配的镜像。
 
 ```sh
@@ -2798,7 +2801,7 @@ busybox             glibc               21c16b6787c6        5 weeks ago         
 ```
 
 #### 格式化输出
-
+---
 格式化选项（`--format`）将使用Go模板打印容器输出。
 
 下面列出了Go模板的有效占位符：
@@ -2895,7 +2898,7 @@ c69cab00d6ef        5 months ago        /bin/sh -c #(nop) MAINTAINER Lokesh Mand
 ```
 
 #### 格式化输出
-
+---
 格式化选项（`--format`）将使用Go模板来显示历史输出。
 
 下面列出了Go模板的有效占位符：
@@ -3011,7 +3014,7 @@ Docker使用内容可寻址的镜像存储，镜像ID是一个涵盖镜像配置
 有关镜像，图层和内容寻址存储的更多信息，请参阅[了解镜像，容器和存储驱动程序](https://docs.docker.com/engine/userguide/storagedriver/imagesandcontainers/)。
 
 #### 通过`digest`（不可变标识符）提取镜像
-
+---
 到目前为止，已经通过名称（和“标签”）来拉取镜像。使用名称和标签是处理镜像的便捷方式。使用标签时，可以`docker pull`再次使用镜像，以确保拥有该镜像的最新版本。例如，`docker pull ubuntu:14.04`拉取最新版本的Ubuntu 14.04镜像。
 
 在某些情况下，你不希望将镜像更新为新版本，但更喜欢使用**固定版本**的镜像。Docker使你能够通过**摘要**来提取镜像 。当通过摘要拉取的镜像，你指定**确切**的镜像的版本。这样做，可让将镜像“钉”到该版本，并确保你使用的镜像**始终保持不变**。
@@ -3062,7 +3065,7 @@ MAINTAINER some maintainer <maintainer@example.com>
 > **注意**：使用此功能可以及时将镜像“钉”到**特定版本**。因此，Docker不会提取镜像的更新版本，其中可能包含安全更新。如果你想拉一个更新的镜像，你需要相应地更改摘要。
 
 #### 从不同的注册表中提取
-
+---
 默认情况下，`docker pull`从[Docker Hub中](https://hub.docker.com/)提取镜像。也可以手动指定要从中注册的注册表路径。例如，如果已设置本地注册表，则可以指定路径以从中取消注册。注册表路径类似于URL，但不包含协议说明符（`https://`）。
 
 以下命令从侦听端口5000（`myregistry.local:5000`）的本地注册表中获取`testing/test-image`镜像：
@@ -3076,7 +3079,7 @@ $ docker pull myregistry.local:5000/testing/test-image
 Docker使用`https://`协议与注册表进行通信，除非允许通过不安全的连接访问注册表。有关更多信息，请参阅 [不安全的注册表](https://docs.docker.com/engine/reference/commandline/dockerd/#insecure-registries)部分。
 
 #### 使用多个镜像拉取一个仓库
-
+---
 默认情况下，`docker pull`从注册表中提取一张镜像。仓库可以包含多个镜像。要从仓库中**提取所有镜像**，请在使用`docker pull`时提供`-a（或--all-tags）`选项。
 
 命令从仓库中提取所有`fedora`镜像：
@@ -3107,7 +3110,7 @@ fedora       latest      105182bb5e8b    5 days ago   372.7 MB
 ```
 
 #### 取消拉取
-
+---
 例如通过`docker pull`在终端中运行时按下`CTRL-c`来终止拉取进程操作。
 
 ```sh
@@ -3267,7 +3270,7 @@ $ docker save -o fedora-latest.tar fedora:latest
 ```
 
 #### 选择特定的标签
-
+---
 甚至可以挑选镜像仓库的特定标签，将多个标签镜像一起保存备份。
 
 ```sh
@@ -3343,7 +3346,7 @@ $ docker search busybox
 ```
 
 #### 显示非截断描述`（--no-trunc）`
-
+---
 此示例显示名称中包含`busybox`的镜像，至少3星，并且说明在输出中不会被截断：
 
 ```sh
@@ -3353,7 +3356,7 @@ busybox              Busybox base image.
 ```
 
 #### 限制搜索结果`（--limit）`
-
+---
 选项`--limit`是搜索结果返回的最大数量。该值可以在1到100之间的范围内。默认值为`--limit`25。
 
 ```sh
@@ -3361,7 +3364,7 @@ $ docker search helloworld --limit 5
 ```
 
 #### 过滤
-
+---
 过滤选项（`-f`或`--filter`）格式是一`key=value`对。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）
 
 目前支持的过滤器是：
@@ -3380,7 +3383,7 @@ $ docker search --filter "is-official=true" --filter "stars=3" busybox
 ```
 
 #### 格式化输出
-
+---
 格式化选项（`--format`）使用Go模板漂亮地打印搜索输出。Go模板的有效占位符是：
 
 | 占位符         | 描述                         |
@@ -3447,7 +3450,7 @@ $ winpty docker login --username xxx registry.cn-hangzhou.aliyuncs.com
 ```
 
 #### 使用STDIN提供密码
-
+---
 要以`docker login`非交互方式运行该命令，可以设置 `--password-stdin`选项以提供密码`STDIN`。**使用 `STDIN`防止密码结束在shell的历史记录或日志**文件中。
 
 以下示例从文件读取密码，并`docker login`使用`STDIN`以下命令将其传递给该 命令：
@@ -3457,7 +3460,7 @@ $ cat ~/my_password.txt | docker login --username foo --password-stdin
 ```
 
 #### 特权用户需求
-
+---
 `docker login`要求用户使用`sudo`或者是`root`，除非：
 
 1. 连接到**远程守护进程**，如`docker-machine`配置`docker engine`。
@@ -3466,7 +3469,7 @@ $ cat ~/my_password.txt | docker login --username foo --password-stdin
 你可以登录到拥有凭据的任何公共或私人仓库。登录时，命令通过以下步骤`$HOME/.docker/config.json`在Linux或`%USERPROFILE%/.docker/config.json`Windows 上存储凭据 。
 
 #### 凭证商店
-
+---
 Docker引擎可以将用户凭证**保存在外部凭证库**中，例如操作系统的本地钥匙串。使用**外部存储**比在Docker配置文件中存储凭据**更安全**。
 
 要使用凭证存储，需要一个外部帮助程序来与特定的钥匙串或外部存储进行交互。Docker需要帮助程序在客户端的`$PATH`主机中。
@@ -3489,11 +3492,11 @@ Docker引擎可以将用户凭证**保存在外部凭证库**中，例如操作�
 如果当前已登录，请运行`docker logout`以从文件中删除凭据并`docker login`再次运行。
 
 #### 默认行为
-
+---
 默认情况下，Docker会在每个平台上查找本地二进制文件，例如macOS上的`osxkeychain`，Windows上的`wincred`以及Linux上的`pass`。一个特殊情况是在Linux上，如果找不到`pass`二进制文件，Docker会回退到`secretservice`二进制文件。如果这些二进制文件**都不存在**，它将在上述配置文件中**以`base64`编码存储凭证**（即密码）。
 
 #### 凭证帮助程序协议
-
+---
 凭证助手可以是遵循一个**非常简单的协议的任何程序或脚本**。这个协议很受Git的启发，但它在共享的信息上有所不同。助手总是使用命令中的第一个参数来标识该操作。这个参数只有三种可能的值：`store`，`get`，和`erase`。
 
 `store`命令从标准输入中获取JSON负载。该有效载荷携带服务器地址，识别凭证，用户名以及密码或身份令牌。
@@ -3524,11 +3527,11 @@ Docker引擎可以将用户凭证**保存在外部凭证库**中，例如操作�
 `erase`命令可以写入`STDOUT`错误消息，以便在出现问题时Docker引擎将显示该消息。
 
 #### 凭证助手
-
+---
 凭证助手与上面的凭证存储类似，但充当指定程序来处理**特定注册管理机构的**凭证。默认凭证库（`credsStore`或配置文件本身）不会用于有关指定注册表的凭证的操作。
 
 #### 注销
-
+---
 如果你当前已登录，请运行`docker logout`以从默认存储中删除凭据。
 
 凭证助手以类似`credsStore`的方式指定，但允许一次配置多个助手。键指定注册表域，值指定要使用的程序的后缀（即后面的所有内容`docker-credential-`）。例如：
@@ -3571,7 +3574,7 @@ $ docker info
 ```
 
 #### 显示调试输出
-
+---
 以下是在Ubuntu上运行的守护进程的示例输出，使用`overlay2`存储驱动程序和属于双节点群集的节点：
 
 ```sh
@@ -3581,7 +3584,7 @@ $ docker -D info
 全局`-D`选项会导致所有`docker`命令输出调试信息。
 
 #### 格式化输出
-
+---
 也可以指定输出格式：
 
 ```sh
@@ -3590,7 +3593,7 @@ $ docker info --format '{{json .}}'
 ```
 
 #### 关于内核支持的警告
-
+---
 如果你的操作系统未启用某些功能，则在运行`docker info`时可能会看到以下警告之一：
 
 ```sh
@@ -3629,25 +3632,25 @@ $ docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{en
 ```
 
 #### 获取实例的MAC地址
-
+---
 ```sh
 $ docker inspect --format='{{range .NetworkSettings.Networks}}{{.MacAddress}}{{end}}' $INSTANCE_ID
 ```
 
 #### 获取实例的日志路径
-
+---
 ```sh
 $ docker inspect --format='{{.LogPath}}' $INSTANCE_ID
 ```
 
 #### 获取实例的镜像名称
-
+---
 ```sh
 $ docker inspect --format='{{.Config.Image}}' $INSTANCE_ID
 ```
 
 #### 列出所有端口绑定
-
+---
 你可以遍历结果中的数组和地图来生成简单的文本输出：
 
 ```sh
@@ -3655,7 +3658,7 @@ $ docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{$p}} 
 ```
 
 #### 找到一个特定的端口映射
-
+---
 当字段名称以数字开头，但模板语言的`index`函数具有此功能时，`.Field`语法不起作用。该 `.NetworkSettings.Ports`部分包含内部端口映射到外部地址/端口对象列表的映射。要抓取数字公共端口，可以使用`index`来查找特定端口映射，然后在`index`其中包含第一个对象。然后我们要求`HostPort`现场获得公开地址。
 
 ```sh
@@ -3663,7 +3666,7 @@ $ docker inspect --format='{{(index (index .NetworkSettings.Ports "8787/tcp") 0)
 ```
 
 #### 以JSON格式获取子部分
-
+---
 如果你请求一个本身是包含其他字段的结构的字段，则默认情况下会获得内部值的Go样式转储。Docker添加了一个模板函数，`json`它可以用于以JSON格式获取结果。
 
 ```sh
@@ -3792,7 +3795,7 @@ $ docker service create
 
 显示一个或多个配置的详细信息
 
- ### 命令参数选项
+### 命令参数选项
 
 ---
 
@@ -3993,7 +3996,7 @@ Are you sure you want to continue? [y/N] y
 ```
 
 #### 过滤
-
+---
 过滤选项（`--filter`）格式为`key = value`。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）
 
 目前支持的过滤器是：
@@ -4204,7 +4207,7 @@ qqabvnny71wz        my-overlay-inte-net                              overlay    
 ```
 
 #### 查看过滤
-
+---
 使用`filter`过滤查看
 
 ```shell
@@ -4237,7 +4240,7 @@ NETWORK ID          NAME                DRIVER              SCOPE
 ```
 
 #### 查看格式化
-
+---
 格式化输出列表
 
 ```shell
@@ -4266,7 +4269,7 @@ host     host    false   false
 | `.CreatedAt` | 网络创建的时间                                           |
 
 #### 其他
-
+---
 其他命令操作，显示完整`network id`：
 
 ```shell
@@ -4343,7 +4346,7 @@ $ docker network create -d overlay my-multihost-network
 网络名称**必须是唯一**的。Docker守护进程尝试识别命名冲突，但**不能保证**。避免名称冲突是用户的责任。
 
 #### 覆盖网络限制
-
+---
 当你使用默认的基于VIP的端点模式创建网络时，你应该创建带有24个块（默认值）的覆盖网络，这会将你限制为256个IP地址。该建议解决了 [群集模式的限制](https://github.com/moby/moby/issues/30820)。如果你需要超过256个IP地址，请勿增加IP块大小。你可以通过`dnsrr`外部负载均衡器使用端点模式，也可以使用多个较小的覆盖网络。 有关不同端点模式的更多信息，请参阅 [配置服务发现](https://docs.docker.com/engine/swarm/networking/#configure-service-discovery)。
 
 ### 示例
@@ -4377,7 +4380,7 @@ a1fcabf9c7b362ea558b4669bbb71b5c0b65661be8140200f4d36f33e20c1680
 ```
 
 #### 连接容器
-
+---
 当你启动容器时，请使用`--network`选项将其连接到网络。本例将`busybox`容器添加到`mynet`网络中：
 
 ```shell
@@ -4392,7 +4395,7 @@ $ docker run -itd --network=mynet busybox
 你可以使用`docker network disconnect`命令从网络断开容器。
 
 #### 高级选项
-
+---
 在创建网络时，Engine默认会为网络创建一个不重叠的子网。这个子网不是现有网络的细分。这目的纯粹是为了ip地址。可以覆盖此默认值并直接使用`--subnet`选项指定子网值。在 `bridge`网络上只能创建一个子网：
 
 ```shell
@@ -4427,7 +4430,7 @@ $ docker network create -d overlay \
 确保你的子网不重叠。如果子网重叠，网络创建失败，引擎返回错误。
 
 #### 桥模式选项
-
+---
 在创建自定义网络时，默认网络驱动程序（即`bridge`）具有可以传递的其他选项。以下是用于docker0桥的那些选项和等效的docker守护进程选项：
 
 | 选项                                             | 等价        | 描述                        |
@@ -4457,7 +4460,7 @@ $ docker network create \
 ```
 
 #### 网络内部模式
-
+---
 默认情况下，当你将容器连接到`overlay`网络时，Docker也会将桥接网络连接到它以提供外部连接。如果你想创建一个外部隔离的`overlay`网络，你可以指定该 `--internal`选项。
 
 ```shell
@@ -4465,7 +4468,7 @@ $ docker network create --internal -d overlay my-overlay-inte-net
 ```
 
 #### 网络ingress模式
-
+---
 你可以创建将用于在群集中提供路由网格的网络。你通过在创建网络时指定`--ingress`来完成此操作。当时只能创建一个入口网络。只有在没有服务依赖它的情况下才能删除网络。除了`--attachable`选项之外，在创建入口网络时，创建覆盖网络时可用的任何选项也可用。
 
 ```shell
@@ -4500,7 +4503,7 @@ Options:
 将容器连接到网络。你可以按名称或ID连接容器。连接后，容器可以与同一网络中的其他容器进行通信。
 
 #### 已运行的容器连接网络
-
+---
 ```shell
 # 运行一个镜像，没有会自动去下载
 $ docker run -it busybox
@@ -4513,7 +4516,7 @@ $ docker network connect my-bridge-net suspicious_kepler
 ```
 
 #### 启动容器时连接到网络
-
+---
 可以使用`docker run --network=<network-name>`选项启动容器并立即将其连接到网络。
 
 ```shell
@@ -4522,7 +4525,7 @@ $ docker run -itd --network=multi-host-network busybox
 ```
 
 #### 连接网络使用固定IP
-
+---
 可以指定要分配给容器固定的IP地址。对于不同的网络，分配的IP网段跟网络有关，所以先查看网络的子网网段，再分配合法的IP。
 
 ```shell
@@ -4534,7 +4537,7 @@ $ docker network connect --ip 192.168.5.122 my-bri-0 suspicious_kepler
 ```
 
 #### 使用旧版`--link`选项
-
+---
 可以使用`--link`选项将另一个容器与首选别名链接起来
 
 ```shell
@@ -4542,7 +4545,7 @@ $ docker network connect --link silly_curie:my_container my-bridge suspicious_ke
 ```
 
 #### 连接网络时创建网络别名
-
+---
 `--alias` 选项可用于通过连接到的网络中的其他名称来解析容器。取别名方便查看链接的容器。
 
 ```shell
@@ -4578,7 +4581,7 @@ $ docker container inspect upbeat_ptolemy
 ```
 
 #### 区间网络
-
+---
 你可以暂停、重新启动并停止连接到网络的容器。**容器运行时会连接到其配置的网络**。
 
 如果设定过网络，则在**重新启动容器时重新应用**容器的IP地址。**如果IP地址不再可用，则容器无法启动**。确保IP地址可用的一种方法是`--ip-range`在创建网络时指定一个IP地址，并从该范围之外**选择静态IP**地址。这确保了当该容器不在网络上时，IP地址**不会被另一个容器占用**。
@@ -4721,7 +4724,7 @@ ID                  NAME                TAG                 DESCRIPTION         
 
 安装并启用插件。Docker首先查找Docker主机上的插件。如果插件本地不存在，则插件将从注册表中提取。请注意，分发插件所需的最低注册表版本是2.3.0
 
- ### 命令参数选项
+### 命令参数选项
 
 ---
 
@@ -4792,7 +4795,7 @@ $ docker plugin ls --filter enabled=true
  ```
 
 ### 格式化
-
+---
 格式化选项（`--format`）使用Go模板漂亮地打印插件输出。
 
 下面列出了Go模板的有效占位符：
@@ -4843,7 +4846,7 @@ tiborvass/sample-volume-plugin
 更改插件的设置。该插件必须禁用。目前支持的设置是：`env变量`，`mount 的来源`，`设备路径`，`ARGS`。
 
 ### 更改环境变量
-
+---
 以下示例更改插件`DEBUG`上的 env变量`sample-volume-plugin`。
 
 ```sh
@@ -4857,7 +4860,7 @@ $ docker plugin inspect -f {{.Settings.Env}} tiborvass/sample-volume-plugin
 ```
 
 ### 更改安装源
-
+---
 以下示例更改插件`mymount`上的装载源`myplugin`。
 
 ```sh
@@ -4873,7 +4876,7 @@ $ docker plugin inspect -f '{{with $mount := index .Settings.Mounts 0}}{{$mount.
 > **注意：**因为`mymount`中只有`source`  可以设置，所以`docker plugins set mymount=/bar myplugin` 也可以。
 
 ### 更改设备路径
-
+---
 以下示例更改插件`mydevice`上设备的路径`myplugin`。
 
 ```sh
@@ -4978,13 +4981,13 @@ Commands:
 创建容器可以使用和存储数据的新卷。如果未指定名称，则Docker会生成一个随机名称。
 
 ### 创建卷
-
+---
 ```sh
 $ docker volume create my-vol
 ```
 
 ### 使用卷
-
+---
 创建一个卷，然后配置容器以使用它：
 
 ```sh
@@ -5006,7 +5009,7 @@ A volume named  "hello"  already exists with the "some-other" driver. Choose a d
 如果你指定当前设备程序中已使用的卷名称，则Docker会假定你想要重新使用现有卷并且不会返回错误。
 
 ### 驱动程序特定的选项
-
+---
 某些卷驱动程序可能会采用选项来创建自定义卷。使用 `-o`或`--opt`选项来传递驱动程序选项：
 
 ```sh
@@ -5056,7 +5059,7 @@ $ docker volume create --driver local \
 ## ls 查看
 
 ### 基本选项
-
+---
 ```shell
 --filter , -f		#提供过滤器值（例如'dangling = true'）
 --format			#使用Go模板的漂亮打印卷
@@ -5064,7 +5067,7 @@ $ docker volume create --driver local \
 ```
 
 ### 过滤
-
+---
 过滤选项（`-f`或`--filter`）格式为“key = value”。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）
 
 目前支持的过滤器是：
@@ -5075,7 +5078,7 @@ $ docker volume create --driver local \
 - `name`（卷的名称）
 
 #### dangling 是否引用
-
+---
 过滤器上没有任何容器引用的所有匹配卷
 
 ```sh
@@ -5087,7 +5090,7 @@ local               rosemary
 ```
 
 #### driver 驱动
-
+---
 `driver`过滤器根据其驱动程序匹配卷。以下示例匹配使用该`local`驱动程序创建的卷：
 
 ```sh
@@ -5099,7 +5102,7 @@ local               tyler
 ```
 
 #### label 标签
-
+---
 标签过滤器根据单独存在标签或标签和值来匹配卷。
 
 首先，我们来创建一些卷来说明这一点;
@@ -5141,7 +5144,7 @@ DRIVER              VOLUME NAME
 ```
 
 #### name 称
-
+---
 名称过滤器匹配全部或部分卷的名称。以下过滤器匹配所有包含该`rose`字符串的名称的卷。
 
 ```sh
@@ -5152,7 +5155,7 @@ local               rosemary
 ```
 
 ### 格式化
-
+---
 格式化选项（`--format`）使用Go模板输出卷。下面列出了Go模板的有效占位符：
 
 | 占位符        | 描述                                                   |
@@ -5258,7 +5261,7 @@ Commands:
 | `--label , -l`      |      | secret标签                                                   |
 | `--template-driver` |      | 模板驱动                                                     |
 
- ### 示例
+### 示例
 
 ---
 
@@ -5274,7 +5277,7 @@ onakdyv307se2tl7nl20anokv   my_secret           6 seconds ago       6 seconds ag
 ```
 
 #### 用文件创建
-
+---
 ```sh
 $ docker secret create my_secret ./secret.json
 dg426haahpi5ezmkkj5kyl3sn
@@ -5285,7 +5288,7 @@ dg426haahpi5ezmkkj5kyl3sn   my_secret           7 seconds ago       7 seconds ag
 ```
 
 #### 用标签创建
-
+---
 ```sh
 $ docker secret create --label env=dev \
                        --label rev=20170324 \
@@ -5400,7 +5403,7 @@ Commands:
 
 `docker system df`命令显示有关docker守护程序使用的磁盘空间量的信息。
 
- ### 命令参数选项
+### 命令参数选项
 
 ---
 
@@ -5561,7 +5564,7 @@ Docker守护进程报告以下事件：
 `--since`和`--until`参数可以是Unix的时间戳，日期格式化时间戳或Go持续时间字符串（例如`10m，1h30m`），相对于**客户端**计算机的时间计算。 如果不提供`--since`选项，则命令仅返回**新事件或现场事件**。支持的格式为日期格式时间戳包括`RFC3339Nano，RFC3339`， `2006-01-02T15:04:05`，`2006-01-02T15:04:05.999999999`，`2006-01-02Z07:00`和`2006-01-02`。如果你在时间戳结束时未提供`Z或+00：00`时区偏移量，则将使用**客户端上的本地**时区。 在提供Unix时间戳时输入`seconds [.nanoseconds]`，其中`seconds`是自1970年1月1日（`UTC / GMT午夜`）以来经过的**秒数**，不包括闰秒（又名Unix时代或Unix时间）和可选项。纳秒字段是一秒不到9位数字的一小部分。
 
 #### 过滤
-
+---
 过滤选项（`-f`或`--filter`）格式为`“key = value”`。如果你想使用多个过滤器，传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）。
 
 多次使用相同的过滤器将作为**OR**处理。 例如 `--filter container=588a23dac085 --filter container=a8f7720b8c22`将显示容器`588a23dac085` **或**容器`a8f7720b8c22`的事件。
@@ -5581,7 +5584,7 @@ Docker守护进程报告以下事件：
 - volume（`volume=<name or id>`）
 
 #### 格式
-
+---
 如果指定了格式（`--format`），则将执行给定模板而不是默认格式。Go的文本/模板包描述了格式的所有细节。
 
 如果格式设置为`{{json .}}`，则事件将作为有效的JSON行进行流式传输。有关JSON行的信息，请参阅http://jsonlines.org/。
@@ -5623,7 +5626,7 @@ $ docker stop test
 要退出`docker system events`命令，请使用`CTRL+C`。
 
 #### 按时间过滤事件
-
+---
 你可以使用以下不同的时间语法在主机上按绝对时间戳或相对时间过滤输出：
 
 ```sh
@@ -5634,7 +5637,7 @@ $ docker system events --since '10m'
 ```
 
 #### 按标准过滤事件
-
+---
 以下命令显示了几种不同的方法来过滤`docker event` 输出。
 
 ```sh
@@ -5651,7 +5654,7 @@ $ docker system events --filter 'type=plugin'
 ```
 
 #### 格式化输出
-
+---
 ```sh
 $ docker system events --filter 'type=container' --format 'Type={{.Type}}  Status={{.Status}}  ID={{.ID}}'
 
@@ -5823,7 +5826,7 @@ $ docker node inspect --pretty node-1
 
 列出Docker Swarm管理知道的所有节点。你可以使用`-f`或`--filter`选项进行过滤。有关可用过滤器选项的更多信息，请参阅[过滤](https://docs.docker.com/engine/reference/commandline/node_ls/#filtering)部分。
 
- ### 命令参数选项
+### 命令参数选项
 
 ---
 
@@ -5850,7 +5853,7 @@ e216jshn25ckzbvmwlnh5jr3g *  swarm-manager1  Ready   Active        Leader
 > **注意**：在上面的示例输出中，有一个隐藏列`.Self`，指示该节点是否与当前docker守护进程相同。 `*`（例如，`e216jshn25ckzbvmwlnh5jr3g *`）表示这个节点是当前的docker守护进程。
 
 #### 过滤
-
+---
 过滤选项（`-f`或`--filter`）格式为“key = value”。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）
 
 目前支持的过滤器是：
@@ -5874,7 +5877,7 @@ $ docker node ls -f "role=manager"
 ```
 
 #### 格式化
-
+---
 格式化选项（`--format`）使用Go模板漂亮地打印节点输出。下面列出了Go模板的有效占位符：
 
 | 占位符           | 描述                                                         |
@@ -5903,7 +5906,7 @@ $ docker node ls --format "table {{.ID}}: {{.Hostname}} {{.TLSStatus}}"
 
 列出Docker 发现的节点上的所有任务。可以使用`-f`或`--filter`选项进行过滤。有关可用过滤器选项的更多信息，请参阅[过滤](https://docs.docker.com/engine/reference/commandline/node_ps/#filtering)部分。
 
- ### 命令参数选项
+### 命令参数选项
 
 ---
 
@@ -5928,7 +5931,7 @@ redis.1.7q92v0nr1hcgts2amcjyqg3pq   redis:3.0.6  swarm-manager1  Running        
 ```
 
 #### 过滤
-
+---
 过滤选项（`-f`或`--filter`）格式为“key = value”。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）
 
 目前支持的过滤器是：
@@ -5973,7 +5976,7 @@ Node swarm-node-02 removed from swarm
 ```
 
 #### 删除运行节点
-
+---
 从群中删除指定的节点，但只有当节点处于停机状态时才会这样。如果**尝试删除活动节点，将收到错误消息**：
 
 ```sh
@@ -5985,7 +5988,7 @@ $ docker node rm swarm-node-03 -f
 ```
 
 #### 强行删除不可访问的节点
-
+---
 如果**失去对工作节点的访问权限或需要将其关闭**，因为它已被破坏或行为不如预期，则可以使用`--force`选项。这可能会导致*暂时错误或中断**，具体取决于节点上正在运行的任务的类型。
 
 ```sh
@@ -6323,7 +6326,7 @@ Docker支持三种不同的挂载方式，它们允许容器在主机操作系�
 | **consistency** **一致性**          |                      | 挂载的一致性要求<br/>`default`：相当于`consistent`。<br/>`consistent`：完全一致。容器运行时和主机始终保持相同的安装视图。<br/>`cached`：主机的装载视图是权威的。在主机上进行的更新在容器内可见之前可能会有延迟。<br/>`delegated`：容器运行时的挂载视图是权威的。在容器中进行的更新在主机上可见之前可能会有延迟。 |
 
 ##### **挂载传播**
-
+---
 挂载传播是指在给定的绑定挂载或命名卷中创建的**挂载**是否可以**传播到该挂载的副本**。考虑一个挂载点`/mnt`，它也被挂载`/tmp`。该状态设置控制是否启用挂载`/tmp/a`也可用`/mnt/a`。每个传播设置都有一个**递归对应点**。在递归的情况下，考虑它`/tmp/a`也被挂载为`/foo`。传播设置控制是否`/mnt/a`和/或`/tmp/a`将存在。
 
 `bind-propagation`选项默认`rprivate`为绑定挂载和卷挂载，并且**只能为绑定挂载**进行配置。换句话说，**命名卷不支持绑定传播**。
@@ -6338,7 +6341,7 @@ Docker支持三种不同的挂载方式，它们允许容器在主机操作系�
 有关绑定传播的更多信息，请参阅[共享子树](https://www.kernel.org/doc/Documentation/filesystems/sharedsubtree.txt)的 [Linux内核文档](https://www.kernel.org/doc/Documentation/filesystems/sharedsubtree.txt)。
 
 ##### **命名卷的选项**
-
+---
 以下选项只能用于命名卷（`type=volume`）：
 
 | 选项              | 描述                                                         |
@@ -6349,7 +6352,7 @@ Docker支持三种不同的挂载方式，它们允许容器在主机操作系�
 | **volume-opt**    | 特定于给定卷驱动程序的**选项，将在创建卷时传递给驱动程序**。选项以逗号分隔的键/值对列表形式提供，例如， `volume-opt = some-option = some-value，volume-opt = some-other-option = some-other-value`。<br/>有关给定驱动程序的可用选项，请参阅该驱动程序的文档。 |
 
 ##### **TMPFS的选项**
-
+---
 以下选项只能用于`tmpfs mounts`（`type=tmpfs`）;
 
 | 选项           | 描述                                                         |
@@ -6358,7 +6361,7 @@ Docker支持三种不同的挂载方式，它们允许容器在主机操作系�
 | **tmpfs-mode** | tmpfs的八进制文件模式。（例如`“700”`或`“0700”）`。在Linux中默认为`“1777”`。 |
 
 ##### **`--MOUNT`和`--VOLUME`的区别**
-
+---
 `--mount`选项支持`docker run`的`-v` 或`--volume`的大多数选项，有一些重要的例外情况：
 
 - `--mount`选项允许你为**每个卷**指定卷驱动程序和卷驱动程序选项，而无需预先创建卷。相反`docker run`允许你使用`--volume-driver`选项来指定由**所有**卷共享的**单个**卷驱动程序。
@@ -6367,7 +6370,7 @@ Docker支持三种不同的挂载方式，它们允许容器在主机操作系�
 - `--mount`选项**不允许**你重新标记用于标记的卷`Z`或`z`选项`selinux`。
 
 ##### 使用命名卷创建服务
-
+---
 以下示例创建使用命名卷的服务：
 
 ```sh
@@ -6385,7 +6388,7 @@ $ docker service create \
 请注意，默认（“本地”）卷是本地作用域卷驱动程序。这意味着根据部署任务的位置，该任务可以获得名为“my-volume” 的 *新*卷，或与同一服务的其他任务共享相同的“我的卷”。如果容器内运行的软件不是用来处理写入同一位置的并发进程的，则写入单个共享卷的多个容器可能会导致数据损坏。还要考虑到容器可以由Swarm协调器重新调度并部署在不同的节点上。
 
 ##### 使用匿名卷创建服务
-
+---
 以下命令使用`/path/in/container`中的匿名卷创建一个具有三个副本的服务：
 
 ```sh
@@ -6399,7 +6402,7 @@ $ docker service create \
 在此示例中，没有为卷指定`source`名称（匿名），因此会为每个任务创建一个新卷。这可以确保每个任务都获得自己的卷，并且不会在任务之间共享卷。完成使用任务后，匿名卷将被删除。
 
 ##### 使用绑定挂载主机目录创建服务
-
+---
 以下示例`/path/in/container`在支持该服务的容器中绑定一个主机目录：
 
 ```sh
@@ -6672,7 +6675,7 @@ $ docker service inspect dmu1ept4cxcf
 ```
 
 #### 格式化
-
+---
 你可以使用以下`--pretty`选项以可读格式而不是默认JSON输出打印检查输出：
 
 ```sh
@@ -6766,7 +6769,7 @@ my-web.2.k027kb6dsgwz@my-vm-node-1    | 10.255.0.2 - - [08/May/2018:07:25:26 +00
 有关选择和配置记录驱动程序的更多信息，请参阅 [配置记录驱动程序](https://docs.docker.com/engine/admin/logging/overview/)。
 
 #### 跟踪日志
-
+---
 `docker service logs --follow`命令将继续流式传输来自服务`STDOUT`和服务的新输出`STDERR`。
 
 ```sh
@@ -6774,7 +6777,7 @@ $ docker service logs my-web --follow
 ```
 
 #### 查看指定行数
-
+---
 传递一个负数或一个非整数`--tail`是无效的，`all`在这种情况下值被设置为。
 
 ```sh
@@ -6784,7 +6787,7 @@ my-web.2.k027kb6dsgwz@my-vm-node-1    | 2018/05/08 07:25:26 [error] 5#5: *1 open
 ```
 
 #### 时间戳
-
+---
 `docker service logs --timestamps`命令将增加一个[RFC3339Nano时间戳](https://golang.org/pkg/time/#pkg-constants) ，例如`2014-09-16T06:17:46.000000000Z`，每个日志记录。为确保时间戳对齐，必要时，时间戳的纳秒部分将填充零。
 
 ```sh
@@ -6793,7 +6796,7 @@ $ docker service logs my-web --tail 2 --timestamps
 ```
 
 #### 额外详细信息
-
+---
 `docker service logs --details`命令将添加额外的属性，例如`--log-opt`创建服务时提供的环境变量和标签。
 
 ```sh
@@ -6802,7 +6805,7 @@ my-web.2.k027kb6dsgwz@my-vm-node-1    |  10.255.0.2 - - [08/May/2018:07:25:26 +0
 ```
 
 #### 日期过滤
-
+---
 `--since`选项仅显示给定日期后生成的服务日志。如果这个应用运行时间过长，比如3天，那么指定日志的开始时间是非常有必要的。可以使用--since，让容器日志只输出指定日期之后的时间。这个时间可以是RFC 3339时间，也可以是UNIX timestamp，你可以结合使用 `--since`选择具有的一种或两种`--follow`或`--tail`选项。例如： 
 
 ```sh
@@ -6816,7 +6819,7 @@ $ docker service logs --details my-web --since "1441018800"
 
 在以管理员身份运行时列出服务正在集群中运行。
 
- ### 命令参数选项
+### 命令参数选项
 
 ---
 
@@ -6845,7 +6848,7 @@ iwe3278osahj  mongo     global      7/7         mongo:3.3
 `REPLICAS`列显示服务的*实际*任务数和*所需*任务数。
 
 #### 过滤
-
+---
 过滤选项（`-f`或`--filter`）格式为“key = value”。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）
 
 目前支持的过滤器是：
@@ -6869,7 +6872,7 @@ $ docker service ls --filter name=redis
 ```
 
 #### 格式化
-
+---
 格式化选项（`--format`）使用Go模板漂亮地打印服务输出。下面列出了Go模板的有效占位符：
 
 | 占位符      | 描述                   |
@@ -6896,7 +6899,7 @@ fm6uf97exkul: global 5/5
 
 列出作为指定服务的一部分运行的任务。该命令必须以管理器节点为目标运行。
 
- ### 命令参数选项
+### 命令参数选项
 
 ---
 
@@ -6939,7 +6942,7 @@ vtiuz2fpc0yb   \_ redis.2  redis:3.0.5  worker2   Shutdown       Shutdown 1 seco
 任务历史记录中的项目数由`--task-history-limit`初始化群时设置的选项决定 。你可以使用该[`docker swarm update`](https://docs.docker.com/engine/reference/commandline/swarm_update/)命令更改任务历史保留限制 。 
 
 #### 过滤
-
+---
 过滤选项（`-f`或`--filter`）格式是一`key=value`对。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）。多个过滤器选项被组合为一个`OR`过滤器。例如，`-f name=redis.1 -f name=redis.7`返回两者`redis.1`和`redis.7`任务。
 
 目前支持的过滤器是：
@@ -6961,7 +6964,7 @@ $ docker service ps -f "desired-state=running" redis
 ```
 
 #### 格式化
-
+---
 格式化选项（`--format`）可以很好地打印使用Go模板输出的任务。下面列出了Go模板的有效占位符：
 
 | 占位符          | 描述                                                  |
@@ -6995,11 +6998,11 @@ $ docker service rm redis redis2
 
 > **警告**：与`docker rm`删除正在运行的服务之前不同，该命令不要求确认。
 
- ## rollback 回滚
+## rollback 回滚
 
 将指定的服务从集群中回滚到其以前的版本。该命令必须以管理节点为目标运行。
 
- ### 命令参数选项
+### 命令参数选项
 
 ---
 
@@ -7091,7 +7094,7 @@ $ docker service update --replicas=50 my_redis2
 ```
 
 #### 扩展多个服务
-
+---
 `docker service scale`命令允许一次为**多个服务**设置所需数量的任务。以下示例缩放后端和前端服务：
 
 ```sh
@@ -7209,7 +7212,7 @@ $ docker service update --limit-cpu 2 redis
 ```
 
 #### 在不更改参数的情况下执行滚动重启
-
+---
 ```sh
 $ docker service update --force --update-parallelism 1 --update-delay 30s redis
 ```
@@ -7217,7 +7220,7 @@ $ docker service update --force --update-parallelism 1 --update-delay 30s redis
 在这个例子中，`--force`选项导致服务的任务**被关闭并被新的替换**，即使其他参数通常都不会导致这种情况发生。`--update-parallelism 1`设置确保一次只替换一个任务（这是默认行为）。 `--update-delay 30s`设置在任务之间引入了30秒的延迟，以便滚动重启逐渐发生。
 
 #### 添加或删除挂载
-
+---
 使用`--mount-add`或`--mount-rm`选项添加或删除服务的绑定挂载或卷。
 
 以下示例创建一个将`test-data`卷 挂载到的服务`/somewhere`。下一步更新服务以将`other-volume` 卷挂接到`/somewhere-else`卷，最后一步卸载`/somewhere`挂载点，从而有效地移除`test-data`卷。每个命令都会返回服务名称。
@@ -7243,7 +7246,7 @@ myservice
 ```
 
 #### 添加或删除已发布的服务端口
-
+---
 使用`--publish-add`或`--publish-rm`选项添加或删除服务的已发布端口。以下示例将已发布的服务端口添加到现有服务。
 
 ```sh
@@ -7253,7 +7256,7 @@ $ docker service update \
 ```
 
 #### 添加或删除网络
-
+---
 使用`--network-add`或`--network-rm`选项为服务添加或删除网络。以下示例将新的别名添加到已连接到网络my-network的现有服务：
 
 ```sh
@@ -7264,7 +7267,7 @@ $ docker service update \
 ```
 
 #### 回滚到服务的先前版本
-
+---
 使用`--rollback`选项可以回滚到服务的先前版本。这会将服务恢复到最新`docker service update`命令之前的配置。以下示例将服务的副本数从4更新为5，然后回滚到以前的配置。
 
 ```sh
@@ -7308,7 +7311,7 @@ $ docker service update \
 例如，设置的服务`--update-parallelism 1 --rollback-parallelism 3` 将在正常更新期间一次更新一个任务，但在回滚期间，一次会执行3个任务。这些回滚参数在自动回滚和使用手动启动的回滚期间都受到`--rollback`。
 
 #### 添加或删除秘密
-
+---
 使用`--secret-add`或`--secret-rm`选项添加或删除服务的秘密。
 
 以下示例添加一个名为`ssh-2`并删除的秘密`ssh-1`：
@@ -7361,7 +7364,7 @@ Commands:
 | `--rotate`      |             | 旋转集群CA - 如果未提供证书或密钥，则会生成新的证书或密钥 |
 
 ### `--rotate`
-
+---
 如果一个或多个**集群管理节点遭到入侵，建议使用根CA轮换**，以便这些管理节点**不能再连接到集群中的任何其他节点**或受其信任。或者，可以使用**根CA旋转来将集群CA控制权授予外部CA**，或从**外部CA获取控制权**。
 
 `--rotate`选项不需要任何参数进行轮换，但可以选择**指定证书和密钥**，或者**证书和外部CA URL**，并且将使用这些参数代替自动生成的证书/密钥对。
@@ -7375,7 +7378,7 @@ jx49db999birkx3myeorh9qvg my-vm-node-1 Ready Ready
 ```
 
 ### `--detach`
-
+---
 启动根CA旋转，但**不要等待完成或显示旋转的进度**。也就是**后台运行**模式！
 
 ### 示例
@@ -7403,7 +7406,7 @@ CVjyhJCYGgNONh1c/RzztCXuYguJwWOjNxAx/n+aLA==
 
 
 #### 轮转证书
-
+---
 传递`--rotate`选项（以及可选的 `--ca-cert`，连同一个`--ca-key`或 `--external-ca`参数选项），以便轮转当前集群根CA.
 
 ```sh
@@ -7574,7 +7577,7 @@ To add a manager to this swarm, run 'docker swarm join-token manager' and follow
 
 这个选项在某些情况下很有用。例如，集群可能希望具有专用管理器节点，这些节点不用作工作者节点。这可以通过传递`--availability=drain`来实现`docker swarm join`。
 
- ### 示例
+### 示例
 
 ---
 
@@ -7594,7 +7597,7 @@ dvfxp4zseq4s0rih1selh0d20    manager1  Ready   Active        Leader
 一个集群最多只能有**3-7个管理节点**，因为大多数管理节点必须可以使集群发挥作用。不打算参与此管理法定人数的节点应该以工作节点身份加入。管理员应该是具有**静态IP地址的稳定主机**。
 
 #### 加入工作节点
-
+---
 下面的示例演示如何使用工作者令牌来加入工作节点。
 
 ```sh
@@ -7712,7 +7715,7 @@ Please enter unlock key:
 
 管理解锁密钥
 
- ### 命令参数选项
+### 命令参数选项
 
 ---
 
@@ -7742,7 +7745,7 @@ will not be able to restart the manager.
 
 用新的参数值更新群。该命令必须以**管理节点**为目标。
 
- ### 命令参数选项
+### 命令参数选项
 
 ---
 
@@ -7865,7 +7868,7 @@ $ docker service ls
 | `--kubeconfig` |      | [实验（CLI）](https://docs.docker.com/engine/reference/commandline/cli/#configuration-files)Kubernetes Kubernetes配置文件 |
 | `--namespace`  |      | [实验性（CLI）](https://docs.docker.com/engine/reference/commandline/cli/#configuration-files)Kubernetes Kubernetes命名空间使用 |
 
- ### 示例
+### 示例
 
 ---
 
@@ -7881,7 +7884,7 @@ myapp              2
 ```
 
 #### 格式化
-
+---
 格式化选项（`--format`）使用Go模板漂亮地打印堆栈。下面列出了Go模板的有效占位符：
 
 | 占位符      | 描述     |
@@ -7917,7 +7920,7 @@ web-cache: 4
 | `--kubeconfig`  |      | [实验（CLI）](https://docs.docker.com/engine/reference/commandline/cli/#configuration-files)Kubernetes Kubernetes配置文件 |
 | `--namespace`   |      | [实验性（CLI）](https://docs.docker.com/engine/reference/commandline/cli/#configuration-files)Kubernetes Kubernetes命名空间使用 |
 
- ### 示例
+### 示例
 
 ---
 
@@ -7941,7 +7944,7 @@ $ docker inspect $(docker stack ps -q voting)
 ```
 
 #### 过滤
-
+---
 过滤选项（`-f`或`--filter`）格式是一`key=value`对。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）。多个过滤器选项被组合为一个`OR`过滤器。例如，`-f name=redis.1 -f name=redis.7`返回两者`redis.1`和`redis.7`任务。
 
 目前支持的过滤器是：
@@ -7963,7 +7966,7 @@ $ docker stack ps -f "desired-state=running" voting
 ```
 
 #### 格式化
-
+---
 格式化选项（`--format`）可以很好地打印使用Go模板输出的任务。下面列出了Go模板的有效占位符：
 
 | 占位符          | 描述                                                  |
@@ -8027,7 +8030,7 @@ ID            NAME            REPLICAS  IMAGE                                   
 ```
 
 #### 过滤
-
+---
 过滤选项（`-f`或`--filter`）格式是一`key=value`对。如果有多个过滤器，则传递多个选项（例如`--filter "foo=bar" --filter "bif=baz"`）。多个过滤器选项被组合为一个`OR`过滤器。
 
 以下命令显示`web`和`db`服务：
@@ -8047,7 +8050,7 @@ dn7m7nhhfb9y  myapp_db        1/1       mysql@sha256:a9a5b559f8821fe73d58c3606c8
 - label (`--filter label=key=value`)
 
 #### 格式化
-
+---
 （`--format`）使用Go模板漂亮地打印服务输出。下面列出了Go模板的有效占位符：
 
 | 占位符      | 描述                   |
