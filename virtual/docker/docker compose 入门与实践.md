@@ -73,8 +73,9 @@ volumes:
 
 
 
-
 ### 单个主机上有多个独立的环境
+
+---
 
 使用`compose`项目来隔离项目彼此的环境。可以在多个不同的环境中使用此项目：
 
@@ -88,6 +89,8 @@ volumes:
 
 ### 创建容器时保留卷数据
 
+---
+
 `compose`会保留服务使用的所有卷，当`docker-compose up` 运行时，如果它发现之前运行的容器，它会将旧容器中的内容复制到新容器中。此过程可确保在卷中创建的任何数据都不会丢失。
 
 如果在`Windows`计算机上使用`docker-compose`，请参阅`环境变量`并根据特定需求调整必要的`环境变量`。
@@ -96,11 +99,15 @@ volumes:
 
 ### 只重建已修改过的容器
 
+---
+
 `Compose`缓存用于创建容器的配置。当重新启动未更改的服务时，`Compose`会重新使用现有容器。使用现有的容器意味着可以快速更改环境。
 
 
 
 ### 变量在环境之间移动合成
+
+---
 
 `Compose`支持`yml`文件中的变量。可以使用这些变量为不同的环境或不同的用户定制编排服务。更多细节请参阅变量替换。您可以使用扩展字段或创建多个`Compose`文件来扩展`Compose`文件。
 
@@ -110,9 +117,9 @@ volumes:
 
 `Compose`可用于许多不同的方式。下面概述了一些常见场景。
 
-
-
 ### 开发环境
+
+---
 
 在开发软件时，在独立环境中运行应用程序并与其交互的能力至关重要。`Compose`命令行工具可用于创建环境并与之交互。
 
@@ -123,6 +130,8 @@ volumes:
 
 
 ### 自动化测试环境
+
+---
 
 任何持续部署或持续集成过程的一个重要部分是自动化测试组件。自动化的端到端测试需要一个运行测试的环境。`Compose`提供了一种创建和销毁测试组件的独立测试环境的便捷方式。通过在[Compose文件中](https://docs.docker.com/compose/compose-file/)定义完整的环境，可以通过几条命令创建和销毁这些环境：
 
@@ -136,11 +145,13 @@ $ docker-compose down
 
 ### 单个主机部署
 
+---
+
 `Compose`传统上一直专注于开发和测试工作流程，但每次发布我们都在更多面向生产的功能方面取得进展。可以使用`Compose`部署到远程Docker引擎。Docker引擎可以是配备[Docker Machine](https://docs.docker.com/machine/overview/)或整个 [Docker Swarm](https://docs.docker.com/engine/swarm/)集群的单个实例 。
 
 
 
-# 安装 `Compose`
+# 安装 `compose`
 
 `Compose` 可以在`macOS`，`Windows`和64位`Linux`上运行。在安装 `compose` 之前，必须先安装 `docker engine`。因此，如果没有安装 `docker engine` 就先安装。正常情况下，安装了`docker` 这两个东西都会安装。
 
@@ -248,7 +259,7 @@ redis
 
 
 
-## 创建一个Dockerfile
+## 创建一个 dockerfile
 
 编写一个`Dockerfile`来构建一个Docker镜像。该镜像包含`Python`应用程序需要的所有依赖项，包括`Python`本身。
 
@@ -377,7 +388,7 @@ Removing network composeexample_default
 
 这样程序就被成功卸载删除并且停止
 
-## 编辑 Compose 文件挂载程序
+## 编辑 compose 文件挂载程序
 
 从项目目录`/compose_example`中，修改 `docker-compose.yml` 文件添加挂载目录，挂载目录指向本地的程序工作目录。
 
@@ -560,9 +571,998 @@ $ docker-compose run web env			# 查看应用服务环境变量
 $ docker-compose down --volumes			# 卸载应用并删除data数据
 ```
 
+# 在集群中使用 `compose`
+
+Docker Compose和Docker Swarm 主要是实现完全集成，这意味着可以将一个Compose应用程序指向一个Swarm集群，并且只需像使用单个Docker主机一样的操作工作即可。
+
+实际的集成范围取决于使用的Compose文件格式的版本：
+
+* 如果使用版本1和`links` ，则应用程序可以正常工作，但Swarm会将**所有容器安排在一台主机上**，因为容器之间的链接**不适用**于使用**旧网络**系统的主机。
+* 如果使用的是版本2，则应用程序应该无任何更改：
+  - 受下述[限制的影响](https://docs.docker.com/compose/swarm/#limitations)，
+  - 只要Swarm集群配置为使用[覆盖驱动程序](https://docs.docker.com/engine/userguide/networking/#an-overlay-network-with-docker-engine-swarm-mode)或支持多主机联网的自定义驱动程序即可。
+
+阅读多主机网络入门，了解如何使用Docker Machine和覆盖驱动程序设置Swarm群集。运行后，将应用程序部署到该应用程序应该如此简单：
+
+```sh
+$ eval "$(docker-machine env --swarm <name of swarm master machine>)"
+$ docker-compose up
+```
+
+## 限制
+
+### 构建图像
+
+---
+
+Swarm可以像Docker实例一样从Dockerfile构建一个映像，但生成的映像只能存在于**单个节点**上，**不会分发**给其他节点。如果您想使用Compose将有问题的服务**扩展到多个节点**，请构建映像，将其推送到诸如Docker Hub的注册表，然后从`docker-compose.yml`中引用它：
+
+```sh
+# 构建镜像
+$ docker build -t myusername/web .
+# 推送到仓库
+$ docker push myusername/web
+
+$ cat docker-compose.yml
+web:
+  image: myusername/web
+
+# 上线装载
+$ docker-compose up -d
+# 扩展副本
+$ docker-compose scale web=3
+```
+
+### 多重依赖
+
+---
+
+如果一个服务具有**强制共同调度的类型的多个依赖**关系（请参阅[自动调度](https://docs.docker.com/compose/swarm/#automatic-scheduling)），则Swarm可能会**调度不同节点**上的依赖关系，从而无法安排依赖服务。例如，这里`foo`需要与`bar`和`baz`共同安排调度：
+
+```yaml
+version: "2"
+services:
+  foo:
+    image: foo
+    volumes_from: ["bar"]
+    network_mode: "service:baz"
+  bar:
+    image: bar
+  baz:
+    image: baz
+```
+
+问题在于Swarm可能会首先在不同的节点上调度`bar`和`baz`（因为它们不依赖于其他节点），因此无法为`foo`选择合适的节点。
+
+要解决此问题，请使用[手动调度](https://docs.docker.com/compose/swarm/#manual-scheduling)来确保所有三个服务都在**同一个节点上**结束：
+
+```yaml
+version: "2"
+services:
+  foo:
+    image: foo
+    volumes_from: ["bar"]
+    network_mode: "service:baz"
+    environment:
+      - "constraint:node==node-1"
+  bar:
+    image: bar
+    environment:
+      - "constraint:node==node-1"
+  baz:
+    image: baz
+    environment:
+      - "constraint:node==node-1"
+```
+
+### 主机端口和重新创建容器
+
+如果服务从主机映射端口（例如`80:8000`），那么`docker-compose up`在第一次运行之后，可能会遇到如下错误：
+
+```
+docker: Error response from daemon: unable to find a node that satisfies
+container==6ab2dfe36615ae786ef3fc35d641a260e3ea9663d6e69c5b70ce0ca6cb373c02.
+```
+
+这种错误的常见原因是**容器在没有显式映射**的情况下具有一个卷（在其图像或compose文件中定义），因此为了保留其数据，Compose已指示Swarm安排新容器与旧容器相同的节点。这导致了**端口冲突**。
+
+这个问题有两种可行的解决方法：
+
+- **指定一个已命名**的卷，并使用一个卷驱动程序，该卷驱动程序能够将该卷挂载到容器中，而不管其预定的节点。
+
+  如果服务仅使用命名卷，则Compose不会为Swarm提供任何特定的计划指示。
+
+  ```yaml
+  version: "2"
+  
+  services:
+    web:
+      build: .
+      ports:
+        - "80:8000"
+      volumes:
+        - web-logs:/var/log/web
+  
+  volumes:
+    web-logs:
+      driver: custom-volume-driver
+  ```
+
+- 在创建新容器之前**删除旧容器**。会**丢失**卷中的任何数据。
+
+  ```sh
+  $ docker-compose stop web
+  $ docker-compose rm -f web
+  $ docker-compose up web
+  ```
+
+## 调度容器
+
+### 自动调度
+
+---
+
+某些配置选项会**导致容器在同一个Swarm节点上**自动调度，以确保它们正常工作。这些是：
+
+- `network_mode: "service:..."`和`network_mode: "container:..."`（以及 `net: "container:..."`第一版文件格式）。
+- `volumes_from`
+- `links`
+
+### 手动调度
+
+---
+
+Swarm提供了丰富的调度安排和亲和力提示，使您可以控制容器的分布位置。它们是通过容器**环境变量指定**的，因此可以使用Compose的`environment`选项来设置它们。
+
+```yaml
+# Schedule containers on a specific node
+environment:
+  - "constraint:node==node-1"
+
+# Schedule containers on a node that has the 'storage' label set to 'ssd'
+environment:
+  - "constraint:storage==ssd"
+
+# Schedule containers where the 'redis' image is already pulled
+environment:
+  - "affinity:image==redis"
+```
+
+# 环境变量
+
+## 命令行环境变量
+
+有几个环境变量可供配置`Docker Compose`命令行使用。以`DOCKER_`开头的变量与用于配置`docker`命令行客户端的变量相同。如果正在使用`docker-machine`，那么`eval "$(docker-machine env my-docker-vm)"`命令应该将它们设置为正确的值。（在本例中，`my-docker-vm`是创建的机器的名称）
 
 
-# Compose 命令行
+
+### 基本的环境变量
+
+---
+
+### COMPOSE_PROJECT_NAME
+
+设置项目名称，在启动时，此值将与服务名称一起预先添加到容器中。例如，如果你的项目名称为`myapp`，它包括两个服务`db`和`web`，然后compose分别启动名为`myapp_db_1`和`myapp_web_1`的容器。
+
+设置是可选的，如果不设置此项，则`COMPOSE_PROJECT_NAME` 默认为项目目录的基本名称。另请参阅`-p`命令行选项。
+
+### COMPOSE_FILE
+
+指定compose文件的路径。如果未提供，则compose会在当前目录中查找名为`docker-compose.yml`的文件，然后依次查找每个父目录，直到找到该名称的文件。
+
+此变量支持多个由路径分隔符分隔的Compose文件（在Linux和MacOS上，路径分隔符是`:`在Windows上`;`）。例如：`COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml`。路径分隔符也可以使用自定义`COMPOSE_PATH_SEPARATOR`。
+
+### COMPOSE_API_VERSION
+
+`Docker API`仅支持来自特定版本的客户端的请求。如果使用 `docker-compose`收到`client and server don't have same version`错误，可以通过设置此环境变量来解决此错误，设置版本值以匹配服务器版本。
+
+设置此变量解决需要临时运行客户端和服务器版本之间不匹配的情况。例如如果您可以升级客户端，但需要等待升级服务器。
+
+使用此变量和已知的不匹配的版本，会阻止某些Docker功能正常工作。功能失败将取决于Docker客户端和服务器版本。出于这个原因，使用此变量集运行仅用作解决方法，并且不受官方支持。
+
+如果遇到使用此设置运行的问题，请通过**升级解决不匹配问题并删除此设置**，以查看通知是否解决了问题。
+
+### DOCKER_HOST
+
+设置`docker`守护进程的`URL `。与Docker客户端一样，默认为`unix:///var/run/docker.sock`。
+
+### DOCKER_TLS_VERIFY
+
+当设置为除空字符串之外的任何其他字符时，都将启用与`docker`守护程序`TLS`的通信。
+
+### DOCKER_CERT_PATH
+
+配置用于TLS验证的`ca.pem`，`cert.pem`以及`key.pem`文件的路径。默认为`~/.docker`。
+
+### COMPOSE_HTTP_TIMEOUT
+
+配置`docker`守护进程的请求在`compose`认为失败之前允许挂起的时间（以秒为单位）。默认为`60`秒。
+
+### COMPOSE_TLS_VERSION
+
+配置哪些`TLS`版本用于与docker守护进程的通信。默认为`TLSv1`。支持的值是：`TLSv1`, `TLSv1_1`, `TLSv1_2`。
+
+### COMPOSE_CONVERT_WINDOWS_PATHS
+
+在卷定义中启用从`Windows`风格到`unix`风格的路径转换。`docker`和`docker toolbox`的用户应该始终设置这个。默认值为0，支持的值：`true`或`1 `启用，`false`或`0 `禁用。
+
+### COMPOSE_PATH_SEPARATOR
+
+如果设置`COMPOSE_FILE`则使用此字符作为路径分隔符，来分隔环境变量的值。
+
+### COMPOSE_FORCE_WINDOWS_HOST
+
+如果设置了，则假定主机路径是`Windows`路径，则使用短语法的卷声明将被解析，即使`compose`正在基于`Unix`的系统上运行。支持的值：`true`或`1`启用，`false`或`0`禁用。
+
+### COMPOSE_IGNORE_ORPHANS
+
+如果设置，compose不会尝试检测孤立项目容器。支持的值：`true`或`1`启用，`false`或`0`禁用。
+
+### COMPOSE_PARALLEL_LIMIT
+
+设置compose可以并行执行的操作数量的限制。默认值是`64`，可能不会低于`2`。
+
+### COMPOSE_INTERACTIVE_NO_CLI
+
+如果设置，compose不会尝试使用`docker cli`进行交互式运行和执行操作。此选项在上述操作需要`cli`的窗口中不可用。支持：`true`或`1`启用，`false`或`0`禁用。
+
+
+
+### 在文件中配置环境变量
+---
+
+compose支持在执行`docker-compose`命令（当前工作目录）的文件夹中，建立名为`.env`的环境配置文件中声明默认环境变量。
+
+#### 基本语法规则
+
+这些语法规则适用于`.env`文件：
+
+- compose期望`.env`文件中的每一行都是`VAR=VAL`格式。
+- 开头的行`#`被处理为注释并被忽略。
+- 空白行被忽略。
+- 没有特殊的引号处理。这意味着 **它们是VAL的一部分**。
+
+
+#### compose 文件和命令行变量
+
+在此定义的环境变量用于Compose文件中的[变量替换](https://docs.docker.com/compose/compose-file/#variable-substitution)，也可用于定义以下[CLI变量](https://docs.docker.com/compose/reference/envvars/)：
+
+- `COMPOSE_API_VERSION`
+- `COMPOSE_CONVERT_WINDOWS_PATHS`
+- `COMPOSE_FILE`
+- `COMPOSE_HTTP_TIMEOUT`
+- `COMPOSE_TLS_VERSION`
+- `COMPOSE_PROJECT_NAME`
+- `DOCKER_CERT_PATH`
+- `DOCKER_HOST`
+- `DOCKER_TLS_VERIFY`
+
+运行时环境中的值**始终会覆盖`.env`文件中定义的值**。同样，通过**命令行参数传递的值最优先**。
+
+在`.env`文件中定义的环境变量在容器中不可见。要设置容器适用的环境变量，请遵循compose中的[主题环境变量](https://docs.docker.com/compose/environment-variables/)中的指导原则，该指南描述了如何将`shell`环境变量传递给容器，如何在compose文件中定义环境变量等。
+
+## 在 compose 中使用环境变量
+
+### 替换 Compose 文件中的环境变量
+
+---
+
+可以在shell中使用环境变量来填充Compose文件中的值：
+
+```yaml
+web:
+  image: "webapp:${TAG}"
+```
+
+有关更多信息，请参阅撰写文件参考中的 [变量替换](https://docs.docker.com/compose/compose-file/#variable-substitution)部分。
+
+### 在容器中设置环境变量
+
+---
+
+可以使用`environment`在服务的容器中设置环境变量，就像使用`docker run -e VARIABLE = VALUE ...`：
+
+```yaml
+web:
+  environment:
+    - DEBUG=1
+```
+
+### 将环境变量传递给容器
+
+---
+
+可以直接通过环境变量`environment`将shell中的环境变量传递给服务的容器，方法是不给它们赋值，就像`docker run -e VARIABLE ...`一样：
+
+```yaml
+web:
+  environment:
+    - DEBUG
+```
+
+所述的值`DEBUG`在容器变量是从值取为在其中撰写运行在壳中的相同变量。
+
+### `env_file` 配置选项
+
+---
+
+可以使用[`env_file`选项](https://docs.docker.com/compose/compose-file/#envfile)将多个环境变量从**外部文件**传递到服务的容器，就像`docker run --env-file=FILE ...`：
+
+```yaml
+web:
+  env_file:
+    - web-variables.env
+```
+
+### 用`docker-compose run`设置环境变量
+
+---
+
+与之类似`docker run -e`，可以在一次性容器上设置环境变量`docker-compose run -e`：
+
+```sh
+$ docker-compose run -e DEBUG=1 web python console.py
+```
+
+你也可以通过从shell中传递一个变量，而不给它一个值：
+
+```sh
+$ docker-compose run -e DEBUG web python console.py
+```
+
+容器中`DEBUG`变量的值取自运行Compose的shell中相同变量的值。
+
+### `.env` 文件
+
+---
+
+可以在以下[环境文件中](https://docs.docker.com/compose/env-file/) 为在Compose文件中引用的任何环境变量设置默认值，或者用于配置Compose `.env`：
+
+```sh
+$ cat .env
+TAG=v1.5
+
+$ cat docker-compose.yml
+version: '3'
+services:
+  web:
+    image: "webapp:${TAG}"
+```
+
+`docker-compose up`运行时，上面定义的`web`服务使用图像`webapp:v1.5`。可以使用[config命令](https://docs.docker.com/compose/reference/config/)验证此问题，该 [命令](https://docs.docker.com/compose/reference/config/)会将已解析的应用程序配置打印到终端：
+
+```sh
+$ docker-compose config
+
+version: '3'
+services:
+  web:
+    image: 'webapp:v1.5'
+```
+
+shell中的值**优先**于`.env`文件中指定的值。如果在shell中将`TAG`设置为不同的值，则`image`中的替换将使用该值：
+
+```sh
+$ export TAG=v2.0
+$ docker-compose config
+
+version: '3'
+services:
+  web:
+    image: 'webapp:v2.0'
+```
+
+当您在多个文件中设置相同的环境变量时，以下是Compose用于选择要使用的值的优先级：
+
+1. compose文件
+2. 环境文件
+3. Dockerfile
+4. 变量未定义
+
+在下面的例子中，我们在`Environment`文件和`Compose`文件上设置了相同的环境变量：
+
+```sh
+$ cat ./Docker/api/api.env
+NODE_ENV=test
+
+$ cat docker-compose.yml
+version: '3'
+services:
+  api:
+    image: 'node:6-alpine'
+    env_file:
+     - ./Docker/api/api.env
+    environment:
+     - NODE_ENV=production
+```
+
+运行容器时，在撰写文件中定义的环境变量优先。
+
+```sh
+$ docker-compose exec api node
+
+> process.env.NODE_ENV
+'production'
+```
+
+有任何`ARG`或`ENV`在设置`Dockerfile`只有当不存在用于多克撰写的条目评估板`environment`或`env_file`。
+
+只有在`environment`或`env_file`没有Docker Compose 配置时，Dockerfile中的任何`ARG`或`ENV`设置才会被有使用的可能。
+
+### 使用环境变量配置compose
+
+---
+
+有几个环境变量可供配置Docker Compose命令行行为。它们以[CLI环境变量](https://docs.docker.com/compose/reference/envvars/)开头`COMPOSE_`或`DOCKER_`记录在[CLI环境变量中](https://docs.docker.com/compose/reference/envvars/)。
+
+### 由链接创建的环境变量
+
+---
+
+在[v1撰写文件中](https://docs.docker.com/compose/compose-file/#version-1)使用['links'选项](https://docs.docker.com/compose/compose-file/#links)时 ，会为每个链接创建环境变量。它们记录在[Link环境变量参考中](https://docs.docker.com/compose/link-env-deprecated/)。但是，这些变量已被弃用。改为使用链接别名作为主机名。
+
+# compose 文件组合配置
+
+Compose支持两种共享通用配置的方法：1、使用多个Compose文件扩展组合单个 Compose文件。2、通过`extends`字段扩展多个服务。
+
+## 多个 `compose` 文件组合
+
+使用多个Compose文件使您可以为**不同的环境**或**不同的工作流**自定义Compose应用程序。
+
+### 理解多个 `compose`文件
+
+---
+
+默认情况下，Compose读取两个文件，一个是`docker-compose.yml`和一个可选的`docker-compose.override.yml`文件。按照惯例，`docker-compose.yml`包含您的**基本配置**。顾名思义，覆盖文件可以包含**现有服务**或**全新服务**的配置覆盖。
+
+如果在两个文件中定义了服务，Compose将使用添加和覆盖配置中描述的规则**合并配置**。
+
+要使用多个覆盖文件或具有不同名称的覆盖文件，可以使用`-f`选项指定文件列表。按照它们在命令行上指定的顺序组合文件。有关使用`-f`的更多信息，请参阅docker-compose命令参考。
+
+在使用多个配置文件时，必须确保文件中的所有路径都与基础Compose文件（使用`-f`指定的**第一个Compose文件**）相关。这是**必需的**，因为覆盖文件不需要是有效的Compose文件。覆盖文件可以包含**小部分配置**。跟踪哪个服务片段与哪个路径相关是困难和混乱的，因此为了使路径更容易理解，所有路径必须**相对于基本文件**进行定义。
+
+### 示例参考
+
+---
+
+有两个常见的用于多个compose文件的使用案例：更改不同环境下的Compose应用程序，以及针对Compose应用程序运行管理任务。 
+
+#### 不同环境的 `compose` 应用
+
+多文件的常见用例是为类似生产环境（可能是生产、分期或CI）更改开发compose应用程序。为了支持这些差异，你可以将你的Compose配置分成几个不同的文件：
+
+从定义服务规范配置的**基础文件**开始。文件：**docker-compose.yml**
+
+```yaml
+web:
+  image: example/my_web_app:latest
+  links:
+    - db
+    - cache
+
+db:
+  image: postgres:latest
+
+cache:
+  image: redis:latest
+```
+
+在这个例子中，开发配置向主机公开了一些**端口**，将我们的代码作为一个**卷**装入，并**构建**Web图像。文件：**docker-compose.override.yml**
+
+```yaml
+web:
+  build: .
+  volumes:
+    - '.:/code'
+  ports:
+    - 8883:80
+  environment:
+    DEBUG: 'true'
+
+db:
+  command: '-d'
+  ports:
+    - 5432:5432
+
+cache:
+  ports:
+    - 6379:6379
+```
+
+当你运行`docker-compose up`它自动读取文件进行覆盖。
+
+现在，在生产环境中使用此Compose应用程序将会很好。因此，创建另一个覆盖文件。文件：**docker-compose.prod.yml**
+
+```yaml
+web:
+  ports:
+    - 80:80
+  environment:
+    PRODUCTION: 'true'
+
+cache:
+  environment:
+    TTL: '500'
+```
+
+用这个生产Compose文件进行部署可以运行
+
+```sh
+$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+这将使用`docker-compose.yml`和`docker-compose.prod.yml`（但不包括开发配置`docker-compose.override.yml`）中的配置部署所有三个服务 。
+
+#### 管理任务
+
+另一个常见用例是针对Compose应用程序中的一个或多个服务运行`adhoc`或管理任务。这个例子演示了运行数据库备份。
+
+从**docker-compose.yml开始**。
+
+```yaml
+web:
+  image: example/my_web_app:latest
+  links:
+    - db
+db:
+  image: postgres:latest
+```
+
+在**docker-compose.admin.yml中**添加一个**新服务来运行数据库导出或备份**。
+
+```yaml
+dbadmin:
+  build: database_admin/
+  links:
+    - db
+```
+
+开始正常的环境运行`docker-compose up -d`。要运行数据库备份，也要包含它`docker-compose.admin.yml`。
+
+```sh
+$ docker-compose -f docker-compose.yml -f docker-compose.admin.yml \
+    run dbadmin db-backup
+```
+
+## 扩展服务
+
+> **注意：**在以前的Compose文件格式中支持`extends`关键字，直到Compose文件版本2.1（请参阅v1中的扩展和第2版中的扩展），但**在Compose版本3.x中不受支持**。请参阅第3版的添加和删除键摘要以及有关如何升级的信息。请参阅[moby/moby#31101](moby/moby#31101)以关注在未来版本中添加对某种形式的扩展的支持的可能性。
+
+Docker Compose的`extends`关键字可以在不同文件之间**共享通用**配置，甚至可以完全共享不同的项目。如果您有多个服务可以**重复使用**一组**通用配置**选项，则扩展服务很有用。使用`extends`你可以在一个地方**定义一套通用的服务**选项并从任何地方引用它。
+
+请记住，`links`，`volumes_from`和`depends_on`永远**不会**在使用`extends`的服务之间共享。这些例外存在以**避免隐式依赖性**。您始终在本地定义`links`和`volumes_from`。这可以确保在读取当前文件时，服务之间的**依赖关系清晰可见**。在本地定义这些也确保对引用文件的更改**不会破坏**任何内容。
+
+### 理解扩展配置
+
+---
+
+在`docker-compose.yml`定义任何服务时，可以声明正在扩展另一个服务，如下所示：
+
+```yaml
+web:
+  extends:
+    file: common-services.yml
+    service: webapp
+```
+
+这指示Compose重新使用`common-services.yml`文件中`webapp`定义的服务的配置。假设`common-services.yml` 看起来像这样：
+
+```yaml
+webapp:
+  build: .
+  ports:
+    - "8000:8000"
+  volumes:
+    - "/data"
+```
+
+在这种情况下，可以得到与使用与`web`直接定义的相同`build`，`ports`和`volumes`配置值编写`docker-compose.yml`完全相同的结果。
+
+可以进一步在本地定义（或重新定义）配置 `docker-compose.yml`：
+
+```yaml
+web:
+  extends:
+    file: common-services.yml
+    service: webapp
+  environment:
+    - DEBUG=1
+  cpu_shares: 5
+
+important_web:
+  extends: web
+  cpu_shares: 10
+```
+
+还可以编写其他服务并将`web`服务链接到它们：
+
+```yaml
+web:
+  extends:
+    file: common-services.yml
+    service: webapp
+  environment:
+    - DEBUG=1
+  cpu_shares: 5
+  links:
+    - db
+db:
+  image: postgres
+```
+
+### 示例参考
+
+---
+
+当有多个具有通用配置的服务时，扩展单个服务很有用。下面的例子是一个包含两个服务的Compose应用程序：一个`Web`应用程序和一个队列工作者。这两个服务使用**相同的代码库并共享许多配置**选项。
+
+在**common.yml中**我们定义了通用配置：
+
+```yaml
+app:
+  build: .
+  environment:
+    CONFIG_FILE_PATH: /code/config
+    API_KEY: xxxyyy
+  cpu_shares: 5
+```
+
+在**docker-compose.yml中，**我们定义了使用通用配置的具体服务：
+
+```yaml
+webapp:
+  extends:
+    file: common.yml
+    service: app
+  command: /code/run_web_app
+  ports:
+    - 8080:8080
+  links:
+    - queue
+    - db
+
+queue_worker:
+  extends:
+    file: common.yml
+    service: app
+  command: /code/run_worker
+  links:
+    - queue
+```
+
+### 添加和覆盖配置
+
+---
+
+将原始服务的复制配置**复制到本地服务器**。如果在原始服务和本地服务中都定义了配置选项，则本地值**将替换**或**扩展**原始值。
+
+对于单值选项`image`，`command`或者`mem_limit`，新值替换旧值。
+
+```yaml
+# original service
+command: python app.py
+
+# local service
+command: python otherapp.py
+
+# result，被覆盖
+command: python otherapp.py
+```
+
+> `build` & `image`在 `compose v1` 中 <br/>在构建和映像的情况下，如果使用Compose文件格式的版本1，则在本地服务中使用一个选项会导致Compose放弃在原始服务中定义的其他选项。<br/>例如，如果原始服务定义`image: webapp`并且本地服务定义，`build: .`那么生成的服务有一个 `build: .`和没有`image`选项。<br/>这是**因为`build`和`image`不能在版本1文件中一起使用**。
+
+对于**多值的选项** `ports`，`expose`，`external_links`，`dns`， `dns_search`，和`tmpfs`，compose会将两组值进行组合连接：
+
+```yaml
+# original service
+expose:
+  - "3000"
+
+# local service
+expose:
+  - "4000"
+  - "5000"
+
+# result，拼接一起
+expose:
+  - "3000"
+  - "4000"
+  - "5000"
+```
+
+在`environment`，`labels`，`volumes`，和`devices`的情况下，**优先使用本地**定义的值编写“合并”条目。对于`environment`和`labels`，**环境变量或标签名称**决定使用哪个值：
+
+```yaml
+# original service
+environment:
+  - FOO=original
+  - BAR=original
+
+# local service
+environment:
+  - BAR=local
+  - BAZ=local
+
+# result
+environment:
+  - FOO=original
+  - BAR=local # 被合并
+  - BAZ=local
+```
+
+`volumes`和`devices`的条目使用容器中的装载路径进行合并：
+
+```yaml
+# original service
+volumes:
+  - ./original:/foo
+  - ./original:/bar
+
+# local service
+volumes:
+  - ./local:/bar
+  - ./local:/baz
+
+# result
+volumes:
+  - ./original:/foo # 被合并
+  - ./local:/bar
+  - ./local:/baz
+```
+
+# compose 网络
+
+> **提示**：只有在使用Compose文件格式的**版本2或更高版本**时，本文才适用。网络功能**不支持版本1**（传统）compose文件。
+
+默认情况下，Compose会为应用程序设置一个网络。服务的每个容器**都加入默认网络**，并且该网络上的**其他容器都可以访问它们**，并且可以**通过与容器名称相同的主机名**来**发现**它们。
+
+> **注意**：根据**项目名称**为应用程序的**网络**提供了一个名称，该名称基于**所在目录的名称**。可以使用`--project-name`标志或`COMPOSE_PROJECT_NAME`环境变量覆盖项目名称。
+
+例如，假设应用程序位于一个名为`myapp`的目录中，并且`docker-compose.yml`如下所示：
+
+```yaml
+version: "3"
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+  db:
+    image: postgres
+    ports:
+      - "8001:5432"
+```
+
+运行时`docker-compose up`，会发生以下情况：
+
+1. 被调用的网络`myapp_default`被创建。
+2. 容器是使用`web`配置创建的。它以名字`web`加入网络`myapp_default` 。
+3. 容器是使用`db`配置创建的。它以名字 `db`加入网络`myapp_default`。
+
+> **在v2.1 +中，覆盖网络总是可以 attachable**<br/>从compose文件格式2.1开始，覆盖网络总是被创建可 `attachable`，并且这是**不可配置**的。这意味着**独立容器可以连接到覆盖网络**。<br/>在compose文件格式3.x中，可以选择将`attachable`属性设置为`false`。
+
+每个容器现在可以查找主机名`web`或`db`，并获**取适当的容器的IP地址**。 例如，`web`应用程序代码可以连接到URL `postgres://db:5432`并开始使用Postgres数据库。
+
+注意`HOST_PORT`和`CONTAINER_PORT`之间的区别很重要。在上面的例子中，对于`db`，`HOST_PORT`是`8001`，而容器端口是`5432`（postgres 默认值）。联网的服务到服务通信使用`CONTAINER_PORT`。**当`HOST_PORT`被定义时，该服务也可以在集群外访问**。
+
+在`Web`容器中，连接到`db`的连接字符串看起来像`postgres://db:5432`，并且从主机连接字符串看起来像`postgres://{DOCKER_IP}:8001`。
+
+## 更新容器
+
+如果对服务进行配置更改并运行`docker-compose up`以更新它，则**旧容器将被删除**，并且新容器将以**不同的IP地址**加入网络，但**名称相同**。正在运行的容器可以**查找该名称**并连接到**新地址**，但**旧地址停止工作**。
+
+如果有任何容器连接到旧容器，它们将关闭。检测这种情况是容器的责任，再次查找名称并重新连接。
+
+## 链接
+
+链接允许定义**额外的别名**，通过它可以**从另一个服务访问服务**。他们不需要**启用服务**进行通信。 默认情况下，任何服务都可以以该**服务的名称到达任何其他服务**。在以下示例中，可通过主机名`db`和数据库从`Web`访问`db`：
+
+```yaml
+version: "3"
+services:
+
+  web:
+    build: .
+    links:
+      - "db:database"
+  db:
+    image: postgres
+```
+
+## 多主机网络
+
+> **注意**：多主机网络仅在针对传统Swarm集群时才起作用。
+
+在将Compose应用程序部署到Swarm集群时，可以使用**内置的`overlay`覆盖驱动**程序启用容器之间的多主机通信，而不必更改Compose文件或应用程序代码。
+
+请参阅多主机网络入门以了解如何设置Swarm群集。群集**默认使用覆盖驱动程序**，但如果您愿意，可以明确指定它。请参阅下文了解如何执行此操作。
+
+## 使用自定义网络
+
+可以**使用顶级`networks`指定自己的网络**，而不只是使用默认的应用程序网络。这使你**可以创建更复杂的拓扑网络并指定[自定义网络驱动程序](https://docs.docker.com/engine/extend/plugins_network/)和选项。还可以使用它将服务连接到不受Compose管理的外部创建的网络**。
+
+每个服务都可以使用**服务级** `networks`来指定要连接的网络，引用**顶级** `networks`下的条目的名称列表。
+
+以下是定义两个自定义网络的示例compose文件。该`proxy`服务与`db`服务是隔离的，因为它们**不共享**网络。只能`app`与两者通话。
+
+```yaml
+version: "3"
+services:
+
+  proxy:
+    build: ./proxy
+    networks:
+      - frontend
+  app:
+    build: ./app
+    networks:
+      - frontend
+      - backend
+  db:
+    image: postgres
+    networks:
+      - backend
+
+networks:
+  frontend:
+    # Use a custom driver
+    driver: custom-driver-1
+  backend:
+    # Use a custom driver which takes special options
+    driver: custom-driver-2
+    driver_opts:
+      foo: "1"
+      bar: "2"
+```
+
+可以通过为每个连接的网络设置[ipv4_address和ipv6_address](https://docs.docker.com/compose/compose-file/#ipv4-address-ipv6-address)来为网络**配置静态IP**地址。
+
+有关可用网络配置选项的完整详细信息，请参阅以下参考资料：
+
+- [顶级`networks`](https://docs.docker.com/compose/compose-file/#network-configuration-reference)
+- [服务级别`networks`](https://docs.docker.com/compose/compose-file/#networks)
+
+## 配置默认网络
+
+除了指定自己的网络外，还可以通过在名为`default`的`networks`下定义条目来更改应用程序范围的默认网络的设置：
+
+```yaml
+version: "3"
+services:
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+  db:
+    image: postgres
+
+networks:
+  default:
+    # Use a custom driver
+    driver: custom-driver-1
+```
+
+## 使用预先存在的网络
+
+如果希望容器加入预先存在的网络，请使用以下[`external`选项](https://docs.docker.com/compose/compose-file/#network-configuration-reference)：
+
+```
+networks:
+  default:
+    external:
+      name: my-pre-existing-network
+```
+
+与试图创建名为`[projectname] _default`的网络，compose查找名为`my-pre-existing-network`的网络，并将应用的容器连接到该网络。
+
+# 在生产环境中使用compose
+
+当在开发中使用Compose定义应用程序时，可以使用此定义在不同环境中运行应用程序，如CI、分期和生产。
+
+部署应用程序的最简单方法是在单个服务器上运行它，这与运行开发环境的方式类似。如果要扩展应用程序，可以在Swarm集群上运行Compose应用程序。
+
+### 修改compose文件进行生产
+
+可能需要对应用配置进行更改，以便为生产做好准备。这些更改可能包括：
+
+- **删除**应用程序代码的任何**绑定卷**，以便**代码保留在容器**内，**不能从外部更改**
+- **绑定**到主机上的不同**端口**
+- 以不同方式**设置环境变量**，例如，当您需要减少日志的详细程度或启用电子邮件发送时）
+- 指定**重启策略**`restart: always`以**避免停机**
+- 添加额外的服务，如日志聚合器
+
+出于这个原因，考虑**定义一个额外的Compose文件**，比如说 `production.yml`，它指定了适合生产的配置。此配置文件只需包含想要从**原始compose文件中需要的更改**。额外的compose文件可以应用于`docker-compose.yml`原始文件以创建新配置。
+
+一旦你有第二个配置文件，利用Compose使用它的 `-f`选项：
+
+```sh
+$ docker-compose -f docker-compose.yml -f production.yml up -d
+```
+
+有关更完整的示例，请参阅[使用多个撰写文件](https://docs.docker.com/compose/extends/#different-environments)。
+
+### 部署更改
+
+当更改应用程序代码时，请记住**重新构建图像**并**重新创建应用程序**的容器。要重新部署所调用的`web`服务 ，请使用：
+
+```sh
+$ docker-compose build web
+$ docker-compose up --no-deps -d web
+```
+
+首先重建图像`web`，然后**停止，销毁，并重新创建** 刚才的`web`服务。`--no-deps`标志**防止compose 重新创建任何`web`依赖**的服务。
+
+### 在单台服务器上运行Compose
+
+通过适当设置`DOCKER_HOST`，`DOCKER_TLS_VERIFY`和`DOCKER_CERT_PATH`环境变量，可以使用Compose将应用程序**部署到远程Docker主机**。对于这样的任务，Docker Machine使得管理本地和远程Docker主机变得非常简单，即使不远程部署也是推荐的。
+
+一旦你设置了你的环境变量，所有正常的`docker-compose` 命令都不需要进一步的配置。
+
+### 在Swarm集群上运行Compose
+
+Docker Swarm是一个Docker本地集群系统，它将同一个API公开为一个Docker主机，这意味着可以将Compose用于Swarm实例并在多个主机上运行应用程序。
+
+# 控制服务启动顺序
+
+可以使用`depends_on`选项来控制**服务启动的顺序**。compose始终以**依赖性顺序启动容器**，依赖性由`depends_on`，`links`，`volumes_from`，和`network_mode: "service:..."`。
+
+但是，Compose不会等到容器**准备就绪**，直到它运行。
+
+例如，等待数据库准备就绪的问题实际上只是分布式系统的一个更大问题的一个。在生产中，数据库可能随时无法使用。您的应用程序需要适应这些类型的故障。
+
+要处理这个问题，请设计应用程序以尝试在**发生故障后重新建立与数据库的连接**。如果应用程序重试连接，它最终可以连接到数据库。
+
+最好的解决方案是在你的应用程序代码中**执行检查**，无论是在启动时，还是因任何原因丢失连接。但是，如果您不需要此级别的恢复能力，则可以使用**包装脚本**解决该问题：
+
+- 使用[wait-for](https://github.com/vishnubob/wait-for-it)， [dockerize](https://github.com/jwilder/dockerize)或sh兼容的 [等待工具](https://github.com/Eficode/wait-for)。这些包装脚本可以包含在应用程序的映像中，以轮询主机和端口，直到它接受TCP连接。
+
+  例如，要使用`wait-for-it.sh`或`wait-for`包装服务的命令：
+
+  ```yaml
+  version: "2"
+  services:
+    web:
+      build: .
+      ports:
+        - "80:8000"
+      depends_on:
+        - "db"
+      command: ["./wait-for-it.sh", "db:5432", "--", "python", "app.py"]
+    db:
+      image: postgres
+  ```
+
+  > **提示**：第一个解决方案存在局限性。例如，它不会验证特定服务何时准备就绪。如果向命令添加更多参数，请使用`bash shift`带有循环的命令，如下例所示。
+
+- 或者，编写自己的包装脚本以执行更多特定于应用程序的**运行状况检查**。例如，可能要等到Postgres完全准备好接受命令：
+
+  ```sh
+  #!/bin/bash
+  # wait-for-postgres.sh
+  
+  set -e
+  
+  host="$1"
+  shift
+  cmd="$@"
+  
+  until PGPASSWORD=$POSTGRES_PASSWORD psql -h "$host" -U "postgres" -c '\q'; do
+    >&2 echo "Postgres is unavailable - sleeping"
+    sleep 1
+  done
+  
+  >&2 echo "Postgres is up - executing command"
+  exec $cmd
+  ```
+
+  可以像前面的示例一样将其用作包装脚本，方法是设置：
+
+  ```sh
+  command: ["./wait-for-postgres.sh", "db", "python", "app.py"]
+  ```
+
+# compose 命令行
 
 通过`docker-compose --help`来查看compose命令行的帮助，会显示配置和命令行列表。可以使用`Docker Compose`二进制文件`docker-compose [-f <arg>...][options] [COMMAND][ARGS...]`在Docker容器中构建和管理多个服务。
 
@@ -687,122 +1687,7 @@ Status: Image is up to date for redis:alpine
 
 每个配置都有一个项目名称。如果提供`-p`标志，则可以指定项目名称。如果未指定标志，则`compose`使用**当前目录**名称。项目名称会对应`COMPOSE_PROJECT_NAME`环境变量。
 
-
-
-## 命令行环境变量
-
-有几个环境变量可供配置`Docker Compose`命令行行为。以`DOCKER_`开头的变量与用于配置`docker`命令行客户端的变量相同。如果正在使用`docker-machine`，那么`eval "$(docker-machine env my-docker-vm)"`命令应该将它们设置为正确的值。（在本例中，`my-docker-vm`是创建的机器的名称。）
-
-
-
-### 基本的环境变量
-
----
-
-### COMPOSE_PROJECT_NAME
-
-设置项目名称，在启动时，此值将与服务名称一起预先添加到容器中。例如，如果你的项目名称为`myapp`，它包括两个服务`db`和`web`，然后compose分别启动名为`myapp_db_1`和`myapp_web_1`的容器。
-
-设置是可选的，如果不设置此项，则`COMPOSE_PROJECT_NAME` 默认为项目目录的基本名称。另请参阅`-p`命令行选项。
-
-### COMPOSE_FILE
-
-指定compose文件的路径。如果未提供，则compose会在当前目录中查找名为`docker-compose.yml`的文件，然后依次查找每个父目录，直到找到该名称的文件。
-
-此变量支持多个由路径分隔符分隔的Compose文件（在Linux和MacOS上，路径分隔符是`:`在Windows上`;`）。例如：`COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml`。路径分隔符也可以使用自定义`COMPOSE_PATH_SEPARATOR`。
-
-### COMPOSE_API_VERSION
-
-`Docker API`仅支持来自特定版本的客户端的请求。如果使用 `docker-compose`收到`client and server don't have same version`错误，可以通过设置此环境变量来解决此错误，设置版本值以匹配服务器版本。
-
-设置此变量解决需要临时运行客户端和服务器版本之间不匹配的情况。例如如果您可以升级客户端，但需要等待升级服务器。
-
-使用此变量和已知的不匹配的版本，会阻止某些Docker功能正常工作。功能失败将取决于Docker客户端和服务器版本。出于这个原因，使用此变量集运行仅用作解决方法，并且不受官方支持。
-
-如果遇到使用此设置运行的问题，请通过**升级解决不匹配问题并删除此设置**，以查看通知是否解决了问题。
-
-### DOCKER_HOST
-
-设置`docker`守护进程的`URL `。与Docker客户端一样，默认为`unix:///var/run/docker.sock`。
-
-### DOCKER_TLS_VERIFY
-
-当设置为除空字符串之外的任何其他字符时，都将启用与`docker`守护程序`TLS`的通信。
-
-### DOCKER_CERT_PATH
-
-配置用于TLS验证的`ca.pem`，`cert.pem`以及`key.pem`文件的路径。默认为`~/.docker`。
-
-### COMPOSE_HTTP_TIMEOUT
-
-配置`docker`守护进程的请求在`compose`认为失败之前允许挂起的时间（以秒为单位）。默认为`60`秒。
-
-### COMPOSE_TLS_VERSION
-
-配置哪些`TLS`版本用于与docker守护进程的通信。默认为`TLSv1`。支持的值是：`TLSv1`, `TLSv1_1`, `TLSv1_2`。
-
-### COMPOSE_CONVERT_WINDOWS_PATHS
-
-在卷定义中启用从`Windows`风格到`unix`风格的路径转换。`docker`和`docker toolbox`的用户应该始终设置这个。默认值为0，支持的值：`true`或`1 `启用，`false`或`0 `禁用。
-
-### COMPOSE_PATH_SEPARATOR
-
-如果设置`COMPOSE_FILE`则使用此字符作为路径分隔符，来分隔环境变量的值。
-
-### COMPOSE_FORCE_WINDOWS_HOST
-
-如果设置了，则假定主机路径是`Windows`路径，则使用短语法的卷声明将被解析，即使`compose`正在基于`Unix`的系统上运行。支持的值：`true`或`1`启用，`false`或`0`禁用。
-
-### COMPOSE_IGNORE_ORPHANS
-
-如果设置，compose不会尝试检测孤立项目容器。支持的值：`true`或`1`启用，`false`或`0`禁用。
-
-### COMPOSE_PARALLEL_LIMIT
-
-设置compose可以并行执行的操作数量的限制。默认值是`64`，可能不会低于`2`。
-
-### COMPOSE_INTERACTIVE_NO_CLI
-
-如果设置，compose不会尝试使用`docker cli`进行交互式运行和执行操作。此选项在上述操作需要`cli`的窗口中不可用。支持：`true`或`1`启用，`false`或`0`禁用。
-
-
-
-### 在文件中配置环境变量
----
-
-compose支持在执行`docker-compose`命令（当前工作目录）的文件夹中，建立名为`.env`的环境配置文件中声明默认环境变量。
-
-#### 基本语法规则
-
-这些语法规则适用于`.env`文件：
-
-- compose期望`.env`文件中的每一行都是`VAR=VAL`格式。
-- 开头的行`#`被处理为注释并被忽略。
-- 空白行被忽略。
-- 没有特殊的引号处理。这意味着 **它们是VAL的一部分**。
-
-
-#### compose 文件和命令行变量
-
-在此定义的环境变量用于Compose文件中的[变量替换](https://docs.docker.com/compose/compose-file/#variable-substitution)，也可用于定义以下[CLI变量](https://docs.docker.com/compose/reference/envvars/)：
-
-- `COMPOSE_API_VERSION`
-- `COMPOSE_CONVERT_WINDOWS_PATHS`
-- `COMPOSE_FILE`
-- `COMPOSE_HTTP_TIMEOUT`
-- `COMPOSE_TLS_VERSION`
-- `COMPOSE_PROJECT_NAME`
-- `DOCKER_CERT_PATH`
-- `DOCKER_HOST`
-- `DOCKER_TLS_VERIFY`
-
-运行时环境中的值始终会覆盖`.env`文件中定义的值。同样，通过命令行参数传递的值最优先。
-
-在`.env`文件中定义的环境变量在容器中不可见。要设置容器适用的环境变量，请遵循compose中的[主题环境变量](https://docs.docker.com/compose/environment-variables/)中的指导原则，该指南描述了如何将`shell`环境变量传递给容器，如何在compose文件中定义环境变量等等。
-
-
-
-## 命令
+## 基本命令
 
 ### up 装载
 
@@ -1306,7 +2191,7 @@ PID    USER                COMMAND
 
 
 
-# Compose file 应用
+# compose file 详解
 
 使用Compose堆栈文件来实现多容器应用程序，服务定义和集群模式。文件结构参考：
 
@@ -2068,7 +2953,7 @@ services:
 
 ---
 
-下面的子选项（支持`docker compose up`和`docker compose run`）是*不支持*的`docker stack deploy`或`deploy`关键的。
+下面的子选项（支持`docker compose up`和`docker compose run`）是**不支持**的`docker stack deploy`或`deploy`关键字的。
 
 - [build](https://docs.docker.com/compose/compose-file/#build)
 - [cgroup_parent](https://docs.docker.com/compose/compose-file/#cgroup_parent)
@@ -2085,4 +2970,14 @@ services:
 - [userns_mode](https://docs.docker.com/compose/compose-file/#userns_mode)
 
 > **提示：**请参阅关于[如何为服务，群集和docker-stack.yml文件配置卷](https://docs.docker.com/compose/compose-file/#volumes-for-services-swarms-and-stack-files)的部分。支持卷*，*但要与群集和服务一起使用，它们必须配置为命名卷或与限制为可访问必需卷的节点的服务相关联
+
+
+
+
+
+
+
+
+
+
 

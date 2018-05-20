@@ -2,9 +2,49 @@
 
 [TOC]
 
+# 概述
+
+## 什么是 Docker Machine 
+
+Docker Machine是一个工具，可让你在虚拟主机上安装Docker Engine并使用`docker-machine`命令管理主机。可以使用计算机在本地Mac或Windows，网络，数据中心或云提供商（如Azure，AWS或Digital Ocean）上创建Docker主机。
+
+使用`docker-machine`命令，可以**启动，检查，停止并重新启动托管主机，升级Docker客户端和守护程序，并配置Docker客户端以与主机通信**。
+
+将机器CLI指向正在运行的托管主机，可以直接在主机上运行`docker` 命令。例如，运行`docker-machine env default`指向所调用的`default`主机，按照提示说明完成 `env`设置，然后运行`docker ps`，`docker run hello-world`等等。
+
+## 为什么要使用 Docker Machine
+
+Docker Machine 使你能够在各种类型的Linux上配置多个远程Docker主机。此外，Machine允许在旧版Mac或Windows系统上运行Docker，如前一主题中所述。
+
+Docker Machine有这两个广泛的用例。
+
+- **一个较旧的桌面系统，并希望在Mac或Windows上运行Docker**
+
+  ![Mac和Windows上的Docker机器](https://docs.docker.com/machine/img/machine-mac-win.png)
+
+  如果您主要工作在不符合新版[Docker for Mac](https://docs.docker.com/docker-for-mac/)和[Docker for Windows](https://docs.docker.com/docker-for-windows/)应用程序要求的较旧的Mac或Windows笔记本电脑或台式机上，则您需要在本地运行Docker Machine运行Docker Engine。使用[Docker Toolbox](https://docs.docker.com/toolbox/overview/)安装程序在Mac或Windows上安装Docker Machine可以为本地虚拟机配置Docker Engine，使您能够连接它并运行`docker`命令。
+
+- **想在远程系统上配置Docker主机**
+
+![Docker机器用于配置多个系统](https://docs.docker.com/machine/img/provision-use-case.png)
+
+Docker Engine在Linux系统上本地运行。如果你有一个Linux系统作为你的主系统，并且想运行`docker`命令，你需要做的就是下载并安装Docker Engine。但是，如果想要在网络上，云端或甚至本地配置多个Docker主机的有效方式，则需要Docker Machine。
+
+无论主系统是Mac，Windows还是Linux，都可以在其上安装Docker Machine并使用`docker-machine`命令配置和管理大量Docker主机。它会自动创建主机，并安装Docker引擎，然后配置`docker`客户端。每个托管主机都是Docker主机和配置客户端的组合。
+
+## Docker Engine和Docker Machine有什么区别？
+
+当人们说**Docker**时，他们通常指的是**Docker Engine**，由Docker守护进程组成的客户端 - 服务器应用程序，指定与守护进程交互的接口的`REST API`以及与守护进程对话的命令行界面（CLI）客户端（通过`REST API`包装器）。docker引擎接受`docker`从CLI命令，例如 `docker run <image>`，`docker ps`可以列出运行容器，`docker image ls` 列出镜像等等。
+
+![Docker引擎](https://docs.docker.com/machine/img/engine.png)
+
+**Docker Machine**是一个供应和管理Docker化主机的工具（`Docker Engine`上的主机）。通常，在本地系统上安装Docker Machine。Docker Machine拥有自己的命令行客户端`docker-machine`和Docker Engine客户端`docker`。可以使用Machine在一个或多个虚拟系统上安装**Docker Engine**。这些虚拟系统可以是本地的（例如当使用Machine在Mac或Windows上的`VirtualBox`中安装和运行Docker引擎）或远程（如当使用Machine在云提供者上配置Docker主机时）。
+
+![码头机](https://docs.docker.com/machine/img/machine.png)
+
+# 创建虚拟机
+
 `docker machine` 如何在本地虚拟机中创建、使用和管理`Docker`主机。
-
-
 
 要运行`Docker`容器需要：
 
@@ -12,13 +52,28 @@
 - 将您的环境切换到新的`VM`
 - 使用`docker`客户端创建，加载和管理容器
 
-一旦你创建一台机器，你可以随时重复使用它。像任何`VirtualBox VM`一样，它在使用之间保持其配置。
+一旦你创建一台机器，你可以随时重复使用它。像任何`VirtualBox VM`一样，它在使用之间保持其配置。这里的示例显示了如何创建和启动计算机，运行`Docker`命令以及使用容器。
 
-这里的示例显示了如何创建和启动计算机，运行`Docker`命令以及使用容器。
+## 安装
 
+下载Docker Machine二进制文件并将其解压到PATH 
 
+如果在**Linux**上**运行**：
 
-# 创建虚拟机
+```sh
+$ base=https://github.com/docker/machine/releases/download/v0.14.0 &&
+  curl -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine &&
+  sudo install /tmp/docker-machine /usr/local/bin/docker-machine
+```
+
+如果使用[Git BASH](https://git-for-windows.github.io/)运行**Windows**，请执行以下操作：
+
+```sh
+$ base=https://github.com/docker/machine/releases/download/v0.14.0 &&
+  mkdir -p "$HOME/bin" &&
+  curl -L $base/docker-machine-Windows-x86_64.exe > "$HOME/bin/docker-machine.exe" &&
+  chmod +x "$HOME/bin/docker-machine.exe"
+```
 
 ## 终端命令窗口
 
@@ -321,9 +376,7 @@ DOCKER_TOOLBOX_INSTALL_PATH=E:\Docker Toolbox
 
   **如果您在`Docker Cloud`上运行群集，则可以重新运行`export` 用于连接群集的命令。**
 
-  ​
-
-
+  
 
 ## 机器启动时默认配置环境变量
 
