@@ -131,7 +131,7 @@ D:\DOCKER\COMPOSE_SAMPLE
 
 
 
-## build 构建
+## `build` 构建
 
 在构建时应用的配置选项。
 
@@ -181,7 +181,7 @@ services:
 
 
 
-### context 上下文
+### `context` 上下文
 
 ---
 
@@ -196,7 +196,7 @@ build:
 
 
 
-### dockerfile 
+### `dockerfile` 
 
 ---
 
@@ -212,7 +212,7 @@ build:
 
 
 
-### args 参数
+### `args` 参数
 
 ---
 
@@ -272,7 +272,7 @@ args:
 
 
 
-### cache_from 缓存
+### `cache_from` 缓存
 
 ---
 
@@ -288,7 +288,7 @@ build:
 
 
 
-### lables 标签
+### `lables` 标签
 
 ---
 
@@ -312,7 +312,7 @@ build:
 
 
 
-### shm_size 分区大小
+### `shm_size` 分区大小
 
 ---
 
@@ -331,7 +331,7 @@ build:
 
 
 
-### target 目标
+### `target` 目标
 
 ---
 
@@ -345,7 +345,7 @@ build:
 
 
 
-## cap_add，cap_drop 添加删除容器
+## `cap_add，cap_drop` 添加删除容器
 
 添加或删除容器功能。请参阅`man 7 capabilities`完整列表。
 
@@ -764,24 +764,24 @@ services:
 - [sysctls](https://docs.docker.com/compose/compose-file/#sysctls)
 - [userns_mode](https://docs.docker.com/compose/compose-file/#userns_mode)
 
-> **提示：**请参阅关于[如何为服务，群集和docker-stack.yml文件配置卷](https://docs.docker.com/compose/compose-file/#volumes-for-services-swarms-and-stack-files)的部分。支持卷*，*但要与群集和服务一起使用，它们必须配置为命名卷或与限制为可访问必需卷的节点的服务相关联
+> **提示**：请参阅关于[如何为服务，群集和docker-stack.yml文件配置卷](https://docs.docker.com/compose/compose-file/#volumes-for-services-swarms-and-stack-files)的部分。支持卷*，*但要与群集和服务一起使用，它们必须配置为命名卷或与限制为可访问必需卷的节点的服务相关联
 
 ## devices 设备
 
-设备映射列表。使用与`--device`Docker客户端创建选项相同的格式。
+设备映射列表。使用方式和`--device`Docker客户端创建选项相同的格式。
 
-```
+```yaml
 devices:
   - "/dev/ttyUSB0:/dev/ttyUSB0"
 ```
 
-> **注意**：当 使用（版本3）Compose文件[在群集模式下部署堆栈](https://docs.docker.com/engine/reference/commandline/stack_deploy/)时，[将](https://docs.docker.com/engine/reference/commandline/stack_deploy/)忽略此选项 。
+> **注意**：当使用（版本3）Compose文件[在群集模式下部署堆栈](https://docs.docker.com/engine/reference/commandline/stack_deploy/)时，[将](https://docs.docker.com/engine/reference/commandline/stack_deploy/)忽略此选项 。
 
 ## depends_on 依赖
 
 服务之间的快速依赖关系，服务依赖关系导致以下行为：
 
-- `docker-compose up`以依赖的顺序启动服务。在下面的例子中，`db`和`redis`在之前启动`web`。
+- `docker-compose up`以**依赖的顺序**启动服务。在下面的例子中，`db`和`redis`在之前启动`web`。
 - `docker-compose up SERVICE`自动包含`SERVICE`依赖关系。在下面的例子中，`docker-compose up web`创建并启动`db`和`redis`。
 
 简单的例子：
@@ -800,13 +800,13 @@ services:
     image: postgres
 ```
 
-> 使用`depends_on`时有几点需要注意：
+> 使用`depends_on`注意事项：
 >
-> - 在启动`web`之前，`depends_on`不会等待`db`和`redis`“准备就绪” - 只有在它们启动之前。如果需要等待服务准备就绪，请参阅控制启动顺序以了解有关此问题的更多信息以及解决此问题的策略。
+> - 在启动`web`之前，`depends_on`不会等待`db`和`redis`“准备就绪” - 只有在它们启动之前。如果需要等待服务准备就绪，请参阅[控制启动顺序](https://docs.docker.com/compose/startup-order/)以了解有关此问题的更多信息以及解决此问题的策略。
 > - 第3版不再支持`condition`的形式`depends_on`。
 > - 使用版本3编排文件[在群集模式下部署堆栈](https://docs.docker.com/engine/reference/commandline/stack_deploy/)`depends_on`时，该选项将被忽略 。
 
-## DNS
+## dns
 
 自定义DNS服务器。可以是单个值或列表。
 
@@ -828,7 +828,7 @@ dns_search:
   - dc2.example.com
 ```
 
-## TMPFS 临时文件系统
+## tmpfs 临时文件系统
 
 在容器中装入一个**临时文件系统**。可以是单个值或列表。
 
@@ -841,7 +841,7 @@ tmpfs:
 
 > **注意**：[在](https://docs.docker.com/engine/reference/commandline/stack_deploy/) 使用（版本3-3.5）compose文件的[群集模式下部署堆栈时，](https://docs.docker.com/engine/reference/commandline/stack_deploy/)忽略此选项 。
 
-在**容器中**装入一个临时文件系统。Size参数以字节为单位指定tmpfs安装的大小。无限制默认。
+在**容器中**装入一个临时文件系统。`size`参数以字节为单位指定`tmpfs`挂载的大小，无限制默认。
 
 ```yaml
  - type: tmpfs
@@ -870,13 +870,13 @@ entrypoint:
     - vendor/bin/phpunit
 ```
 
-> **注意**：`entrypoint`使用`ENTRYPOINT`指令设置**覆盖服务映像上**设置的任何默认入口点，并**清除映像**上的任何默认命令 - 这意味着如果`CMD` Dockerfile中有指令，则会**忽略**它。
+> **注意**：`entrypoint`使用 Dockerfile 的`ENTRYPOINT`指令设置**覆盖服务映像上**设置的任何默认入口点，并**清除映像**上的任何默认命令。这意味着如果Dockerfile中有 `CMD` 指令，则会**忽略**它。
 
 ## env_file 环境变量文件
 
 从文件添加环境变量，可以是单个值或列表。<br/>如果已经指定了Compose文件`docker-compose -f FILE`，则路径 `env_file`相对于compose文件所在的目录。
 
-`environment`部分中 声明的环境变量*会覆盖* `env_file` 的值 - 即使这些值为空或未定义，也是如此。
+`environment`部分中 声明的环境变量**会覆盖**`env_file` 的值， 即使这些值为空或未定义，也是如此。
 
 ```yaml
 env_file: .env
@@ -887,7 +887,7 @@ env_file:
   - /opt/secrets.env
 ```
 
-compose 配置期望`env`文件中的每行都是`VAR=VAL`格式。以开头的行`#`被视为注释并被忽略。空行也被忽略。
+compose 配置期望`env`文件中的每行都是`VAR=VAL`格式。以开头的行`#`被视为注释并被忽略，空行也被忽略。
 
 ```properties
 # Set Rails/Rack environment
@@ -896,7 +896,7 @@ RACK_ENV=development
 
 > **注意**：如果服务指定了[构建](https://docs.docker.com/compose/compose-file/#build)选项，则在构建期间，环境文件中定义的变量*不会*自动显示。使用[args](https://docs.docker.com/compose/compose-file/#args)子选项`build`来定义构建时环境变量。
 
-该值按`VAL`原样使用，根本不作任何修改。例如，如果值被引号包围（如通常是shell变量的情况），则引用将包含在传递给Compose的值中。
+**该值按`VAL`原样使用，根本不作任何修改**。例如，如果值被引号包围（如通常是shell变量的情况），则引用将包含在传递给Compose的值中。
 
 请记住，**列表中文件的顺序在确定分配给多次显示的变量的值时非常重要**。对于文件`a.env`中指定的相同变量并在文件`b.env`中分配了不同的值，如果`b.env`列在下面（之后），则表示`b.env`中的值。例如，在`docker_compose.yml`中给出以下声明：
 
@@ -910,14 +910,14 @@ services:
 
 以下文件：
 
-```
+```yaml
 # a.env
 VAR=1
 ```
 
 和
 
-```
+```yaml
 # b.env
 VAR=hello
 ```
@@ -926,11 +926,11 @@ VAR=hello
 
 ## environment 环境变量
 
-添加环境变量，您可以使用数组或字典。任何布尔值; 真，假，是的，需要用引号括起来以确保它们不被YML解析器转换为True或False。
+添加环境变量，可以使用**数组或字典**。任何boolean值：`True、False、Yes`，需要用**引号括起来以确保它们不被YML解析器转换为True或False**。
 
-只有一个密钥的环境变量会在计算机上运行时解析为它们的值，这对于密钥或主机特定的值可能会有所帮助。
+只有一个环境变量会在计算机上运行时解析为它们的值，这对于主机特定的值可能会有所帮助。
 
-```
+```yaml
 environment:
   RACK_ENV: development
   SHOW: 'true'
@@ -942,4 +942,31 @@ environment:
   - SESSION_SECRET
 ```
 
-> **注意**：如果您的服务指定了[构建](https://docs.docker.com/compose/compose-file/#build)选项，`environment`则在构建过程中定义的变量*不会*自动显示。使用[args](https://docs.docker.com/compose/compose-file/#args)子选项`build`来定义构建时环境变量。
+> **注意**：如果服务指定了[build](https://docs.docker.com/compose/compose-file/#build)选项，`environment`则在构建过程中定义的变量**不会**自动显示。使用[args](https://docs.docker.com/compose/compose-file/#args)子选项`build`来定义构建时环境变量。
+
+## expose 暴露
+
+**公开端口**而不将它们发布到主机，它们只能**被链接服务访问**，**只能指定内部端口**。
+
+```yaml
+expose:
+ - "3000"
+ - "8000"
+```
+
+## external_links 外部链接
+
+链接到在此之外`docker-compose.yml`甚至在Compose之外的容器，特别是对于提供共享或公共服务的容器。 在指定容器名称和链接别名（）时`external_links`遵循与旧选项类似的语义。`links``CONTAINER:ALIAS`
+
+```
+external_links:
+ - redis_1
+ - project_db_1:mysql
+ - project_db_1:postgresql
+```
+
+> **笔记：**
+>
+> 如果您使用的是[第2版或更高版本的文件格式](https://docs.docker.com/compose/compose-file/compose-versioning/#version-2)，则外部创建的容器必须至少连接到与链接到它们的服务相同的网络。[链接](https://docs.docker.com/compose/compose-file/compose-file-v2#links)是遗留选项。我们建议使用[网络](https://docs.docker.com/compose/compose-file/#networks)。
+>
+> 使用（版本3）Compose文件[在群集模式下部署堆栈](https://docs.docker.com/engine/reference/commandline/stack_deploy/)时忽略此选项。
