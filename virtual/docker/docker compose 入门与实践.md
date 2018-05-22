@@ -1207,7 +1207,7 @@ app:
   cpu_shares: 5
 ```
 
-在**docker-compose.yml中，**我们定义了使用通用配置的具体服务：
+在**docker-compose.yml**中，我们定义了使用通用配置的具体服务：
 
 ```yaml
 webapp:
@@ -1664,7 +1664,7 @@ webapp:
 
 `docker-compose.override.yml`文件中的配置将应用于`docker-compose.yml`文件中的值。
 
-### 指定单个 compose 文件路径
+### 指定单个 compose 文件
 
 ---
 
