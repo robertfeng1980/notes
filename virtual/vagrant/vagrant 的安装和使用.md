@@ -1,6 +1,6 @@
 # Vagrant 的安装和使用
 
-* [Vagrant 的安装和使用](#vagrant-%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%                                                                                                                           E7%94%A8)
+* [Vagrant 的安装和使用](#vagrant-%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%E7%94%A8)
 * [安装 Vagrant](#%E5%AE%89%E8%A3%85-vagrant)
 * [Vagrant 基本操作](#vagrant-%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C)
   * [基本命令](#%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4)
@@ -10,10 +10,10 @@
     * [关闭虚拟机](#%E5%85%B3%E9%97%AD%E8%99%9A%E6%8B%9F%E6%9C%BA)
     * [销毁虚拟机](#%E9%94%80%E6%AF%81%E8%99%9A%E6%8B%9F%E6%9C%BA)
   * [高级命令](#%E9%AB%98%E7%BA%A7%E5%91%BD%E4%BB%A4)
-    * [查看虚拟机box文件](#%E6%9F%A5%E7%9C%8B%E8%99%9A%E6%8B%9F%E6%9C%BAbox%E6%9                                                                                                                           6%87%E4%BB%B6)
-    * [查看虚拟机box列表](#%E6%9F%A5%E7%9C%8B%E8%99%9A%E6%8B%9F%E6%9C%BAbox%E5%8                                                                                                                           8%97%E8%A1%A8)
+    * [查看虚拟机box文件](#%E6%9F%A5%E7%9C%8B%E8%99%9A%E6%8B%9F%E6%9C%BAbox%E6%96%87%E4%BB%B6)
+    * [查看虚拟机box列表](#%E6%9F%A5%E7%9C%8B%E8%99%9A%E6%8B%9F%E6%9C%BAbox%E5%88%97%E8%A1%A8)
     * [删除虚拟机 box](#%E5%88%A0%E9%99%A4%E8%99%9A%E6%8B%9F%E6%9C%BA-box)
-    * [查看已下载的虚拟机box](#%E6%9F%A5%E7%9C%8B%E5%B7%B2%E4%B8%8B%E8%BD%BD%E7%                                                                                                                           9A%84%E8%99%9A%E6%8B%9F%E6%9C%BAbox)
+    * [查看已下载的虚拟机box](#%E6%9F%A5%E7%9C%8B%E5%B7%B2%E4%B8%8B%E8%BD%BD%E7%9A%84%E8%99%9A%E6%8B%9F%E6%9C%BAbox)
     * [打包虚拟机 box](#%E6%89%93%E5%8C%85%E8%99%9A%E6%8B%9F%E6%9C%BA-box)
   * [配置选项](#%E9%85%8D%E7%BD%AE%E9%80%89%E9%A1%B9)
     * [端口映射转发](#%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E8%BD%AC%E5%8F%91)
@@ -75,7 +75,7 @@ Vagrant 基本操作
   添加一个box在远程服务器上，程序会自动到这个地址下载。然后添加这个box到虚拟机上名称为`mybox`
 
 
-- **添加一个远程现有的`box` ** 
+- **添加一个远程现有的`box`** 
 
   ```shell
   $ vagrant init mybox https://boxes.company.com/my-project.box
@@ -83,7 +83,7 @@ Vagrant 基本操作
 
   上面的`mybox`是虚拟机名称，后面的网址是远程的虚拟机文件
 
-  ​
+  
 
 ### 启动虚拟机
 
@@ -120,7 +120,7 @@ Vagrant 基本操作
 
   云镜像仓库：` cloud-images.ubuntu.com`<br/>上面的网址都可以打开看看，你就明白了`Vagrant`是如何去下载、匹配文件的。<br/>`vagrant up`这个命令会默认使用`Virtualbox`，如果需要使用其他的虚拟机产品可以设置`vagrant up --provider hyperv` 这里的hyperv是一个虚拟机产品，如：`VMware`、`Virtualbox`
 
-  ​
+  
 
 ### 连接虚拟机
 
@@ -157,6 +157,8 @@ Vagrant 基本操作
 
 
 
+
+
 ### 关闭虚拟机
 
 ---
@@ -164,6 +166,8 @@ Vagrant 基本操作
 - **关闭虚拟机 `vagrant halt`**
 
   关闭正在运行的虚拟机，当你的工作目录不在虚拟机目录下 ` vagrant.exe halt ID`
+
+
 
 
 
