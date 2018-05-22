@@ -1,10 +1,31 @@
 # Vagrant 的安装和使用
 
-[TOC]
+* [Vagrant 的安装和使用](#vagrant-%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%                                                                                                                           E7%94%A8)
+* [安装 Vagrant](#%E5%AE%89%E8%A3%85-vagrant)
+* [Vagrant 基本操作](#vagrant-%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C)
+  * [基本命令](#%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4)
+    * [创建虚拟机](#%E5%88%9B%E5%BB%BA%E8%99%9A%E6%8B%9F%E6%9C%BA)
+    * [启动虚拟机](#%E5%90%AF%E5%8A%A8%E8%99%9A%E6%8B%9F%E6%9C%BA)
+    * [连接虚拟机](#%E8%BF%9E%E6%8E%A5%E8%99%9A%E6%8B%9F%E6%9C%BA)
+    * [关闭虚拟机](#%E5%85%B3%E9%97%AD%E8%99%9A%E6%8B%9F%E6%9C%BA)
+    * [销毁虚拟机](#%E9%94%80%E6%AF%81%E8%99%9A%E6%8B%9F%E6%9C%BA)
+  * [高级命令](#%E9%AB%98%E7%BA%A7%E5%91%BD%E4%BB%A4)
+    * [查看虚拟机box文件](#%E6%9F%A5%E7%9C%8B%E8%99%9A%E6%8B%9F%E6%9C%BAbox%E6%9                                                                                                                           6%87%E4%BB%B6)
+    * [查看虚拟机box列表](#%E6%9F%A5%E7%9C%8B%E8%99%9A%E6%8B%9F%E6%9C%BAbox%E5%8                                                                                                                           8%97%E8%A1%A8)
+    * [删除虚拟机 box](#%E5%88%A0%E9%99%A4%E8%99%9A%E6%8B%9F%E6%9C%BA-box)
+    * [查看已下载的虚拟机box](#%E6%9F%A5%E7%9C%8B%E5%B7%B2%E4%B8%8B%E8%BD%BD%E7%                                                                                                                           9A%84%E8%99%9A%E6%8B%9F%E6%9C%BAbox)
+    * [打包虚拟机 box](#%E6%89%93%E5%8C%85%E8%99%9A%E6%8B%9F%E6%9C%BA-box)
+  * [配置选项](#%E9%85%8D%E7%BD%AE%E9%80%89%E9%A1%B9)
+    * [端口映射转发](#%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E8%BD%AC%E5%8F%91)
+    * [共享挂载目录](#%E5%85%B1%E4%BA%AB%E6%8C%82%E8%BD%BD%E7%9B%AE%E5%BD%95)
+    * [provision](#provision)
+    * [网络设置](#%E7%BD%91%E7%BB%9C%E8%AE%BE%E7%BD%AE)
+    * [虚拟机提供商](#%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%8F%90%E4%BE%9B%E5%95%86)
+    * [配置结果示例](#%E9%85%8D%E7%BD%AE%E7%BB%93%E6%9E%9C%E7%A4%BA%E4%BE%8B)
+* [命令行汇总](#%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%B1%87%E6%80%BB)
+* [参考资料](#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99)
 
 `vagrant` 工具就是一个用命令行和脚本的方式，帮你创建虚拟机和安装虚拟机里面的软件的一个工具。并且它支持把安装好的环境进行打包成`*.box`然后在其他机器上再通过vagrant很方便的添加到机器上。 
-
-
 
 安装 Vagrant
 ===
@@ -13,7 +34,7 @@
 
 选择适合电脑的版本，安装完成后重启电脑
 
-​
+
 
 Vagrant 基本操作
 ===
@@ -54,7 +75,7 @@ Vagrant 基本操作
   添加一个box在远程服务器上，程序会自动到这个地址下载。然后添加这个box到虚拟机上名称为`mybox`
 
 
-- **添加一个远程现有的`box`  **
+- **添加一个远程现有的`box` ** 
 
   ```shell
   $ vagrant init mybox https://boxes.company.com/my-project.box
@@ -151,9 +172,9 @@ Vagrant 基本操作
 
 ---
 
-- **删除销毁虚拟机 `vagrant destroy` **
+- **删除销毁虚拟机 `vagrant destroy`**
 
-  **该操作只会删除虚拟机，不会删除虚拟机对应的`box` **
+  **该操作只会删除虚拟机，不会删除虚拟机对应的`box`**
 
   ​
 
