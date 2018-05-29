@@ -1,11 +1,7 @@
 # hyperledger fabric 建立你的第一个网络
-
-[TOC]
 > 演示hyperledger fabric的第一个网络示例，帮助了解换hyperledger fabric的运行流程原理和运行环境。
 
-
-
-## 1、运行环境
+# 运行环境
 
 > 以下软件都是在Linux/ Ubuntu 16.04 系统上进行安装，首先请安装好系统。
 
@@ -30,25 +26,25 @@
 
 
 
-### 1.1 cURL 安装
+## cURL 安装
 
 > cURL 是一个下载工具，支持HTTP、HTTPS、FTP、FTPS、DICT、TELNET、LDAP、FILE和GOPHER。利用[URL](https://baike.baidu.com/item/URL)语法在命令行方式下工作的开源文件传输工具。它被广泛应用在[Unix](https://baike.baidu.com/item/Unix)、多种[Linux](https://baike.baidu.com/item/Linux)发行版中，并且有[DOS](https://baike.baidu.com/item/DOS/32025)和[Win32](https://baike.baidu.com/item/Win32)、Win64下的移植版本。
 
-#### 下载cURL
+### 下载cURL
 找到最新的版本 https://curl.haxx.se/download/，下载地址：https://curl.haxx.se/download/curl-7.59.0.tar.xz
 
 ```shell
 wget https://curl.haxx.se/download/curl-7.59.0.tar.xz
 ```
 
-#### 解压
+### 解压
 
 ```shell
 xz -d curl-7.59.0.tar.xz
 tar -C /opt/ -xvf curl-7.59.0.tar
 ```
 
-#### 安装
+### 安装
 
 ```shell
 cd curl-7.59.0/
@@ -61,13 +57,11 @@ cd curl-7.59.0/
  make install
 ```
 
-
-
-## 2、下载和运行示例代码
+# 下载和运行示例代码
 
 > 将示例代码下载下来，并且解压安装到 `opt/fabric-samples`目录下
 
-### 下载代码
+## 下载代码
 
 ```shell
 git clone -b master https://github.com/hyperledger/fabric-samples.git
@@ -80,7 +74,7 @@ wget https://github.com/hyperledger/fabric/blob/master/scripts/bootstrap.sh
 
 
 
-### 运行示例
+## 运行示例
 
 **生成必要的二进制文件和配置文件**
 
@@ -128,7 +122,7 @@ cd /opt/fabric-samples/first-network
 
 
 
-## 3、Crypto 加密器的使用
+# Crypto 加密器的使用
 
 > 加密器会为我们生成MSP必须的证书和秘钥（x509证书和签名密钥），这些证书是身份的代表，它允许我们的实体在交易时进行验证身份和签名。
 >
