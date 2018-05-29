@@ -25,24 +25,75 @@
 * [命令行汇总](#%E5%91%BD%E4%BB%A4%E8%A1%8C%E6%B1%87%E6%80%BB)
 * [参考资料](#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99)
 
-`vagrant` 工具就是一个用命令行和脚本的方式，帮你创建虚拟机和安装虚拟机里面的软件的一个工具。并且它支持把安装好的环境进行打包成`*.box`然后在其他机器上再通过vagrant很方便的添加到机器上。 
+# 概述
+
+Vagrant是为所有人设计的，作为创建虚拟环境的最简单快捷的方式。Vagrant是一款用于在单个工作流程中构建和管理虚拟机环境的工具。 凭借易于使用的**工作流程**和专注于**自动化**，Vagrant降低了开发环境设置时间，提高了产品开发效率。
+
+Vagrant提供易于配置，可重复使用的便携式工作环境，构建于业界标准技术之上，并由单一一致的工作流程控制，帮助您最大限度地提高您和团队的生产力和灵活性。
+
+为了达到它的效率，vagrant 站在巨人的肩膀上。计算机配置在VirtualBox，VMware，AWS或[任何其他提供商](https://www.vagrantup.com/docs/providers/)之上 。然后使用行业标准 [配置工具](https://www.vagrantup.com/docs/provisioning/) （如`shell`脚本，`Chef`或`Puppet`）可以自动在虚拟机上安装和配置软件。
+
+`vagrant` 工具就是一个用命令行和脚本的方式，帮你创建虚拟机和安装虚拟机里面的软件的一个工具。并且它支持把安装好的环境进行打包成`*.box`，然后在其他机器上再通过vagrant很方便的添加到机器上。 
+
+## 优点
+
++ 适合所有人，创建虚拟机最简单快捷
++ 专注于**工作流程**和专注于**自动化**
++ 降低了开发环境设置时间，提高了产品开发效率。提高团队的生产力和灵活性
++ 易于配置，可重复使用的便携式工作环境
 
 安装 Vagrant
 ===
 
 下载安装文件：https://www.vagrantup.com/downloads.html
 
-选择适合电脑的版本，安装完成后重启电脑
+选择适合电脑的版本，安装完成后重启电脑。重启后使用命令`vagrant version`检测安装
 
-
+```sh
+$ vagrant version
+```
 
 Vagrant 基本操作
 ===
 ## 基本命令
 
-**介绍`box`的创建、启动、关闭、删除、连接**
+```sh
+$ vagrant list-commands
+# 以下是所有可用的Vagrant命令和简要的列表
 
-
+box             # 管理box：安装，拆卸等
+cap             # 检查和执行能力
+destroy         # 停止并删除虚拟机器的所有痕迹
+docker-exec     # 附加到已经运行的docker容器
+docker-logs     # 输出来自Docker容器的日志
+docker-run      # 在容器的上下文中运行一次性命令
+global-status   # 输出此用户的虚拟机环境的状态
+halt            # 停止虚拟机
+help            # 显示子命令的帮助
+init            # 通过创建一个Vagrantfile来初始化一个新的Vagrant环境
+list-commands   # 输出所有可用的Vagrant子命令，甚至是非主要的子命令
+login           # 登录HashiCorp的Vagrant Cloud
+package         # 将一个虚拟机包装到一个盒子里
+plugin          # 管理插件：安装，卸载，更新等
+port            # 显示有关访客端口映射的信息
+powershell      # 通过PowerShell远程连接到机器
+provider        # 显示此环境的提供者，VirtualBox，VMware，AWS
+provision       # 重新执行上次命令以继续从上次失败的位置继续运行
+push            # 会将此环境中的代码部署到配置的目标
+rdp             # 通过RDP连接到机器
+reload          # 重新启动vagrant机器，加载新的Vagrantfile配置
+resume          # 恢复暂停的 vagrant machine
+rsync           # 同步rsync同步文件夹到远程机器
+rsync-auto      # 在文件更改时自动同步rsync同步文件夹
+snapshot        # 管理快照：保存，恢复等。
+ssh             # 通过SSH连接到机器
+ssh-config      # 输出OpenSSH有效配置以连接到机器
+status          # 输出虚拟机的状态
+suspend         # 挂机
+up              # 启动并provisions虚拟机环境
+validate        # 验证Vagrantfile
+version         # 打印当前和最新的Vagrant版本
+```
 
 ### 创建虚拟机
 
@@ -299,7 +350,7 @@ end
 
 - `provision` 规定虚拟机运行一段特定的 **命令或脚本**。简单地说，`provision`即通过使用某些工具自动地、批量地为机器安装软件以及配置系统，它省去了人工安装和配置系统时的重复性和易错性，当然还享受了计算机与生俱来的速度。Vagrant提供多种方式对虚拟机进行`provision`，包括`Shell`、`Chef`、`Puppet`和`Ansible`等。以`Shell`为例，既可以通过直接在`Vagrantfile`中编写`Shell`脚本的方式，也可以通过引用外部Shell文件的方式。
 
-  ```shell
+  ```sh
   Vagrant.configure("2") do |config|
     config.vm.provision "shell", inline: "echo hello"
   end
