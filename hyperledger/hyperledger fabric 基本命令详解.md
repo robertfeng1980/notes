@@ -1,6 +1,6 @@
 # HyperLedger Fabric 基本命令详解
 
-# cryptogen 基本命令
+# `cryptogen` 基本命令
 
 ```sh
 $ cryptogen --help
@@ -13,7 +13,7 @@ Commands:
   extend [<flags>]		# 扩展存在的网络    
 ```
 
-## generate 生成加密文件
+## `generate` 生成加密文件
 
 ```sh
 # 生成密钥材料
@@ -104,7 +104,7 @@ crypto_out
 
 也可以调整配置文件，生成不同数量的`Order、Peer、User`的加密文件配置。
 
-## extend 扩展现有网络
+## `extend` 扩展现有网络
 
 扩展网络其实就是在之前的网络的目录中生成新加入的配置加密文件数据
 
@@ -158,7 +158,7 @@ org11.hoojo.csdn.net
 $ tree crypto_out -d -L 4 
 ```
 
-# configtxgen 基本命令
+# `configtxgen` 基本命令
 
 ```sh
 $ configtxgen --help
@@ -173,7 +173,9 @@ $ configtxgen --help
   -profile # 用于生成的configtx.yaml配置文件。 （默认“SampleInsecureSolo”）
 ```
 
-# peer 命令行详解
+# `peer` 命令
+
+`peer`命令有五个不同的子命令，每个子命令都针对不同的类型的主题进行操作。例如，可以使用对等节点通道子命令将对等节点加入通道，或使用`peer chaincode`命令将智能合约代码部署到对等节点。
 
 ```sh
 $ peer --help
@@ -200,11 +202,9 @@ Flags:
 -v, --version            # 显示fabric peer server的版本
 ```
 
-### 版本信息
+## 版本信息
 
----
-
-查询当前镜像版本
+查询当前镜像版本。使用此标志来显示有关**对等节点构建的详细版本信息**。该标志不能应用于**对等节点子命令或其选项**。
 
 ```sh
 $ peer -v
@@ -220,11 +220,12 @@ peer:
   Docker Namespace: hyperledger
 ```
 
-### 日志级别
+## 日志级别
+设置日志级别，该选项设置启动时对等节点的日志记录级别。有六个可选的值：`debug，info，notice，warning，error、critical`。 
 
----
+如果未明确指定日志记录级别，则将其从`CORE_LOGGING_LEVEL`环境变量中取出（如果已设置）。如果`CORE_LOGGING_LEVEL`未设置，则使用文件`sampleconfig/core.yaml `来确定对等节点的日志记录级别。
 
-设置日志级别
+可以通过运行`peer logging getlevel <component-name>`来找到对等节点上特定组件的当前日志记录级别。
 
 ```sh
 # peer logging getlevel <module> [flags]
@@ -236,7 +237,9 @@ $ peer logging getlevel mychannel
 $ peer version --logging-level ERROR
 ```
 
-## peer chaincode 命令
+# `peer chaincode` 命令
+
+peer chaincode命令允许管理员在对等体上执行链式代码相关操作，例如安装，实例化，调用，打包，查询和升级链式代码。
 
 ```sh
 $ peer chaincode --help
@@ -266,13 +269,11 @@ Flags:
       --transient string                    # JSON编码中参数的临时映射
 ```
 
-### list 链码列表
-
----
+## `list` 链码列表
 
 获取通道上的实例化链码或对等节点上安装的链码
 
-#### 语法和选项
+### 语法和选项
 
 ```sh
 Usage:
@@ -284,7 +285,7 @@ Flags:
       --instantiated       # 获取通道上的实例化链码
 ```
 
-#### 示例
+### 示例
 
 ```sh
 # 查询已安装的cc
@@ -302,13 +303,11 @@ Get instantiated chaincodes on channel mychannel:
 Name: marbles, Version: 1.0, Path: github.com/hyperledger/fabric/examples/chaincode/go/marbles02, Escc: escc, Vscc: vscc
 ```
 
-### install 安装
-
----
+## `install` 安装
 
 将指定的链码打包到部署规范中并将其保存在对等节点路径中
 
-#### 语法和选项
+### 语法和选项
 
 ```sh
 Usage:
@@ -322,7 +321,7 @@ Flags:
   -v, --version string   # 指定的chaincode的版本, 在 install/instantiate/upgrade 命令下
 ```
 
-#### 示例
+### 示例
 
 ```sh
 # -o 为 chaincode 的 --orderer选项
@@ -331,13 +330,11 @@ $ peer chaincode install -o orderer.example.com:7050 -n marbles -v 1.0 -p github
 $ peer chaincode install -n mycc -v 1.0 -p github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02
 ```
 
-### instantiate 实例化
-
----
+## `instantiate` 实例化
 
 将指定的链式代码部署到网络中
 
-#### 语法和选项
+### 语法和选项
 
 ```sh
 $ peer chaincode instantiate --help
@@ -356,7 +353,7 @@ Flags:
   -V, --vscc string                 # 用于链码的身份验证系统链码的名称
 ```
 
-#### 示例
+### 示例
 
 ```sh
 # mycc 调用 init 方法，接收两个参数 a、b，具体可以查看链码的代码
@@ -366,13 +363,11 @@ $ peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile $CC_CA -
 $ peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile $CC_CA -C $CHANNEL_NAME -n marbles -v 1.0 -c '{"Args":["init"]}' -P "OR ('Org2MSP.member','Org1MSP.member')"
 ```
 
-### invoke 调用
-
----
+## `invoke` 调用
 
 调用指定的链码
 
-#### 语法和选项
+### 语法和选项
 
 ```sh
 $ peer chaincode invoke --help
@@ -385,7 +380,7 @@ Flags:
   -n, --name string        # 链码的名称
 ```
 
-#### 示例
+### 示例
 
 ```sh
 # a 为 b 交易转账
@@ -395,13 +390,11 @@ $ peer chaincode invoke -o orderer.example.com:7050 --tls --cafile $CC_CA  -C my
 $ peer chaincode invoke -o orderer.example.com:7050 --tls --cafile $CC_CA -C $CHANNEL_NAME -n marbles -c '{"Args":["initMarble","marble1","blue","35","tom"]}'
 ```
 
-### query 查询
-
----
+## `query` 查询
 
 使用指定的链码查询
 
-#### 语法和选项
+### 语法和选项
 
 ```sh
 $ peer chaincode query --help
@@ -417,7 +410,7 @@ Flags:
   -t, --tid string         # 自定义ID生成算法的名称（哈希和解码）例如sha256base64
 ```
 
-#### 示例
+### 示例
 
 ```sh
 # 查询a的账户数据
@@ -427,13 +420,11 @@ $ peer chaincode query -C $CHANNEL_NAME -n marbles -c '{"Args":["readMarble","ma
 Query Result: 7b22636f6c6f72223a22726564222c22646f6354797065223a226d6172626c65222c226e616d65223a226d6172626c6532222c226f776e6572223a22746f6d222c2273697a65223a35307d
 ```
 
-### package 打包
-
----
+## `package` 打包
 
 指定的链码打包
 
-#### 语法和选项
+### 语法和选项
 
 ```sh
 $ peer chaincode package --help
@@ -449,10 +440,9 @@ Flags:
   -p, --path string                 # 链码的路径
   -S, --sign                        # 如果为所有者认可创建CC部署规范包，也可以使用本地MSP进行签名
   -v, --version string              # 指定的chaincode的版本, 在 install/instantiate/upgrade 命令下
-
 ```
 
-#### 示例
+### 示例
 
 ```sh
 $ peer chaincode package -n marbles -p /tmp/marbles_cc -i "OR ('Org2MSP.member','Org1MSP.member')"
