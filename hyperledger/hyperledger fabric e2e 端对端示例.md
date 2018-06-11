@@ -19,7 +19,7 @@
 * [configtxgen 工具](#configtxgen-%E5%B7%A5%E5%85%B7)
   * [它是如何工作的？](#%E5%AE%83%E6%98%AF%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C%E7%9A%84-1)
   * [configtxgen 基本命令](#configtxgen-%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4)
-* [运行shell脚本](#%E8%BF%90%E8%A1%8Cshell%E8%84%9A%E6%9C%AC)
+  * [运行shell脚本](#%E8%BF%90%E8%A1%8Cshell%E8%84%9A%E6%9C%AC)
   * [手动生成配置文件](#%E6%89%8B%E5%8A%A8%E7%94%9F%E6%88%90%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6)
     * [设置平台类型](#%E8%AE%BE%E7%BD%AE%E5%B9%B3%E5%8F%B0%E7%B1%BB%E5%9E%8B)
     * [生成加密证书](#%E7%94%9F%E6%88%90%E5%8A%A0%E5%AF%86%E8%AF%81%E4%B9%A6)
@@ -684,7 +684,7 @@ $ configtxgen --help
   -profile # 用于生成的configtx.yaml配置文件。 （默认“SampleInsecureSolo”）
 ```
 
-# 运行shell脚本
+## 运行shell脚本
 
 确保位于脚本所在的目录`examples/e2e_cli`中。确定创建的通道的名称是唯一的，并用你选择的名称替换`<channel-ID>`参数。如果不提供名称，该脚本将使用默认名称`mychannel`。
 
