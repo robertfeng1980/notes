@@ -991,6 +991,7 @@ $ docker update --restart=on-failure:3 abebf7571666 hopeful_morse
 
 请注意，如果容器以`-rm`选项启动，则无法为其更新重新启动策略。`AutoRemove`和`RestartPolicy`是容器相互排斥。
 
+
 ## * commit 提交
 
 将**容器的文件更改或设置**提交到**新镜像**可能很有用。这允许通过**运行交互式shell来调试容器**，或者将**工作数据集**导出到另一台服务器。一般来说，最好使用`Dockerfiles`以**文件化和可维护**的方式管理镜像。 [详细了解有效的镜像名称和标签](https://docs.docker.com/engine/reference/commandline/tag/)。
@@ -1384,9 +1385,7 @@ A /var/cache/nginx/uwsgi_temp
 
 `docker exec`命令在正在运行的容器中运行新命令。使用`docker exec`启动的命令**仅在容器的主进程**（`PID 1`）正在运行时运行，并且如果**容器重新启动，则不会重新启动该命令**。
 
-命令将在容器的默认目录中运行。如果底层镜像的`Dockerfile`中有`WORKDIR`指令指定的自定义目录，则将使用此目录。
-
-命令应该是可执行文件，链接或引用的命令将不起作用。例如：`docker exec -ti my_container "echo a && echo b"`不会工作，但`docker exec -ti my_container sh -c "echo a && echo b"`会成功执行。
+命令将在容器的默认目录中运行。如果底层镜像的`Dockerfile`中有`WORKDIR`指令指定的自定义目录，则将使用此目录。命令应该是可执行文件，链接或引用的命令将不起作用。例如：`docker exec -ti my_container "echo a && echo b"`不会工作，但`docker exec -ti my_container sh -c "echo a && echo b"`会成功执行。
 
 ### 命令参数选项
 
@@ -1821,7 +1820,7 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 
 
 
-**标签过滤**
+##### 标签过滤
 ---
 ```sh
 # color标签的容器
@@ -1843,7 +1842,7 @@ $ docker ps -a --filter 'exited=137'
 
 ```
 
-**状态过滤**
+##### 状态过滤
 ---
 `status`过滤器的状态相匹配的容器。<br/>可以使用筛选`created`，`restarting`，`running`，`removing`，`paused`，`exited`和`dead`。<br/>例如，要过滤`running`容器：
 
@@ -1852,7 +1851,7 @@ $ docker ps --filter status=running
 $ docker ps --filter status=paused
 ```
 
-**`ancestor`**
+##### `ancestor`
 ---
 `ancestor`过滤器匹配基于它的形象或它的**后代**在容器上。该过滤器支持以下镜像表示形式：
 
@@ -1873,7 +1872,7 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 82a598284012        ubuntu:12.04.5      "top"               3 minutes ago        Up 3 minutes    
 ```
 
-**创建时间**
+##### 创建时间
 ---
 ```sh
 # before过滤器只显示与给定id或名称容器之前创建的容器
@@ -1882,7 +1881,7 @@ $ docker ps -f before=9c3527ed70ce
 $ docker ps -f since=6e63f6ff38b0
 ```
 
-**卷**
+##### 卷
 ---
 `volume`筛选器仅显示装载特定卷或将卷装入特定路径的容器：
 
@@ -1896,7 +1895,7 @@ CONTAINER ID        MOUNTS
 9c3527ed70ce        remote-volume
 ```
 
-**网络**
+##### 网络
 ---
 `network`过滤器仅显示了连接到网络的具有给定名称或ID的容器。
 
@@ -1918,7 +1917,7 @@ $ docker network inspect --format "{{.ID}}" net1
 $ docker ps --filter network=8c0b4110ae930dbe26b258de9bc34a03f98056ed6f27f991d32919bfe401d7c5
 ```
 
-**发布/公开**
+##### 发布/公开
 ---
 `publish`和`expose`过滤器仅显示**已发布或暴露**端口与**给定的端口**号，端口范围，或协议的容器。默认协议是`tcp`没有指定的时候。
 
@@ -2552,6 +2551,634 @@ IMAGE               CREATED             CREATED BY                              
 
 我们可以发现所有图层的名称都是`<missing>`，并且COMMENT有一个新图层`merge`。<br/>测试镜像，检查`/remove_me`是否消失，确保`hello\nworld`处于`/hello`确定`HELLO`envvar的值`world`。
 
+## run 运行镜像
+
+`docker run`命令首先在指定的映像上`creates`一个可写容器层，然后使用指定的`starts`命令启动它。也就是说， `docker run`相当于API `/containers/create`，然后调用 `/containers/(id)/start`。已停止的容器可以`docker start`重新启动，并保持原来的所有更改不变。请参阅`docker ps -a`查看所有容器的列表。
+
+`docker run`命令可以在组合使用`docker commit`，以 [*改变一个容器中运行的命令*](https://docs.docker.com/engine/reference/commandline/commit/)。
+
+### 命令参数选项
+
+---
+
+| 选项，简写                | 默认      | 描述                                                         |
+| ------------------------- | --------- | ------------------------------------------------------------ |
+| `--add-host`              |           | 添加自定义的主机到IP映射（主机：IP）                         |
+| `--attach , -a`           |           | 附加到STDIN，STDOUT或STDERR                                  |
+| `--blkio-weight`          |           | 阻止IO（相对权重），介于10和1000之间，或0禁用（默认值为0）   |
+| `--blkio-weight-device`   |           | 块IO重量（相对设备重量）                                     |
+| `--cap-add`               |           | 添加Linux功能                                                |
+| `--cap-drop`              |           | 删除Linux功能                                                |
+| `--cgroup-parent`         |           | 容器的可选父cgroup                                           |
+| `--cidfile`               |           | 将容器ID写入文件                                             |
+| `--cpu-count`             |           | CPU数量（仅限Windows）                                       |
+| `--cpu-percent`           |           | CPU百分比（仅限Windows）                                     |
+| `--cpu-period`            |           | 限制CPU CFS（完全公平调度程序）期间                          |
+| `--cpu-quota`             |           | 限制CPU CFS（完全公平调度程序）配额                          |
+| `--cpu-rt-period`         |           | [API 1.25+](https://docs.docker.com/engine/api/v1.25/) 以微秒为单位限制CPU实时周期 |
+| `--cpu-rt-runtime`        |           | [API 1.25+](https://docs.docker.com/engine/api/v1.25/) 以微秒为单位限制CPU实时运行时间 |
+| `--cpu-shares , -c`       |           | CPU份额（相对重量）                                          |
+| `--cpus`                  |           | [API 1.25+](https://docs.docker.com/engine/api/v1.25/) CPU数量 |
+| `--cpuset-cpus`           |           | 允许执行的CPU（0-3,0,1）                                     |
+| `--cpuset-mems`           |           | 允许执行的MEM（0-3,0,1）                                     |
+| `--detach , -d`           |           | 在后台运行容器并打印容器ID                                   |
+| `--detach-keys`           |           | 覆盖分离容器的键序列                                         |
+| `--device`                |           | 将主机设备添加到容器                                         |
+| `--device-cgroup-rule`    |           | 将规则添加到cgroup允许的设备列表                             |
+| `--device-read-bps`       |           | 限制设备的读取速率（每秒字节数）                             |
+| `--device-read-iops`      |           | 限制设备的读取速率（每秒IO）                                 |
+| `--device-write-bps`      |           | 限制写入速率（每秒字节数）到设备                             |
+| `--device-write-iops`     |           | 限制写入速率（每秒IO）到设备                                 |
+| `--disable-content-trust` | `true`    | 跳过图像验证                                                 |
+| `--dns`                   |           | 设置自定义DNS服务器                                          |
+| `--dns-opt`               |           | 设置DNS选项                                                  |
+| `--dns-option`            |           | 设置DNS选项                                                  |
+| `--dns-search`            |           | 设置自定义DNS搜索域                                          |
+| `--entrypoint`            |           | 覆盖图像的默认入口点                                         |
+| `--env , -e`              |           | 设置环境变量                                                 |
+| `--env-file`              |           | 读入环境变量文件                                             |
+| `--expose`                |           | 公开一个端口或一系列端口                                     |
+| `--group-add`             |           | 添加其他群组加入                                             |
+| `--health-cmd`            |           | 运行以检查运行状况的命令                                     |
+| `--health-interval`       |           | 运行检查之间的时间（ms \| s \| m \| h）（默认为0）           |
+| `--health-retries`        |           | 需要报告不健康的连续失败                                     |
+| `--health-start-period`   |           | [API 1.29+](https://docs.docker.com/engine/api/v1.29/) 在开始健康重试倒数前，容器要初始化的起始时间段（ms \| s \| m \| h）（默认值为0） |
+| `--health-timeout`        |           | 允许一次检查运行的最长时间（ms \| s \| m \| h）（默认值为0） |
+| `--help`                  |           | 打印用法                                                     |
+| `--hostname , -h`         |           | 容器主机名称                                                 |
+| `--init`                  |           | [API 1.25+](https://docs.docker.com/engine/api/v1.25/) 在容器中运行一个init，用于转发信号并收集进程 |
+| `--interactive , -i`      |           | 即使没有连接，也要保持STDIN打开                              |
+| `--io-maxbandwidth`       |           | 系统驱动器的最大IO带宽限制（仅限Windows）                    |
+| `--io-maxiops`            |           | 系统驱动器的最大IOps限制（仅限Windows）                      |
+| `--ip`                    |           | IPv4地址（例如172.30.100.104）                               |
+| `--ip6`                   |           | IPv6地址（例如，2001：db8 :: 33）                            |
+| `--ipc`                   |           | 使用IPC模式                                                  |
+| `--isolation`             |           | 容器隔离技术                                                 |
+| `--kernel-memory`         |           | 内核内存限制                                                 |
+| `--label , -l`            |           | 在容器上设置元数据                                           |
+| `--label-file`            |           | 阅读标签的行分隔文件                                         |
+| `--link`                  |           | 将链接添加到其他容器                                         |
+| `--link-local-ip`         |           | Container IPv4 / IPv6链路本地地址                            |
+| `--log-driver`            |           | 记录容器的驱动程序                                           |
+| `--log-opt`               |           | 日志驱动选项                                                 |
+| `--mac-address`           |           | 容器MAC地址（例如，92：d0：c6：0a：29：33）                  |
+| `--memory , -m`           |           | 内存限制                                                     |
+| `--memory-reservation`    |           | 内存软限制                                                   |
+| `--memory-swap`           |           | 交换限制等于内存加交换：'-1'以启用无限交换                   |
+| `--memory-swappiness`     | `-1`      | 调整容器内存swappiness（0到100）                             |
+| `--mount`                 |           | 将文件系统挂载附加到容器                                     |
+| `--name`                  |           | 为容器分配一个名称                                           |
+| `--net`                   |           | 将容器连接到网络                                             |
+| `--net-alias`             |           | 为容器添加网络范围的别名                                     |
+| `--network`               |           | 将容器连接到网络                                             |
+| `--network-alias`         |           | 为容器添加网络范围的别名                                     |
+| `--no-healthcheck`        |           | 禁用任何容器指定的HEALTHCHECK                                |
+| `--oom-kill-disable`      |           | 禁用OOM杀手                                                  |
+| `--oom-score-adj`         |           | 调整主机的OOM首选项（从-1000到1000）                         |
+| `--pid`                   |           | 要使用的PID名称空间                                          |
+| `--pids-limit`            |           | 调整容器匹配限制（无限制地设置-1）                           |
+| `--platform`              |           | [实验（守护程序）](https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file)[API 1.32+](https://docs.docker.com/engine/api/v1.32/) 如果服务器具有多平台功能，请设置平台 |
+| `--privileged`            |           | 给这个容器赋予扩展权限                                       |
+| `--publish , -p`          |           | 将容器的端口发布到主机                                       |
+| `--publish-all , -P`      |           | 将所有暴露的端口发布到随机端口                               |
+| `--read-only`             |           | 将容器的根文件系统挂载为只读                                 |
+| `--restart`               | `no`      | 重新启动策略以在容器退出时应用                               |
+| `--rm`                    |           | 当容器退出时自动移除容器                                     |
+| `--runtime`               |           | 运行时用于此容器                                             |
+| `--security-opt`          |           | 安全选项                                                     |
+| `--shm-size`              |           | `/dev/shm`的大小                                             |
+| `--sig-proxy`             | `true`    | 代理接收到进程的信号                                         |
+| `--stop-signal`           | `SIGTERM` | 停止容器的信号                                               |
+| `--stop-timeout`          |           | [API 1.25+](https://docs.docker.com/engine/api/v1.25/) 超时（以秒为单位）停止容器 |
+| `--storage-opt`           |           | 容器的存储驱动程序选项                                       |
+| `--sysctl`                |           | Sysctl选项                                                   |
+| `--tmpfs`                 |           | 挂载一个tmpfs目录                                            |
+| `--tty , -t`              |           | 分配一个伪TTY                                                |
+| `--ulimit`                |           | Ulimit选项                                                   |
+| `--user , -u`             |           | 用户名或UID（格式：`<name | uid> [：<group | gid>]`）        |
+| `--userns`                |           | 要使用的用户名称空间                                         |
+| `--uts`                   |           | UTS命名空间使用                                              |
+| `--volume , -v`           |           | 绑定安装一个卷                                               |
+| `--volume-driver`         |           | 容器的可选卷驱动程序                                         |
+| `--volumes-from`          |           | 从指定容器装载卷                                             |
+| `--workdir , -w`          |           | 容器内的工作目录                                             |
+
+### 示例
+
+---
+
+#### 分配名称和TTY选项 `--name -it`
+
+```sh
+$ winpty docker run --name box -it busybox
+/ # ls
+bin   dev   etc   home  proc  root  sys   tmp   usr   var
+/ # exit 13
+
+$ echo $?
+13
+```
+
+这个例子运行一个`busybox:latest` 图像使用`box`命名的容器。`-it`指示docker分配一个伪TTY连接到容器的`stdin`。 `bash`在容器中创建一个交互式shell。在示例中，`bash`通过输入`exit 13`来退出shell 。此退出代码被传递给`docker run`调用者 ，并记录在`box`容器的元数据中。
+
+#### 提取容器ID `--cidfile`
+
+---
+
+```sh
+$ docker run --cidfile /tmp/docker_test.cid busybox echo "test"
+test
+$ cat /tmp/docker_test.cid
+5e1fd236d25df9c4e90a51d1bdf0ba6d3c302162d3d06c196aa0a3b891ddc602
+```
+
+创建一个容器并打印`test`到控制台。`cidfile` 标志使得Docker尝试创建一个新文件并将容器ID写入到这个文件中。如果文件已经存在，Docker会返回一个错误。Docker在`docker run`退出时会关闭这个文件。
+
+#### 完整的容器功能 `--privileged`
+
+---
+
+```sh
+$ winpty docker run --name box -it busybox
+root@bc338942ef20:/# mount -t tmpfs none /mnt
+mount: permission denied  (are you root?)
+```
+
+会发现**没有权限**，因为默认情况下，大多数具有**潜在危险**的内核功能**都被屏蔽**。 包括`cap_sys_admin`（这是挂载文件系统所必需的）。但是 `--privileged`标志将允许它运行：
+
+```sh
+$ winpty docker run --name box -it --rm --privileged  busybox
+root@50e3f57e16e6:/# mount -t tmpfs none /mnt
+root@50e3f57e16e6:/# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+none            1.9G     0  1.9G   0% /mnt
+```
+
+`--privileged`标志为容器提供了**所有**功能，并且还提升了`device`cgroup控制器执行的**所有**限制。换句话说，**容器可以做主机可以做的几乎所有事情**。这个标志存在允许特殊的用例，比如**在Docker中运行Docker**。
+
+#### 设置工作目录 `-w`
+
+---
+
+```sh
+$ docker run -w /path/to/dir/ -it  busybox pwd
+/path/to/dir
+```
+
+`-w` 让命令在给定的目录里执行，这里是`/path/to/dir/`。如果路径不存在，它将在容器内创建。
+
+#### 为容器设置存储驱动器选项
+
+---
+
+```sh
+$ docker run -it --rm --storage-opt size=1G busybox /bin/bash
+```
+
+`size`选项将在创建时将容器`rootfs`大小设置为`1G`。此选项仅适用于`devicemapper`，`btrfs`，`overlay2`， `windowsfilter`和`zfs`图形驱动程序。对于`devicemapper`，`btrfs`，`windowsfilter`和`zfs`图形驱动程序，用户无法通过的尺寸小于默认尺寸`BaseFS`。对于`overlay2`存储驱动程序，大小选项仅在支持`fs`为`xfs`并使用`pquota`安装选项安装时可用。在这些条件下，用户可以传递小于后备`fs`大小的任何大小。
+
+#### 挂载tmpfs `--tmpfs`
+
+---
+
+```sh
+$ docker run -d --tmpfs /run:rw,noexec,nosuid,size=65536k my_image
+```
+
+`--tmpfs`标志将空`tmpfs`与`rw，noexec，nosuid，size = 65536k`选项一起装载到容器中 
+
+#### 挂载卷 装入卷  `-v， --read-only`
+
+---
+
+```sh
+$ docker run  -v `pwd`:`pwd` -w `pwd` -i -t  busybox pwd
+```
+
+`-v`标志将**当前工作目录挂载到容器**中。在`-w` 让容器在当前的工作目录内执行。`pwd` 会输出当前容器的工作目录。
+
+```sh
+$ docker run -v /doesnt/exist:/foo -w /foo -i -t busybox sh
+```
+
+当绑定挂载卷的主机**目录不存在**时，Docker会自动在主机上**创建此目录**。在上面的例子中，Docker将`/doesnt/exist` 在启动容器之前创建文件夹。
+
+```sh
+$ docker run --read-only -v /icanwrite busybox touch /icanwrite/here
+
+$ docker run --read-only -v /icanwrite busybox sh
+```
+
+卷可以结合使用`--read-only`来控制容器写入文件的位置。`--read-only`标志将容器的根文件系统挂载为**只读**，**禁止写入容器指定卷以外的位置**。
+
+```sh
+$ docker run -ti -v /var/run/docker.sock:/var/run/docker.sock -v /path/to/static-docker-binary:/usr/bin/docker busybox sh
+```
+
+通过绑定`docker unix`套接字和静态链接的docker二进制文件（请参阅[获取linux二进制文件](https://docs.docker.com/engine/installation/binaries/#/get-the-linux-binary)），可以赋予容器完全访问权限，以创建和操作主机的Docker守护进程。
+
+#### 使用--mount标志添加绑定挂载或卷
+
+---
+
+`--mount`标志允许在容器中安装`tmpfs`卷、主机目录和挂载。`--mount`标志支持`-v` 或`--volume`标志支持的大多数选项，但使用不同的语法。即使没有计划弃用`-volume`，建议使用`--mount`。
+
+```sh
+$ docker run --read-only --mount type=volume,target=/icanwrite busybox touch /icanwrite/here
+$ docker run -t -i --mount type=bind,src=/data,dst=/data busybox sh
+```
+
+#### 发布或公开端口 `-p，--expose`
+
+---
+
+```sh
+$ docker run -p 127.0.0.1:80:8080/tcp ubuntu bash
+```
+
+这将`8080`容器的端口绑定到主机`127.0.0.1`的TCP`80`端口上。也可以指定`udp`和`sctp`端口。
+
+```sh
+$ docker run --expose 80 ubuntu bash
+```
+
+暴露`80`容器的端口而不将端口发布到主机系统的接口。 
+
+#### 设置环境变量 `-e，--env，--env-file`
+
+---
+
+```sh
+$ docker run -e MYVAR1 --env MYVAR2=foo --env-file ./env.list ubuntu bash
+```
+
+使用`-e，--env`和`--env-file`标志在运行的容器中设置简单（非数组）的环境变量，或覆盖正在运行的映像的`Dockerfile`中定义的变量。可以在运行容器时定义变量及其值：
+
+```sh
+$ docker run --env VAR1=value1 --env VAR2=value2 busybox env | grep VAR
+VAR1=value1
+VAR2=value2
+```
+
+也可以使用已经`export`到本地环境的变量：
+
+```sh
+export VAR1=value1
+export VAR2=value2
+
+$ docker run --env VAR1 --env VAR2 ubuntu env | grep VAR
+VAR1=value1
+VAR2=value2
+```
+
+在运行命令时，Docker CLI 客户端将**检查变量在本地环境中的值并将其传递给容器**。如果没有提供 `=`赋值，并且变量未在本地环境中`export`，则该变量将不会在容器中进行设置。
+
+也可以**从文件中加载环境变量**。该文件应该使用语法`<variable>=value`（将变量设置为给定值）或 `<variable>`（从本地环境获取值）以及`#`注释。
+
+```sh
+$ cat env.list
+# This is a comment
+VAR1=value1
+VAR2=value2
+USER
+
+$ docker run --env-file env.list ubuntu env | grep VAR
+VAR1=value1
+VAR2=value2
+USER=denis
+```
+
+#### 在容器上设置元数据 `-l，--label，--label-file`
+
+---
+
+标签`label`是将元数据应用于容器的`键=值`对。用两个标签标注容器：
+
+```sh
+$ docker run -l my-label --label com.example.foo=bar ubuntu bash
+```
+
+`my-label`键没有指定值，因此标签默认为空字符串（`""`）。要添加多个标签，请重复标签标志（`-l`或`--label`）。`key=value`必须是**唯一**的，以避免**覆盖**的标签值。如果使用相同的键但指定了不同的值，则每个**后续值都会覆盖前一个值**。Docker 使用提供的最后一个`key=value`。
+
+使用`--label-file`标志从文件加载多个标签。用EOL标记分隔文件中的每个标签。下面的示例从当前目录中的标签文件加载标签：
+
+```sh
+$ docker run --label-file ./labels ubuntu bash
+```
+
+标签文件格式与加载环境变量的格式类似。（与环境变量不同，**标签对容器内运行的进程不可见**。）以下示例说明了标签文件格式：
+
+```sh
+com.example.label1="a label"
+
+# this is a comment
+com.example.label2=another\ label
+com.example.label3
+```
+
+可以通过提供多个`--label-file`标志来加载多个标签文件 。
+
+#### 将容器连接到网络  `--network`
+
+---
+
+当启动容器时，请使用`--network`标志将其连接到网络。将`busybox`容器添加到`my-net`网络。
+
+```sh
+$ docker run -itd --network=my-net busybox
+```
+
+当在用户定义的网络上启动容器时，还可以选择带有`--ip`和`--ip6`标志的容器的IP地址。
+
+```sh
+$ docker run -itd --network=my-net --ip=10.10.9.75 busybox
+```
+
+如果要将正在运行的容器添加到网络，请使用`docker network connect`子命令。
+
+可以将多个容器连接到同一个网络。一旦连接，容器可以很容易地通信，只需要另一个容器的IP地址或名称。对于`overlay`支持多主机连接的网络或自定义插件，连接到相同多主机网络但从不同引擎启动的容器也可以通过这种方式进行通信。
+
+> **注意**：服务发现在默认网桥上不可用。容器默认通过IP地址进行通信。要通过名称进行交流，他们必须联系起来。
+
+可以使用`docker network disconnect`命令从网络断开容器。
+
+#### 从容器装入卷 `--volumes-from`
+
+---
+
+```sh
+$ docker run --volumes-from 777f7dc92da7 --volumes-from ba8c0c54f0f2:ro -i -t ubuntu pwd
+```
+
+`--volumes-from`标志会从引用的容器中挂载所定义的卷。容器可以通过重复`-volumes-from`参数来指定。容器ID可以选择性地添加后缀`：ro`或`：rw`以分别将卷挂载到只读或读写模式。默认情况下，卷以相同模式（读写或只读）作为参考容器挂载。
+
+像`SELinux`这样的标签系统要求在挂载到容器中的卷内容上放置正确的标签。如果没有标签，安全系统可能会阻止容器内运行的进程使用内容。默认情况下，Docker不会更改OS设置的标签。
+
+要更改容器上下文中的标签，可以添加两个后缀中的任意一个`:z`或添加 `:Z`到卷装载。这些后缀告诉Docker重新标记共享卷上的文件对象。`z`选项告诉Docker两个容器共享卷内容。因此，Docker使用共享内容标签来标记内容。共享卷标允许所有容器读取/写入内容。`Z`选项告诉Docker使用私有非共享标签标记内容。只有当前容器可以使用私人卷。
+
+#### 附加到`STDIN / STDOUT / STDERR` `-a`
+
+---
+
+`-a`标志告诉`docker run`绑定到容器的`STDIN`，`STDOUT` 或`STDERR`。这可以根据需要操作输出和输入。
+
+```sh
+$ echo "test" | docker run -i -a stdin busybox cat -
+```
+
+这将数据管理到容器中，并通过仅附加到容器上来打印容器的ID `STDIN`。
+
+```sh
+$ docker run -a stderr busybox echo test
+```
+
+这不会打印任何东西，除非出现错误，因为我们只附加到容器的`STDERR`。容器的日志仍然存储了写入`STDERR`和`STDOUT`的内容。
+
+```sh
+$ cat somefile | docker run -i -a stdin busybox dobuild
+```
+
+这是如何将文件传输到容器中以便构建的。构建完成后将打印容器的ID，并可使用检索构建日志`docker logs`。如果需要将文件或其他内容传输到容器中，并在容器运行完毕后检索容器的ID，这非常有用。
+
+#### 将主机设备添加到容器 ` - 设备`
+
+---
+
+```sh
+$ docker run --device=/dev/sdc:/dev/xvdc \
+             --device=/dev/sdd --device=/dev/zero:/dev/nulo \
+             -i -t \
+             ubuntu ls -l /dev/{xvdc,sdd,nulo}
+
+brw-rw---- 1 root disk 8, 2 Feb  9 16:05 /dev/xvdc
+brw-rw---- 1 root disk 8, 3 Feb  9 16:05 /dev/sdd
+crw-rw-rw- 1 root root 1, 5 Feb  9 16:05 /dev/nulo
+```
+
+通常需要将设备直接暴露于容器，启用`--device` 选项。例如，一个特定的块存储设备或循环设备或音频设备可以添加到另一个没有特权的容器（没有`--privileged`标志），并让应用程序直接访问它。
+
+默认情况下，容器就可以`read`，`write`和`mknod`这些设备。这可以使用`--device` 标志的第三组选项`:rwm`来覆盖：
+
+```sh
+$ docker run --device=/dev/sda:/dev/xvdc --rm -it ubuntu fdisk  /dev/xvdc
+
+Command (m for help): q
+$ docker run --device=/dev/sda:/dev/xvdc:r --rm -it ubuntu fdisk  /dev/xvdc
+You will not be able to write the partition table.
+
+Command (m for help): q
+
+$ docker run --device=/dev/sda:/dev/xvdc:rw --rm -it ubuntu fdisk  /dev/xvdc
+
+Command (m for help): q
+
+$ docker run --device=/dev/sda:/dev/xvdc:m --rm -it ubuntu fdisk  /dev/xvdc
+fdisk: unable to open /dev/xvdc: Operation not permitted
+```
+
+> **注意**：`--device`不能安全地用于临时设备。使用`--device`不能将不可用的块设备添加到不受信任的容器中。 
+
+#### 重新启动策略 `--restart`
+
+---
+
+使用`Docker's`  `--restart`来指定容器的**重新启动策略**。重新启动策略控制Docker守护程序在退出后是否重新启动容器。Docker支持以下重启策略：
+
+| 策略                       | 结果                                                         |
+| -------------------------- | ------------------------------------------------------------ |
+| `no`                       | 退出时**不自动重启**容器。这是**默认**设置。                 |
+| `on-failure[:max-retries]` | 仅在容器以**非零退出状态**退出时才能重新启动。或者，限制Docker守护程序尝试**重新启动的次数**。 |
+| `unless-stopped`           | 重新启动容器，除非它明确停止或者Docker本身停止或重新启动。   |
+| `always`                   | 不管退出状态如何，**始终重新启动**容器。当你总是指定时，Docker守护进程将尝试无限期地重启容器。无论容器的当前状态如何，容器也将始终在守护进程启动时启动。 |
+
+```sh
+$ docker run --restart=always redis
+```
+
+这将运行`redis`**始终**重启策略的容器， 如果容器退出，Docker将重启它。
+
+#### 将条目添加到容器host文件 `--add-host`
+
+---
+
+可以`/etc/hosts`使用一个或多个`--add-host`标志将其他主机添加到容器的文件中。此示例为名为 `docker`添加一个静态地址：
+
+```sh
+$ docker run --add-host=docker:10.180.0.1 --rm -it debian
+
+root@f38c87f2a42d:/# ping docker
+PING docker (10.180.0.1): 48 data bytes
+56 bytes from 10.180.0.1: icmp_seq=0 ttl=254 time=7.600 ms
+56 bytes from 10.180.0.1: icmp_seq=1 ttl=254 time=30.705 ms
+^C--- docker ping statistics ---
+2 packets transmitted, 2 packets received, 0% packet loss
+round-trip min/avg/max/stddev = 7.600/19.152/30.705/11.553 ms
+```
+
+有时需要从容器内连接到Docker主机。要启用此功能，请使用`--add-host`标志将Docker主机的IP地址传递给容器。要查找主机的地址，请使用`ip addr show`命令。
+
+传递的标志`ip addr show`取决于容器中是使用IPv4还是IPv6网络。使用以下标志为名为`eth0`的网络设备检索IPv4地址：
+
+```sh
+$ HOSTIP=`ip -4 addr show scope global dev eth0 | grep inet | awk '{print \$2}' | cut -d / -f 1`
+$ docker run  --add-host=docker:${HOSTIP} --rm -it debian
+```
+
+对于IPv6，使用`-6`标志而不是`-4`标志。对于其他网络设备，请用正确的设备名称替换`eth0`（例如`docker0` 桥接设备）。
+
+#### 在容器中设置ulimits `--ulimit`
+
+由于在容器中设置`ulimit`需要在默认容器中设置不可用的额外特权，因此可以使用`--ulimit`标志来设置这些特权。 `--ulimit`用软和硬限制来指定 `<type>=<soft limit>[:<hard limit>]`，例如：
+
+```sh
+$ docker run --ulimit nofile=1024:1024 --rm debian sh -c "ulimit -n"
+1024
+```
+
+> **注意**：如果你不提供一个`hard limit`，这个`soft limit`值将被用于这两个值。如果没有`ulimits`设置，它们将从`ulimits`守护进程的默认设置继承。 `as`选项现在被禁用。换句话说，不支持以下脚本：
+>
+> ```sh
+> $ docker run -it --ulimit as=1024 fedora /bin/bash`
+> ```
+
+这些值`syscall`在设置时会发送到适当的位置。Docker不执行任何字节转换。设置这些值时请考虑这一点。
+
+#### 对于`NPROC`使用
+
+`nproc`使用Linux设计的`ulimit`标志时要小心设置，`nproc`以便为用户设置可用的最大进程数，而不是容器。例如，用`daemon`用户启动四个容器：
+
+```sh
+$ docker run -d -u daemon --ulimit nproc=3 busybox top
+
+$ docker run -d -u daemon --ulimit nproc=3 busybox top
+
+$ docker run -d -u daemon --ulimit nproc=3 busybox top
+
+$ docker run -d -u daemon --ulimit nproc=3 busybox top
+```
+
+第四个容器失败并报告“[8]系统错误：资源暂时不可用”错误。这会失败，因为调用者设置`nproc=3`导致前三个容器使用为`daemon`用户设置的三个进程配额。
+
+#### 停止带有信号的容器
+
+---
+
+`--stop-signal`标志设置将发送给容器的系统调用信号退出。这个信号可以是一个有效的无符号数字，与内核`syscall`表中的位置相匹配，例如`9`，或者`SIGNAME`格式的信号名称，例如`SIGKILL`。 
+
+#### 可选的安全选项（--security-opt）
+
+---
+
+在Windows上，该标志可用于指定`credentialspec`选项。在`credentialspec`必须在格式`file://spec.txt`或`registry://keyname`。
+
+#### 用超时停止容器（--stop-timeout）
+
+---
+
+`--stop-timeout`标志设置超时（以秒为单位）`--stop-signal`表示将发送给容器退出的预定义（请参阅）系统调用信号。超时后，容器将被`SIGKILL`杀死。
+
+#### 指定容器的隔离技术
+
+---
+
+在Windows上运行Docker容器的情况下，此选项很有用。`--isolation <value>`选项设置容器的隔离技术。在Linux上，唯一支持的是使用Linux命名空间的选项`default`。这两个命令在Linux上是等效的：
+
+```sh
+$ docker run -d busybox top
+$ docker run -d --isolation default busybox top
+```
+
+在Windows上，`--isolation`可以采用以下值之一：
+
+| 值        | 描述                                                         |
+| --------- | ------------------------------------------------------------ |
+| `default` | 使用Docker守护进程`--exec-opt`或系统默认值指定的值（见下文）。 |
+| `process` | 共享内核命名空间隔离（`Windows`客户端操作系统不支持）。      |
+| `hyperv`  | 基于`Hyper-V`管理程序分区的隔离。                            |
+
+Windows服务器操作系统上的默认隔离是`process`。Windows客户端操作系统上的默认（且仅支持）隔离是`hyperv`。尝试在客户端操作系统上启动容器`--isolation process`将失败。
+
+在Windows服务器上，假设使用默认配置，这些命令是等同的并导致`process`隔离：
+
+```sh
+PS C:\> docker run -d microsoft/nanoserver powershell echo process
+PS C:\> docker run -d --isolation default microsoft/nanoserver powershell echo process
+PS C:\> docker run -d --isolation process microsoft/nanoserver powershell echo process
+```
+
+如果您`--exec-opt isolation=hyperv`在Docker上设置了该选项`daemon`，或者针对基于Windows客户端的守护进程运行了这些命令，则这些命令是等同的并会导致`hyperv`隔离：
+
+```sh
+PS C:\> docker run -d microsoft/nanoserver powershell echo hyperv
+PS C:\> docker run -d --isolation default microsoft/nanoserver powershell echo hyperv
+PS C:\> docker run -d --isolation hyperv microsoft/nanoserver powershell echo hyperv
+```
+
+#### 指定容器可用内存
+
+---
+
+`--memory`参数始终设置容器可用内存的上限。在Linux上，这是在`cgroup`上设置的，容器中的应用程序可以通过查询来查询它`/sys/fs/cgroup/memory/memory.limit_in_bytes`。
+
+在Windows上，这将根据使用的隔离类型对容器产生不同的影响。
+
+- 通过`process`隔离，Windows将报告主机系统的全部内存，而不是对容器内运行的应用程序的限制
+
+  ```sh
+    PS C:\> docker run -it -m 2GB --isolation=process microsoft/nanoserver powershell Get-ComputerInfo *memory*
+  
+    CsTotalPhysicalMemory      : 17064509440
+    CsPhyicallyInstalledMemory : 16777216
+    OsTotalVisibleMemorySize   : 16664560
+    OsFreePhysicalMemory       : 14646720
+    OsTotalVirtualMemorySize   : 19154928
+    OsFreeVirtualMemory        : 17197440
+    OsInUseVirtualMemory       : 1957488
+    OsMaxProcessMemorySize     : 137438953344
+  ```
+
+- 在`hyperv`隔离的情况下，Windows将创建一个足够容纳内存限制的实用程序虚拟机，以及承载容器所需的最小操作系统。该大小被报告为“总物理内存”。
+
+  ```sh
+    PS C:\> docker run -it -m 2GB --isolation=hyperv microsoft/nanoserver powershell Get-ComputerInfo *memory*
+  
+    CsTotalPhysicalMemory      : 2683355136
+    CsPhyicallyInstalledMemory :
+    OsTotalVisibleMemorySize   : 2620464
+    OsFreePhysicalMemory       : 2306552
+    OsTotalVirtualMemorySize   : 2620464
+    OsFreeVirtualMemory        : 2356692
+    OsInUseVirtualMemory       : 263772
+    OsMaxProcessMemorySize     : 137438953344
+  ```
+
+#### 在运行时配置名称空间内核参数
+
+---
+
+`--sysctl`容器中的命名空间的内核参数（`sysctl`）集。例如，要打开容器网络名称空间中的IP转发，请运行以下命令：
+
+```sh
+$ docker run --sysctl net.ipv4.ip_forward=1 someimage
+```
+
+> **注意**：并非所有`sysctl`都是命名空间。Docker不支持更改也修改主机系统的容器内部的`sysctls`。随着内核的发展，我们期望看到更多的`sysctl`变成命名空间。
+
+#### 目前支持的SYSCTLS
+
+- `IPC Namespace`：
+
+  ```sh
+  kernel.msgmax, kernel.msgmnb, kernel.msgmni, kernel.sem, kernel.shmall, kernel.shmmax, kernel.shmmni, kernel.shm_rmid_forced
+  Sysctls beginning with fs.mqueue.*
+  ```
+
+  如果你使用这个`--ipc=host`选项，这些`sysctl`将不被允许。
+
+- `Network Namespace`：
+
+  以`net`开头的`Sysctl`。如果`--network=host`使用这些选项，则不允许使用这些`sysctl`。
+  
 ## tag 镜像标签
 
 镜像名称由**斜杠分隔**的名称组件组成，可选地以**注册表主机名**作为前缀。主机名必须符合标准DNS规则，但不能包含下划线。如果存在主机名，则可以选择使用格式中的端口号`:8080`。如果不存在，命令`registry-1.docker.io`默认使用Docker的**公共注册表**。名称组件可能包含**小写字母，数字和分隔符**。分隔符定义为句点，一个或两个下划线或一个或多个破折号。名称组件不能以分隔符开始或结束。
