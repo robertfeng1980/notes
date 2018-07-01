@@ -2,8 +2,8 @@
 
 + [git 笔记](https://github.com/hooj0/notes/blob/master/git/Git%20%E4%BD%BF%E7%94%A8%E6%89%8B%E5%86%8C.md)
 + [hyperledger 笔记](https://github.com/hooj0/notes/tree/master/hyperledger)
-  + [hyperledger fabric 第一个示例](https://github.com/hooj0/notes/blob/master/hyperledger/hyperledger%20fabric%20%E7%AC%AC%E4%B8%80%E4%B8%AA%E7%A4%BA%E4%BE%8B.md)
-  + [在windows下搭建hyperledger fabric 开发环境](https://github.com/hooj0/notes/blob/master/hyperledger/%E5%9C%A8windows%E4%B8%8B%E6%90%AD%E5%BB%BAhyperledger%20fabric%20%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83.md)
+  + [hyperledger fabric 第一个示例](https://github.com/hooj0/notes/blob/master/blockchain/hyperledger/hyperledger%20fabric%20%E7%AC%AC%E4%B8%80%E4%B8%AA%E7%A4%BA%E4%BE%8B.md)
+  + [在windows下搭建hyperledger fabric 开发环境](https://github.com/hooj0/notes/blob/master/blockchain/hyperledger/%E5%9C%A8windows%E4%B8%8B%E6%90%AD%E5%BB%BAhyperledger%20fabric%20%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83.md)
 + [虚拟化笔记](https://github.com/hooj0/notes/tree/master/virtual)
   + [vagrant 笔记](https://github.com/hooj0/notes/blob/master/virtual/vagrant/vagrant%20%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%E7%94%A8.md)
   + [docker 笔记](https://github.com/hooj0/notes/tree/master/virtual/docker)
@@ -21,5 +21,3 @@
     + [docker 高级[1]程序配置.md](https://github.com/hooj0/notes/blob/master/virtual/docker/docker%20%E9%AB%98%E7%BA%A7%5B1%5D%E7%A8%8B%E5%BA%8F%E9%85%8D%E7%BD%AE.md)
     + [docker 高级[2]集群应用.md](https://github.com/hooj0/notes/blob/master/virtual/docker/docker%20%E9%AB%98%E7%BA%A7%5B2%5D%E9%9B%86%E7%BE%A4%E5%BA%94%E7%94%A8.md)
     + [docker 高级[3]插件应用.md](https://github.com/hooj0/notes/blob/master/virtual/docker/docker%20%E9%AB%98%E7%BA%A7%5B3%5D%E6%8F%92%E4%BB%B6%E5%BA%94%E7%94%A8.md)
-
-[Git 使用手册]('git/Git 使用手册.md' ) 
