@@ -775,7 +775,7 @@ org2.example.com
 
 ### 生成创世块
 ---
-接下来，需要告诉`configtxgen`工具在哪里查找它需要获取的`configtx.yaml`文件。先看看我们目前的工作目录：
+接下来，需要告诉`configtxgen`工具在哪里查找它需要获取的`configtx.yaml`文件。设置为我们目前的工作目录：
 
 ```sh
 FABRIC_CFG_PATH=$PWD
