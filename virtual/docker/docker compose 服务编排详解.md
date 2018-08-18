@@ -1234,7 +1234,7 @@ network_mode: "container:[container name/id]"
 > **笔记**
 >
 > - 使用（版本3）Compose文件[在集群模式下部署堆栈](https://docs.docker.com/engine/reference/commandline/stack_deploy/)时忽略此选项 。
-> - `network_mode: "host"`不能与`链接`混合使用。 
+> - `network_mode: "host"`不能与`link`混合使用。 
 
 ## `networks` 网络
 
