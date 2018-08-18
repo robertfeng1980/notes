@@ -96,7 +96,16 @@ $ mvn compile jib:build
   $ mvn compile jib:buildTar
   ```
 
+将镜像 `tar` 包加载到 docker 镜像中
+
+```sh
+$ docker load --input jib-image.tar
+
+# docker import jib-image.tar masget/fabric-chaincode-manager:0.1
+```
+
 ## 绑定生命周期
+
 可以绑定`jib:build`到`Maven`生命周期，例如`package`，通过向`jib-maven-plugin`定义添加以下执行：  
 
   ```xml
