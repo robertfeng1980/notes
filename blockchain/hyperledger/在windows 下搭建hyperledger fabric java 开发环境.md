@@ -12,7 +12,7 @@ $ git checkout v1.1.0
 打开文件`Vagrantfile`并验证是否设置了以`config.vm.network`语句。如果不是，则添加它们：
 
 ```ruby
-$ cd ../fabric/devenv/
+$ cd /d/GoPath/src/github.com/hyperledger/fabric/devenv
 $ vi Vagrantfile
 
   config.vm.network :forwarded_port, guest: 7050, host: 7050 # fabric orderer service
@@ -33,7 +33,7 @@ $ vi Vagrantfile
   config.vm.network :forwarded_port, guest: 2333, host: 2333, protocol: "tcp" # dockerd
 ```
 
-添加到`Vagrantfile`文件夹以引用下面几行之间的sdk集成文件夹：
+添加到`Vagrantfile`文件夹以引用下面几行之间的sdk集成文件夹，将fabric需要的配置文件挂载到指定的目录：
 
 ```ruby
 config.vm.synced_folder "..", "/opt/gopath/src/github.com/hyperledger/fabric"
