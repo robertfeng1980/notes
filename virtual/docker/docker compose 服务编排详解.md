@@ -796,7 +796,7 @@ services:
 - `max_attempts`：在放弃之前尝试重新启动容器多少次（默认：从不放弃）。如果重新启动在配置中没有成功`window`，则此尝试不计入配置`max_attempts`值。例如，如果`max_attempts`设置为“2”，并且第一次尝试重新启动失败，则可能会尝试重新启动两次以上。
 - `window`：在决定重新启动是否成功之前等待多久，指定为[持续时间](https://docs.docker.com/compose/compose-file/#specifying-durations)（默认值：立即决定）。
 
-```
+```yaml
 version: "3"
 services:
   redis:
@@ -2191,8 +2191,7 @@ logging:
 
 ```yaml
 version: '2.1'
-x-logging:
-  &default-logging
+x-logging: &default-logging
   options:
     max-size: '12m'
     max-file: '5'
@@ -2211,8 +2210,7 @@ services:
 
 ```yaml
 version: '2.1'
-x-volumes:
-  &default-volume
+x-volumes: &default-volume
   driver: foobar-storage
 
 services:
