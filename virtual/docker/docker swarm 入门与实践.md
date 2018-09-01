@@ -2696,8 +2696,6 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
    $ docker-machine ssh worker1
    ```
 
-   
-
 2. 运行[创建群组](https://docs.docker.com/engine/swarm/swarm-tutorial/create-swarm/)教程步骤中的`docker swarm init`输出 产生的命令，以创建一个加入到现有集群的工作节点：
 
    ```sh
@@ -2863,7 +2861,7 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
 4. 运行`docker ps`以查看在连接的节点上运行的容器。以下示例显示了正在运行的`manager1`任务：
 
    ```sh
-   $ docker p
+   $ docker ps
    CONTAINER ID        IMAGE               COMMAND             CREATED              STATUS              PORTS               NAMES
    89dad2b7f9e8        alpine:latest       "ping baidu.com"    25 minutes ago       Up 26 minutes                           helloworld.1.xe2d3sypfvk1eb4nj2pcydfg3
    ```
@@ -3047,7 +3045,7 @@ dxn1zf6l61qsb1josjja83ngz *  manager1  Ready   Active        Leader
    qmaoadbmvdjh         \_ redis.3         redis:3.0.6         worker1             Shutdown            Shutdown 16 minutes ago
    ```
 
-   在这种情况下，swarm manager将一个任务**分配给每个节点**。可能会看到环境中的节点之间的任务分布不同。
+   在这种情况下，`swarm manager`将一个任务**分配给每个节点**。可能会看到环境中的节点之间的任务分布不同。
 
 5. 运行`docker node update --availability drain <NODE-ID>`以**排除**具有**分配**给它的任务的节点：
 
