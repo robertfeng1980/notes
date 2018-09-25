@@ -39,27 +39,20 @@ example:
  - `OR('Org1.member', AND('Org2.member', 'Org3.member'))` 请求来自`Org1 MSP`成员的一个签名或来自`Org2 MSP`成员的1个签名和来自`Org3 MSP`成员的1个签名。
 ## 为链码指定背书策略
 
-Using this language, a chaincode deployer can request that the endorsements for a chaincode be
-validated against the specified policy. NOTE - the default policy requires one signature 
-from a member of the `DEFAULT` MSP). This is used if a policy is not specified in the CLI.
+使用此语言，链码部署者可以请求根据指定的策略验证链码的背书认可策略。 **注：默认策略需要来自DEFAULT MSP成员的一个签名** ，如果未在`CLI`中指定策略，则使用此选项。
 
-The policy can be specified at deploy time using the `-P` switch, followed by the policy.
-
-For example:
+可以在部署时使用`-P`开关指定策略，然后使用策略。示例如下：
 
 ```
 peer chaincode deploy -C testchainid -n mycc -p github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02 -c '{"Args":["init","a","100","b","200"]}' -P "AND('Org1.member', 'Org2.member')"
 ```
 
-This command deploys chaincode `mycc` on chain `testchainid` with the policy `AND('Org1.member', 'Org2.member')`.
+此命令使用策略`AND（'Org1.member'，'Org2.member'）`在链`testchainid`上部署链码`mycc`。
 
-## Future enhancements
+## 未来的改进
 
-In this section we list future enhancements for endorsement policies:
- - alongside the existing way of identifying principals by their relationship with an MSP, we plan 
-   to identify principals in terms of the _Organization Unit (OU)_ expected in their certificates; 
-   this is useful to express policies where we request signatures from any identity displaying a 
-   valid certificate with an OU matching the one requested in the definition of the principal.
- - instead of the syntax `AND(., .)` we plan to move to a more intuitive syntax `. AND .`
+在本节中，我们列出了背书策略的未来增强功能：
+ - 除了通过与`MSP`的关系识别委托人的现有方式外，我们还计划根据其证书中预期的组织单位`（OU）`确定委托人，这对于表达我们从显示有效证书的任何标识请求签名的策略非常有用，该证书的`OU`与主体定义中请求的`OU`匹配。
+ - 我们计划转向更直观的语法`. AND .`，而不是语法`AND（.，.）`
  - we plan to expose generalized threshold gates in the language as well alongside `AND` (which is 
    the special `n`-out-of-`n` gate) and `OR` (which is the special `1`-out-of-`n` gate)
