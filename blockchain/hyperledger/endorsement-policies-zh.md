@@ -11,8 +11,8 @@
 ## 背书策略设计
 
 背书策略有两个主要组成部分：
- - a principal 主要的
- - a threshold gate 阈值
+ - `a principal` 主要的
+ - `a threshold gate` 阈值
 
 委托人`P`识别预期签名的实体。
 
@@ -54,5 +54,4 @@ peer chaincode deploy -C testchainid -n mycc -p github.com/hyperledger/fabric/ex
 在本节中，我们列出了背书策略的未来增强功能：
  - 除了通过与`MSP`的关系识别委托人的现有方式外，我们还计划根据其证书中预期的组织单位`（OU）`确定委托人，这对于表达我们从显示有效证书的任何标识请求签名的策略非常有用，该证书的`OU`与主体定义中请求的`OU`匹配。
  - 我们计划转向更直观的语法`. AND .`，而不是语法`AND（.，.）`
- - we plan to expose generalized threshold gates in the language as well alongside `AND` (which is 
-   the special `n`-out-of-`n` gate) and `OR` (which is the special `1`-out-of-`n` gate)
+ - 我们计划在语言中暴露广义阈值门，以及`AND`（这是特殊的`n-out-of-n`）和`OR`（这是特殊的`1-out-of-n`）
