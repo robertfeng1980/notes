@@ -9,7 +9,7 @@
 + 证书续签和撤销
 
 
-## 概述
+# 概述
 
 下图说明了Hyperledger Fabric CA服务器如何适应整个Hyperledger Fabric架构。
 
@@ -23,11 +23,44 @@
 
 服务器可能包含多个CA， 每个CA都是根CA或中间CA， 每个中间CA都有一个父CA，它是根CA或另一个中间CA。
 
+# 入门
 
+## 环境
 
++ `Go` 1.9+
++ `docker` 17.03+
++ `docker-compose` 1.11+
++ `libtool`、`libtdhl-dev` 软件包
 
+以下是`Ubuntu`上的安装`libtool`依赖项：
 
+```sh
+$ sudo apt install libtool libltdl-dev
+```
 
+## 安装
+
+在 `$GOPATH/bin` 目录中安装 `fabric-ca-server`和`fabric-ca-client`二进制文件。
+
+```sh
+$ go get -u github.com/hyperledger/fabric-ca/cmd/...
+```
+
+> 注意：如果您已经克隆了`fabric-ca`存储库，请确保在运行上面的`'go get'`命令之前，您位于主分支上。否则，您可能会看到错误。
+
+## 启动服务器
+
+以下内容使用默认设置启动 `fabric-ca-server`
+
+```sh
+$ fabric-ca-server start -b admin:adminpw
+```
+
+`-b` 选项为引导程序管理员提供注册`ID`和密码，如果未使用`ldap.enabled` 设置启用`LDAP`，则必须执行此操作。
+
+在本地目录中创建名为 `fabric-ca-server-config.yaml` 的默认配置文件，该文件可以自定义。
+
+## 通过Docker启动服务器
 
 
 
