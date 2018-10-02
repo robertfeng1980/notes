@@ -62,6 +62,119 @@ $ fabric-ca-server start -b admin:adminpw
 
 ## 通过Docker启动服务器
 
+### 选择 docker 镜像
+
+找到与要提取的`fabric-ca`的体系结构和版本相匹配的标记。选择适合环境的 docker 镜像：<https://hub.docker.com/r/hyperledger/fabric-ca/tags/>
+
+进入工作目录到`$GOPATH/src/github.com/hyperledger/fabric-ca/docker/server`并在编辑器中打开`docker-compose.yml`。编辑文件中的docker 镜像版本至自己需要的文件版本。
+
+```yml
+fabric-ca-server:
+   image: hyperledger/fabric-ca:1.2.0
+   container_name: fabric-ca-server
+   ports:
+     - "7054:7054"
+   environment:
+     - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+   volumes:
+     - "./fabric-ca-server:/etc/hyperledger/fabric-ca-server"
+   command: sh -c 'fabric-ca-server start -b admin:adminpw'
+```
+
+在与`docker-compose.yml`文件相同的目录中打开终端并执行以下命令：
+
+```sh
+$ docker-compose up -d
+```
+
+这样就可以通过`docker compose`拉取指定的`fabric-ca`图像（如果它尚不存在），并启动`fabric-ca`服务器的实例。
+
+### 构建自己的Docker镜像
+
+可以通过`docker-compose`构建和启动服务器，如下所示：
+
+```sh
+$ cd $GOPATH/src/github.com/hyperledger/fabric-ca
+$ make docker
+
+$ cd docker/server
+$ docker-compose up -d
+```
+
+`hyperledger/fabric-ca docker` 镜像包含`fabric-ca-server`和`fabric-ca-client`。
+
+```sh
+$ cd $GOPATH/src/github.com/hyperledger/fabric-ca
+$ FABRIC_CA_DYNAMIC_LINK=true make docker
+$ cd docker/server
+$ docker-compose up -d
+```
+
+## 配置设置
+
+Fabric CA提供了3种方法来配置Fabric CA服务器和客户端上的设置。优先顺序是：
++ 1. `CLI`选项
++ 2. 环境变量
++ 3. 配置文件
+
+环境变量或`CLI`选项覆盖配置文件更改。
+
+假定客户端配置文件内容如下：
+
+```yml
+tls:
+  # Enable TLS (default: false)
+  enabled: false
+
+  # TLS for the client's listenting port (default: false)
+  certfiles:
+  client:
+    certfile: cert.pem
+    keyfile:
+```
+
+通过环境变量覆盖配置文件中的`certfile`值，可以通过以下方式：
+
+```sh
+$ export FABRIC_CA_CLIENT_TLS_CLIENT_CERTFILE=cert2.pem
+```
+
+通过命令行选项方式覆盖配置文件，可以通过以下方式：
+
+```sh
+$ fabric-ca-client enroll --tls.client.certfile cert3.pem
+```
+
+同样的方法适用于`fabric-ca-server`，除了使用`FABRICC_CA_CLIENT`作为环境变量的前缀之外，还可以使用`FABRIC_CA_SERVER`。
+
+## 关于文件配置路径
+
+`Fabric CA`服务器和客户机配置文件中指定文件名的所有属性都支持**相对路径和绝对路径**。相对路径相对于配置文件所在的`config`目录。例如，如果`config`目录是`~/ config`并且`tls`部分如下所示，则`Fabric CA`服务器或客户端将在`~/config`目录中查找`root.pem`文件，`~/ config`中的`cert.pem`文件`/certs`目录和`/abs/path`目录中的`key.pem`文件。
+
+```sh
+tls:
+  enabled: true
+  certfiles:
+    - root.pem
+  client:
+    certfile: certs/cert.pem
+    keyfile: /abs/path/key.pem
+```
+
+# Fabric CA Server
+
+可以在启动之前初始化`Fabric CA`服务器。为提供了生成默认配置文件的机会，该文件可在启动服务器之前进行查看和自定义。
+
+- `Fabric CA`服务器的主目录确定如下：
+
+  如果设置了`-home`命令行选项，请使用其值。否则，如果`FABRIC_CA_SERVER_HOME`设置了环境变量，请使用其值。否则，如果`FABRIC_CA_HOME`设置了环境变量，则使用其值。否则，如果`CA_CFG_PATH`设置了环境变量，请使用其值。否则，使用当前工作目录
+
+对于此服务器部分的其余部分，我们假设已将`FABRIC_CA_HOME`环境变量设置为`$HOME/fabric-ca/server`。
+
+以下说明假定服务器配置文件存在于服务器的主目录中。
+
+
+
 
 
 
