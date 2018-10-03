@@ -170,11 +170,19 @@ tls:
 + 否则，如果`FABRIC_CA_SERVER_HOME`设置了环境变量，请使用其值。
 + 否则，如果`FABRIC_CA_HOME`设置了环境变量，则使用其值。
 + 否则，如果`CA_CFG_PATH`设置了环境变量，请使用其值。
-+ 否则，使用当前工作目录
++ 否则，使用当前工作目录。
 
 对于此服务器部分的其余部分，我们假设已将`FABRIC_CA_HOME`环境变量设置为`$HOME/fabric-ca/server`。
 
 以下说明假定服务器配置文件存在于服务器的主目录中。
+
+## 初始化服务器
+
+按如下方式初始化Fabric CA服务器：
+
+```sh
+$ fabric-ca-server init -b admin:adminpw
+```
 
 
 
