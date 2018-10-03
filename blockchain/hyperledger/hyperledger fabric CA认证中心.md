@@ -27,7 +27,7 @@
 
 ## 环境
 
-+ `Go` 1.9+
++ `Go` 1.11+
 + `docker` 17.03+
 + `docker-compose` 1.11+
 + `libtool`、`libtdhl-dev` 软件包
@@ -47,6 +47,8 @@ $ go get -u github.com/hyperledger/fabric-ca/cmd/...
 ```
 
 > 注意：如果您已经克隆了`fabric-ca`存储库，请确保在运行上面的`'go get'`命令之前，您位于主分支上。否则，您可能会看到错误。
+>
+> 如果切换到`master`分支后，同时更新到最新版本还继续出现错误，需要将 `go` 更新到最新版本。
 
 ## 启动服务器
 
