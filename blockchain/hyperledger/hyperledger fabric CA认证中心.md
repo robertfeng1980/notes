@@ -184,7 +184,122 @@ tls:
 
 ```sh
 $ fabric-ca-server init -b admin:adminpw
+
+2018/10/03 10:04:21 [INFO] Created default configuration file at /opt/gopath/src/github.com/hyperledger/fabric-ca/fabric-ca-server-config.yaml
+2018/10/03 10:04:21 [INFO] Server Version: 1.3.0
+2018/10/03 10:04:21 [INFO] Server Levels: &{Identity:1 Affiliation:1 Certificate:1 Credential:1 RAInfo:1 Nonce:1}
+2018/10/03 10:04:21 [WARNING] &{69 The specified CA certificate file /opt/gopath/src/github.com/hyperledger/fabric-ca/ca-cert.pem does not exist}
+2018/10/03 10:04:21 [INFO] generating key: &{A:ecdsa S:256}
+2018/10/03 10:04:21 [INFO] encoded CSR
+2018/10/03 10:04:21 [INFO] signed certificate with serial number 417095774184384307384614229539156324298726356837
+2018/10/03 10:04:21 [INFO] The CA key and certificate were generated for CA
+2018/10/03 10:04:21 [INFO] The key was stored by BCCSP provider 'SW'
+2018/10/03 10:04:21 [INFO] The certificate is at: /opt/gopath/src/github.com/hyperledger/fabric-ca/ca-cert.pem
+2018/10/03 10:04:22 [INFO] Initialized sqlite3 database at /opt/gopath/src/github.com/hyperledger/fabric-ca/fabric-ca-server.db
+2018/10/03 10:04:22 [INFO] The issuer key was successfully stored. The public key is at: /opt/gopath/src/github.com/hyperledger/fabric-ca/IssuerPublicKey, secret key is at: /opt/gopath/src/github.com/hyperledger/fabric-ca/msp/keystore/IssuerSecretKey
+2018/10/03 10:04:22 [INFO] Idemix issuer revocation public and secret keys were generated for CA ''
+2018/10/03 10:04:22 [INFO] The revocation key was successfully stored. The public key is at: /opt/gopath/src/github.com/hyperledger/fabric-ca/IssuerRevocationPublicKey, private key is at: /opt/gopath/src/github.com/hyperledger/fabric-ca/msp/keystore/IssuerRevocationPrivateKey
+2018/10/03 10:04:22 [INFO] Home directory for default CA: /opt/gopath/src/github.com/hyperledger/fabric-ca
+2018/10/03 10:04:22 [INFO] Initialization was successful
 ```
+
+执行命令后会生成如下文件和目录：
+
+```sh
+IssuerPublicKey
+IssuerRevocationPublicKey
+ca-cert.pem
+docker/server/fabric-ca-server/
+fabric-ca-server-config.yaml
+fabric-ca-server.db
+msp/
+```
+
+在初始化` ca `命令行中 `$ fabric-ca-server init -b admin:adminpw` ，`-b`（引导标识）选项是必需的，`LDAP`初始化时被禁用。启动Fabric CA服务器至少需要一个引导程序标识。此身份是服务器管理员。
+
+服务器配置文件`fabric-ca-server-config.yaml`包含可以配置的证书签名请求（`CSR`）部分。以下是`CSR`示例。
+
+```yaml
+csr:
+   cn: fabric-ca-server
+   names:
+      - C: US
+        ST: "North Carolina"
+        L:
+        O: Hyperledger
+        OU: Fabric
+   hosts:
+     - 19b01d2ba729
+     - localhost
+   ca:
+      expiry: 131400h
+      pathlength: 1
+```
+
+上面的所有字段都与`X.509`签名密钥和由`fabric-ca-server init`生成的证书有关。这对应于服务器配置文件中的`ca.certfile`和`ca.keyfile`文件。字段如下：
+
++ `cn` 是通用名称
+
++ `O` 是组织名称
++ `OU` 是组织单位
++ `L` 是地点或城市
++ `ST` 是州
++ `C` 是国家
+
+如果需要`CSR`的自定义值，可以**自定义配置文件**，删除`ca.certfile`和`ca.keyfile`配置项指定的文件，然后再次运行`fabric-ca-server init -b admin:adminpw`命令。
+
+除非指定了`-u <parent-fabric-ca-server-URL>`选项，否则 `fabric-ca-server init` 命令会生成自签名`CA`证书。如果指定了`-u`，则服务器的`CA`证书由父`Fabric CA`服务器签名。要对父`Fabric CA`服务器进行身份验证，`URL`的格式必须为`<scheme>://<enrollmentID>:<secret>@<host>:<port>`，其中`<enrollmentID>`和`<secret>`对应于带有`'hf.IntermediateCA'`属性的标识，其值等于`'true'`。`fabric-ca-server init`命令还在服务器的主目录中生成名为`fabric-ca-server-config.yaml`的默认配置文件。
+
+如果希望`Fabric CA`服务器使用您提供的CA签名证书和密钥文件，则必须将文件分别放在`ca.certfile`和`ca.keyfile`引用的位置。这两个文件都必须是**PEM编码**的，不得加密。更具体地说，CA证书文件的内容必须以`----- BEGIN CERTIFICATE -----`开头，并且密钥文件的内容必须以`----- BEGIN PRIVATE KEY -----`开头，而不是`-----BEGIN ENCRYPTED PRIVATE KEY-----`。
+
+**算法和密钥大小**
+
+可以自定义`CSR`以生成支持椭圆曲线（`ECDSA`）的`X.509`证书和密钥。以下设置是使用曲线`prime256v1`和签名算法`ecdsa-with-SHA256`实现椭圆曲线数字签名算法（`ECDSA`）的示例：
+
+```yaml
+key:
+   algo: ecdsa
+   size: 256
+```
+
+算法和密钥大小的选择基于安全需求。
+
+椭圆曲线（ECDSA）提供以下密钥大小选项：
+
+| size | ASN1 OID     | Signature Algorithm |
+| ---- | ------------ | ------------------- |
+| 256  | `prime256v1` | `ecdsa-with-SHA256` |
+| 384  | `secp384r1`  | `ecdsa-with-SHA384` |
+| 521  | `secp521r1`  | `ecdsa-with-SHA512` |
+
+## 启动服务器
+
+启动`Fabric CA`服务器，如下所示：
+
+```sh
+$ fabric-ca-server start -b <admin>:<adminpw>
+```
+
+如果服务器之前没有被初始化，它将在**第一次启动时自行初始化**。在此初始化期间，服务器将生成`ca-cert.pem`和`ca-key.pem`文件（如果它们尚不存在），并且如果它不存在，还将创建默认配置文件。请参阅初始化`Fabric CA`服务器部分。
+
+除非`Fabric CA`服务器配置为使用`LDAP`，否则必须至少配置一个预先注册的引导程序标识，以便注册和注册其他标识。**`-b`选项指定引导标识的名称和密码**。
+
+要使`Fabric CA`服务器侦听`https`而不是`http`，请将`tls.enabled`设置为`true`。
+
+> 安全警告：`Fabric CA`服务器应始终在启用`TLS`的情况下启动（`tls.enabled`设置为`true`）。如果不这样做，服务器就容易受到**访问网络流量的攻击者的攻击**。
+
+要**限制可以使用相同密钥（或密码）进行注册的次数**，请将配置文件中的`registry.maxenrollments`设置为适当的值。如果将值设置为`1`，则`Fabric CA`服务器允许仅对特定注册ID使用一次密码。如果将值设置为`-1`，则`Fabric CA`服务器**不会限制**可以重新使用密钥进行注册的次数。**默认值为-1**。**将值设置为0，`Fabric CA`服务器将禁用所有身份的注册，并且不允许注册身份**。
+
+`Fabric CA`服务器现在应该在端口**7054**上侦听。
+
+## 配置数据库
+
+本节介绍如何配置`Fabric CA`服务器以连接到`PostgreSQL`或`MySQL`数据库。默认数据库是`SQLite`，默认数据库文件是`Fabric CA`服务器主目录中的`fabric-ca-server.db`。
+
+如果在群集中运行`Fabric CA`服务器，必须配置`PostgreSQL`或`MySQL`，如下所述。`Fabric CA`在群集设置中支持以下数据库版本：
+
+- `PostgreSQL`: 9.5.5 or later
+- `MySQL`: 5.7 or later
 
 
 
