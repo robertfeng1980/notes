@@ -436,7 +436,193 @@ listen http-in
 
 ## 设置多个CA
 
+默认情况下，`fabric-ca`服务器由单个默认CA组成。但是，可以使用`cafiles`或`cacount`配置选项将其他`CA`添加到单个服务器。每个额外的CA都**有自己的主目录**。
 
+**cacount：**
+
+`cacount`提供了一种快速启动`X`个默认附加`CA`的方法。主目录将相对于服务器目录。使用此选项，目录结构如下：
+
+```sh
+--<Server Home>
+  |--ca
+    |--ca1
+    |--ca2
+```
+
+每个额外的CA都将获得在其主目录中生成的默认配置文件，在配置文件中它将包含唯一的CA名称。
+
+例如，以下命令将启动2个默认CA实例：
+
+```sh
+$ fabric-ca-server start -b admin:adminpw --cacount 2
+```
+
+**cafiles:**
+
+如果使用`cafiles`配置选项时未提供绝对路径，则CA主目录将相对于服务器目录。
+
+要使用此选项，**必须已为要启动的每个CA生成并配置CA配置文件**。每个配置文件必须具有**唯一的CA名称和公用名（CN）**，否则服务器将无法启动，因为这些名称必须是唯一的。CA配置文件将覆盖任何默认CA配置，CA配置文件中的任何缺少的选项将替换为默认CA中的值。
+
+配置文件中优先顺序如下：
+
+1. `CA`配置文件
+2. 默认`CA` CLI标志
+3. 默认`CA`环境变量
+4. 默认`CA`配置文件
+
+CA配置文件必须至少包含以下内容：
+
+```yaml
+ca:
+# Name of this CA
+name: <CANAME>
+
+csr:
+  cn: <COMMONNAME>
+```
+
+可以按如下方式配置目录结构：
+
+```sh
+--<Server Home>
+  |--ca
+    |--ca1
+      |-- fabric-ca-config.yaml
+    |--ca2
+      |-- fabric-ca-config.yaml
+```
+
+例如，以下命令将启动两个自定义CA实例：
+
+```sh
+$ fabric-ca-server start -b admin:adminpw --cafiles ca/ca1/fabric-ca-config.yaml
+--cafiles ca/ca2/fabric-ca-config.yaml
+```
+
+## 注册中间CA
+
+为了为中间CA创建CA签名证书，中间CA必须以与`Fabric-ca-client`注册**CA相同的方式向父CA注册**。这是通过使用`-u`选项指定父CA的`URL`以及注册ID和秘钥来完成的，如下所示。与此注册ID关联的标识必须具有名称为`hf.IntermediateCA`且值为`true`的属性。已颁发证书的`CN`（或通用名称）将设置为注册`ID`。如果中间CA尝试显式指定`CN`值，则会发生错误。
+
+```sh
+$ fabric-ca-server start -b admin:adminpw -u http://<enrollmentID>:<secret>@<parentserver>:<parentport>
+```
+
+对于其他中间CA标志，请参阅[Fabric CA服务器的配置文件格式](https://hyperledger-fabric-ca.readthedocs.io/en/latest/users-guide.html#fabric-ca-server-s-configuration-file-format)部分。
+
+## 升级服务器
+
+在升级`Fabric CA`客户端之前，必须升级`Fabric CA`服务器。在升级之前，建议**备份当前数据库**：
+
++ 如果使用`sqlite3`，则备份当前数据库文件（默认情况下名为`fabric-ca-server.db`）。
++ 对于其他数据库类型，请使用适当的`备份/复制`机制。
+
+要升级`Fabric CA`服务器的单个实例，需要完成以下步骤：
+
+1. 停止`fabric-ca-server`进程。
+
+2. 确保备份当前数据库。
+
+3. 将先前的`fabric-ca-server`二进制文件替换为升级版本。
+
+4. 启动`fabric-ca-server`进程。
+
+5. 使用以下命令验证`fabric-ca-server`进程是否可用，其中`<host>`是启动服务器的主机名：
+
+   ```sh
+   $ fabric-ca-client getcainfo -u http://<host>:7054
+   ```
+
+### **升级集群**：
+
+要使用`MySQL`或`Postgres`数据库升级`fabric-ca-server`实例集群，请执行以下过程。我们假设正在使用`haproxy`分别对`host1`和`host2`上的两个`fabric-ca-server`集群成员进行负载均衡，同时监听端口`7054`。在此过程之后，将负载平衡到升级的`fabric-ca-server`集群成员在`host3`和`host4`上分别监听端口`7054`。
+
+要使用`haproxy`统计信息监视更改，请启用统计信息收集。将以下行添加到`haproxy`配置文件的全局部分：
+
+```nginx
+stats socket /var/run/haproxy.sock mode 666 level operator
+stats timeout 2m
+```
+
+重新启动`haproxy`以获取更改：
+
+```sh
+$ haproxy -f <configfile> -st $(pgrep haproxy)
+```
+
+要显示`haproxy` `“show stat”`命令的摘要信息，以下函数可能对解析返回的大量`CSV`数据非常有用：
+
+```sh
+haProxyShowStats() {
+   echo "show stat" | nc -U /var/run/haproxy.sock |sed '1s/^# *//'|
+      awk -F',' -v fmt="%4s %12s %10s %6s %6s %4s %4s\n" '
+         { if (NR==1) for (i=1;i<=NF;i++) f[tolower($i)]=i }
+         { printf fmt, $f["sid"],$f["pxname"],$f["svname"],$f["status"],
+                       $f["weight"],$f["act"],$f["bck"] }'
+}
+```
+
+1、最初的`haproxy`配置文件类似于以下内容：
+
+```nginx
+server server1 host1:7054 check
+server server2 host2:7054 check
+```
+
+将此配置更改为以下内容：
+
+```nginx
+server server1 host1:7054 check backup
+server server2 host2:7054 check backup
+server server3 host3:7054 check
+server server4 host4:7054 check
+```
+
+2、使用新配置重新启动HA代理，如下所示：
+
+```sh
+$ haproxy -f <configfile> -st $(pgrep haproxy)
+```
+
+`haProxyShowStats`现在将反映修改后的配置，包括两个活动的旧版本备份服务器和两个（尚未启动）升级服务器：
+
+```sh
+sid   pxname      svname  status  weig  act  bck
+  1   fabric-cas  server3   DOWN     1    1    0
+  2   fabric-cas  server4   DOWN     1    1    0
+  3   fabric-cas  server1     UP     1    0    1
+  4   fabric-cas  server2     UP     1    0    1
+```
+
+3、在`host3`和`host4`上安装`fabric-ca-server`的升级二进制文件。`host3`和`host4`上新升级的服务器应配置为使用与`host1`和`host2`上的旧版本相同的数据库。启动升级后的服务器后，将自动迁移数据库。`haproxy`将所有新流量转发到升级后的服务器，因为它们未配置为备份服务器。在继续之前，使用`fabric-ca-client getcainfo`命令验证群集是否仍在正常运行。此外，`haProxyShowStats`现在应该反映所有服务器都处于活动状态，类似于以下内容：
+
+```sh
+sid   pxname      svname  status  weig  act  bck
+  1   fabric-cas  server3    UP     1    1    0
+  2   fabric-cas  server4    UP     1    1    0
+  3   fabric-cas  server1    UP     1    0    1
+  4   fabric-cas  server2    UP     1    0    1
+```
+
+4、停止`host1`和`host2`上的旧服务器。在继续之前，使用`fabric-ca-client getcainfo`命令验证新群集是否仍在正常运行。然后从`haproxy`配置文件中删除旧的服务器备份配置，使其看起来类似于以下内容：
+
+```nginx
+server server3 host3:7054 check
+server server4 host4:7054 check
+```
+
+5、使用新配置重新启动HA代理，如下所示：
+
+```sh
+$ haproxy -f <configfile> -st $(pgrep haproxy)
+```
+
+`haProxyShowStats` 现在将反映已修改的配置，其中两个活动服务器已升级到新版本：
+
+```sh
+sid   pxname      svname  status  weig  act  bck
+  1   fabric-cas  server3   UP       1    1    0
+  2   fabric-cas  server4   UP       1    1    0
+```
 
 
 
