@@ -3,7 +3,6 @@
 `Hyperledger Fabric  CA`是`Hyperledger Fabric`  的认证中心和证书颁发机构（CA）。下面的介绍了可用于`fabric-ca`客户端和`fabric-ca`服务器的命令。
 
 它提供以下功能：
-
 + 身份注册，或作为用户注册表连接到`LDAP`
 + 签发注册证书（`ECerts`）
 + 证书续签和撤销
@@ -26,7 +25,6 @@
 # 入门
 
 ## 环境
-
 + `Go` 1.11+
 + `docker` 17.03+
 + `docker-compose` 1.11+
@@ -115,9 +113,9 @@ $ docker-compose up -d
 ## 配置设置
 
 Fabric CA提供了3种方法来配置Fabric CA服务器和客户端上的设置。优先顺序是：
-+ 1. `CLI`选项
-+ 2. 环境变量
-+ 3. 配置文件
++ `CLI`选项
++ 环境变量
++ 配置文件
 
 环境变量或`CLI`选项覆盖配置文件更改。
 
@@ -151,7 +149,7 @@ $ fabric-ca-client enroll --tls.client.certfile cert3.pem
 
 ## 关于文件配置路径
 
-`Fabric CA`服务器和客户机配置文件中指定文件名的所有属性都支持**相对路径和绝对路径**。相对路径相对于配置文件所在的`config`目录。例如，如果`config`目录是`~/ config`并且`tls`部分如下所示，则`Fabric CA`服务器或客户端将在`~/config`目录中查找`root.pem`文件，`~/ config`中的`cert.pem`文件`/certs`目录和`/abs/path`目录中的`key.pem`文件。
+`Fabric CA`服务器和客户机配置文件中指定文件名的所有属性都支持**相对路径和绝对路径**。相对路径相对于配置文件所在的`config`目录。例如，如果`config`目录是`~/config`并且`tls`部分如下所示，则`Fabric CA`服务器或客户端将在`~/config`目录中查找`root.pem`文件，`~/config`中的`cert.pem`文件`/certs`目录和`/abs/path`目录中的`key.pem`文件。
 
 ```sh
 tls:
@@ -237,9 +235,7 @@ csr:
 ```
 
 上面的所有字段都与`X.509`签名密钥和由`fabric-ca-server init`生成的证书有关。这对应于服务器配置文件中的`ca.certfile`和`ca.keyfile`文件。字段如下：
-
 + `cn` 是通用名称
-
 + `O` 是组织名称
 + `OU` 是组织单位
 + `L` 是地点或城市
@@ -262,9 +258,7 @@ key:
    size: 256
 ```
 
-算法和密钥大小的选择基于安全需求。
-
-椭圆曲线（ECDSA）提供以下密钥大小选项：
+算法和密钥大小的选择基于安全需求。椭圆曲线（`ECDSA`）提供以下密钥大小选项：
 
 | size | ASN1 OID     | Signature Algorithm |
 | ---- | ------------ | ------------------- |
@@ -298,14 +292,12 @@ $ fabric-ca-server start -b <admin>:<adminpw>
 
 如果在群集中运行`Fabric CA`服务器，必须配置`PostgreSQL`或`MySQL`，如下所述。`Fabric CA`在群集设置中支持以下数据库版本：
 
-- `PostgreSQL`: 9.5.5 or later
-- `MySQL`: 5.7 or later
+- `PostgreSQL`： 9.5.5 or later
+- `MySQL`：5.7 or later
 
 ## 配置LDAP
 
-`Fabric CA`服务器可以配置为从`LDAP`服务器读取。 
-
-特别是，`Fabric CA`服务器可以连接到`LDAP`服务器以执行以下操作：
+`Fabric CA`服务器可以配置为从`LDAP`服务器读取。 特别是，`Fabric CA`服务器可以连接到`LDAP`服务器以执行以下操作：
 
 - 在注册之前验证身份
 - 检索用于授权的标识属性值
@@ -367,10 +359,92 @@ ldap:
 - `host` 是`LDAP`服务器的主机名或`IP`地址 
 - `port` 是可选的端口号，其中`ldap`的默认值为`389`，`ldap`的默认值为`636`
 - `base` 是用于搜索的`LDAP`树的可选根
-- `filter` 是搜索将登录用户名转换为可分辨名称时使用的过滤器。例如，值（`uid =％s`）搜索具有`uid`属性值的LDAP条目，其值为登录用户名。同样，（`email =％s`）可用于使用电子邮件地址登录。
-- `LDAPAttrs` 是一个LDAP属性名称数组，代表用户从LDAP服务器请求
-- `attribute.converters`部分用于将LDAP属性转换为结构CA属性，其中`* fcaAttrName`是结构CA属性的名称;`* fcaExpr`是一个表达式，其评估值分配给结构CA属性。例如，假设`<LDAPAttrs>`是`[“uid”]`，`<fcaAttrName>`是`'hf.Revoker'`，而`<fcaExpr>`是`'attr（“uid”）=~“revoker *”'`。这意味着代表用户从LDAP服务器请求名为`“uid”`的属性。如果用户的`'uid'`LDAP属性的值以`'revoker'`开头，则为`'hf.Revoker'`属性赋予用户`'true'`的值;否则，为`'hf.Revoker'`属性赋予用户`'false'`的值。
-- `attribute.maps`部分用于映射`LDAP`响应值。典型的用例是将与LDAP组关联的可分辨名称映射到标识类型。
+- `filter` 是搜索将登录用户名转换为可分辨名称时使用的过滤器。例如，值（`uid=％s`）搜索具有`uid`属性值的`LDAP`条目，其值为**登录用户名**。同样，（`email=％s`）可用于使用电子邮件地址登录。
+- `LDAPAttrs` 是一个`LDAP`属性名称数组，代表用户从`LDAP`服务器请求
+- `attribute.converters`部分用于将`LDAP`属性转换为结构`CA`属性，其中`*fcaAttrName`是结构`CA`属性的名称；`*fcaExpr`是一个表达式，其评估值分配给结构`CA`属性。例如，假设`<LDAPAttrs>`是`['uid']`，`<fcaAttrName>`是`'hf.Revoker'`，而`<fcaExpr>`是`'attr('uid')=~'revoker*'`。这意味着代表用户从`LDAP`服务器请求名为`uid`的属性。如果用户的`'uid'`LDAP属性的值以`'revoker'`开头，则为`'hf.Revoker'`属性赋予用户`'true'`的值；否则，为`'hf.Revoker'`属性赋予用户`'false'`的值。
+- `attribute.maps`部分用于映射`LDAP`响应值。典型的用例是将与`LDAP`组关联的可分辨名称映射到标识类型。
+
+`LDAP`表达式语言使用`govaluate`包，如[https://github.com/Knetic/govaluate/blob/master/MANUAL.md](https://github.com/Knetic/govaluate/blob/master/MANUAL.md)。这定义了诸如`=〜`之类的运算符和诸如`revoker*`之类的文字，这是一个正则表达式。扩展基本`govaluate`语言的特定于`LDAP`的变量和函数如下：
+
+- `DN` 是一个等于用户专有名称的变量。
+- `affiliation` 是一个等于用户所属关系的变量。
+- `attr`是一个带有`1`或`2`个参数的函数。第一个参数是`LDAP`属性名称。第二个参数是一个分隔符字符串，用于将多个值连接成一个字符串; 默认的分隔符字符串是`“，”`。该`attr`函数始终返回`string`类型的值。
+- `map`是一个带有`2`个参数的函数。第一个参数是任何字符串。第二个参数是映射的名称，用于对第一个参数的字符串执行字符串替换。
+- `if`是一个函数，它接受3个参数，其中第一个参数必须解析为布尔值。如果它的计算结果为`true`，则返回第二个参数；否则，返回第三个参数。
+
+例如，如果用户具有以`O=org1，C=US`结尾的可分辨名称，或者如果用户具有以`org1.dept2`开头的关系（`affiliation `），并且还具有`admin`属性，则以下表达式的计算结果为`true`。
+
+```sh
+DN =~'*O=org1,C=US' || (affiliation =~ 'org1.dept2.*' && attr('admin') = 'true')
+```
+
+注意：由于`attr`函数始终返回`string`类型的值，因此数字运算符不能用于构造表达式。例如，以下内容**不是有效表达式**：
+
+```yml
+value: attr("gidNumber") >= 10000 && attr("gidNumber") < 10006
+```
+
+或者，如下所示用引号括起来的正则表达式可用于返回等效结果：
+
+```yml
+value: attr("gidNumber") =~ "1000[0-5]$" || attr("mail") == "root@example.com"
+```
+
+以下是`OpenLDAP`服务器的默认设置的示例配置部分，其`Docker`镜像位于https://github.com/osixia/docker-openldap。
+
+```yml
+ldap:
+   enabled: true
+   url: ldap://cn=admin,dc=example,dc=org:admin@localhost:10389/dc=example,dc=org
+   userfilter: (uid=%s)
+```
+
+有关启动`OpenLDAP` docker 映像，配置它，在`FABRIC_CA/cli/server/ldap/ldap_test.go`中运行`LDAP`测试并停止`OpenLDAP`服务器的脚本，请参阅`FABRIC_CA/scripts/run-ldap-tests`。
+
+配置`LDAP`时，注册的工作方式如下：
+
++ `Fabric CA`客户端或客户端`SDK`使用基本授权标头发送注册请求。
++ `Fabric CA`服务器接收注册请求，解码授权头中的身份名称和密码，使用配置文件中的`userfilter`查找与身份名称关联的`DN`（专有名称），然后尝试`LDAP`绑定身份的密码。如果`LDAP`绑定成功，则注册处理已获得授权并可继续。
+
+## 设置群集
+
+可以使用任何`IP sprayer`将负载平衡到`Fabric CA`服务器群集。本节提供了如何设置`Haproxy`以路由到`Fabric CA`服务器群集的示例。请务必更改主机名和端口以反映`Fabric CA`服务器的设置。
+
+`haproxy.conf` 配置如下：
+
+```nginx
+global
+      maxconn 4096
+      daemon
+
+defaults
+      mode http
+      maxconn 2000
+      timeout connect 5000
+      timeout client 50000
+      timeout server 50000
+
+listen http-in
+      bind *:7054
+      balance roundrobin
+      server server1 hostname1:port
+      server server2 hostname2:port
+      server server3 hostname3:port
+```
+
+注意：如果使用`TLS`，需要使用模式`tcp`。
+
+## 设置多个CA
+
+
+
+
+
+
+
+
+
+
 
 
 
