@@ -301,9 +301,76 @@ $ fabric-ca-server start -b <admin>:<adminpw>
 - `PostgreSQL`: 9.5.5 or later
 - `MySQL`: 5.7 or later
 
+## 配置LDAP
 
+`Fabric CA`服务器可以配置为从`LDAP`服务器读取。 
 
+特别是，`Fabric CA`服务器可以连接到`LDAP`服务器以执行以下操作：
 
+- 在注册之前验证身份
+- 检索用于授权的标识属性值
+
+修改`Fabric CA`服务器配置文件的`LDAP`部分，以将服务器配置为连接到`LDAP`服务器。
+
+```yml
+ldap:
+   # Enables or disables the LDAP client (default: false)
+   enabled: false
+   # The URL of the LDAP server
+   url: <scheme>://<adminDN>:<adminPassword>@<host>:<port>/<base>
+   userfilter: <filter>
+   attribute:
+      # 'names' is an array of strings that identify the specific attributes
+      # which are requested from the LDAP server.
+      names: <LDAPAttrs>
+      # The 'converters' section is used to convert LDAP attribute values
+      # to fabric CA attribute values.
+      #
+      # For example, the following converts an LDAP 'uid' attribute
+      # whose value begins with 'revoker' to a fabric CA attribute
+      # named "hf.Revoker" with a value of "true" (because the expression
+      # evaluates to true).
+      #    converters:
+      #       - name: hf.Revoker
+      #         value: attr("uid") =~ "revoker*"
+      #
+      # As another example, assume a user has an LDAP attribute named
+      # 'member' which has multiple values of "dn1", "dn2", and "dn3".
+      # Further assume the following configuration.
+      #    converters:
+      #       - name: myAttr
+      #         value: map(attr("member"),"groups")
+      #    maps:
+      #       groups:
+      #          - name: dn1
+      #            value: orderer
+      #          - name: dn2
+      #            value: peer
+      # The value of the user's 'myAttr' attribute is then computed to be
+      # "orderer,peer,dn3".  This is because the value of 'attr("member")' is
+      # "dn1,dn2,dn3", and the call to 'map' with a 2nd argument of
+      # "group" replaces "dn1" with "orderer" and "dn2" with "peer".
+      converters:
+        - name: <fcaAttrName>
+          value: <fcaExpr>
+      maps:
+        <mapName>:
+            - name: <from>
+              value: <to>
+```
+
+配置介绍：
+
+- `scheme` 是`ldap`或`ldaps`之一
+- `adminDN` 是管理员用户的专有名称
+- `pass` 是`admin`用户的密码
+- `host` 是`LDAP`服务器的主机名或`IP`地址 
+- `port` 是可选的端口号，其中`ldap`的默认值为`389`，`ldap`的默认值为`636`
+- `base` 是用于搜索的`LDAP`树的可选根
+- `filter` 是搜索将登录用户名转换为可分辨名称时使用的过滤器。例如，值（`uid =％s`）搜索具有`uid`属性值的LDAP条目，其值为登录用户名。同样，（`email =％s`）可用于使用电子邮件地址登录。
+- `LDAPAttrs` 是一个LDAP属性名称数组，代表用户从LDAP服务器请求
+- `attribute.converters`部分用于将LDAP属性转换为结构CA属性，其中`* fcaAttrName`是结构CA属性的名称;`* fcaExpr`是一个表达式，其评估值分配给结构CA属性。例如，假设`<LDAPAttrs>`是`[“uid”]`，`<fcaAttrName>`是`'hf.Revoker'`，而`<fcaExpr>`是`'attr（“uid”）=~“revoker *”'`。这意味着代表用户从LDAP服务器请求名为`“uid”`的属性。如果用户的`'uid'`LDAP属性的值以`'revoker'`开头，则为`'hf.Revoker'`属性赋予用户`'true'`的值;否则，为`'hf.Revoker'`属性赋予用户`'false'`的值。
+- `attribute.maps`部分用于映射`LDAP`响应值。典型的用例是将与LDAP组关联的可分辨名称映射到标识类型。
 
 
 
