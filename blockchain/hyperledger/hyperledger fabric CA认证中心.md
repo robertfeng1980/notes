@@ -921,6 +921,37 @@ $ fabric-ca-client revoke -e peer1 --gencrl
 
 在`Fabric CA`服务器中撤消证书后，还必须更新`Hyperledger Fabric`中的相应`MSP`。这包括对等体的本地`MSP`以及相应通道配置块中的`MSP`。为此，`PEM`编码的`CRL`（证书撤销列表）文件必须放在`MSP`的`crls`文件夹中。`fabric-ca-client gencrl`命令可用于生成`CRL`。具有`hf.GenCRL`属性的任何标识都可以创建一个`CRL`，其中包含在特定时间段内已撤消的所有证书的序列号。创建的`CRL`存储在`<msp folder>/crls/crl.pem`文件中。
 
+以下命令将创建一个包含所有已撤销的证书（已过期和未过期）的`CRL`，并将`CRL`存储在`~/msp/crls/crl.pem`文件中。
+
+```sh
+$ export FABRIC_CA_CLIENT_HOME=~/clientconfig
+$ fabric-ca-client gencrl -M ~/msp
+```
+
+下一个命令将创建一个`CRL`，其中包含在`2017-09-13T16:39:57-08:00`（由`-revokedafter`标志指定）之后和`2017-09-21T16:39:57-08:00 `之前（由`-revokedbefore`标志指定）被撤销的所有证书（已过期和未过期）并将`CRL`存储在`~/msp/crls/crl.pem`文件中。
+
+```sh
+$ export FABRIC_CA_CLIENT_HOME=~/clientconfig
+$ fabric-ca-client gencrl --caname "" --revokedafter 2017-09-13T16:39:57-08:00 --revokedbefore 2017-09-21T16:39:57-08:00 -M ~/msp
+```
+
+`-caname` 标志指定将请求发送到的CA的名称。在此示例中，`gencrl`请求被发送到默认`CA`。
+
+`-revokedafter`和`-revokedbefore`标志指定时间段的下边界和上边界。生成的`CRL`将包含在此时间段内被撤销的证书。值必须是`RFC3339`格式中指定的`UTC`时间戳。`-revokedafter`时间戳不能大于`-revokedbefore`时间戳。
+
+默认情况下，`CRL`的“下次更新”日期设置为第二天。`crl.expiry` CA配置属性可用于指定自定义值。
+
+`gencrl`命令还将接受`-expireafter`和`-expirebefore`标志，这些标志可用于生成具有在这些标志指定的时间段内到期的已撤销证书的`CRL`。例如，以下命令将生成一个`CRL`，其中包含在`2017-09-13T16:39:57-08:00`之后和`2017-09-21T16:39:57-08:00`之前被撤销的证书，并且该证书在之后到期`2017-09-13T16:39:57-08:00`和`2018-09-13T16:39:57-08:00`之前。
+
+```sh
+$ export FABRIC_CA_CLIENT_HOME=~/clientconfig
+$ fabric-ca-client gencrl --caname "" --expireafter 2017-09-13T16:39:57-08:00 --expirebefore 2018-09-13T16:39:57-08:00  --revokedafter 2017-09-13T16:39:57-08:00 --revokedbefore 2017-09-21T16:39:57-08:00 -M ~/msp
+```
+
+`fabric-samples/fabric-ca`示例演示了如何生成包含已撤销用户证书的`CRL`并更新通道`msp`。然后，它将演示使用已撤销的用户凭据查询通道将导致授权错误。
+
+## 启用TLS
+
 
 
 
