@@ -782,6 +782,70 @@ $ export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
 $ fabric-ca-client register --id.name client1 --id.type client --id.affiliation bu1.department1.Team1
 ```
 
+## 注册Peer身份
+
+既然已成功注册了对等身份，现在可以在给定注册`ID`和密码的情况下注册对等体。这与注册引导（`bootstrap`）标识类似，不同之处在于我们还演示了如何使用`“-M”`选项填充`Hyperledger Fabric MSP`（成员资格服务提供程序）目录结构。
+
+以下命令注册`peer1`。请务必将`“-M”`选项的值替换为对等方`MSP`目录的路径，目录是对等方`core.yaml`文件中的`“mspConfigPath”`设置。也可以将`FABRIC_CA_CLIENT_HOME`设置为对等体的主目录。
+
+```sh
+export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/peer1
+fabric-ca-client enroll -u http://peer1:peer1pw@localhost:7054 -M $FABRIC_CA_CLIENT_HOME/msp
+```
+
+注册`Orderer`是相同的，除了`MSP`目录的路径是`orderer`的`orderer.yaml`文件中的`“LocalMSPDir”`设置。
+
+`fabric-ca-server`颁发的所有注册证书都有组织单位（或简称`OU`），如下所示：
+
++ `OU`层次结构的根等于标识类型
++ 为身份的所属关系的每个组件添加`OU`
+
+例如，如果标识是`peer`类型且其隶属关系是`department1.team1`，则标识的`OU`层次结构（从`leaf`到`root`）是`OU = team1，OU = department1，OU = peer`。
+
+## 从另一个`Fabric CA`服务器获取`CA`证书链
+
+通常，`MSP`目录的`cacerts`目录必须包含其他证书颁发机构的证书颁发机构链，代表对等方的所有信任根。
+
+`fabric-ca-client getcainfo`命令用于从其他`Fabric CA`服务器实例检索这些证书链。
+
+例如，以下内容将在`localhost`上启动第二个`Fabric CA`服务器，侦听端口`7055`，名称为`“CA2”`。这代表完全独立的信任根，并由区块链上的其他成员管理。
+
+```sh
+export FABRIC_CA_SERVER_HOME=$HOME/ca2
+fabric-ca-server start -b admin:ca2pw -p 7055 -n CA2
+```
+
+以下命令将`CA2`的证书链安装到`peer1`的`MSP`目录中
+
+```sh
+export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/peer1
+fabric-ca-client getcainfo -u http://localhost:7055 -M $FABRIC_CA_CLIENT_HOME/msp
+```
+
+默认情况下，`Fabric CA`服务器以子优先顺序返回CA链。这意味着链中的每个CA证书后面都是其颁发者的CA证书。如果需要`Fabric CA`服务器以相反的顺序返回CA链，请将环境变量`CA_CHAIN_PARENT_FIRST`设置为`true`并重新启动`Fabric CA`服务器。`Fabric CA`客户端将适当地处理任一顺序。
+
+## 获取用户的`Identity Mixer`凭据
+
+`Identity Mixer`（`Idemix`）是一种加密协议套件，用于保护身份验证和传输认证属性。`Idemix`允许用户在没有发行者（CA）参与的情况下使用验证者进行身份验证，并且仅选择性地仅披露验证者所需的那些属性，并且可以在不跨越其事务的情况下进行链接。
+
+除`X509`证书外，`Fabric CA`服务器还可以颁发`Idemix`凭据。可以通过将请求发送到`/api/v1/idemix/credential` API端点来请求`Idemix`凭证。有关此和其他`Fabric CA`服务器`API`端点的更多信息，请参阅`swagger-fabric-ca.json`。
+
+`Idemix` 凭证颁发是一个两步过程。首先，将带有空主体的请求发送到`/api/v1/idemix/credential` API端点以获取随机数和CA的`Idemix`公钥。其次，使用`nonce`和CA的`Idemix`公钥创建凭证请求，并将正文中的凭证请求发送另一个请求到`/api/v1/idemix/credential` API端点，以获取`Idemix`凭证，凭证撤销信息（`CRI`），和属性名称和值。目前，仅支持三个属性：
+
+- **OU**：用户的组织单位。此属性的值设置为用户的从属关系。例如，如果用户的`affiliaton`是`dept1.unit1`，则`OU`属性设置为`dept1.unit1`
+- **IsAdmin**：如果用户是管理员。此属性的值设置为`isAdmin`注册属性的值 
+- **EnrollmentID**： 用户的注册ID
+
+可以参考https://github.com/hyperledger/fabric-ca/blob/master/lib/client.go中的`handleIdemixEnroll`函数，以获取获取`Idemix`凭据的两步流程的参考实现。
+
+`/api/v1/idemix/credential` API端点接受基本和令牌授权标头。基本授权标头应包含用户的注册ID和密码。如果用户已具有`X509`注册证书，则还可以使用它来创建令牌授权标头。
+
+请注意，`Hyperledger Fabric`将支持`客户端/用户`使用`X509`和`Idemix`凭据对事务进行签名，但仅支持`peer`和`orderer`身份的`X509`凭据。和以前一样，应用程序可以使用`Fabric SDK`将请求发送到`Fabric CA`服务器。`SDK`隐藏了与创建授权标头和请求有效负载以及处理响应相关的复杂性。
+
+## 获取`Idemix CRI`（证书撤销信息）
+
+
+
 
 
 
