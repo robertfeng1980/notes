@@ -624,11 +624,163 @@ sid   pxname      svname  status  weig  act  bck
   2   fabric-cas  server4   UP       1    1    0
 ```
 
+# Fabric CA Client
+
+`Fabric CA`客户端的主目录确定如下：
++ 如果设置了`-home`命令行选项，使用其值
++ 否则，如果设置了`FABRIC_CA_CLIENT_HOME`环境变量，使用其值
++ 否则，如果设置了`FABRIC_CA_HOME`环境变量，使用其值
++ 否则，如果设置了`CA_CFG_PATH`环境变量，使用其值
++ 否则，使用`$HOME/.fabric-ca-client`
+
+以下说明假定客户端配置文件存在于客户端的主目录中。
+
+## 注册bootstrap标识
+
+首先，如果需要，请在客户端配置文件中自定义`CSR`（证书签名请求）部分。请注意，必须将`csr.cn`字段设置为引导标识的`ID`。默认`CSR`值如下所示：
+```yml
+csr:
+  cn: <<enrollment ID>>
+  key:
+    algo: ecdsa
+    size: 256
+  names:
+    - C: US
+      ST: North Carolina
+      L:
+      O: Hyperledger Fabric
+      OU: Fabric CA
+  hosts:
+   - <<hostname of the fabric-ca-client>>
+  ca:
+    pathlen:
+    pathlenzero:
+    expiry:
+```
+
+然后运行`fabric-ca-client enroll`命令以注册身份。例如，以下命令通过调用在`7054`端口本地运行的`Fabric CA`服务器来注册`ID`为`admin`且密码为`adminpw`的标识。
+
+```sh
+$ export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin 
+$ fabric-ca-client enroll -u http://admin:adminpw@localhost:7054
+```
+
+`enroll`命令在`Fabric CA`客户端的`msp`目录的子目录中存储注册证书（`ECert`）相应的私钥和`CA`证书链`PEM`文件。将看到指示`PEM`文件存储位置的消息。
 
 
+## 注册新身份
 
+**执行注册请求的身份必须是已注册的，并且还必须具有注册身份类型的适当权限**。特别是，`Fabric CA`服务器在注册期间进行了**三次授权检查**，如下所示：
 
+1、注册服务（即调用者）必须具有`hf.Registrar.Roles`属性，其中包含逗号分隔的值列表，其中一个值等于要注册的身份类型。例如，如果注册商具有值为`peer，app，user`的`hf.Registrar.Roles`属性，则注册商可以注册`peer，app`和`user`类型的身份，但不能注册`orderer`。
 
+2、注册服务的从属关系必须等于所注册身份的从属关系或前缀。例如，具有`“a.b”`附属关系的注册商可以注册具有`“a.b.c”`附属关系的身份，但不能注册具有`“a.c”`附属关系的身份。如果身份需要`root`联属，则联属请求应为点（`“.”`），并且注册商也必须具有`root`隶属关系。如果注册请求中未指定任何从属关系，则注册的身份将被授予注册服务的关联。
+
+3、如果满足以下所有条件，注册服务可以向用户注册属性：
+
++ 只有在注册商拥有该属性并且它是`hf.Registrar.Attributes`属性值的一部分时，注册商才能注册具有前缀`'hf.'`的`Fabric CA`保留属性。此外，如果属性是类型列表，则注册的属性值必须等于注册器具有的值的一个子集。如果属性的类型为`boolean`，则只有当注册商的属性值为`true`时，注册器才能注册该属性。
++ 注册自定义属性（即名称不以`'hf.'`开头的任何属性）要求注册商具有`'hf.Registar.Attributes'`属性，并且要注册属性或模式的值。唯一支持的模式是末尾带有`“*”`的字符串。例如，`“a.b.*”`是匹配以`“a.b.”`开头的所有属性名称的模式。例如，如果注册商具有`hf.Registrar.Attributes=orgAdmin`，则注册商可以在身份中添加或删除的唯一属性是`“orgAdmin”`属性。
++ 如果请求的属性名称为`“hf.Registrar.Attributes”`，则执行附加检查以查看此属性的请求值是否等于`“hf.Registrar.Attributes”`的注册商值的子集。为此，每个请求的值必须与注册商的`'hf.Registrar.Attributes'`属性值相匹配。例如，如果注册商的`'hf.Registrar.Attributes'`的值是`'a.b.*，x.y.z'`并且所请求的属性值是`'a.b.c，x.y.z'`，则它是有效的，因为`'a.b.c'`匹配`'a.b.*'`并且`'x.y.z'`与注册商的`'x.y.z'`值相匹配。
+
+**例子：**
+
++ **有效方案**：
+  + 如果注册商具有属性`'hf.Registrar.Attributes=a.b.*，x.y.z'`并且正在注册属性`'a.b.c'`，则有效`'a.b.c'`匹配`'a.b.*'`。
+  + 如果注册商具有属性`'hf.Registrar.Attributes = a.b.*，x.y.z'`并且正在注册属性`'x.y.z'`，则它是有效的，因为`'x.y.z'`与注册商的`'x.y.z'`值匹配。
+  + 如果注册商具有属性`'hf.Registrar.Attributes = a.b.*，x.y.z'`且请求的属性值为`'a.b.c,x.y.z'`，则它是有效的，因为`'a.b.c'`匹配`'a.b.*'`和`'x.y.z'`匹配注册商的`'x.y.z'`值。
+  + 如果注册商具有属性`'hf.Registrar.Roles=peer,client'`并且所请求的属性值是`'peer'`或`'peer,client'`，则它是有效的，因为请求的值等于或者是注册服务器的值的子集。
+
++ **无效方案**
+  + 如果注册商具有属性`'hf.Registrar.Attributes = a.b.*，x.y.z'`并且正在注册属性`'hf.Registar.Attributes = a.b.c，x.y.*'`，则它无效，因为请求的属性`'x.y.*'`不是模式由注册商拥有。值`'x.y.*'`是`'x.y.z'`的超集。
+  + 如果注册商具有属性`'hf.Registrar.Attributes = a.b.*，x.y.z'`并且正在注册属性`'hf.Registar.Attributes = a.b.c，x.y.z，attr1'`，则它无效，因为注册商的`'hf.Registrar.Attributes'`属性值不包含`'attr1'`。
+  + 如果注册商具有属性`'hf.Registrar.Attributes = a.b.*，x.y.z'`并且正在注册属性`'a.b'`，则它是无效的，因为`'a.b.*'`中不包含值`'a.b'`。
+  + 如果注册商具有属性`'hf.Registrar.Attributes = a.b.*，x.y.z'`并且正在注册属性`'x.y'`，则它是无效的，因为`'x.y.z'`不包含`'x.y'`。
+  + 如果注册商具有属性`'hf.Registrar.Roles = peer，client'`并且所请求的属性值是`'peer，client，orderer'`，则它是无效的，因为注册商在其值中没有`orderer`角色`hf.Registrar.Roles`属性。
+  + 如果注册商具有属性`'hf.Revoker = false'`且请求的属性值为`'true'`，则它无效，因为`hf.Revoker`属性是布尔属性，并且注册商的属性值不是`'true'`。
+
+下表列出了可以为身份注册的所有属性。属性的名称区分大小写。
+
+| 名称                         | 类型 | 描述                                                         |
+| ---------------------------- | ---- | ------------------------------------------------------------ |
+| `hf.Registrar.Roles`         | 名单 | 允许注册服务管理的角色列表                                   |
+| `hf.Registrar.DelegateRoles` | 名单 | 注册服务允许注册服务为其“hf.Registrar.Roles”属性提供的角色列表 |
+| `hf.Registrar.Attributes`    | 名单 | 允许注册服务注册的属性列表                                   |
+| `hf.GenCRL`                  | 布尔 | 如果属性值为true，则Identity可以生成CRL                      |
+| `hf.Revoker`                 | 布尔 | 如果属性值为true，则身份可以撤消用户和/或证书                |
+| `hf.AffiliationMgr`          | 布尔 | 如果属性值为true，则身份可以管理从属关系                     |
+| `hf.IntermediateCA`          | 布尔 | 如果属性值为true，则身份可以注册为中间CA.                    |
+
+注意：注册身份时，请指定属性名称和值的数组。如果数组指定具有相同名称的多个数组元素，则当前仅使用最后一个元素。换句话说，目前不支持多值属性。
+
+以下命令使用管理员标识的凭据注册，注册ID为`“admin2”`的新用户，`“org1.department1”`的从属关系，名为`“hf.Revoker”`的属性，值为`“true”`，以及属性名为`“admin”`，值为`“true”`。`“:ecert”`后缀默认情况下，`“admin”`属性及其值将插入用户的注册证书中，然后可用于制定访问控制决策。
+
+```sh
+$ export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
+$ fabric-ca-client register --id.name admin2 --id.affiliation org1.department1 --id.attrs 'hf.Revoker=true,admin=true:ecert'
+```
+
+将打印密码，也称为注册密码。注册身份需要此密码，这允许管理员注册身份并将注册ID和秘钥提供给其他人以注册身份。
+
+可以将多个属性指定为`-id.attrs`标志的一部分，每个属性必须以逗号分隔。对于包含逗号的属性值，必须将该属性封装在双引号中。见下面的例子：
+
+```sh
+$ fabric-ca-client register -d --id.name admin2 --id.affiliation org1.department1 --id.attrs '"hf.Registrar.Roles=peer,user",hf.Revoker=true'
+
+# 或者
+$ fabric-ca-client register -d --id.name admin2 --id.affiliation org1.department1 --id.attrs '"hf.Registrar.Roles=peer,user"' --id.attrs hf.Revoker=true
+```
+
+通过编辑客户端的配置文件为`register`命令中使用的任何字段设置默认值。例如，假设配置文件包含以下内容：
+
+```yml
+id:
+  name:
+  type: user
+  affiliation: org1.department1
+  maxenrollments: -1
+  attributes:
+    - name: hf.Revoker
+      value: true
+    - name: anotherAttrName
+      value: anotherAttrValue
+```
+
+然后，使用以下命令行注册一个`ID`为`“admin3”`的新标识，其余部分将从包含标识类型的配置文件中获取：`“user”`，`affiliation：“org1.department1”`，以及两个属性：`“hf.Revoker”`和`“anotherAttrName”`。
+
+```sh
+$ export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
+$ fabric-ca-client register --id.name admin3
+```
+
+要注册具有多个属性的标识，需要在配置文件中指定所有属性名称和值，如上所示。
+
+将`maxenrollments`设置为0或将其从配置中删除，将导致注册的标识使用CA的最大注册值。此外，正在注册的身份的最大注册值不能超过CA的最大注册值。例如，如果CA的最大注册值为5，任何新标识的值必须小于或等于5，并且也不能将其设置为-1（无限注册）。
+
+接下来，让我们注册一个对等服务的身份，用于在下一节中注册对等体。以下命令注册`peer1`标识。请注意，我们选择指定自己的密码，而不是让服务器为我们生成一个密码。
+
+```sh
+$ export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
+$ fabric-ca-client register --id.name peer1 --id.type peer --id.affiliation org1.department1 --id.secret peer1pw
+```
+
+请注意，除了服务器配置文件中指定的非叶子节点关联外，关联是区分大小写的，这些关联始终以小写形式存储。例如，如果服务器配置文件的从属关系部分如下所示：
+
+```yaml
+affiliations:
+  BU1:
+    Department1:
+      - Team1
+  BU2:
+    - Department2
+    - Department3
+```
+
+`BU1`，`Department1`，`BU2`以小写形式存储。这是因为`Fabric CA`使用`Viper`读取配置。`Viper`将映射键视为**不区分大小写，并始终返回小写值**。要向`Team1`联盟注册身份，需要将`bu1.department1.Team1`指定给`-id.affiliation`标志，如下所示：
+
+```sh
+$ export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
+$ fabric-ca-client register --id.name client1 --id.type client --id.affiliation bu1.department1.Team1
+```
 
 
 
