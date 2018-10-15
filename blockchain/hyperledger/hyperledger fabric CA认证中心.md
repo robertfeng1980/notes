@@ -213,7 +213,7 @@ fabric-ca-server.db
 msp/
 ```
 
-在初始化` ca `命令行中 `$ fabric-ca-server init -b admin:adminpw` ，`-b`（引导标识）选项是必需的，`LDAP`初始化时被禁用。启动Fabric CA服务器至少需要一个引导程序标识。此身份是服务器管理员。
+在初始化` ca `命令行中 `$ fabric-ca-server init -b admin:adminpw` ，`-b`（引导身份）选项是必需的，`LDAP`初始化时被禁用。启动Fabric CA服务器至少需要一个引导程序身份。此身份是服务器管理员。
 
 服务器配置文件`fabric-ca-server-config.yaml`包含可以配置的证书签名请求（`CSR`）部分。以下是`CSR`示例。
 
@@ -244,7 +244,7 @@ csr:
 
 如果需要`CSR`的自定义值，可以**自定义配置文件**，删除`ca.certfile`和`ca.keyfile`配置项指定的文件，然后再次运行`fabric-ca-server init -b admin:adminpw`命令。
 
-除非指定了`-u <parent-fabric-ca-server-URL>`选项，否则 `fabric-ca-server init` 命令会生成自签名`CA`证书。如果指定了`-u`，则服务器的`CA`证书由父`Fabric CA`服务器签名。要对父`Fabric CA`服务器进行身份验证，`URL`的格式必须为`<scheme>://<enrollmentID>:<secret>@<host>:<port>`，其中`<enrollmentID>`和`<secret>`对应于带有`'hf.IntermediateCA'`属性的标识，其值等于`'true'`。`fabric-ca-server init`命令还在服务器的主目录中生成名为`fabric-ca-server-config.yaml`的默认配置文件。
+除非指定了`-u <parent-fabric-ca-server-URL>`选项，否则 `fabric-ca-server init` 命令会生成自签名`CA`证书。如果指定了`-u`，则服务器的`CA`证书由父`Fabric CA`服务器签名。要对父`Fabric CA`服务器进行身份验证，`URL`的格式必须为`<scheme>://<enrollmentID>:<secret>@<host>:<port>`，其中`<enrollmentID>`和`<secret>`对应于带有`'hf.IntermediateCA'`属性的身份，其值等于`'true'`。`fabric-ca-server init`命令还在服务器的主目录中生成名为`fabric-ca-server-config.yaml`的默认配置文件。
 
 如果希望`Fabric CA`服务器使用您提供的CA签名证书和密钥文件，则必须将文件分别放在`ca.certfile`和`ca.keyfile`引用的位置。这两个文件都必须是**PEM编码**的，不得加密。更具体地说，CA证书文件的内容必须以`----- BEGIN CERTIFICATE -----`开头，并且密钥文件的内容必须以`----- BEGIN PRIVATE KEY -----`开头，而不是`-----BEGIN ENCRYPTED PRIVATE KEY-----`。
 
@@ -276,7 +276,7 @@ $ fabric-ca-server start -b <admin>:<adminpw>
 
 如果服务器之前没有被初始化，它将在**第一次启动时自行初始化**。在此初始化期间，服务器将生成`ca-cert.pem`和`ca-key.pem`文件（如果它们尚不存在），并且如果它不存在，还将创建默认配置文件。请参阅初始化`Fabric CA`服务器部分。
 
-除非`Fabric CA`服务器配置为使用`LDAP`，否则必须至少配置一个预先注册的引导程序标识，以便注册和注册其他标识。**`-b`选项指定引导标识的名称和密码**。
+除非`Fabric CA`服务器配置为使用`LDAP`，否则必须至少配置一个预先注册的引导程序身份，以便注册和注册其他身份。**`-b`选项指定引导身份的名称和密码**。
 
 要使`Fabric CA`服务器侦听`https`而不是`http`，请将`tls.enabled`设置为`true`。
 
@@ -300,7 +300,7 @@ $ fabric-ca-server start -b <admin>:<adminpw>
 `Fabric CA`服务器可以配置为从`LDAP`服务器读取。 特别是，`Fabric CA`服务器可以连接到`LDAP`服务器以执行以下操作：
 
 - 在注册之前验证身份
-- 检索用于授权的标识属性值
+- 检索用于授权的身份属性值
 
 修改`Fabric CA`服务器配置文件的`LDAP`部分，以将服务器配置为连接到`LDAP`服务器。
 
@@ -362,7 +362,7 @@ ldap:
 - `filter` 是搜索将登录用户名转换为可分辨名称时使用的过滤器。例如，值（`uid=％s`）搜索具有`uid`属性值的`LDAP`条目，其值为**登录用户名**。同样，（`email=％s`）可用于使用电子邮件地址登录。
 - `LDAPAttrs` 是一个`LDAP`属性名称数组，代表用户从`LDAP`服务器请求
 - `attribute.converters`部分用于将`LDAP`属性转换为结构`CA`属性，其中`*fcaAttrName`是结构`CA`属性的名称；`*fcaExpr`是一个表达式，其评估值分配给结构`CA`属性。例如，假设`<LDAPAttrs>`是`['uid']`，`<fcaAttrName>`是`'hf.Revoker'`，而`<fcaExpr>`是`'attr('uid')=~'revoker*'`。这意味着代表用户从`LDAP`服务器请求名为`uid`的属性。如果用户的`'uid'`LDAP属性的值以`'revoker'`开头，则为`'hf.Revoker'`属性赋予用户`'true'`的值；否则，为`'hf.Revoker'`属性赋予用户`'false'`的值。
-- `attribute.maps`部分用于映射`LDAP`响应值。典型的用例是将与`LDAP`组关联的可分辨名称映射到标识类型。
+- `attribute.maps`部分用于映射`LDAP`响应值。典型的用例是将与`LDAP`组关联的可分辨名称映射到身份类型。
 
 `LDAP`表达式语言使用`govaluate`包，如[https://github.com/Knetic/govaluate/blob/master/MANUAL.md](https://github.com/Knetic/govaluate/blob/master/MANUAL.md)。这定义了诸如`=〜`之类的运算符和诸如`revoker*`之类的文字，这是一个正则表达式。扩展基本`govaluate`语言的特定于`LDAP`的变量和函数如下：
 
@@ -501,7 +501,7 @@ $ fabric-ca-server start -b admin:adminpw --cafiles ca/ca1/fabric-ca-config.yaml
 
 ## 注册中间CA
 
-为了为中间CA创建CA签名证书，中间CA必须以与`Fabric-ca-client`注册**CA相同的方式向父CA注册**。这是通过使用`-u`选项指定父CA的`URL`以及注册ID和秘钥来完成的，如下所示。与此注册ID关联的标识必须具有名称为`hf.IntermediateCA`且值为`true`的属性。已颁发证书的`CN`（或通用名称）将设置为注册`ID`。如果中间CA尝试显式指定`CN`值，则会发生错误。
+为了为中间CA创建CA签名证书，中间CA必须以与`Fabric-ca-client`注册**CA相同的方式向父CA注册**。这是通过使用`-u`选项指定父CA的`URL`以及注册ID和秘钥来完成的，如下所示。与此注册ID关联的身份必须具有名称为`hf.IntermediateCA`且值为`true`的属性。已颁发证书的`CN`（或通用名称）将设置为注册`ID`。如果中间CA尝试显式指定`CN`值，则会发生错误。
 
 ```sh
 $ fabric-ca-server start -b admin:adminpw -u http://<enrollmentID>:<secret>@<parentserver>:<parentport>
@@ -635,9 +635,9 @@ sid   pxname      svname  status  weig  act  bck
 
 以下说明假定客户端配置文件存在于客户端的主目录中。
 
-## 注册bootstrap标识
+## 注册bootstrap身份
 
-首先，如果需要，请在客户端配置文件中自定义`CSR`（证书签名请求）部分。请注意，必须将`csr.cn`字段设置为引导标识的`ID`。默认`CSR`值如下所示：
+首先，如果需要，请在客户端配置文件中自定义`CSR`（证书签名请求）部分。请注意，必须将`csr.cn`字段设置为引导身份的`ID`。默认`CSR`值如下所示：
 ```yml
 csr:
   cn: <<enrollment ID>>
@@ -658,7 +658,7 @@ csr:
     expiry:
 ```
 
-然后运行`fabric-ca-client enroll`命令以注册身份。例如，以下命令通过调用在`7054`端口本地运行的`Fabric CA`服务器来注册`ID`为`admin`且密码为`adminpw`的标识。
+然后运行`fabric-ca-client enroll`命令以注册身份。例如，以下命令通过调用在`7054`端口本地运行的`Fabric CA`服务器来注册`ID`为`admin`且密码为`adminpw`的身份。
 
 ```sh
 $ export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin 
@@ -712,7 +712,7 @@ $ fabric-ca-client enroll -u http://admin:adminpw@localhost:7054
 
 注意：注册身份时，请指定属性名称和值的数组。如果数组指定具有相同名称的多个数组元素，则当前仅使用最后一个元素。换句话说，目前不支持多值属性。
 
-以下命令使用管理员标识的凭据注册，注册ID为`“admin2”`的新用户，`“org1.department1”`的从属关系，名为`“hf.Revoker”`的属性，值为`“true”`，以及属性名为`“admin”`，值为`“true”`。`“:ecert”`后缀默认情况下，`“admin”`属性及其值将插入用户的注册证书中，然后可用于制定访问控制决策。
+以下命令使用管理员身份的凭据注册，注册ID为`“admin2”`的新用户，`“org1.department1”`的从属关系，名为`“hf.Revoker”`的属性，值为`“true”`，以及属性名为`“admin”`，值为`“true”`。`“:ecert”`后缀默认情况下，`“admin”`属性及其值将插入用户的注册证书中，然后可用于制定访问控制决策。
 
 ```sh
 $ export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
@@ -745,18 +745,18 @@ id:
       value: anotherAttrValue
 ```
 
-然后，使用以下命令行注册一个`ID`为`“admin3”`的新标识，其余部分将从包含标识类型的配置文件中获取：`“user”`，`affiliation：“org1.department1”`，以及两个属性：`“hf.Revoker”`和`“anotherAttrName”`。
+然后，使用以下命令行注册一个`ID`为`“admin3”`的新身份，其余部分将从包含身份类型的配置文件中获取：`“user”`，`affiliation：“org1.department1”`，以及两个属性：`“hf.Revoker”`和`“anotherAttrName”`。
 
 ```sh
 $ export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
 $ fabric-ca-client register --id.name admin3
 ```
 
-要注册具有多个属性的标识，需要在配置文件中指定所有属性名称和值，如上所示。
+要注册具有多个属性的身份，需要在配置文件中指定所有属性名称和值，如上所示。
 
-将`maxenrollments`设置为0或将其从配置中删除，将导致注册的标识使用CA的最大注册值。此外，正在注册的身份的最大注册值不能超过CA的最大注册值。例如，如果CA的最大注册值为5，任何新标识的值必须小于或等于5，并且也不能将其设置为-1（无限注册）。
+将`maxenrollments`设置为0或将其从配置中删除，将导致注册的身份使用CA的最大注册值。此外，正在注册的身份的最大注册值不能超过CA的最大注册值。例如，如果CA的最大注册值为5，任何新身份的值必须小于或等于5，并且也不能将其设置为-1（无限注册）。
 
-接下来，让我们注册一个对等服务的身份，用于在下一节中注册对等体。以下命令注册`peer1`标识。请注意，我们选择指定自己的密码，而不是让服务器为我们生成一个密码。
+接下来，让我们注册一个对等服务的身份，用于在下一节中注册对等体。以下命令注册`peer1`身份。请注意，我们选择指定自己的密码，而不是让服务器为我们生成一个密码。
 
 ```sh
 $ export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
@@ -784,7 +784,7 @@ $ fabric-ca-client register --id.name client1 --id.type client --id.affiliation 
 
 ## 注册Peer身份
 
-既然已成功注册了对等身份，现在可以在给定注册`ID`和密码的情况下注册对等体。这与注册引导（`bootstrap`）标识类似，不同之处在于我们还演示了如何使用`“-M”`选项填充`Hyperledger Fabric MSP`（成员资格服务提供程序）目录结构。
+既然已成功注册了对等身份，现在可以在给定注册`ID`和密码的情况下注册对等体。这与注册引导（`bootstrap`）身份类似，不同之处在于我们还演示了如何使用`“-M”`选项填充`Hyperledger Fabric MSP`（成员资格服务提供程序）目录结构。
 
 以下命令注册`peer1`。请务必将`“-M”`选项的值替换为对等方`MSP`目录的路径，目录是对等方`core.yaml`文件中的`“mspConfigPath”`设置。也可以将`FABRIC_CA_CLIENT_HOME`设置为对等体的主目录。
 
@@ -797,10 +797,10 @@ fabric-ca-client enroll -u http://peer1:peer1pw@localhost:7054 -M $FABRIC_CA_CLI
 
 `fabric-ca-server`颁发的所有注册证书都有组织单位（或简称`OU`），如下所示：
 
-+ `OU`层次结构的根等于标识类型
++ `OU`层次结构的根等于身份类型
 + 为身份的所属关系的每个组件添加`OU`
 
-例如，如果标识是`peer`类型且其隶属关系是`department1.team1`，则标识的`OU`层次结构（从`leaf`到`root`）是`OU = team1，OU = department1，OU = peer`。
+例如，如果身份是`peer`类型且其隶属关系是`department1.team1`，则身份的`OU`层次结构（从`leaf`到`root`）是`OU = team1，OU = department1，OU = peer`。
 
 ## 从另一个`Fabric CA`服务器获取`CA`证书链
 
@@ -865,11 +865,11 @@ fabric-ca-client reenroll
 
 身份或证书可以被撤销。撤消身份将撤销身份所拥有的所有证书，并且还将阻止身份获取任何新证书。撤销证书将使单个证书无效。
 
-为了撤销证书或身份，调用标识必须具有`hf.Revoker`和`hf.Registrar.Roles`属性。撤销身份只能撤销证书或具有与撤销身份的从属关系相同或前缀的关联的身份。此外，`revoker`只能撤销`revoker`的`hf.Registrar.Roles`属性中列出的类型的身份。
+为了撤销证书或身份，调用身份必须具有`hf.Revoker`和`hf.Registrar.Roles`属性。撤销身份只能撤销证书或具有与撤销身份的从属关系相同或前缀的关联的身份。此外，`revoker`只能撤销`revoker`的`hf.Registrar.Roles`属性中列出的类型的身份。
 
-例如，具有从属关系`orgs.org1`和`'hf.Registrar.Roles = peer，client'`属性的`revoker`可以撤销与`orgs.org1`或`orgs.org1.department1`关联的对等或客户端类型标识，但不能撤销标识附属于`orgs.org2`或任何其他类型。
+例如，具有从属关系`orgs.org1`和`'hf.Registrar.Roles = peer，client'`属性的`revoker`可以撤销与`orgs.org1`或`orgs.org1.department1`关联的对等或客户端类型身份，但不能撤销身份附属于`orgs.org2`或任何其他类型。
 
-以下命令**禁用标识并撤消与标识关联的所有证书**。`Fabric CA`服务器从此身份收到的所有未来请求都将被拒绝。
+以下命令**禁用身份并撤消与身份关联的所有证书**。`Fabric CA`服务器从此身份收到的所有未来请求都将被拒绝。
 
 ```sh
 $ fabric-ca-client revoke -e <enrollment_id> -r <reason>
@@ -888,14 +888,14 @@ $ fabric-ca-client revoke -e <enrollment_id> -r <reason>
 + `privilegewithdrawn` 特权剔除
 + `aacompromise`  泄露
 
-例如，与关联树的根关联的引导管理员可以撤消`peer1`的标识，如下所示：
+例如，与关联树的根关联的引导管理员可以撤消`peer1`的身份，如下所示：
 
 ```sh
 export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
 fabric-ca-client revoke -e peer1
 ```
 
-可以通过指定其`AKI`（授权密钥标识符）和序列号来撤销属于身份的注册证书，如下所示：
+可以通过指定其`AKI`（授权密钥身份符）和序列号来撤销属于身份的注册证书，如下所示：
 
 ```sh
 $ fabric-ca-client revoke -a xxx -s yyy -r <reason>
@@ -919,7 +919,7 @@ $ fabric-ca-client revoke -e peer1 --gencrl
 
 ## 生成CRL（证书吊销列表）
 
-在`Fabric CA`服务器中撤消证书后，还必须更新`Hyperledger Fabric`中的相应`MSP`。这包括对等体的本地`MSP`以及相应通道配置块中的`MSP`。为此，`PEM`编码的`CRL`（证书撤销列表）文件必须放在`MSP`的`crls`文件夹中。`fabric-ca-client gencrl`命令可用于生成`CRL`。具有`hf.GenCRL`属性的任何标识都可以创建一个`CRL`，其中包含在特定时间段内已撤消的所有证书的序列号。创建的`CRL`存储在`<msp folder>/crls/crl.pem`文件中。
+在`Fabric CA`服务器中撤消证书后，还必须更新`Hyperledger Fabric`中的相应`MSP`。这包括对等体的本地`MSP`以及相应通道配置块中的`MSP`。为此，`PEM`编码的`CRL`（证书撤销列表）文件必须放在`MSP`的`crls`文件夹中。`fabric-ca-client gencrl`命令可用于生成`CRL`。具有`hf.GenCRL`属性的任何身份都可以创建一个`CRL`，其中包含在特定时间段内已撤消的所有证书的序列号。创建的`CRL`存储在`<msp folder>/crls/crl.pem`文件中。
 
 以下命令将创建一个包含所有已撤销的证书（已过期和未过期）的`CRL`，并将`CRL`存储在`~/msp/crls/crl.pem`文件中。
 
@@ -950,11 +950,416 @@ $ fabric-ca-client gencrl --caname "" --expireafter 2017-09-13T16:39:57-08:00 --
 
 `fabric-samples/fabric-ca`示例演示了如何生成包含已撤销用户证书的`CRL`并更新通道`msp`。然后，它将演示使用已撤销的用户凭据查询通道将导致授权错误。
 
-## 启用TLS
+## 启用`TLS`
 
+本节更详细地介绍如何为`Fabric CA`客户端配置`TLS`。可以在`fabric-ca-client-config.yaml`中配置以下部分。
 
+```yml
+tls:
+  # Enable TLS (default: false)
+  enabled: true
+  certfiles:
+    - root.pem
+  client:
+    certfile: tls_client-cert.pem
+    keyfile: tls_client-key.pem
+```
 
+`certfiles`选项是客户端信任的一组根证书。这通常只是在`ca-cert.pem`文件中服务器主目录中找到的根`Fabric CA`服务器证书。仅当在服务器上配置了相互`TLS`时，才需要**客户端**选项。
 
+## 基于属性的访问控制
+
+可以通过链代码（以及`Hyperledger Fabric`运行时）基于身份的属性来做出访问控制决策。这称为基于属性的访问控制，简称`ABAC`。
+
+为了实现这一点，身份的注册证书（`ECert`）可以包含一个或多个属性名称和值。然后，链码提取属性的值以进行访问控制决策。
+
+例如，假设正在开发应用程序`app1`并希望只有`app1`管理员才能访问特定的链代码操作。链代码可以验证调用者的证书（由`CA`信任的`CA`颁发）包含名为`app1Admin`且值为`true`的属性。当然，属性的名称可以是任何值，值不必是布尔值。
+
+那么如何获得具有属性的注册证书？有两种方法：
+
++ 注册身份时，可以指定为身份颁发的注册证书默认情况下应包含属性。在注册时可以覆盖此行为，但这对于建立默认行为很有用，并且假设注册发生在应用程序之外，则不需要更改任何应用程序。
+
+  以下显示如何使用两个属性注册`user1:app1Admin`和`email`。默认情况下，`“：ecert”`后缀会导致`appAdmin`属性插入到`user1`的注册证书中，此时用户在注册时未明确请求属性。默认情况下，电子邮件属性不会添加到注册证书中。
+
++ 注册身份时，可以明确请求将一个或多个属性添加到证书中。对于请求的每个属性，可以指定属性是否可选。如果未选择性地请求并且身份不具有该属性，则将发生错误。
+
+  下面显示了如何使用`email`属性注册`user1`，不使用`app1Admin`属性，也可以选择使用`phone`属性（如果用户拥有`phone`属性）。
+
+```sh
+$ fabric-ca-client enroll -u http://user1:user1pw@localhost:7054 --enrollment.attrs "email,phone:opt"
+```
+
+下表显示了为每个身份自动注册的三个属性。
+
+| 属性名称          | 属性值         |
+| ----------------- | -------------- |
+| `hf.EnrollmentID` | 身份的注册ID   |
+| `hf.Type`         | 身份的类型     |
+| `hf.Affiliation`  | 身份的隶属关系 |
+
+要将任何上述属性默认添加到证书，必须使用`“：ecert”`规范显式注册该属性。例如，以下注册身份`'user1'`，以便如果在注册时未请求特定属性，则将`'hf.Affiliation'`属性添加到注册证书。请注意，`'-id.affiliation'`和`'-id.attrs'`标志中的隶属关系（`'org1'`）的值必须相同。
+
+```sh
+$ fabric-ca-client register --id.name user1 --id.secret user1pw --id.type user --id.affiliation org1 --id.attrs 'hf.Affiliation=org1:ecert'
+```
+
+有关基于属性的访问控制的链代码库API的信息，请参阅https://github.com/hyperledger/fabric/tree/release-1.1/core/chaincode/lib/cid/README.md
+
+有关演示基于属性的访问控制的端到端示例等，请参阅https://github.com/hyperledger/fabric-samples/tree/release-1.1/fabric-ca/README.md
+
+## 动态服务器配置更新
+
+本节介绍如何使用`fabric-ca-client`动态更新`fabric-ca-server`的部分配置，而无需重新启动服务器。本节中的所有命令都要求您首先通过执行`fabric-ca-client enroll`命令注册。
+
+### 动态更新身份
+
+本节介绍如何使用`fabric-ca-client`动态更新身份。如果客户端身份不满足以下所有条件，则会发生授权失败：
+
++ 客户端身份必须具有`“hf.Registrar.Roles”`属性，其中包含逗号分隔的值列表，其中一个值等于要更新的身份的类型；例如，如果客户端的身份具有值为`“client，peer”`的`“hf.Registrar.Roles”`属性，则客户端可以更新`“client”`和`“peer”`类型的身份，但不能更新`“orderer”`。
++ 客户身份的从属关系必须等于或更新身份的从属关系的前缀。例如，具有`“a.b”`附属关系的客户端可以更新具有`“a.b.c”`附属关系的身份，但不能更新具有`“a.c”`附属关系的身份。如果身份需要`root`联属，则更新请求应为联盟指定点（`“.”`），并且客户端还必须具有`root`隶属关系。
+
+以下显示如何添加，修改和删除联属关系。
+
+### 获取身份信息
+
+只要调用者满足上一节中突出显示的授权要求，调用者就可以从`fabric-ca`服务器检索身份信息。以下命令显示如何获取身份。
+
+```sh
+$ fabric-ca-client identity list --id user1
+```
+
+调用者还可以通过发出以下命令来请求检索有权查看的所有身份的信息。
+
+```sh
+$ fabric-ca-client identity list
+```
+
+### 添加身份
+
+以下内容为`“user1”`添加了新标识。添加新标识与通过`“fabric-ca-client register”`命令注册标识执行相同的操作。添加新标识有两种可用的方法：第一种方法是通过`-json`标志，您可以在其中描述`JSON`字符串中的标识：
+
+```sh
+$ fabric-ca-client identity add user1 --json '{"secret": "user1pw", "type": "user", "affiliation": "org1", "max_enrollments": 1, "attrs": [{"name": "hf.Revoker", "value": "true"}]}'
+```
+
+以下添加具有`root affiliation`的用户。请注意，从属关系名称`“.”`表示根关联。
+
+```sh
+$ fabric-ca-client identity add user1 --json '{"secret": "user1pw", "type": "user", "affiliation": ".", "max_enrollments": 1, "attrs": [{"name": "hf.Revoker", "value": "true"}]}'
+```
+
+添加标识的第二种方法是使用直接标志，请参阅下面的示例以添加`“user1”`：
+
+```sh
+$ fabric-ca-client identity add user1 --secret user1pw --type user --affiliation . --maxenrollments 1 --attrs hf.Revoker=true
+```
+
+下表列出了标识的所有字段，以及它们是必需的还是可选的，以及它们可能具有的任何默认值：
+
+| 字段             | 必需 | 默认值               |
+| ---------------- | ---- | -------------------- |
+| `ID`             | 是   |                      |
+| `Secret`         | 没有 |                      |
+| `Affiliation`    | 没有 | Caller’s Affiliation |
+| `Type`           | 没有 | client               |
+| `Maxenrollments` | 没有 | 0                    |
+| `Attributes`     | 没有 |                      |
+
+### 修改身份
+
+有两种可用于修改现有标识的方法。第一种方法是通过`-json`标志，可以在其中描述对`JSON`字符串中的标识的修改。可以在单个请求中进行多项修改，未修改的身份的任何元素将保留其原始值。
+
+> 注意：`maxenrollments`值`“-2”`指定要使用CA的最大注册设置。
+
+以下命令使用`-json`标志对标识进行多次修改。
+
+```sh
+$ fabric-ca-client identity modify user1 --json '{"secret": "newPassword", "affiliation": ".", "attrs": [{"name": "hf.Regisrar.Roles", "value": "peer,client"},{"name": "hf.Revoker", "value": "true"}]}'
+```
+
+以下命令使用直接标志进行修改。以下内容将身份`'user1'`的注册密码更新为`'newsecret'`
+
+```sh
+$ fabric-ca-client identity modify user1 --secret newsecret
+```
+
+以下内容更新了身份`'user1'`与`'org2'`的关系
+
+```sh
+$ fabric-ca-client identity modify user1 --affiliation org2
+```
+
+以下内容将身份`'user1'`的类型更新为`'peer'`
+
+```sh
+$ fabric-ca-client identity modify user1 --type peer
+```
+
+以下内容将身份`'user1'`的`maxenrollments`更新为5
+
+```sh
+$ fabric-ca-client identity modify user1 --maxenrollments 5
+```
+
+通过指定`maxenrollments`值为`“-2”`，以下内容会导致标识`“user1”`使用CA的最大注册设置
+
+```sh
+$ fabric-ca-client identity modify user1 --maxenrollments -2
+```
+
+以下将身份`'user1'`的`'hf.Revoker'`属性的值设置为`'false'`。如果标识具有其他属性，则不会更改它们。如果标识先前没有`'hf.Revoker'`属性，则该属性将添加到标识中。也可以通过不为属性指定值来删除属性。
+
+```sh
+$ fabric-ca-client identity modify user1 --attrs hf.Revoker=false
+```
+
+以下删除了用户`'user1'`的`'hf.Revoker'`属性
+
+```sh
+$ fabric-ca-client identity modify user1 --attrs hf.Revoker=
+```
+
+以下演示了在单个`fabric-ca-client`身份修改命令中可以使用多个选项。在这种情况下，为用户`'user1'`更新秘钥和类型。
+
+```sh
+$ fabric-ca-client identity modify user1 --secret newpass --type peer
+```
+
+### 删除身份
+
+以下删除标识`'user1'`并撤消与`'user1'`标识关联的任何证书。
+
+```sh
+$ fabric-ca-client identity remove user1
+```
+
+> 注意：默认情况下，在`fabric-ca-server`中禁用标识的删除，但可以通过使用`-cfg.identities.allowremove`选项启动`fabric-ca-server`来启用。
+
+## 动态更新附属关系
+
+本节介绍如何使用`fabric-ca-client`动态更新从属关系。以下显示如何添加，修改，删除和列出联属关系。
+
+### 添加关系
+
+如果客户端标识不满足以下所有条件，则会发生授权失败：
+
++ 客户端标识必须具有值为`'true'`的属性`'hf.AffiliationMgr'`
++ 客户身份的从属关系必须在层级上高于正在更新的关联。例如，如果客户的隶属关系是`“a.b”`，则客户端可以添加从属关系`“a.b.c”`而不是`“a”`或`“a.b”`。
+
+以下添加了一个名为`“org1.dept1”`的新关系：
+
+```sh
+$ fabric-ca-client affiliation add org1.dept1
+```
+
+### 修改关系
+
+如果客户端标识不满足以下所有条件，则会发生授权失败：
+
++ 客户端标识必须具有值为`'true'`的属性`'hf.AffiliationMgr'`
++ 客户身份的从属关系必须在层级上高于正在更新的关联。例如，如果客户的隶属关系是`“a.b”`，则客户端可以添加从属关系`“a.b.c”`而不是`“a”`或`“a.b”`
++ 如果`'-force'`选项为`true`且存在必须修改的标识，则还必须授权客户标识修改标识。
+
+以下将`'org2'`从属关系重命名为`'org3'`。它还重命名任何子隶属关系（例如`'org2.department 1'`被重命名为`'org3.department 1'`）。
+
+```sh
+$ fabric-ca-client affiliation modify org2 --name org3
+```
+
+如果存在受关系重命名影响的身份，除非使用`'-force'`选项，否则将导致错误。使用`'-force'`选项将更新受影响的身份的从属关系以使用新的从属关系名称：
+
+```sh
+$ fabric-ca-client affiliation modify org1 --name org2 --force
+```
+
+### 删除关系
+
+如果客户端标识不满足以下所有条件，则会发生授权失败：
+
++ 客户端标识必须具有值为`'true'`的属性`'hf.AffiliationMgr'`。
++ 客户身份的从属关系必须在层级上高于正在更新的关联。例如，如果客户的隶属关系是`“a.b”`，则客户端可以删除从属关系`“a.b.c”`而不是`“a”`或`“a.b”`。
++ 如果`'-force'`选项为`true`且存在必须修改的标识，则还必须授权客户标识修改标识。
+
+以下删除了从属关系`'org2'`以及任何子关联。例如，如果`'org2.dept1'`是`'org2'`下面的联盟，它也会被删除。
+
+```sh
+$ fabric-ca-client affiliation remove org2
+```
+
+如果存在受删除联盟影响的身份，则除非使用`“-force”`选项，否则将导致错误。使用`'-force'`选项还将删除与该关联关联的所有身份，以及与这些身份中的任何身份相关联的证书。
+
+> 注意：默认情况下，在`fabric-ca-server`中禁用删除附属关系，但可以通过使用`-cfg.affiliations.allowremove`选项启动`fabric-ca-server`来启用。
+
+## 列出关系信息
+
+如果客户端标识不满足以下所有条件，则会发生授权失败：
+
++ 客户端标识必须具有值为`'true'`的属性`'hf.AffiliationMgr'`。
++ 客户身份的关联必须等于或者等级高于正在更新的关联。例如，如果客户的隶属关系是`“a.b”`，则客户端可以获得关于`“a.b”`或`“a.b.c”`但不是`“a”`或`“a.c”`的关联信息。
+
+以下命令显示如何获取特定的关联：
+
+```sh
+$ fabric-ca-client affiliation list --affiliation org2.dept1
+```
+
+调用者还可以通过发出以下命令来请求检索其有权查看的所有从属关系的信息。
+
+```sh
+$ fabric-ca-client affiliation list
+```
+
+## 管理证书
+
+本节介绍如何使用`fabric-ca-client`管理证书
+
+### 列出证书信息
+
+调用者可见的证书包括：
+
++ 那些属于调用者的证书
++ 如果调用者拥有`hf.Registrar.Roles`属性或值为`true`的`hf.Revoker`属性，则属于调用者所属关系中及其下方的身份的所有证书。例如，如果客户的联盟是`a.b`，则客户可以获得身份证明的证书，其身份是`a.b`或`a.b.c`但不是`a`或`b`。
+
+如果执行请求多个身份证书的列表命令，则只会列出联系人等于或等级低于调用者所属关系的身份证书。可以基于`ID`，`AKI`，序列号，到期时间，撤销时间，未撤销和`notexpired`标志来过滤将列出的证书。
+
+- `id`：列出此注册ID的证书
+- `serial`：列出具有此序列号的证书
+- `aki`：列出具有此`AKI`的证书
+- `expiration`：列出到期日期在此到期时间内的证书
+- `revocation`：列出在此吊销时间内撤消的证书
+- `notrevoked`：列出尚未撤销的证书
+- `notexpired`：列出尚未过期的证书
+
+可以使用标记`notexpired`和`notrevoked`作为过滤器来从结果集中排除已撤销的证书和过期的证书。例如，如果只关心已过期但尚未撤销的证书，则可以使用`expiration`和`notrevoked`标志来获取此类结果。下面提供了这种情况的一个例子。
+
+应根据`RFC3339`指定时间。例如，要列出2018年3月1日下午1:00和2018年6月15日凌晨2:00之间到期的证书，输入时间字符串将显示为`2018-03-01T13:00:00z`和`2018-06-15T02:00:00Z`。如果时间不是问题，只有日期很重要，那么时间部分可以保持关闭，然后字符串变为2018-03-01和2018-06-15。
+
+`now`字符串可用于表示当前时间，空字符串可用于表示任何时间。例如，`now::`表示从现在到未来任何时间的时间范围，`::now`表示从过去到现在的任何时间的时间范围。
+
+以下命令显示如何使用各种筛选器列出证书，列出所有证书：
+
+```sh
+$ fabric-ca-client certificate list
+```
+
+按ID列出所有证书：
+
+```sh
+$ fabric-ca-client certificate list --id admin
+```
+
+按序列和`aki`列出证书：
+
+```sh
+$ fabric-ca-client certificate list --serial 1234 --aki 1234
+```
+
+按ID和`serial/aki`列出证书：
+
+```sh
+$ fabric-ca-client certificate list --id admin --serial 1234 --aki 1234
+```
+
+列出既不是`revoker`也不是`id`过期的证书：
+
+```sh
+$ fabric-ca-client certificate list --id admin --notrevoked --notexpired
+```
+
+列出尚未针对`id`（`admin`）撤消的所有证书：
+
+`“-notexpired”`标志相当于`“-expiration now::”`，这意味着证书将在未来某个时间到期。
+
+```sh
+$ fabric-ca-client certificate list --id admin --notexpired
+```
+
+列出在时间范围内已撤销但尚未为id（`admin`）过期的所有证书：
+
+```sh
+$ fabric-ca-client certificate list --id admin --revocation 2018-01-01T01:30:00z::2018-01-30T05:00:00z
+```
+
+列出在时间范围内已撤销但尚未为id（`admin`）过期的所有证书：
+
+```sh
+$ fabric-ca-client certificate list --id admin --revocation 2018-01-01::2018-01-30 --notexpired
+```
+
+使用持续时间（在`30`天和`15`天前撤销）列出所有已撤销的证书（`ID`）（`admin`）：
+
+```sh
+$ fabric-ca-client certificate list --id admin --revocation -30d::-15d
+```
+
+在一段时间之前列出所有被撤销的证书：
+
+```sh
+$ fabric-ca-client certificate list --revocation ::2018-01-30
+```
+
+在此之前和特定日期之后列出所有已撤销的证书：
+
+```sh
+$ fabric-ca-client certificate list --id admin --revocation 2018-01-30::now
+```
+
+列出所有在时间范围之间过期但尚未针对id（`admin`）撤销的证书：
+
+```sh
+$ fabric-ca-client certificate list --id admin --expiration 2018-01-01::2018-01-30 --notrevoked
+```
+
+列出所有过期的证书使用持续时间（在30天和15天前过期）为id（`admin`）：
+
+```sh
+$ fabric-ca-client certificate list --expiration -30d::-15d
+```
+
+列出所有已过期或将在特定时间之前过期的证书：
+
+```sh
+$ fabric-ca-client certificate list --expiration ::2058-01-30
+```
+
+列出所有已过期或将在特定时间后过期的证书：
+
+```sh
+$ fabric-ca-client certificate list --expiration 2018-01-30::
+```
+
+在此之前和特定日期之后列出所有过期的证书：
+
+```sh
+$ fabric-ca-client certificate list --expiration 2018-01-30::now
+```
+
+列出未来10天到期的证书：
+
+```sh
+$ fabric-ca-client certificate list --id admin --expiration ::+10d --notrevoked
+```
+
+`list certificate`命令还可用于在文件系统上存储证书。这是在`MSP`中填充`admins`文件夹的便捷方式，`“-store”`标志指向文件系统上用于存储证书的位置。
+
+通过在`MSP`中存储身份证书，将身份配置为管理员：
+
+```sh
+$ export FABRIC_CA_CLIENT_HOME=/tmp/clientHome
+$ fabric-ca-client certificate list --id admin --store msp/admincerts
+```
+
+## 关联特定的CA实例
+
+当服务器运行多个`CA`实例时，可以将请求定向到特定CA。默认情况下，如果客户端请求中未指定CA名称，则请求将定向到`fabric-ca`服务器上的默认CA。可以使用`caname`过滤器在客户端命令的命令行上指定CA名称，如下所示：
+
+```sh
+$ fabric-ca-client enroll -u http://admin:adminpw@localhost:7054 --caname <caname>
+```
+
+# HSM
+
+默认情况下，Fabric CA服务器和客户端将私钥存储在PEM编码的文件中，但它们也可以配置为通过PKCS11 API在HSM（硬件安全模块）中存储私钥。此行为在服务器或客户端配置文件的BCCSP（BlockChain加密服务提供程序）部分中配置。
 
 
 
