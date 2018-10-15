@@ -842,7 +842,86 @@ fabric-ca-client getcainfo -u http://localhost:7055 -M $FABRIC_CA_CLIENT_HOME/ms
 
 请注意，`Hyperledger Fabric`将支持`客户端/用户`使用`X509`和`Idemix`凭据对事务进行签名，但仅支持`peer`和`orderer`身份的`X509`凭据。和以前一样，应用程序可以使用`Fabric SDK`将请求发送到`Fabric CA`服务器。`SDK`隐藏了与创建授权标头和请求有效负载以及处理响应相关的复杂性。
 
-## 获取`Idemix CRI`（证书撤销信息）
+# 获取`Idemix CRI`（证书撤销信息）
+
+`Idemix CRI`（凭证撤销信息）的目的与`X509 CRL`（证书撤销列表）类似：撤销先前发布的内容。但是，存在一些差异。
+
+在`X509`中，颁发者撤销最终用户的证书，其`ID`包含在`CRL`中。验证程序检查用户的证书是否在`CRL`中，如果是，则返回授权失败。除了从验证者接收授权错误之外，最终用户不参与此撤销过程。
+
+在`Idemix`中，最终用户参与其中。发行人撤销类似于`X509`的最终用户凭证，并且撤销的证据记录在`CRI`中。`CRI`给予最终用户（又名“证明者”）。然后，最终用户根据`CRI`生成证明其凭证未被撤销的证明。最终用户将此证据提供给验证者，验证者根据CRI验证证明。为了验证成功，最终用户和验证者使用的`CRI`版本（称为“纪元”）必须相同。可以通过向`/api/v1/idemix/cri` API端点发送请求来请求最新的`CRI`。
+
+当`fabric-ca-server`收到注册请求并且撤销句柄池中没有剩余撤销句柄时，`CRI`的版本会递增。在这种情况下，`fabric-ca-server`必须生成一个新的撤销句柄池，它会增加`CRI`的纪元。可以通过`idemix.rhpoolsize`服务器配置属性配置吊销句柄池中的吊销句柄数。
+
+## 重新注册身份
+
+假设您的注册证书即将过期或已被盗用。可以按如下方式发出`reenroll`命令以续订注册证书。
+
+```sh
+export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/peer1
+fabric-ca-client reenroll
+```
+
+## 撤销证书或身份
+
+身份或证书可以被撤销。撤消身份将撤销身份所拥有的所有证书，并且还将阻止身份获取任何新证书。撤销证书将使单个证书无效。
+
+为了撤销证书或身份，调用标识必须具有`hf.Revoker`和`hf.Registrar.Roles`属性。撤销身份只能撤销证书或具有与撤销身份的从属关系相同或前缀的关联的身份。此外，`revoker`只能撤销`revoker`的`hf.Registrar.Roles`属性中列出的类型的身份。
+
+例如，具有从属关系`orgs.org1`和`'hf.Registrar.Roles = peer，client'`属性的`revoker`可以撤销与`orgs.org1`或`orgs.org1.department1`关联的对等或客户端类型标识，但不能撤销标识附属于`orgs.org2`或任何其他类型。
+
+以下命令**禁用标识并撤消与标识关联的所有证书**。`Fabric CA`服务器从此身份收到的所有未来请求都将被拒绝。
+
+```sh
+$ fabric-ca-client revoke -e <enrollment_id> -r <reason>
+```
+
+以下是可以使用`-r`标志指定的受支持原因：
+
++ `unspecified` 不明
++ `keycompromise`  密钥泄漏
++ `cacompromise` 证书泄露
++ `affiliationchange` 从属关系变更
++ `superseded` 取代
++ `cessationofoperation` 停止操作
++ `certificatehold` 证书持有
++ `removefromcrl` 从 `crl` 删除
++ `privilegewithdrawn` 特权剔除
++ `aacompromise`  泄露
+
+例如，与关联树的根关联的引导管理员可以撤消`peer1`的标识，如下所示：
+
+```sh
+export FABRIC_CA_CLIENT_HOME=$HOME/fabric-ca/clients/admin
+fabric-ca-client revoke -e peer1
+```
+
+可以通过指定其`AKI`（授权密钥标识符）和序列号来撤销属于身份的注册证书，如下所示：
+
+```sh
+$ fabric-ca-client revoke -a xxx -s yyy -r <reason>
+```
+
+例如，可以使用`openssl`命令获取证书的`AKI`和序列号，并将它们传递给`revoke`命令以撤销所述证书，如下所示：
+
+```sh
+serial=$(openssl x509 -in userecert.pem -serial -noout | cut -d "=" -f 2)
+aki=$(openssl x509 -in userecert.pem -text | awk '/keyid/ {gsub(/ *keyid:|:/,"",$1);print tolower($0)}')
+$ fabric-ca-client revoke -s $serial -a $aki -r affiliationchange
+```
+
+`-gencrl` 标志可用于生成包含所有已撤销证书的`CRL`（证书吊销列表）。例如，以下命令将撤消身份`peer1`，生成`CRL`并将其存储在` <msp folder>/crls/crl.pem `文件中。
+
+```sh
+$ fabric-ca-client revoke -e peer1 --gencrl
+```
+
+也可以使用`gencrl`命令生成`CRL`。有关`gencrl`命令的更多信息，请参阅生成`CRL`（证书吊销列表）部分。
+
+## 生成CRL（证书吊销列表）
+
+在`Fabric CA`服务器中撤消证书后，还必须更新`Hyperledger Fabric`中的相应`MSP`。这包括对等体的本地`MSP`以及相应通道配置块中的`MSP`。为此，`PEM`编码的`CRL`（证书撤销列表）文件必须放在`MSP`的`crls`文件夹中。`fabric-ca-client gencrl`命令可用于生成`CRL`。具有`hf.GenCRL`属性的任何标识都可以创建一个`CRL`，其中包含在特定时间段内已撤消的所有证书的序列号。创建的`CRL`存储在`<msp folder>/crls/crl.pem`文件中。
+
+
 
 
 
