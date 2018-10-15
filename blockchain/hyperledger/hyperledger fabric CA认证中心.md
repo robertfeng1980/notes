@@ -1359,7 +1359,44 @@ $ fabric-ca-client enroll -u http://admin:adminpw@localhost:7054 --caname <canam
 
 # HSM
 
-默认情况下，Fabric CA服务器和客户端将私钥存储在PEM编码的文件中，但它们也可以配置为通过PKCS11 API在HSM（硬件安全模块）中存储私钥。此行为在服务器或客户端配置文件的BCCSP（BlockChain加密服务提供程序）部分中配置。
+默认情况下，`Fabric CA`服务器和客户端将私钥存储在`PEM`编码的文件中，但它们也可以配置为通过`PKCS11 API`在`HSM`（硬件安全模块）中存储私钥。此行为在服务器或客户端配置文件的`BCCSP`（`BlockChain`加密服务提供程序）部分中配置。
+
+## 配置`Fabric CA`服务器以使用`softhsm2`
+
+本节介绍如何配置`Fabric CA`服务器或客户端以使用名为`softhsm`的`PKCS11`软件版本（请参阅https://github.com/opendnssec/SoftHSMv2）。
+
+安装`softhsm`后，创建一个令牌，将其标记为`“ForFabric”`，将引脚设置为`“98765432”`（请参阅`softhsm`文档）。
+
+可以使用配置文件和环境变量来配置`BCCSP`。例如，如下所示设置`Fabric CA`服务器配置文件的`bccsp`部分。请注意，默认字段的值为`PKCS11`。
+
+```yml
+#############################################################################
+# BCCSP (BlockChain Crypto Service Provider) section is used to select which
+# crypto library implementation to use
+#############################################################################
+bccsp:
+  default: PKCS11
+  pkcs11:
+    Library: /usr/local/Cellar/softhsm/2.1.0/lib/softhsm/libsofthsm2.so
+    Pin: 98765432
+    Label: ForFabric
+    hash: SHA2
+    security: 256
+    filekeystore:
+      # The directory used for the software file-based keystore
+      keystore: msp/keystore
+```
+
+可以通过环境变量覆盖相关字段，如下所示：
+
+```sh
+FABRIC_CA_SERVER_BCCSP_DEFAULT=PKCS11 FABRIC_CA_SERVER_BCCSP_PKCS11_LIBRARY=/usr/local/Cellar/softhsm/2.1.0/lib/softhsm/libsofthsm2.so 
+FABRIC_CA_SERVER_BCCSP_PKCS11_PIN=98765432 FABRIC_CA_SERVER_BCCSP_PKCS11_LABEL=ForFabric
+```
+
+
+
+
 
 
 
