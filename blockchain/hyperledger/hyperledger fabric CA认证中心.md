@@ -46,19 +46,19 @@ $ go get -u github.com/hyperledger/fabric-ca/cmd/...
 
 > 注意：如果您已经克隆了`fabric-ca`存储库，请确保在运行上面的`'go get'`命令之前，您位于主分支上。否则，您可能会看到错误。
 >
-> 如果切换到`master`分支后，同时更新到最新版本还继续出现错误，需要将 `go` 更新到最新版本。
+> **如果切换到`master`分支后，同时更新到最新版本还继续出现错误，需要将 `go` 更新到最新版本。**
 
 ## 启动服务器
 
-以下内容使用默认设置启动 `fabric-ca-server`
+以下内容使用默认设置启动 `fabric-ca-server`，`-b` 选项为引导程序管理员提供注册`ID`和密码，如果未使用`ldap.enabled` 设置启用`LDAP`，则必须执行此操作。
 
 ```sh
 $ fabric-ca-server start -b admin:adminpw
 ```
 
-`-b` 选项为引导程序管理员提供注册`ID`和密码，如果未使用`ldap.enabled` 设置启用`LDAP`，则必须执行此操作。
+启动后程序会在本地目录中创建名为 `fabric-ca-server-config.yaml` 的默认配置文件，该文件可以自定义。
 
-在本地目录中创建名为 `fabric-ca-server-config.yaml` 的默认配置文件，该文件可以自定义。
+
 
 ## 通过Docker启动服务器
 
@@ -66,7 +66,7 @@ $ fabric-ca-server start -b admin:adminpw
 
 找到与要提取的`fabric-ca`的体系结构和版本相匹配的标记。选择适合环境的 docker 镜像：<https://hub.docker.com/r/hyperledger/fabric-ca/tags/>
 
-进入工作目录到`$GOPATH/src/github.com/hyperledger/fabric-ca/docker/server`并在编辑器中打开`docker-compose.yml`。编辑文件中的docker 镜像版本至自己需要的文件版本。
+进入工作目录到`$GOPATH/src/github.com/hyperledger/fabric-ca/docker/server`并在编辑器中打开`docker-compose.yml`。编辑文件中的 `docker` 镜像版本至自己需要的文件版本。
 
 ```yml
 fabric-ca-server:
@@ -112,14 +112,13 @@ $ docker-compose up -d
 
 ## 配置设置
 
-Fabric CA提供了3种方法来配置Fabric CA服务器和客户端上的设置。优先顺序是：
+`Fabric CA`提供了3种方法来配置`Fabric CA`服务器和客户端上的设置。配置读取的优先顺序是：
+
 + `CLI`选项
 + 环境变量
 + 配置文件
 
-环境变量或`CLI`选项覆盖配置文件更改。
-
-假定客户端配置文件内容如下：
+**环境变量或`CLI`选项覆盖配置文件更改**。假定客户端配置文件内容如下：
 
 ```yml
 tls:
@@ -145,13 +144,13 @@ $ export FABRIC_CA_CLIENT_TLS_CLIENT_CERTFILE=cert2.pem
 $ fabric-ca-client enroll --tls.client.certfile cert3.pem
 ```
 
-同样的方法适用于`fabric-ca-server`，除了使用`FABRICC_CA_CLIENT`作为环境变量的前缀之外，还可以使用`FABRIC_CA_SERVER`。
+同样的方法适用于`fabric-ca-server`，除了使用`FABRIC_CA_CLIENT`作为环境变量的前缀之外，还可以使用`FABRIC_CA_SERVER`。
 
 ## 关于文件配置路径
 
 `Fabric CA`服务器和客户机配置文件中指定文件名的所有属性都支持**相对路径和绝对路径**。相对路径相对于配置文件所在的`config`目录。例如，如果`config`目录是`~/config`并且`tls`部分如下所示，则`Fabric CA`服务器或客户端将在`~/config`目录中查找`root.pem`文件，`~/config`中的`cert.pem`文件`/certs`目录和`/abs/path`目录中的`key.pem`文件。
 
-```sh
+```yaml
 tls:
   enabled: true
   certfiles:
@@ -163,7 +162,7 @@ tls:
 
 # Fabric CA Server
 
-可以在启动之前初始化`Fabric CA`服务器。为提供了生成默认配置文件的机会，该文件可在启动服务器之前进行查看和自定义。
+可以在启动之前初始化`Fabric CA`服务器。并提供了**生成默认配置文件**的机会，该文件可在启动服务器之前进行查看和自定义。
 
 `Fabric CA`服务器的主目录确定如下：
 + 如果设置了`-home`命令行选项，请使用其值。
@@ -172,13 +171,11 @@ tls:
 + 否则，如果`CA_CFG_PATH`设置了环境变量，请使用其值。
 + 否则，使用当前工作目录。
 
-对于此服务器部分的其余部分，我们假设已将`FABRIC_CA_HOME`环境变量设置为`$HOME/fabric-ca/server`。
-
-以下说明假定服务器配置文件存在于服务器的主目录中。
+对于此服务器部分的其余部分，我们假设已将`FABRIC_CA_HOME`环境变量设置为`$HOME/fabric-ca/server`。以下说明假定服务器配置文件存在于服务器的主目录中。
 
 ## 初始化服务器
 
-按如下方式初始化Fabric CA服务器：
+按如下方式初始化`Fabric CA`服务器：
 
 ```sh
 $ fabric-ca-server init -b admin:adminpw
@@ -213,7 +210,7 @@ fabric-ca-server.db
 msp/
 ```
 
-在初始化` ca `命令行中 `$ fabric-ca-server init -b admin:adminpw` ，`-b`（引导身份）选项是必需的，`LDAP`初始化时被禁用。启动Fabric CA服务器至少需要一个引导程序身份。此身份是服务器管理员。
+在初始化` ca `命令行中 `$ fabric-ca-server init -b admin:adminpw` ，`-b`（引导身份）选项是必需的，`LDAP`初始化时被禁用。启动`Fabric CA`服务器至少需要一个引导程序身份，此身份是服务器管理员。
 
 服务器配置文件`fabric-ca-server-config.yaml`包含可以配置的证书签名请求（`CSR`）部分。以下是`CSR`示例。
 
@@ -1428,13 +1425,13 @@ Flags:
       --csr.names stringSlice          # Slice格式为<name> = <value>的逗号分隔的CSR名称列表(e.g. C=CA,O=Org1)
       --csr.serialnumber string        # 证书签名请求中的序列号
   -d, --debug                          # 启用调试级别日志记录
-      --enrollment.attrs stringSlice   # 格式的逗号分隔属性请求列表 <name>[:opt] (e.g. foo,bar:opt)
+      --enrollment.attrs string        # 格式的逗号分隔属性请求列表 <name>[:opt] (e.g. foo,bar:opt)
       --enrollment.label string        # 在HSM操作中使用的标签
       --enrollment.profile string      # 用于颁发证书的签名配置文件的名称
       --enrollment.type string         # 注册请求的类型：'x509'或'idemix'(default "x509")
   -H, --home string                    # 客户端的主目录(default "/home/vagrant/.fabric-ca-client")
       --id.affiliation string          # 身份的隶属关系
-      --id.attrs stringSlice           # Slice <name> = <value>形式的逗号分隔属性列表 (e.g. foo=foo1,bar=bar1)
+      --id.attrs string                # Slice <name> = <value>形式的逗号分隔属性列表 (e.g. foo=foo1,bar=bar1)
       --id.maxenrollments int          # 可以重用密钥以注册的最大次数(default CA's Max Enrollment)
       --id.name string                 # 标识的唯一名称
       --id.secret string               # 正在注册的身份的注册密钥
@@ -1445,7 +1442,7 @@ Flags:
   -e, --revoke.name string             # 应撤销其证书的标识
   -r, --revoke.reason string           # 撤销原因
   -s, --revoke.serial string           # 要撤销的证书的序列号
-      --tls.certfiles stringSlice      # Slice逗号分隔的PEM编码的可信证书文件列表(e.g. root1.pem,root2.pem)
+      --tls.certfiles string           # Slice逗号分隔的PEM编码的可信证书文件列表(e.g. root1.pem,root2.pem)
       --tls.client.certfile string     # 启用相互身份验证时的PEM编码证书文件
       --tls.client.keyfile string      # 字符串启用相互身份验证时的PEM编码密钥文件
   -u, --url string                     # fabric-ca-server的字符串URL(default "http://localhost:7054")
@@ -1482,12 +1479,12 @@ Flags:
       --crl.expiry duration              # gencrl请求生成的CRL的到期时间（默认为24h0m0s）
       --crlsizelimit int         # 可接受的CRL的大小限制（以字节为单位）（默认为512000）
       --csr.cn string            # 对父fabric-ca-server的证书签名请求的公用名字段
-      --csr.hosts stringSlice    # 对父fabric-ca-server的证书签名请求中以空格分隔的主机名列表
+      --csr.hosts string         # 对父fabric-ca-server的证书签名请求中以空格分隔的主机名列表
       --csr.keyrequest.algo string       # 指定密钥算法
       --csr.keyrequest.size int          # 指定密钥大小
       --csr.serialnumber string  # 对父fabric-ca-server的证书签名请求中的序列号
       --db.datasource string     # 数据库特定的数据源(default "fabric-ca-server.db")
-      --db.tls.certfiles stringSlice     # Slice以逗号分隔的PEM编码的可信证书文件列表(e.g. root1.pem,root2.pem)
+      --db.tls.certfiles string  # Slice以逗号分隔的PEM编码的可信证书文件列表(e.g. root1.pem,root2.pem)
       --db.tls.client.certfile string    # 启用相互身份验证时的PEM编码证书文件
       --db.tls.client.keyfile string     # 启用相互身份验证时的PEM编码密钥文件
       --db.type string                   # 数据库的类型;之一：sqlite3，postgres，mysql (default "sqlite3")
@@ -1507,7 +1504,7 @@ Flags:
       --ldap.attribute.names stringSlice          # Slice要在LDAP搜索上请求的LDAP属性的名称
       --ldap.enabled                              # 启用LDAP客户端以进行身份验证和属性
       --ldap.groupfilter string                   # 单个联属组的LDAP组过滤器(default "(memberUid=%s)")
-      --ldap.tls.certfiles stringSlice            # Slice逗号分隔的PEM编码的可信证书文件列表(e.g. root1.pem,root2.pem)
+      --ldap.tls.certfiles string                 # Slice逗号分隔的PEM编码的可信证书文件列表(e.g. root1.pem,root2.pem)
       --ldap.tls.client.certfile string           # 启用相互身份验证时的PEM编码证书文件
       --ldap.tls.client.keyfile string            # 启用相互身份验证时的PEM编码密钥文件
       --ldap.url string                           LDAP client URL of form ldap://adminDN:adminPassword@host[:port]/base
