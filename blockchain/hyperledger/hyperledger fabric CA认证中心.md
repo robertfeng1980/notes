@@ -1521,3 +1521,396 @@ Flags:
       --tls.keyfile string                        # 服务器侦听端口的PEM编码TLS密钥
 ```
 
+## `fabric-ca-server-config.yaml` 配置详解
+
+```yaml
+#############################################################################
+#   This is a configuration file for the fabric-ca-server command.
+#
+#   COMMAND LINE ARGUMENTS AND ENVIRONMENT VARIABLES
+#   ------------------------------------------------
+#   Each configuration element can be overridden via command line
+#   arguments or environment variables.  The precedence for determining
+#   the value of each element is as follows:
+#   1) command line argument
+#      Examples:
+#      a) --port 443
+#         To set the listening port
+#      b) --ca.keyfile ../mykey.pem
+#         To set the "keyfile" element in the "ca" section below;
+#         note the '.' separator character.
+#   2) environment variable
+#      Examples:
+#      a) FABRIC_CA_SERVER_PORT=443
+#         To set the listening port
+#      b) FABRIC_CA_SERVER_CA_KEYFILE="../mykey.pem"
+#         To set the "keyfile" element in the "ca" section below;
+#         note the '_' separator character.
+#   3) configuration file
+#   4) default value (if there is one)
+#      All default values are shown beside each element below.
+#
+#   FILE NAME ELEMENTS
+#   ------------------
+#  名称以“file”或“files”结尾的所有字段的值是其他文件的名称或名称。 
+#  例如，请参阅“tls.certfile”和“tls.clientauth.certfiles”。 
+#  每个字段的值可以是简单文件名，相对路径或绝对路径。 
+#  如果该值不是绝对路径，则将其解释为相对于此配置文件的位置。
+#############################################################################
+
+# Version of config file
+version: 1.3.0
+
+# Server's listening port (default: 7054)
+port: 7054
+
+# Enables debug logging (default: false)
+debug: false
+
+# Size limit of an acceptable CRL in bytes (default: 512000)
+crlsizelimit: 512000
+
+#############################################################################
+# 服务器侦听端口的TLS部分
+# 客户端身份验证支持以下类型：NoClientCert，
+# RequestClientCert，RequireAnyClientCert，VerifyClientCertIfGiven和RequireAndVerifyClientCert。
+# Certfiles是服务器在验证客户端证书时使用的根证书颁发机构的列表。
+#############################################################################
+tls:
+  # Enable TLS (default: false)
+  enabled: false
+  # TLS for the server's listening port
+  certfile:
+  keyfile:
+  clientauth:
+    type: noclientcert
+    certfiles:
+
+#############################################################################
+# CA部分包含与证书颁发机构相关的信息，包括CA的名称，对于区块链网络的所有成员，CA的名称应该是唯一的。 
+# 它还包括颁发注册证书（ECerts）和交易证书（TCerts）时使用的密钥和证书文件。 
+# 链文件（如果存在）包含应该为此CA信任的证书链，其中链中的第1个始终是根CA证书。
+#############################################################################
+ca:
+  # Name of this CA
+  name:
+  # Key file (is only used to import a private key into BCCSP)
+  keyfile:
+  # Certificate file (default: ca-cert.pem)
+  certfile:
+  # Chain file
+  chainfile:
+
+#############################################################################
+# gencrl REST端点用于生成包含已吊销证书的CRL。 
+# 本节包含gencrl请求处理期间使用的配置选项。
+#############################################################################
+crl:
+  # 指定生成的CRL的到期时间。 
+  # 此属性指定的小时数将添加到UTC时间，结果时间用于设置CRL的“下次更新”日期
+  expiry: 24h
+
+#############################################################################
+# 注册表部分控制fabric-ca-server如何执行两项操作：
+# 1）验证包含用户名和密码（也称为注册ID和密码）的注册请求。
+# 2）一旦经过身份验证，就会检索fabric-ca-server可选择放入TCerts的身份属性名称和值，然后在TCerts上为Hyperledger Fabric区块链进行交易。
+# 这些属性对于在链代码中进行访问控制决策很有用。
+# 有两个主要配置选项：
+# 1）fabric-ca-server是注册表。 如果下面的ldap部分中的“ldap.enabled”为false，则为true。
+# 2）LDAP服务器是注册表，在这种情况下，fabric-ca-server调用LDAP服务器来执行这些任务。
+# 如果下面的ldap部分中的“ldap.enabled”为true，则为true，这意味着将忽略此“注册表”部分。
+#############################################################################
+registry:
+  # Maximum number of times a password/secret can be reused for enrollment
+  # (default: -1, which means there is no limit)
+  maxenrollments: -1
+
+  # Contains identity information which is used when LDAP is disabled
+  identities:
+     - name: admin
+       pass: adminpw
+       type: client
+       affiliation: ""
+       attrs:
+          hf.Registrar.Roles: "*"
+          hf.Registrar.DelegateRoles: "*"
+          hf.Revoker: true
+          hf.IntermediateCA: true
+          hf.GenCRL: true
+          hf.Registrar.Attributes: "*"
+          hf.AffiliationMgr: true
+
+#############################################################################
+#  Database section
+#  支持的类型有：“sqlite3”，“postgres”和“mysql”。
+#  dataasource值取决于类型。
+#  如果类型为“sqlite3”，则数据源值是用作数据库存储的文件名。 
+#  由于“sqlite3”是嵌入式数据库，因此如果要在群集中运行fabric-ca-server，则可能无法使用它。
+#  要在群集中运行fabric-ca-server，必须选择“postgres”或“mysql”。
+#############################################################################
+db:
+  type: sqlite3
+  datasource: fabric-ca-server.db
+  tls:
+      enabled: false
+      certfiles:
+      client:
+        certfile:
+        keyfile:
+
+#############################################################################
+#  LDAP section
+#  如果启用了LDAP，则fabric-ca-server将LDAP调用到：
+#  1）验证注册请求的注册ID和秘密（即用户名和密码）;
+#  2）检索身份属性
+#############################################################################
+ldap:
+   # Enables or disables the LDAP client (default: false)
+   # If this is set to true, the "registry" section is ignored.
+   enabled: false
+   # The URL of the LDAP server
+   url: ldap://<adminDN>:<adminPassword>@<host>:<port>/<base>
+   # TLS configuration for the client connection to the LDAP server
+   tls:
+      certfiles:
+      client:
+         certfile:
+         keyfile:
+   # Attribute related configuration for mapping from LDAP entries to Fabric CA attributes
+   attribute:
+      # 'names' is an array of strings containing the LDAP attribute names which are
+      # requested from the LDAP server for an LDAP identity's entry
+      names: ['uid','member']
+      # The 'converters' section is used to convert an LDAP entry to the value of
+      # a fabric CA attribute.
+      # For example, the following converts an LDAP 'uid' attribute
+      # whose value begins with 'revoker' to a fabric CA attribute
+      # named "hf.Revoker" with a value of "true" (because the boolean expression
+      # evaluates to true).
+      #    converters:
+      #       - name: hf.Revoker
+      #         value: attr("uid") =~ "revoker*"
+      converters:
+         - name:
+           value:
+      # The 'maps' section contains named maps which may be referenced by the 'map'
+      # function in the 'converters' section to map LDAP responses to arbitrary values.
+      # For example, assume a user has an LDAP attribute named 'member' which has multiple
+      # values which are each a distinguished name (i.e. a DN). For simplicity, assume the
+      # values of the 'member' attribute are 'dn1', 'dn2', and 'dn3'.
+      # Further assume the following configuration.
+      #    converters:
+      #       - name: hf.Registrar.Roles
+      #         value: map(attr("member"),"groups")
+      #    maps:
+      #       groups:
+      #          - name: dn1
+      #            value: peer
+      #          - name: dn2
+      #            value: client
+      # The value of the user's 'hf.Registrar.Roles' attribute is then computed to be
+      # "peer,client,dn3".  This is because the value of 'attr("member")' is
+      # "dn1,dn2,dn3", and the call to 'map' with a 2nd argument of
+      # "group" replaces "dn1" with "peer" and "dn2" with "client".
+      maps:
+         groups:
+            - name:
+              value:
+
+#############################################################################
+# Affiliations section. 
+# Fabric CA 服务器可以使用本节中指定的附件进行引导。 附属关系被指定为地图。
+#
+# For example:
+#   businessunit1:
+#     department1:
+#       - team1
+#   businessunit2:
+#     - department2
+#     - department3
+#
+# Affiliations本质上是分层的。 
+# 在上面的例子中，department1（用作businessunit1.department1）是businessunit1的子节点。 
+# team1（用作businessunit1.department1.team1）是department1的子级。 
+# department2（用作businessunit2.department2）和department3（businessunit2.department3）是businessunit2的子项。
+# 注意：除了在配置文件中指定的非叶关联（如businessunit1，department1，businessunit2）之外，
+# 关联是区分大小写的，它们始终以小写形式存储。
+#############################################################################
+affiliations:
+   org1:
+      - department1
+      - department2
+   org2:
+      - department1
+
+#############################################################################
+#  Signing section
+#
+#  “默认”子部分用于签署注册证书; 
+#  默认到期时间（“到期”字段）为“8760h”，即1小时。
+#
+#  “ca”配置文件子部分用于签署中间CA证书; 默认到期时间（“到期”字段）为“43800h”，即5小时。
+#  请注意，“isca”为true，表示它颁发CA证书。 
+#  maxpathlen为0表示中间CA无法颁发其他中间CA证书，但仍可以颁发最终实体证书。（参见RFC 5280，第4.2.1.9节）
+#
+# “tls”配置文件子节用于签署TLS证书请求; 默认到期时间（“到期”字段）为“8760h”，即1小时。
+#############################################################################
+signing:
+    default:
+      usage:
+        - digital signature
+      expiry: 8760h
+    profiles:
+      ca:
+         usage:
+           - cert sign
+           - crl sign
+         expiry: 43800h
+         caconstraint:
+           isca: true
+           maxpathlen: 0
+      tls:
+         usage:
+            - signing
+            - key encipherment
+            - server auth
+            - client auth
+            - key agreement
+         expiry: 8760h
+
+###########################################################################
+# 证书签名请求（CSR）部分。
+#
+# 这将控制根CA证书的创建。
+# 根CA证书的到期时间配置为下面的“ca.expiry”字段，其默认值为“131400h”，即15小时。
+# pathlength 字段用于限制CA证书层次结构，如RFC 5280的4.2.1.9节所述。
+# 例子：
+# 1）没有路径长度值意味着没有请求限制。
+# 2）pathlength == 1表示请求的限制为1，这是根CA的默认值。 
+# 这意味着根CA可以颁发中间CA证书，但这些中间CA可能不会发出其他CA证书，尽管它们仍然可以颁发最终实体证书。
+# 3）pathlength == 0表示请求限制为0; 
+# 这是中间CA的默认值，这意味着它仍然无法颁发CA证书，尽管它仍然可以颁发最终实体证书。
+###########################################################################
+csr:
+   cn: fabric-ca-server
+   keyrequest:
+     algo: ecdsa
+     size: 256
+   names:
+      - C: US
+        ST: "North Carolina"
+        L:
+        O: Hyperledger
+        OU: Fabric
+   hosts:
+     - ubuntu-xenial
+     - localhost
+   ca:
+      expiry: 131400h
+      pathlength: 1
+
+###########################################################################
+# 每个CA都可以发出X509注册证书以及Idemix Credential。 
+# 本节指定负责颁发Idemix凭据的颁发者组件的配置。
+###########################################################################
+idemix:
+  # 指定吊销句柄的池大小。 
+  # 撤销句柄是Idemix凭证的唯一标识符。 
+  # 颁发者将创建此指定大小的池撤销句柄。
+  # 当请求凭证时，发行者将从池中获得处理并将其分配给凭证。 
+  # 当使用池中的最后一个句柄时，Issuer将使用新句柄重新填充池。
+  # 撤销句柄和凭证撤销信息（CRI）用于由证明者创建非撤销证明，以向验证者证明她的凭证未被撤销。
+  rhpoolsize: 1000
+
+  # Idemix凭证颁发是一个两步过程。 
+  # 第一步是从发行者获取一个nonce，第二步是使用nonce向isuser发送凭证请求以请求凭证。
+  # 此配置属性指定随机数的到期时间。 默认情况下，nonce在15秒后过期。
+  # 该值以time.Duration格式表示(see https://golang.org/pkg/time/#ParseDuration).
+  nonceexpiration: 15s
+
+  # 指定从数据存储中删除过期的nonce的时间间隔。 默认值为15分钟。
+  # 该值以time.Duration格式表示 (see https://golang.org/pkg/time/#ParseDuration)
+  noncesweepinterval: 15m
+
+#############################################################################
+# BCCSP（BlockChain Crypto Service Provider）部分用于选择要使用的加密库实现
+#############################################################################
+bccsp:
+    default: SW
+    sw:
+        hash: SHA2
+        security: 256
+        filekeystore:
+            # 用于基于软件文件的密钥库的目录
+            keystore: msp/keystore
+
+#############################################################################
+# Multi CA section
+#
+# 默认情况下，每个Fabric CA服务器都包含一个CA. 此部分用于在单个服务器中配置多个CA.
+#
+# 1) --cacount <number-of-CAs>
+# 自动生成<number-of-CAs>非默认CA. 
+# 这些额外CA的名称是“ca1”，“ca2”，...“caN”，其中“N”是<CA的数量>
+# 这在快速设置多个CA的开发环境中特别有用。 
+# 请注意，此配置选项不适用于中间CA服务器
+# i.e., 使用intermediate.parentserver.url配置选项启动的结构CA服务器 (-u command line option)
+#
+# 2) --cafiles <CA-config-files>
+# 对于列表中的每个CA配置文件，生成单独的签名CA. 
+# 此列表中的每个CA配置文件可以包含除port，debug和tls部分之外的服务器配置文件中的所有相同元素。
+#
+# Examples:
+# fabric-ca-server start -b admin:adminpw --cacount 2
+#
+# fabric-ca-server start -b admin:adminpw --cafiles ca/ca1/fabric-ca-server-config.yaml
+# --cafiles ca/ca2/fabric-ca-server-config.yaml
+#
+#############################################################################
+
+cacount:
+
+cafiles:
+
+#############################################################################
+# Intermediate CA section
+#
+# 服务器和CA之间的关系如下：
+#    1）单个服务器进程可以包含或充当一个或多个CA. 这由上面的“多CA部分”配置。
+#    2）每个CA是根CA或中间CA.
+#    3）每个中间CA具有父CA，其是根CA或另一中间CA.
+#
+# 本节涉及＃2和＃3的配置。
+# 如果设置了“intermediate.parentserver.url”属性，那么这是具有指定父CA的中间CA.
+#
+# parentserver section
+#    url - 父服务器的URL
+#    caname - 要在服务器中注册的CA的名称
+#
+# enrollment section 用于向父CA注册中间CA.
+#    profile - 用于颁发证书的签名配置文件的名称
+#    label - 用于HSM操作的标签
+#
+# tls section for secure socket connection
+#   certfiles - PEM编码的受信任根证书文件列表
+#   client:
+#     certfile - PEM编码的证书文件，用于在服务器上启用客户端身份验证
+#     keyfile - 用于在服务器上启用客户端身份验证的PEM编码密钥文件
+#############################################################################
+intermediate:
+  parentserver:
+    url:
+    caname:
+
+  enrollment:
+    hosts:
+    profile:
+    label:
+
+  tls:
+    certfiles:
+    client:
+      certfile:
+      keyfile:
+```
+
