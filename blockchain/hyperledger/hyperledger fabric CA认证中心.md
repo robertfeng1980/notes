@@ -1394,17 +1394,11 @@ FABRIC_CA_SERVER_BCCSP_DEFAULT=PKCS11 FABRIC_CA_SERVER_BCCSP_PKCS11_LIBRARY=/usr
 FABRIC_CA_SERVER_BCCSP_PKCS11_PIN=98765432 FABRIC_CA_SERVER_BCCSP_PKCS11_LABEL=ForFabric
 ```
 
-
-
-
-
-
-
-
-
-## `Fabric-CA` 客户端
+# `Fabric-CA` 客户端
 
 `fabric-ca-client` 命令允许管理身份（包括属性管理）和证书（包括续订和撤销）。
+
+## 基本命令行
 
 ```sh
 Hyperledger Fabric Certificate Authority Client
@@ -1413,110 +1407,117 @@ Usage:
   fabric-ca-client [command]
 
 Available Commands:
-  affiliation Manage affiliations
-  enroll      Enroll an identity
-  gencrl      Generate a CRL
-  gencsr      Generate a CSR
-  getcacert   Get CA certificate chain
-  identity    Manage identities
-  reenroll    Reenroll an identity
-  register    Register an identity
-  revoke      Revoke an identity
-  version     Prints Fabric CA Client version
+  affiliation # 管理从属关系
+  certificate # 管理证书
+  enroll      # 注册身份
+  gencrl      # 生成CRL
+  gencsr      # 生成CSR
+  getcainfo   # 获取CA证书链和Idemix公钥
+  identity    # 管理身份
+  reenroll    # 注册重新注册身份
+  register    # 注册身份
+  revoke      # 撤销身份
+  version     # 打印Fabric CA Client版本
 
 Flags:
-      --caname string                  Name of CA
-      --csr.cn string                  The common name field of the certificate signing request
-      --csr.hosts stringSlice          A list of space-separated host names in a certificate signing request
-      --csr.names stringSlice          A list of comma-separated CSR names of the form <name>=<value> (e.g. C=CA,O=Org1)
-      --csr.serialnumber string        The serial number in a certificate signing request
-  -d, --debug                          Enable debug level logging
-      --enrollment.attrs stringSlice   A list of comma-separated attribute requests of the form <name>[:opt] (e.g. foo,bar:opt)
-      --enrollment.label string        Label to use in HSM operations
-      --enrollment.profile string      Name of the signing profile to use in issuing the certificate
-  -H, --home string                    Client's home directory (default "$HOME/.fabric-ca-client")
-      --id.affiliation string          The identity's affiliation
-      --id.attrs stringSlice           A list of comma-separated attributes of the form <name>=<value> (e.g. foo=foo1,bar=bar1)
-      --id.maxenrollments int          The maximum number of times the secret can be reused to enroll (default CA's Max Enrollment)
-      --id.name string                 Unique name of the identity
-      --id.secret string               The enrollment secret for the identity being registered
-      --id.type string                 Type of identity being registered (e.g. 'peer, app, user') (default "client")
-  -M, --mspdir string                  Membership Service Provider directory (default "msp")
-  -m, --myhost string                  Hostname to include in the certificate signing request during enrollment (default "$HOSTNAME")
-  -a, --revoke.aki string              AKI (Authority Key Identifier) of the certificate to be revoked
-  -e, --revoke.name string             Identity whose certificates should be revoked
-  -r, --revoke.reason string           Reason for revocation
-  -s, --revoke.serial string           Serial number of the certificate to be revoked
-      --tls.certfiles stringSlice      A list of comma-separated PEM-encoded trusted certificate files (e.g. root1.pem,root2.pem)
-      --tls.client.certfile string     PEM-encoded certificate file when mutual authenticate is enabled
-      --tls.client.keyfile string      PEM-encoded key file when mutual authentication is enabled
-  -u, --url string                     URL of fabric-ca-server (default "http://localhost:7054")
-
-Use "fabric-ca-client [command] --help" for more information about a command.
+      --caname string                  # CA的名称
+      --csr.cn string                  # 证书签名请求的公用名字段
+      --csr.hosts stringSlice          # Slice证书签名请求中以空格分隔的主机名列表
+      --csr.keyrequest.algo string     # 指定密钥算法
+      --csr.keyrequest.size int        # 指定密钥大小
+      --csr.names stringSlice          # Slice格式为<name> = <value>的逗号分隔的CSR名称列表(e.g. C=CA,O=Org1)
+      --csr.serialnumber string        # 证书签名请求中的序列号
+  -d, --debug                          # 启用调试级别日志记录
+      --enrollment.attrs stringSlice   # 格式的逗号分隔属性请求列表 <name>[:opt] (e.g. foo,bar:opt)
+      --enrollment.label string        # 在HSM操作中使用的标签
+      --enrollment.profile string      # 用于颁发证书的签名配置文件的名称
+      --enrollment.type string         # 注册请求的类型：'x509'或'idemix'(default "x509")
+  -H, --home string                    # 客户端的主目录(default "/home/vagrant/.fabric-ca-client")
+      --id.affiliation string          # 身份的隶属关系
+      --id.attrs stringSlice           # Slice <name> = <value>形式的逗号分隔属性列表 (e.g. foo=foo1,bar=bar1)
+      --id.maxenrollments int          # 可以重用密钥以注册的最大次数(default CA's Max Enrollment)
+      --id.name string                 # 标识的唯一名称
+      --id.secret string               # 正在注册的身份的注册密钥
+      --id.type string                 # 正在注册的身份类型(e.g. 'peer, app, user') (default "client")
+  -M, --mspdir string                  # 成员资格服务提供程序目录(default "msp")
+  -m, --myhost string                  # 注册期间包含在证书签名请求中的主机名(default "ubuntu-xenial")
+  -a, --revoke.aki string              # 要撤销的证书的字符串AKI（Authority Key Identifier）
+  -e, --revoke.name string             # 应撤销其证书的标识
+  -r, --revoke.reason string           # 撤销原因
+  -s, --revoke.serial string           # 要撤销的证书的序列号
+      --tls.certfiles stringSlice      # Slice逗号分隔的PEM编码的可信证书文件列表(e.g. root1.pem,root2.pem)
+      --tls.client.certfile string     # 启用相互身份验证时的PEM编码证书文件
+      --tls.client.keyfile string      # 字符串启用相互身份验证时的PEM编码密钥文件
+  -u, --url string                     # fabric-ca-server的字符串URL(default "http://localhost:7054")
 ```
 
-
-
-## `Fabric-CA` 服务端
+# `Fabric-CA` 服务端
 
 `fabric-ca-server` 命令允许初始化和启动一个服务器进程，该进程可以托管一个或多个证书颁发机构。
 
+## 基本命令行
+
 ```sh
-Hyperledger Fabric Certificate Authority Server
+Hyperledger Fabric 证书颁发机构服务器
 
 Usage:
   fabric-ca-server [command]
 
 Available Commands:
-  init        Initialize the fabric-ca server
-  start       Start the fabric-ca server
-  version     Prints Fabric CA Server version
+  init        #初始化fabric-ca服务器
+  start       #启动fabric-ca服务器
+  version     #打印Fabric CA Server版本
 
 Flags:
-      --address string                            Listening address of fabric-ca-server (default "0.0.0.0")
-  -b, --boot string                               The user:pass for bootstrap admin which is required to build default config file
-      --ca.certfile string                        PEM-encoded CA certificate file (default "ca-cert.pem")
-      --ca.chainfile string                       PEM-encoded CA chain file (default "ca-chain.pem")
-      --ca.keyfile string                         PEM-encoded CA key file
-  -n, --ca.name string                            Certificate Authority name
-      --cacount int                               Number of non-default CA instances
-      --cafiles stringSlice                       A list of comma-separated CA configuration files
-      --cfg.affiliations.allowremove              Enables removal of affiliations dynamically
-      --cfg.identities.allowremove                Enables removal of identities dynamically
-      --crl.expiry duration                       Expiration for the CRL generated by the gencrl request (default 24h0m0s)
-      --crlsizelimit int                          Size limit of an acceptable CRL in bytes (default 512000)
-      --csr.cn string                             The common name field of the certificate signing request to a parent fabric-ca-server
-      --csr.hosts stringSlice                     A list of space-separated host names in a certificate signing request to a parent fabric-ca-server
-      --csr.serialnumber string                   The serial number in a certificate signing request to a parent fabric-ca-server
-      --db.datasource string                      Data source which is database specific (default "fabric-ca-server.db")
-      --db.tls.certfiles stringSlice              A list of comma-separated PEM-encoded trusted certificate files (e.g. root1.pem,root2.pem)
-      --db.tls.client.certfile string             PEM-encoded certificate file when mutual authenticate is enabled
-      --db.tls.client.keyfile string              PEM-encoded key file when mutual authentication is enabled
-      --db.type string                            Type of database; one of: sqlite3, postgres, mysql (default "sqlite3")
-  -d, --debug                                     Enable debug level logging
-  -H, --home string                               Server's home directory (default "/etc/hyperledger/fabric-ca")
-      --intermediate.enrollment.label string      Label to use in HSM operations
-      --intermediate.enrollment.profile string    Name of the signing profile to use in issuing the certificate
-      --intermediate.parentserver.caname string   Name of the CA to connect to on fabric-ca-server
-  -u, --intermediate.parentserver.url string      URL of the parent fabric-ca-server (e.g. http://<username>:<password>@<address>:<port)
-      --intermediate.tls.certfiles stringSlice    A list of comma-separated PEM-encoded trusted certificate files (e.g. root1.pem,root2.pem)
-      --intermediate.tls.client.certfile string   PEM-encoded certificate file when mutual authenticate is enabled
-      --intermediate.tls.client.keyfile string    PEM-encoded key file when mutual authentication is enabled
-      --ldap.attribute.names stringSlice          The names of LDAP attributes to request on an LDAP search
-      --ldap.enabled                              Enable the LDAP client for authentication and attributes
-      --ldap.groupfilter string                   The LDAP group filter for a single affiliation group (default "(memberUid=%s)")
-      --ldap.tls.certfiles stringSlice            A list of comma-separated PEM-encoded trusted certificate files (e.g. root1.pem,root2.pem)
-      --ldap.tls.client.certfile string           PEM-encoded certificate file when mutual authenticate is enabled
-      --ldap.tls.client.keyfile string            PEM-encoded key file when mutual authentication is enabled
+      --address string   #fabric-ca-server的侦听地址 (default "0.0.0.0")
+  -b, --boot string      #用户：传递bootstrap admin，这是构建默认配置文件所必需的
+      --ca.certfile string      # PEM编码的CA证书文件(default "ca-cert.pem")
+      --ca.chainfile string     # PEM编码的CA链文件(default "ca-chain.pem")
+      --ca.keyfile string       # PEM编码的CA密钥文件
+  -n, --ca.name string          # 证书颁发机构名称
+      --cacount int             # 非默认，CA实例的数量
+      --cafiles stringSlice     # Slice以逗号分隔的CA配置文件列表
+      --cfg.affiliations.allowremove     # 允许动态删除从属关系
+      --cfg.identities.allowremove       # 允许动态删除身份
+      --crl.expiry duration              # gencrl请求生成的CRL的到期时间（默认为24h0m0s）
+      --crlsizelimit int         # 可接受的CRL的大小限制（以字节为单位）（默认为512000）
+      --csr.cn string            # 对父fabric-ca-server的证书签名请求的公用名字段
+      --csr.hosts stringSlice    # 对父fabric-ca-server的证书签名请求中以空格分隔的主机名列表
+      --csr.keyrequest.algo string       # 指定密钥算法
+      --csr.keyrequest.size int          # 指定密钥大小
+      --csr.serialnumber string  # 对父fabric-ca-server的证书签名请求中的序列号
+      --db.datasource string     # 数据库特定的数据源(default "fabric-ca-server.db")
+      --db.tls.certfiles stringSlice     # Slice以逗号分隔的PEM编码的可信证书文件列表(e.g. root1.pem,root2.pem)
+      --db.tls.client.certfile string    # 启用相互身份验证时的PEM编码证书文件
+      --db.tls.client.keyfile string     # 启用相互身份验证时的PEM编码密钥文件
+      --db.type string                   # 数据库的类型;之一：sqlite3，postgres，mysql (default "sqlite3")
+  -d, --debug                            # 启用调试级别日志记录
+  -H, --home string                      # Server的主目录(default ".")
+      --idemix.nonceexpiration string    # nonce过期的持续时间 (default "15s")
+      --idemix.noncesweepinterval string # 删除过期的nonce的间隔 (default "15m")
+      --idemix.rhpoolsize int            # 指定吊销句柄池大小(default 100)
+      --intermediate.enrollment.label string      # 在HSM操作中使用的标签
+      --intermediate.enrollment.profile string    # 用于颁发证书的签名配置文件的名称
+      --intermediate.enrollment.type string       # 注册请求的类型：'x509'或'idemix'(default "x509")
+      --intermediate.parentserver.caname string   # 要在fabric-ca-server上连接的CA的名称
+  -u, --intermediate.parentserver.url string      # l父fabric-ca-server的字符串URL(e.g. http://<username>:<password>@<address>:<port)
+      --intermediate.tls.certfiles stringSlice    # Slice逗号分隔的PEM编码的可信证书文件列表(e.g. root1.pem,root2.pem)
+      --intermediate.tls.client.certfile string   # 启用相互身份验证时的PEM编码证书文件
+      --intermediate.tls.client.keyfile string    # 启用相互身份验证时的PEM编码密钥文件
+      --ldap.attribute.names stringSlice          # Slice要在LDAP搜索上请求的LDAP属性的名称
+      --ldap.enabled                              # 启用LDAP客户端以进行身份验证和属性
+      --ldap.groupfilter string                   # 单个联属组的LDAP组过滤器(default "(memberUid=%s)")
+      --ldap.tls.certfiles stringSlice            # Slice逗号分隔的PEM编码的可信证书文件列表(e.g. root1.pem,root2.pem)
+      --ldap.tls.client.certfile string           # 启用相互身份验证时的PEM编码证书文件
+      --ldap.tls.client.keyfile string            # 启用相互身份验证时的PEM编码密钥文件
       --ldap.url string                           LDAP client URL of form ldap://adminDN:adminPassword@host[:port]/base
-      --ldap.userfilter string                    The LDAP user filter to use when searching for users (default "(uid=%s)")
-  -p, --port int                                  Listening port of fabric-ca-server (default 7054)
-      --registry.maxenrollments int               Maximum number of enrollments; valid if LDAP not enabled (default -1)
-      --tls.certfile string                       PEM-encoded TLS certificate file for server's listening port (default "tls-cert.pem")
-      --tls.clientauth.certfiles stringSlice      A list of comma-separated PEM-encoded trusted certificate files (e.g. root1.pem,root2.pem)
-      --tls.clientauth.type string                Policy the server will follow for TLS Client Authentication. (default "noclientcert")
-      --tls.enabled                               Enable TLS on the listening port
-      --tls.keyfile string                        PEM-encoded TLS key for server's listening port
-
-Use "fabric-ca-server [command] --help" for more information about a command.
+      --ldap.userfilter string                    # 搜索用户时使用的LDAP用户过滤器 (default "(uid=%s)")
+  -p, --port int                                  # fabric-ca-server的侦听端口 (default 7054)
+      --registry.maxenrollments int               # 最大注册人数; 如果未启用LDAP，则有效(default -1)
+      --tls.certfile string                       # 服务器侦听端口的PEM编码TLS证书文件(default "tls-cert.pem")
+      --tls.clientauth.certfiles stringSlice      # Slice以逗号分隔的PEM编码的可信证书文件列表(e.g. root1.pem,root2.pem)
+      --tls.clientauth.type string                # 服务器将遵循TLS客户端身份验证的策略(default "noclientcert")
+      --tls.enabled                               # 在侦听端口上启用TLS
+      --tls.keyfile string                        # 服务器侦听端口的PEM编码TLS密钥
 ```
+
