@@ -818,7 +818,7 @@ fabric-ca-client getcainfo -u http://localhost:7055 -M $FABRIC_CA_CLIENT_HOME/ms
 
 ## 获取用户的`Identity Mixer`凭据
 
-`Identity Mixer`（`Idemix`）是一种加密协议套件，用于保护身份验证和传输认证属性。`Idemix`允许用户在没有发行者（CA）参与的情况下使用验证者进行身份验证，并且仅选择性地仅披露验证者所需的那些属性，并且可以在不跨越其事务的情况下进行链接。
+`Identity Mixer`（`Idemix`）是**一种加密协议套件，用于保护身份验证和传输认证属性**。`Idemix`允许用户在没有发行者（CA）参与的情况下使用验证者进行身份验证，并且仅选择性地仅披露验证者所需的那些属性，并且可以在不跨越其事务的情况下进行链接。
 
 除`X509`证书外，`Fabric CA`服务器还可以颁发`Idemix`凭据。可以通过将请求发送到`/api/v1/idemix/credential` API端点来请求`Idemix`凭证。有关此和其他`Fabric CA`服务器`API`端点的更多信息，请参阅`swagger-fabric-ca.json`。
 
@@ -832,7 +832,7 @@ fabric-ca-client getcainfo -u http://localhost:7055 -M $FABRIC_CA_CLIENT_HOME/ms
 
 `/api/v1/idemix/credential` API端点接受基本和令牌授权标头。基本授权标头应包含用户的注册ID和密码。如果用户已具有`X509`注册证书，则还可以使用它来创建令牌授权标头。
 
-请注意，`Hyperledger Fabric`将支持`客户端/用户`使用`X509`和`Idemix`凭据对事务进行签名，但仅支持`peer`和`orderer`身份的`X509`凭据。和以前一样，应用程序可以使用`Fabric SDK`将请求发送到`Fabric CA`服务器。`SDK`隐藏了与创建授权标头和请求有效负载以及处理响应相关的复杂性。
+> 注意，`Hyperledger Fabric`将支持`客户端/用户`使用`X509`和`Idemix`凭据对事务进行签名，但仅支持`peer`和`orderer`身份的`X509`凭据。和以前一样，应用程序可以使用`Fabric SDK`将请求发送到`Fabric CA`服务器。`SDK`隐藏了与创建授权标头和请求有效负载以及处理响应相关的复杂性。
 
 # 获取`Idemix CRI`（证书撤销信息）
 
