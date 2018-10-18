@@ -96,7 +96,7 @@ Linux基金会于2015年创建了`Hyperledger`项目，以推进跨行业的区�
 
 我们将了解有关`Hyperledger Fabric`共识机制的更多信息，目前包括`SOLO`和`Kafka`。
 
-#`Hyperledger Fabric` 功能
+# `Hyperledger Fabric` 功能
 
 `Hyperledger Fabric` 是分布式账本技术（`DLT`）的一种实现，可在模块化架构区块链架构中提供企业级网络安全性，具有可扩展、机密性、高性能的特点。
 
