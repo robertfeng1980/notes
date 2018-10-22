@@ -279,5 +279,12 @@ CA的有两种形式：**根CA**和**中间CA**。由于`Root CA`（`Symantec`�
 
 ## 证书撤销列表
 
+证书撤销列表（`CRL`）很容易理解，它只是CA知道由于某种原因而被**撤销的证书的引用列表**。如果回想一下商店场景，`CRL`就像被盗信用卡列表一样。
 
+**当第三方想要验证另一方的身份时，它首先检查颁发CA的`CRL`以确保证书尚未被撤销**。验证者不必检查`CRL`，但如果不是，则他们冒着接受**受损身份的风险**。
 
+![CRL](https://hyperledger-fabric.readthedocs.io/en/latest/_images/identity.diagram.12.png)
+
+使用CRL检查证书是否仍然有效。如果模仿者试图将受损的数字证书传递给验证方，则可以**首先检查颁发CA的CRL**，以确保其未列为不再有效。
+
+请注意，**被撤销的证书与证书过期非常不同**。撤销的证书尚未过期，按其他措施，**它们是完全有效的证书**。有关CRL的更多深入信息，[请单击此处](https://hyperledger-fabric-ca.readthedocs.io/en/latest/users-guide.html#generating-a-crl-certificate-revocation-list)。
