@@ -1,5 +1,26 @@
-# hyperledger fabric 建立你的第一个网络
-> 演示hyperledger fabric的第一个网络示例，帮助了解换hyperledger fabric的运行流程原理和运行环境。
+# `hyperledger fabric` 入门
+检查是否已在将要开发区块链应用程序和运行`Hyperledger Fabric`的平台上安装了所有[必要环境](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html)。
+
+安装必备组件后，即可下载并安装`HyperLedger Fabric`。在我们为`Fabric`二进制文件开发真正的安装程序时，我们提供了一个脚本，可以[将示例、二进制文件和Docker镜像安装](https://hyperledger-fabric.readthedocs.io/en/latest/install.html)到系统中。该脚本还将`Docker`镜像下载到本地仓库中。
+
+## `Hyperledger Fabric SDK`
+
+`Hyperledger Fabric`提供了许多`SDK`来支持各种编程语言。有两个正式发布的`Node.js`和`Java SDK`：
+
+ - [Hyperledger Fabric Node SDK](https://github.com/hyperledger/fabric-sdk-node)和[Node SDK文档](https://fabric-sdk-node.github.io/)。
+ - [Hyperledger Fabric Java SDK](https://github.com/hyperledger/fabric-sdk-java)。
+
+此外，还有三个尚未正式发布的`SDK`（适用于`Python`，`Go`和`REST`），但它们仍可供下载和测试：
+
+ - [Hyperledger Fabric Python SDK](https://github.com/hyperledger/fabric-sdk-py)。
+ - [Hyperledger Fabric Go SDK](https://github.com/hyperledger/fabric-sdk-go)。
+ - [Hyperledger Fabric REST SDK](https://github.com/hyperledger/fabric-sdk-rest)。
+
+## `Hyperledger Fabric CA`
+
+`Hyperledger Fabric`提供可选的 [证书颁发机构服务](http://hyperledger-fabric-ca.readthedocs.io/en/latest) ，您可以选择使用该服务生成证书和密钥材料，以配置和管理区块链网络中的身份。但是，可以使用任何可以生成`ECDSA`证书的CA。
+
+
 
 # 运行环境
 
