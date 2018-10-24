@@ -1,8 +1,6 @@
 ## `hyperledger` 文档
-
-[hyperledger fabric 关键概念.md](./hyperledger/hyperledger%20fabric%20关键概念.md)
-
-[hyperledger fabric 区块链网络.md](./hyperledger/hyperledger%20fabric%20区块链网络.md) 
++ [`hyperledger fabric 关键概念.md`](./hyperledger/hyperledger%20fabric%20关键概念.md)
++ [`hyperledger fabric 区块链网络.md`](./hyperledger/hyperledger%20fabric%20区块链网络.md) 
 
 [hyperledger fabric 入门.md](./hyperledger/hyperledger%20fabric%20入门.md)
 
