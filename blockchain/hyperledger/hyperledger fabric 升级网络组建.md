@@ -117,5 +117,16 @@ $ ./byfn.sh upgrade -i 1.2.x
 
 如果要手动升级网络，只需再次运行`./byfn.sh down`并执行步骤 `./byfn.sh upgrade -i 1.2.x`。然后继续下一部分。
 
-# 升级orderer容器
+# 升级`orderer`容器
+
+`Orderer`容器应以滚动方式升级（一次一个）。在较高级别，`orderer`升级过程如下：
+
+1. 停止`orderer`。
+2. 备份`orderer`的分类帐和`MSP`。
+3. 使用最新镜像重新启动`orderer`。
+4. 验证升级完成。
+
+由于利用`BYFN`，我们有一个独立`orderer`设置，因此，我们只会执行一次此过程。但是，在`Kafka`设置中，必须为每个`orderer`执行此过程。
+
+> **注意**：本教程使用`docker`部署。对于本机部署，请使用发布工件中的`orderer`文件替换该文件。备份`orderer.yaml`并将其替换为发布工件中的`orderer.yaml`文件。然后将备份的`orderer.yaml`中的任何修改变量移植到新的变量。使用像`diff`这样的实用程序可能会有所帮助。`v1.2`中没有新的`orderer.yaml`配置参数，但最佳做法是将更改作为升级过程的一部分移植到新配置文件中。
 
