@@ -272,3 +272,113 @@ export PEER=peer1.org2.example.com
 
 # 启用新的`v1.2`功能
 
+尽管`Fabric`二进制文件可以并且应该以滚动方式进行升级，但在**启用功能之前完成二进制文件的升级**非常重要。在启用新功能之前未升级到`v1.2`的任何对等方节点**可能会崩溃**，以指示可能导致状态为`forl`的错误配置。如果订购者未升级到`v1.2`，则不会崩溃，也不会创建状态分叉（与从`v1.0.x`升级到`v1.1`不同）。尽管如此，在启用新功能之前，**将所有`peer`和`orderer`二进制文件升级到`v1.2`仍然是最佳做法**。
+
+启用功能后，**它将成为该通道的永久记录**的一部分。这意味着即使在**禁用该功能**之后，**旧的二进制文件也将无法参与该通道**，因为它们无法处理超出阻止功能的块进入禁用它的块。因此，**一旦启用了功能，就不建议或不支持禁用它**。
+
+因此，**将升级通道功能视为不可逆，一旦升级就不能回退**。请在测试设置中尝试新功能，并在继续在生产中启用它们之前充满信心。
+
+通过通道配置启用交易功能。有关更新通道配置的更多信息，请查看[向](https://hyperledger-fabric.readthedocs.io/en/release-1.2/channel_update_tutorial.html)通道[添加组织](https://hyperledger-fabric.readthedocs.io/en/release-1.2/channel_update_tutorial.html) 或[更新通道配置](https://hyperledger-fabric.readthedocs.io/en/release-1.2/config_update.html)的文档。
+
+`v1.2`的新功能位于`Application`通道组中（这会影响**对等网络**行为，例如对等方处理交易的方式）。与任何通道配置更新一样，我们必须遵循以下流程：
+
+1. 获取最新的频道配置
+2. 创建修改后的频道配置
+3. 创建配置更新交易
+
+通过重新发布`docker exec -it cli bash`进入`cli`容器。
+
+## Application 组
+
+要更改应用程序组的配置，请将环境变量设置为`Org1`：
+
+```sh
+export CORE_PEER_LOCALMSPID="Org1MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+export CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+export CH_NAME="mychannel"
+```
+
+## 获取最新的频道配置
+
+接下来，获取最新的频道配置：
+
+```sh
+$ peer channel fetch config config_block.pb -o orderer.example.com:7050 -c $CH_NAME --tls --cafile $ORDERER_CA
+
+$ configtxlator proto_decode --input config_block.pb --type common.Block --output config_block.json
+
+$ jq .data.data[0].payload.data.config config_block.json > config.json
+```
+
+## 创建修改后的频道配置
+
+创建修改后的频道配置：
+
+```sh
+jq -s '.[0] * {"channel_group":{"groups":{"Application": {"values": {"Capabilities": .[1]}}}}}' config.json ./scripts/capabilities.json > modified_config.json
+```
+
+注意我们在这里要改变的内容：`Capabilities` 被添加为`value` 的 `Application` 组下`channel_group`（在`mychannel`中）。
+
+## 创建配置更新交易
+
+创建配置更新交易：
+
+```sh
+$ configtxlator proto_encode --input config.json --type common.Config --output config.pb
+
+$ configtxlator proto_encode --input modified_config.json --type common.Config --output modified_config.pb
+
+$ configtxlator compute_update --channel_id $CH_NAME --original config.pb --updated modified_config.pb --output config_update.pb
+```
+
+`Org1`签署交易：
+
+```sh
+$ peer channel signconfigtx -f config_update_in_envelope.pb
+```
+
+和上面同样的方式进行操作其他组织，将环境变量设置为`Org2`： 
+
+```sh
+export CORE_PEER_LOCALMSPID="Org2MSP"
+
+export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+
+export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+
+export CORE_PEER_ADDRESS=peer0.org2.example.com:7051
+```
+
+`Org2`使用其签名提交配置更新交易： 
+
+```sh
+$ peer channel update -f config_update_in_envelope.pb -c $CH_NAME -o orderer.example.com:7050 --tls true --cafile $ORDERER_CA
+```
+
+到此，现在已启用`v1.2`功能。 
+
+## 重新验证升级完成
+
+让我们确保网络仍然畅通，运行一下命令：
+
+```sh
+$ peer chaincode invoke -o orderer.example.com:7050  --tls --cafile $ORDERER_CA  -C $CH_NAME -n mycc -c '{"Args":["invoke","a","b","10"]}'
+```
+
+然后查询值`a`，该值应显示值`70`。让我们来看看：
+
+```sh
+$ peer chaincode query -C $CH_NAME -n mycc -c '{"Args":["query","a"]}'
+```
+
+我们应该看到以下内容：
+
+```
+Query Result: 70
+```
+
+> **注意**：虽然网络中的所有对等二进制文件都应该在此之前进行升级，但是在加入v1.1.x对等体的通道上启用功能要求将导致对等体崩溃。这种崩溃行为是故意的，因为它表明可能导致状态分叉的配置错误。
