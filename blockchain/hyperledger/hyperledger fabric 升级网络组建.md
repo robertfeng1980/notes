@@ -119,7 +119,7 @@ $ ./byfn.sh upgrade -i 1.2.x
 
 # 升级`orderer`容器
 
-`Orderer`容器应以滚动方式升级（一次一个）。在较高级别，`orderer`升级过程如下：
+`Orderer`容器应以**滚动方式升级**（一次一个）。在较高级别，`orderer`升级过程如下：
 
 1. 停止（`stop`）`orderer`。
 2. 备份`orderer`的分类帐和`MSP`。
@@ -173,4 +173,102 @@ $ docker-compose -f docker-compose-cli.yaml up -d --no-deps orderer.example.com
 由于我们的示例使用“独立” `orderer` 服务，因此重新启动的 `orderer` 必须同步的网络中没有其他 `orderer` 。但是，在利用`Kafka`的生产网络中，最好的做法是 `peer channel fetch <blocknumber>` 在重新启动 `orderer` 后验证是否已赶上其他订货人。
 
 # 升级 `peer` 容器
+
+接下来，如何将对等容器升级到`Fabric v1.2`。与`orderer`一样，`docker peer` 镜像应以**滚动方式升级**（一次一个）。正如`orderer`升级期间提到的那样，`orderers`和`peer`可以**并行升级**，但是为了本教程的目的，我们已经将这些进程分开了。将执行以下步骤：
+
+1. 停止(`stop`)`peer`。
+2. 备份`peer`的分类账本和`MSP`。
+3. 删除链码容器和镜像。
+4. 使用最新镜像重新启动`peer`容器。
+5. 验证升级完成。
+
+我们的网络中有四个同行。我们将为每个对等体执行一次此过程，总共进行四次升级。
+
+> **注意**：同样，本教程使用了`docker`部署。对于**本机** 部署，请`peer`使用发布工件中的文件替换该文件。备份`core.yaml`并使用发布工件中的替换它。将所有已修改变量从备份移植`core.yaml`到新变量 。使用类似的实用程序`diff`可能会有所帮助。
+
+## 停止`peer`服务
+
+让我们用以下命令**关闭第一个对等**容器： 
+
+```sh
+$ export PEER=peer0.org1.example.com
+$ docker stop $PEER
+```
+
+## 备份`peer`的分类账本和`MSP`
+
+**备份对等的分类帐和MSP**：
+
+```sh
+$ mkdir -p $LEDGERS_BACKUP
+$ docker cp $PEER:/var/hyperledger/production ./$LEDGERS_BACKUP/$PEER
+```
+
+## 删除链码容器和镜像
+
+在对等体停止并备份分类帐后，**删除对等链代码容器**：
+
+```sh
+$ CC_CONTAINERS=$(docker ps | grep dev-$PEER | awk '{print $1}')
+$ if [ -n "$CC_CONTAINERS" ] ; then docker rm -f $CC_CONTAINERS ; fi
+```
+
+**删除对等体链代码镜像**：
+
+```sh
+CC_IMAGES=$(docker images | grep dev-$PEER | awk '{print $1}')
+if [ -n "$CC_IMAGES" ] ; then docker rmi -f $CC_IMAGES ; fi
+```
+
+## 使用最新镜像重新启动`peer`容器
+
+现在我们将使用v1.2图像标记重新启动对等体：
+
+```sh
+$ docker-compose -f docker-compose-cli.yaml up -d --no-deps $PEER
+```
+
+> **注意**：尽管`BYFN`支持使用`CouchDB`，但我们在本教程中选择了更简单的实现。但是，如果您使用的是`CouchDB`，请发出此命令而不是上面的命令：
+
+```sh
+$ docker-compose -f docker-compose-cli.yaml -f docker-compose-couch.yaml up -d --no-deps $PEER
+```
+
+> **注意**：无需重新启动链代码容器，当对等方获得链代码请求（调用或查询）时，它首先检查它是否有运行该链代码的副本。如果是这样，它就会使用它。否则，在这种情况下，对等体启动链码（如果需要，重建图像）。
+
+## 验证升级完成
+
+现在已完成第一个`peer`的升级，但在继续之前，请检查以确保通过链代码调用正确完成升级。继续转账从`a`到`b`使用这些命令：
+
+```sh
+$ docker-compose -f docker-compose-cli.yaml up -d --no-deps cli
+
+$ docker exec -it cli bash
+
+$ peer chaincode invoke -o orderer.example.com:7050  --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem  -C mychannel -n mycc -c '{"Args":["invoke","a","b","10"]}'
+```
+
+查询显示`a`有一个值`90`，我们刚刚调用了它们转账 `10`。因此，一个查询`a`应该显示`80`。让我们来看看：
+
+```sh
+$ peer chaincode query -C mychannel -n mycc -c '{"Args":["query","a"]}'
+```
+
+应该看到以下内容：
+
+```
+Query Result: 80
+```
+
+验证对等方是否已正确升级后，请确保`exit` 在继续升级对等方之前发出一个离开容器的方法。可以通过重复上述过程并导出不同的`peer`对等名称来完成此操作。
+
+```sh
+export PEER=peer1.org1.example.com
+export PEER=peer0.org2.example.com
+export PEER=peer1.org2.example.com
+```
+
+> **注意**：在启用`v1.2`功能之前，必须升级所有对等体。
+
+# 启用新的`v1.2`功能
 
