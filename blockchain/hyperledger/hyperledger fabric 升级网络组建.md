@@ -121,7 +121,7 @@ $ ./byfn.sh upgrade -i 1.2.x
 
 `Orderer`容器应以滚动方式升级（一次一个）。在较高级别，`orderer`升级过程如下：
 
-1. 停止`orderer`。
+1. 停止（`stop`）`orderer`。
 2. 备份`orderer`的分类帐和`MSP`。
 3. 使用最新镜像重新启动`orderer`。
 4. 验证升级完成。
@@ -129,4 +129,48 @@ $ ./byfn.sh upgrade -i 1.2.x
 由于利用`BYFN`，我们有一个独立`orderer`设置，因此，我们只会执行一次此过程。但是，在`Kafka`设置中，必须为每个`orderer`执行此过程。
 
 > **注意**：本教程使用`docker`部署。对于本机部署，请使用发布工件中的`orderer`文件替换该文件。备份`orderer.yaml`并将其替换为发布工件中的`orderer.yaml`文件。然后将备份的`orderer.yaml`中的任何修改变量移植到新的变量。使用像`diff`这样的实用程序可能会有所帮助。`v1.2`中没有新的`orderer.yaml`配置参数，但最佳做法是将更改作为升级过程的一部分移植到新配置文件中。
+
+## 停止 `orderer` 服务
+
+通过**停止`orderer`**开始升级过程：
+
+```sh
+# 停止 orderer 服务
+$ docker stop orderer.example.com
+# 设置备份目录
+$ export LEDGERS_BACKUP=./ledgers-backup
+
+# 注意，将'1.2.x'替换为特定版本，例如'1.2.0'。
+# 如果您希望默认使用系统上标记为“最新”的图像，请将IMAGE_TAG设置为“最新”。
+
+# 设置升级后的 docker 镜像版本
+$ export IMAGE_TAG=$(go env GOARCH)-1.2.0-stable
+```
+
+我们为目录创建了一个变量，用于放入备份文件，并设置想要升级到的`docker`镜像`IMAGE_TAG`。
+
+## 备份`orderer`的分类账本和`MSP`
+
+`orderer`停掉后，需要**备份其分类帐和MSP**：
+
+```sh
+$ mkdir -p $LEDGERS_BACKUP
+
+# 下面的目录是 docker-compose-cli.yaml 中挂载的卷路径
+$ docker cp orderer.example.com:/var/hyperledger/production/orderer/ ./$LEDGERS_BACKUP/orderer.example.com
+```
+
+在生产网络中，将以滚动方式为每个基于`kafka`的`orderer`重复该过程。
+
+## 使用最新镜像重新启动`orderer`
+
+现在使用我们的新的镜像版本**下载并重新启动`orderer`**：
+
+```sh
+$ docker-compose -f docker-compose-cli.yaml up -d --no-deps orderer.example.com
+```
+
+由于我们的示例使用“独立” `orderer` 服务，因此重新启动的 `orderer` 必须同步的网络中没有其他 `orderer` 。但是，在利用`Kafka`的生产网络中，最好的做法是 `peer channel fetch <blocknumber>` 在重新启动 `orderer` 后验证是否已赶上其他订货人。
+
+# 升级 `peer` 容器
 
