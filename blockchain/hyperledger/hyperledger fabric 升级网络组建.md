@@ -381,4 +381,38 @@ $ peer chaincode query -C $CH_NAME -n mycc -c '{"Args":["query","a"]}'
 Query Result: 70
 ```
 
-> **注意**：虽然网络中的所有对等二进制文件都应该在此之前进行升级，但是在加入v1.1.x对等体的通道上启用功能要求将导致对等体崩溃。这种崩溃行为是故意的，因为它表明可能导致状态分叉的配置错误。
+> **注意**：虽然网络中的**所有对等二进制文件都应该在此之前进行升级**，但是在加入`v1.1.x`对等体的通道上启用功能要求将导致对等体崩溃。这种崩溃行为是故意的，因为它表明可能导致状态分叉的配置错误。
+
+# 升级组件`BYFN`不支持
+
+## 升级`Fabric CA`容器
+
+要了解如何升级`Fabric CA`服务器，请单击[CA文档。](http://hyperledger-fabric-ca.readthedocs.io/en/latest/users-guide.html#upgrading-the-server)
+
+## 升级`SDK`客户端
+
+升级`SDK`客户端之前升级`Fabric CA`
+
+## 升级`Kafka`群集
+
+这不是必需的，但建议升级`Kafka`集群并与`Fabric`的其余部分保持同步。较新版本的`Kafka`支持较旧的协议版本，因此可以在`Fabric`的其余部分之前或之后升级`Kafka`。
+
+如果按照[升级网络到v1.1教程](http://hyperledger-fabric.readthedocs.io/en/release-1.1/upgrading_your_network_tutorial.html)，`Kafka`群集应该是`v1.0.0`。如果不是，请参阅有关[从先前版本](https://kafka.apache.org/documentation/#upgrade)升级`Kafka`以升级`Kafka`群集代理的官方`Apache Kafka`文档。
+
+## 升级`Zookeeper`
+
+`Apache Kafka`集群需要`Apache Zookeeper`集群。`Zookeeper API`已经稳定了很长时间，因此，`Kafka`几乎可以使用任何版本的`Zookeeper`。如果有特定要求升级到特定版本的·Zookeeper·，请参阅[Apache Kafka升级](https://kafka.apache.org/documentation/#upgrade)文档。如果您想升级`Zookeeper`群集，可以在[Zookeeper FAQ中](https://cwiki.apache.org/confluence/display/ZOOKEEPER/FAQ)找到有关升级`Zookeeper`群集的一些信息。
+
+## 升级`CouchDB`
+
+如果您使用`CouchDB`作为状态数据库，则应**在升级对等体的同时升级对等体的`CouchDB`**。因为`v1.1`和`v1.2`都附带了`CouchDB v2.1.1`，如果你按照升级到`v1.1`的步骤进行操作，那么你的`CouchDB`应该是最新的。
+
+## 升级`Chaincodes vendored shim`
+
+> **注意**：`v1.1.0`填充程序与`v1.2`对等程序兼容，但是，最佳做法是升级链代码填充程序以匹配对等程序的当前级别。
+
+存在许多第三方工具，允许提供链码`vendored shim`。如果使用其中一种工具，请使用相同的工具更新销售并重新打包的链码。
+
+如果你的链码供应商是`vendored shim`，在更新`vendored shim`版本之后，你必须将它安装到已经拥有链码的所有同行。**使用相同的名称安装它，但是更新版本**。然后，应该**在已部署此链代码的每个通道上执行链代码升级，以转移到新版本**。
+
+如果没有提供链码，则可以完全跳过此步骤。
