@@ -27,13 +27,13 @@
 
 # 概述
 
-Vagrant是为所有人设计的，作为创建虚拟环境的最简单快捷的方式。Vagrant是一款用于在单个工作流程中构建和管理虚拟机环境的工具。 凭借易于使用的**工作流程**和专注于**自动化**，Vagrant降低了开发环境设置时间，提高了产品开发效率。
+`Vagrant`是为所有人设计的，作为创建虚拟环境的最简单快捷的方式。`Vagrant`是一款用于在单个工作流程中构建和管理虚拟机环境的工具。 凭借易于使用的**工作流程**和专注于**自动化**，`Vagrant`降低了开发环境设置时间，提高了产品开发效率。
 
-Vagrant提供易于配置，可重复使用的便携式工作环境，构建于业界标准技术之上，并由单一一致的工作流程控制，帮助您最大限度地提高您和团队的生产力和灵活性。
+`Vagrant`提供易于配置，可重复使用的便携式工作环境，构建于业界标准技术之上，并由单一一致的工作流程控制，帮助您最大限度地提高您和团队的生产力和灵活性。
 
-为了达到它的效率，vagrant 站在巨人的肩膀上。计算机配置在VirtualBox，VMware，AWS或[任何其他提供商](https://www.vagrantup.com/docs/providers/)之上 。然后使用行业标准 [配置工具](https://www.vagrantup.com/docs/provisioning/) （如`shell`脚本，`Chef`或`Puppet`）可以自动在虚拟机上安装和配置软件。
+为了达到它的效率，`vagrant` 站在巨人的肩膀上。计算机配置在`VirtualBox`，`VMware`，`AWS`或[任何其他提供商](https://www.vagrantup.com/docs/providers/)之上 。然后使用行业标准 [配置工具](https://www.vagrantup.com/docs/provisioning/) （如`shell`，`Chef`或`Puppet`）可以自动在虚拟机上安装和配置软件。
 
-`vagrant` 工具就是一个用命令行和脚本的方式，帮你创建虚拟机和安装虚拟机里面的软件的一个工具。并且它支持把安装好的环境进行打包成`*.box`，然后在其他机器上再通过vagrant很方便的添加到机器上。 
+`vagrant` 工具就是一个用命令行和脚本的方式，帮你创建虚拟机和安装虚拟机里面的软件的一个工具。并且它支持把安装好的环境进行打包成`*.box`，然后在其他机器上再通过`vagrant`很方便的添加到机器上。 
 
 ## 优点
 
@@ -126,7 +126,7 @@ version         # 打印当前和最新的Vagrant版本
   添加一个box在远程服务器上，程序会自动到这个地址下载。然后添加这个box到虚拟机上名称为`mybox`
 
 
-- **添加一个远程现有的`box`** 
+- **创建一个远程现有的`box`** 
 
   ```shell
   $ vagrant init mybox https://boxes.company.com/my-project.box
@@ -134,44 +134,41 @@ version         # 打印当前和最新的Vagrant版本
 
   上面的`mybox`是虚拟机名称，后面的网址是远程的虚拟机文件
 
-  
 
 ### 启动虚拟机
 
 ---
 
-- **启动虚拟机 `vagrant up`就可以启动当前虚拟机了**，此时`vagrant`会检查本地是否有`ubuntu/trusty64`这个虚拟机的`trusty`的`ubuntu`版本（`Ubuntu Server 14.04 LTS (Trusty Tahr) daily builds`），如果没有就会从官网https://atlas.hashicorp.com来下载`ubuntu/trusty64`这个box，这个过程的速度看网络好坏。
+**启动虚拟机 `vagrant up`就可以启动当前虚拟机了**，此时`vagrant`会检查本地是否有`ubuntu/trusty64`这个虚拟机的`trusty`的`ubuntu`版本（`Ubuntu Server 14.04 LTS (Trusty Tahr) daily builds`），如果没有就会从官网https://atlas.hashicorp.com来下载`ubuntu/trusty64`这个`box`，这个过程的速度看网络好坏。
 
-  ```shell
-  $ vagrant up
-  Bringing machine 'default' up with 'virtualbox' provider...
-  ==> default: Box 'ubuntu/trusty64' could not be found. Attempting to find and install...
-      default: Box Provider: virtualbox
-      default: Box Version: >= 0
-  ==> default: Loading metadata for box 'ubuntu/trusty64'
-      default: URL: https://vagrantcloud.com/ubuntu/trusty64
-  ==> default: Adding box 'ubuntu/trusty64' (v20180409.0.0) for provider: virtualbox
-      default: Downloading: https://vagrantcloud.com/ubuntu/boxes/trusty64/versions/20180409.0.0/providers/virtualbox.box
-      default: Download redirected to host: cloud-images.ubuntu.com
-      default: Progress: 0% (Rate: 15769/s, Estimated time remaining: 10:00:35)
-  ```
+```shell
+$ vagrant up
+Bringing machine 'default' up with 'virtualbox' provider...
+==> default: Box 'ubuntu/trusty64' could not be found. Attempting to find and install...
+    default: Box Provider: virtualbox
+    default: Box Version: >= 0
+==> default: Loading metadata for box 'ubuntu/trusty64'
+    default: URL: https://vagrantcloud.com/ubuntu/trusty64
+==> default: Adding box 'ubuntu/trusty64' (v20180409.0.0) for provider: virtualbox
+    default: Downloading: https://vagrantcloud.com/ubuntu/boxes/trusty64/versions/20180409.0.0/providers/virtualbox.box
+    default: Download redirected to host: cloud-images.ubuntu.com
+    default: Progress: 0% (Rate: 15769/s, Estimated time remaining: 10:00:35)
+```
 
-  从上面的日志可以看到，程序会先去找`'ubuntu/trusty64'`没有找到，于是就去匹配`vagrant`虚拟镜像配置
-  `URL: https://vagrantcloud.com/ubuntu/trusty64`，它会配置虚拟机的名称和使用的虚拟机软件。<br/>下载`vagrant`的`box`文件： https://vagrantcloud.com/ubuntu/boxes/trusty64/versions/20180409.0.0/providers/virtualbox.box
+从上面的日志可以看到，程序会先去找`'ubuntu/trusty64'`没有找到，于是就去匹配`vagrant`虚拟镜像配置
+`URL: https://vagrantcloud.com/ubuntu/trusty64`，它会配置虚拟机的名称和使用的虚拟机软件。<br/>下载`vagrant`的`box`文件： https://vagrantcloud.com/ubuntu/boxes/trusty64/versions/20180409.0.0/providers/virtualbox.box
 
-  ```shell
-  Vagrant.configure("2") do |config|
-    config.vm.box = "ubuntu/trusty64"
-    config.vm.box_version = "20180409.0.0"
-  end
+```shell
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/trusty64"
+  config.vm.box_version = "20180409.0.0"
+end
 
-  1 provider for this version.
-  virtualbox Externally hosted (cloud-images.ubuntu.com)
-  ```
+1 provider for this version.
+virtualbox Externally hosted (cloud-images.ubuntu.com)
+```
 
-  云镜像仓库：` cloud-images.ubuntu.com`<br/>上面的网址都可以打开看看，你就明白了`Vagrant`是如何去下载、匹配文件的。<br/>`vagrant up`这个命令会默认使用`Virtualbox`，如果需要使用其他的虚拟机产品可以设置`vagrant up --provider hyperv` 这里的hyperv是一个虚拟机产品，如：`VMware`、`Virtualbox`
-
-  
+云镜像仓库：` cloud-images.ubuntu.com`<br/>上面的网址都可以打开看看，你就明白了`Vagrant`是如何去下载、匹配文件的。<br/>`vagrant up`这个命令会默认使用`Virtualbox`，如果需要使用其他的虚拟机产品可以设置`vagrant up --provider hyperv` 这里的`hyperv`是一个虚拟机产品，如：`VMware`、`Virtualbox`
 
 ### 连接虚拟机
 
@@ -203,11 +200,7 @@ version         # 打印当前和最新的Vagrant版本
   $ vagrant ssh ccbaaf6
   ```
 
-  **此时vagrant将使用默认的用户vagrant以及预设的SSH公钥密钥键值对直接登录虚拟机。**
-
-
-
-
+  **此时`vagrant`将使用默认的用户`vagrant`以及预设的`SSH`公钥密钥键值对直接登录虚拟机。**
 
 
 ### 关闭虚拟机
@@ -219,10 +212,6 @@ version         # 打印当前和最新的Vagrant版本
   关闭正在运行的虚拟机，当你的工作目录不在虚拟机目录下 ` vagrant.exe halt ID`
 
 
-
-
-
-
 ### 销毁虚拟机
 
 ---
@@ -230,10 +219,6 @@ version         # 打印当前和最新的Vagrant版本
 - **删除销毁虚拟机 `vagrant destroy`**
 
   **该操作只会删除虚拟机，不会删除虚拟机对应的`box`**
-
-  ​
-
-
 
 高级命令
 ---
@@ -271,8 +256,6 @@ ubuntu/xenial64 (virtualbox, 20180410.0.0)
 $ vagrant box remove box-name
 ```
 
-
-
 ### 查看已下载的虚拟机`box`
 
 ---
@@ -283,13 +266,11 @@ $ vagrant box remove box-name
 $ vagrant global-status
 ```
 
-
-
 ### 打包虚拟机 `box`
 
 ---
 
-打包`box`可以让之前安装好的环境重复使用，比如将自己机器的工作环境打包成一个`box`，以后去其他公司或者网络封闭的场所时，把这个打包好的box直接添加到新机器上直接就可以使用了。而不需要重复安装一些软件，这样避免了错误也省去了大量的时间精力，毕竟安装软件是一些苦力活，对网络的也有要求。
+打包`box`可以让之前安装好的环境重复使用，比如将自己机器的工作环境打包成一个`box`，以后去其他公司或者网络封闭的场所时，把这个打包好的`box`直接添加到新机器上直接就可以使用了。而不需要重复安装一些软件，这样避免了错误也省去了大量的时间精力，毕竟安装软件是一些苦力活，对网络的也有要求。
 
 ```shell
 $ vagrant halt
@@ -305,8 +286,6 @@ $ vagrant package --base mybox
 $ vagrant halt
 $ vagrant package
 ```
-
-
 
 
 配置选项
@@ -325,7 +304,7 @@ $ vagrant package
 
   在默认情况下，`Vagrant`所创建的`Virtualbox`虚拟机使用的是`NAT`网络类型，即外界是不能直接访问你的虚拟机的，就连宿主（装`Virtualbox`软件的这台机器）机器也访问不了。此时，如果你在虚拟机中启动的一个`Tomcat`来部署网站的测试环境，而又想外界能够访问的话，你需要使用端口转发。
 
-  通过上面的配置后，宿主主机的`8888`端口转发到了虚拟机的`8080`端口，这样你便可以通过在宿主主机上访问 http://localhost:8888 来访问虚拟机的`Tomcat`了。对于`Virtualbox`来说，只有NAT类型的网络类型支持端口转发，这也是为什么`Vagrant`创建的`Virtualbox`虚拟机默认都有一个支持NAT的虚拟网卡，原因就是要能够支持`Vagrant`级别的端口转发。另外，`Vagrant`在第一次尝试连接虚拟机时使用的也是NAT。
+  通过上面的配置后，宿主主机的`8888`端口转发到了虚拟机的`8080`端口，这样你便可以通过在宿主主机上访问 http://localhost:8888 来访问虚拟机的`Tomcat`了。对于`Virtualbox`来说，只有`NAT`类型的网络类型支持端口转发，这也是为什么`Vagrant`创建的`Virtualbox`虚拟机默认都有一个支持`NAT`的虚拟网卡，原因就是要能够支持`Vagrant`级别的端口转发。另外，`Vagrant`在第一次尝试连接虚拟机时使用的也是`NAT`。
 
 
 
@@ -350,7 +329,7 @@ end
 
 - `provision` 规定虚拟机运行一段特定的 **命令或脚本**。简单地说，`provision`即通过使用某些工具自动地、批量地为机器安装软件以及配置系统，它省去了人工安装和配置系统时的重复性和易错性，当然还享受了计算机与生俱来的速度。Vagrant提供多种方式对虚拟机进行`provision`，包括`Shell`、`Chef`、`Puppet`和`Ansible`等。以`Shell`为例，既可以通过直接在`Vagrantfile`中编写`Shell`脚本的方式，也可以通过引用外部Shell文件的方式。
 
-  ```sh
+  ```ruby
   Vagrant.configure("2") do |config|
     config.vm.provision "shell", inline: "echo hello"
   end
@@ -364,7 +343,7 @@ end
 
   上面的配置是系统在执行`vagrant provision`的时候就会输出 `hello`
 
-  ```shell
+  ```ruby
   Vagrant.configure("2") do |config|
     config.vm.provision "shell", path: "script.sh"
   end
@@ -372,7 +351,7 @@ end
 
   > 上面的配置引用外部脚本 ` "script.sh"`
 
-​    
+    
 
 - 下面介绍下  **`ansible` 批量自动化任务**
 
@@ -392,7 +371,7 @@ end
     （2）采用`ansible local`的方式，即在虚拟机自身上安装`ansible`<br/>
     对于第（1）种方法，我们需要保证宿主主机机器上已经安装了`ansible`，然后进行配置：
 
-  ```shell
+  ```ruby
     Vagrant.configure("2") do |config|
 
     	# Run Ansible from the Vagrant Host
@@ -404,7 +383,7 @@ end
 
   在使用第（2）种方法时，`Vagrant`会首先检查box中是否已经安装了`ansible`，如果没有，则会自动安装到虚拟机上，然后再运行`provision`：
 
-  ```shell
+  ```ruby
     Vagrant.configure("2") do |config|
     	# Run Ansible from the Vagrant VM
     	config.vm.provision "ansible_local" do |ansible|
@@ -421,7 +400,7 @@ end
 
   当然，你也可以在`Vagrantfile`中配置成每次执行`vagrant up`时都运行`provision`：
 
-  ```shell
+  ```ruby
   Vagrant.configure("2") do |config|
   	config.vm.provision "shell", inline: "echo hello",
   	run: "always"
@@ -434,7 +413,7 @@ end
 ### 网络设置
 ---
 
-- 配置私有固定`ip`网络
+- 配置私有固定`ip`网络，**可以在宿主主机直接通过`ip`访问到虚拟机的任何资源**
 
   ```shell
   Vagrant.configure("2") do |config|
