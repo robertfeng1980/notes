@@ -144,7 +144,7 @@ $ export LEDGERS_BACKUP=./ledgers-backup
 # 如果您希望默认使用系统上标记为“最新”的图像，请将IMAGE_TAG设置为“最新”。
 
 # 设置升级后的 docker 镜像版本
-$ export IMAGE_TAG=$(go env GOARCH)-1.2.0-stable
+$ export IMAGE_TAG=$(go env GOARCH)-1.2.0
 ```
 
 我们为目录创建了一个变量，用于放入备份文件，并设置想要升级到的`docker`镜像`IMAGE_TAG`。
@@ -333,6 +333,16 @@ $ configtxlator proto_encode --input config.json --type common.Config --output c
 $ configtxlator proto_encode --input modified_config.json --type common.Config --output modified_config.pb
 
 $ configtxlator compute_update --channel_id $CH_NAME --original config.pb --updated modified_config.pb --output config_update.pb
+```
+
+将配置更新打包到交易中：
+
+```sh
+$ configtxlator proto_decode --input config_update.pb --type common.ConfigUpdate --output config_update.json
+
+$ echo '{"payload":{"header":{"channel_header":{"channel_id":"'$CH_NAME'", "type":2}},"data":{"config_update":'$(cat config_update.json)'}}}' | jq . > config_update_in_envelope.json
+
+$ configtxlator proto_encode --input config_update_in_envelope.json --type common.Envelope --output config_update_in_envelope.pb
 ```
 
 `Org1`签署交易：
