@@ -12,6 +12,7 @@
 - 开发
     + [`在windows 下搭建hyperledger fabric java 开发环境`](./hyperledger/在windows%20下搭建hyperledger%20fabric%20java%20开发环境.md)
     + [`在windows下搭建hyperledger fabric 开发环境`](./hyperledger/在windows下搭建hyperledger%20fabric%20开发环境.md)
+    + [`Chaincode 教程`](./hyperledger/Chaincode%20教程.md)
 
 - 操作指南
     + [`hyperledger fabric 更新 block & tx 配置`](./hyperledger/hyperledger%20fabric%20更新%20block%20&%20tx%20配置.md)
