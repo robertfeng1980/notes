@@ -24,3 +24,15 @@
 
 ## `Chaincode API`
 
+> **注意**：还有另一组链代码`API`，允许客户端（提交者）身份用于**访问控制**决策，无论是基于**客户端身份**本身，还是**组织身份**，还是**客户端身份属性**。例如，表示为键/值的资产可以包括客户端的标识，并且**只有该客户端**可以被**授权对密钥/值进行更新**。客户端身份库具有`API`，链代码可以使用这些`API`来**检索**此提交者信息以做出此类**访问控制决策**。
+
+每个`chaincode`程序都必须实现`Chaincode`接口：
+
+```java
+interface Chaincode {
+    Chaincode.Response init(ChaincodeStub stub);
+    
+	Chaincode.Response invoke(ChaincodeStub stub);
+}
+```
+
