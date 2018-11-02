@@ -734,7 +734,27 @@ CA的有两种形式：**根CA**和**中间CA**。由于`Root CA`（`Symantec`�
 
 ## 区块
 
+一个块的结构，它由三部分组成：
 
++ **块头部 `Block Header`**
+
+  此部分包含三个字段，在**创建块时写入**。
+
+  - **`Block number` 区块编号**：一个从`0`开始的整数（**创世块**），并且对于附加到区块链的**每个新块**增加`1`。
+  - **Current Block Hash 当前区块散列值**：当前块中包含的**所有事务**的哈希值。
+  - **Previous Block Hash 前一个区块散列值**：区块链中前一个区块的哈希**副本**。
+
+  ![ledger.blocks](https://hyperledger-fabric.readthedocs.io/en/latest/_images/ledger.diagram.4.png)
+
+  事实表达的如下：块`B2`的块头`H2`由块号`2`，当前块数据`D2`的散列`CH2`和来自前一块（块号1）的散列`PH1`的副本组成。
+
++ **块数据 `Block Data`**
+
+  本节包含**按顺序排列的交易清单**。它是在**创建块时写入**的。这些事务具有丰富但直接的结构，我们将在本主题[后面](https://hyperledger-fabric.readthedocs.io/en/latest/ledger/ledger.html#Transactions)介绍。
+
++ **块元数据 `Block Metadata`**
+
+  此部分包含**写入块的时间**，以及块编写器的***证书、公钥和签名**。随后，块提交器还为每个事务添加了一个**有效/无效的指示符**，尽管此信息未包含在哈希中，因为创建块时会创建该信息。
 
 ## 交易
 
