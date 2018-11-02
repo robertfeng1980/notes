@@ -798,5 +798,5 @@ CA的有两种形式：**根CA**和**中间CA**。由于`Root CA`（`Symantec`�
 
 ## 其他
 
-
+请参阅[事务流](https://hyperledger-fabric.readthedocs.io/en/latest/txflow.html)， [读写集语义](https://hyperledger-fabric.readthedocs.io/en/latest/readwrite.html)和 [CouchDB作为StateDatabase](https://hyperledger-fabric.readthedocs.io/en/latest/couchdb_as_state_database.html)主题，以深入了解事务流，并发控制和世界状态数据库。
 
