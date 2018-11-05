@@ -684,7 +684,7 @@ ex02 Invoke
 Query Response:{"Name":"a","Amount":"90"}
 ```
 
-## 了解`Docker Compose`服务编排
+# 了解`Docker Compose`服务编排
 
 `BYFN`示例提供了两种`Docker Compose`文件，这两种文件都是从`docker-compose-base.yaml`（位于基本文件夹中）扩展而来的。第一个版本`docker-compose-cli.yaml`为提供了一个`CLI`容器，以及一个订购者，四个同行。将此文件用于此页面上的所有说明。
 
@@ -695,3 +695,92 @@ Query Response:{"Name":"a","Amount":"90"}
 如果想在没有先运行`byfn.sh`脚本的情况下使用`docker-compose-e2e.yaml`，那么需要进行四次略微修改。需要修改指向组织CA的私钥。可以在`crypto-config`文件夹中找到这些值。例如，要找到`Org1`的私钥，将遵循此路径 `crypto-config/peerOrganizations/org1.example.com/ca/`。私钥是一个长哈希值，后跟`_sk`。`Org2`的路径是 `crypto-config/peerOrganizations/org2.example.com/ca/`。
 
 在`docker-compose-e2e.yaml`中更新`ca0`和`ca1`的`FABRIC_CA_SERVER_TLS_KEYFILE`变量。还需要编辑命令中提供的路径以启动`ca`服务器。为每个`CA`容器提供两次相同的私钥。
+
+# 使用 `CouchDB`
+
+状态数据库可以从默认（`goleveldb`）切换到`CouchDB`。`CouchDB`提供了相同的链代码功能，但是，根据链代码数据被建模为`JSON`，还可以根据状态数据库数据内容执行**丰富而复杂的查询**。
+
+要使用`CouchDB`而不是默认数据库（`goleveldb`），请按照前面概述的相同步骤生成工件，除非在启动网络时也通过`docker-compose-couch.yaml`：
+
+```sh
+$ docker-compose -f docker-compose-cli.yaml -f docker-compose-couch.yaml up -d
+```
+
+`chaincode_example02` 现在应该使用下面的`CouchDB`。
+
+> **注意**：如果选择将`fabric-couchdb`容器端口映射到主机端口，请确保了解安全隐患。在开发环境中映射端口使`CouchDB REST API`可用，并允许通过`CouchDB Web`界面（`Fauxton`）可视化数据库。**生产环境可能会避免实施端口映射，以限制对`CouchDB`容器的外部访问**。
+
+可以使用上面列出的步骤对`CouchDB`状态数据库使用`chaincode_example02`链代码，但是为了运用`CouchDB`查询功能，需要使用具有建模为`JSON`的数据的链代码（例如`marbles02`）。您可以在`fabric/examples/chaincode/go`目录中找到`marbles02`链代码。
+
+将按照上面相同的流程创建和加入频道，如上面的[创建和加入频道](https://hyperledger-fabric.readthedocs.io/en/latest/build_network.html#createandjoin)部分所述。将对等方加入频道后，请使用以下步骤与**marbles02**链代码进行交互：
+
++ 安装并实例化链代码`peer0.org1.example.com`：
+
+  ```sh
+  # be sure to modify the $CHANNEL_NAME variable accordingly for the instantiate command
+  
+  peer chaincode install -n marbles -v 1.0 -p github.com/chaincode/marbles02/go
+  peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -v 1.0 -c '{"Args":["init"]}' -P "OR ('Org0MSP.peer','Org1MSP.peer')"
+  ```
+
++ 制作一些弹珠并移动它们：
+
+  ```sh
+  # be sure to modify the $CHANNEL_NAME variable accordingly
+  
+  peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -c '{"Args":["initMarble","marble1","blue","35","tom"]}'
+  peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -c '{"Args":["initMarble","marble2","red","50","tom"]}'
+  peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -c '{"Args":["initMarble","marble3","blue","70","tom"]}'
+  peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -c '{"Args":["transferMarble","marble2","jerry"]}'
+  peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -c '{"Args":["transferMarblesBasedOnColor","blue","jerry"]}'
+  peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -c '{"Args":["delete","marble1"]}'
+  ```
+
++ 如果选择在`docker-compose`中映射`CouchDB`端口，现在可以通过打开浏览器并导航到以下`URL`，通过`CouchDB Web`界面（`Fauxton`）查看状态数据库：
+
+  ```sh
+  http://localhost:5984/_utils
+  ```
+
+  应该看到名为`mychannel`（或唯一通道名称）的数据库及其中的文档。
+
++ **注意**：对于以下命令，请确保适当更新`$CHANNEL_NAME`变量。
+
+  可以从`CLI`运行常规查询：
+
+  ```sh
+  peer chaincode query -C $CHANNEL_NAME -n marbles -c '{"Args":["readMarble","marble2"]}'
+  ```
+
+  输出应显示`marble2`的详细信息：
+
+  ```sh
+  Query Result: {"color":"red","docType":"marble","name":"marble2","owner":"jerry","size":50}
+  ```
+
++ 可以检索特定弹珠的历史记录，例如`marble1`：
+
+  ```sh
+  peer chaincode query -C $CHANNEL_NAME -n marbles -c '{"Args":["getHistoryForMarble","marble1"]}'
+  ```
+
+  输出应显示`marble1`上的交易：
+
+  ```sh
+  Query Result: [{"TxId":"1c3d3caf124c89f91a4c0f353723ac736c58155325f02890adebaa15e16e6464", "Value":{"docType":"marble","name":"marble1","color":"blue","size":35,"owner":"tom"}},{"TxId":"755d55c281889eaeebf405586f9e25d71d36eb3d35420af833a20a2f53a3eefd", "Value":{"docType":"marble","name":"marble1","color":"blue","size":35,"owner":"jerry"}},{"TxId":"819451032d813dde6247f85e56a89262555e04f14788ee33e28b232eef36d98f", "Value":}]
+  ```
+
++ 还可以对数据内容执行丰富的查询，例如按所有者`jerry`查询大弹珠字段：
+
+  ```sh
+  peer chaincode query -C $CHANNEL_NAME -n marbles -c '{"Args":["queryMarblesByOwner","jerry"]}'
+  ```
+
+  输出结果：
+
+  ```sh
+  Query Result: [{"Key":"marble2", "Record":{"color":"red","docType":"marble","name":"marble2","owner":"jerry","size":50}},{"Key":"marble3", "Record":{"color":"blue","docType":"marble","name":"marble3","owner":"jerry","size":70}}]
+  ```
+
+# 为何选择`CouchDB`
+
