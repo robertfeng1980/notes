@@ -245,7 +245,7 @@ Deleted: sha256:ed3230614e64e1c83e510c0c282e982d2b06d148b1c498bbdcc429e2b2531e91
 
 将使用`cryptogen`工具为各种网络实体生成加密材料（`x509`证书和签名密钥）。这些证书代表身份，它们允许在实体进行通信和交易时进行签名、验证身份验证。
 
-## 它是如何工作的
+## 工作原理
 
 `Cryptogen`使用一个文件 `crypto-config.yaml` 它包含拓扑网络，并允许我们为组织和属于这些组织的组件生成一组**证书和密钥**。每个组织都配置了一个**唯一的根证书**（`ca-cert`），**用于将特定组件（同行和订购者）绑定到该组织**。通过为每个组织分配唯一的`CA`证书，我们模仿典型的网络，其中参与的成员将使用其自己的证书颁发机构。`Hyperledger Fabric`中的事务和通信由**实体的私钥（密钥库）签名**，然后通过**公钥（`signcerts`）进行验证**。
 
@@ -287,3 +287,26 @@ PeerOrgs:
 网络实体的命名约定如下 `“{{.Hostname}}.{{.Domain}}”`。因此，使用我们的订购节点作为参考点，我们留下了一个名为 `orderer.example.com`的订购节点，它与`Orderer`的`MSP ID`相关联。该文件包含有关定义和语法的大量文档。还可以参考[会员服务提供商（`MSP`）](https://hyperledger-fabric.readthedocs.io/en/latest/msp.html)文档，深入了解`MSP`。
 
 运行该`cryptogen`工具后，生成的证书和密钥将保存到名为`crypto-config`的文件夹中。 
+
+# 配置交易生成器
+
+`configtxgen`工具用于创建四个配置工件：
+
+- `orderer`服务创世块配置 `genesis block`
+- `channel`通道交易配置 `configuration transaction`
+- 两个对等交易锚点 `anchor peer transactions`  一个组织 `Peer Org`
+
+有关此工具功能的完整说明，请参阅[configtxgen](https://hyperledger-fabric.readthedocs.io/en/latest/commands/configtxgen.html)
+
+`orderer`块是订购服务的[Genesis Block](https://hyperledger-fabric.readthedocs.io/en/latest/glossary.html#genesis-block)，并且通道配置交易文件在[Channel](https://hyperledger-fabric.readthedocs.io/en/latest/glossary.html#channel)创建时**广播到订购者**。正如名称所暗示的那样，锚点对等事务在此通道上指定每个`Org`的[Anchor Peer](https://hyperledger-fabric.readthedocs.io/en/latest/glossary.html#anchor-peer)。 
+
+## 工作原理
+
+`Configtxgen`使用文件 `configtx.yaml`包含示例网络的定义。有三个成员，一个`Orderer Org`（`OrdererOrg`）和两个`Peer Orgs` （`Org1`＆`Org2`），每个成员管理和维护两个对等节点。该文件还指定了一个联盟 `SampleConsortium`  由我们的两个`Peer Orgs`组成。请特别注意此文件顶部的“配置文件”部分。会注意到我们有两个唯一标头，一个用于`orderer genesis`块： `TwoOrgsOrdererGenesis` ，一个用于我们的通道：`TwoOrgsChannel`。
+
+这些头文件很重要，因为我们将在创建工件时将它们作为参数传递。 
+
+> **注意**：`SampleConsortium`在系统级配置文件中定义，然后由通道级配置文件引用。通道存在于一个联盟的范围内，所有联盟必须在整个网络的范围内定义。
+
+此文件还包含两个值得注意的其他规范。首先，我们为每个`Peer Org`（`peer0.org1.example.com`＆`peer0.org2.example.com`）指定**锚点对等体**。其次，我们指向每个成员的`MSP`目录的位置，从而允许我们在`orderer genesis`块中存储每个`Org`的根证书。这是一个关键概念。现在，与订购服务通信的任何网络实体都可以验证其数字签名。
+
