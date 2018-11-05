@@ -542,7 +542,7 @@ $ peer chaincode install -n mycc -v 1.0 -l java -p /opt/gopath/src/github.com/ch
 # be sure to replace the $CHANNEL_NAME environment variable if you have not exported it
 # if you did not install your chaincode with a name of mycc, then modify that argument as well
 
-peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n mycc -v 1.0 -c '{"Args":["init","a", "100", "b","200"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer')"
+$ peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n mycc -v 1.0 -c '{"Args":["init","a", "100", "b","200"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer')"
 ```
 
 **Node.js**
@@ -554,7 +554,7 @@ peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile /opt/gopat
 # if you did not install your chaincode with a name of mycc, then modify that argument as well
 # notice that we must pass the -l flag after the chaincode name to identify the language
 
-peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n mycc -l node -v 1.0 -c '{"Args":["init","a", "100", "b","200"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer')"
+$ peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n mycc -l node -v 1.0 -c '{"Args":["init","a", "100", "b","200"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer')"
 ```
 
 **Java**
@@ -570,4 +570,14 @@ $ peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile /opt/gop
 如果希望其他对等方与分类帐**进行交互**，则需要将它们连接到通道，并**将链码源的相同名称，版本和语言安装到相应的对等文件系统**上。一旦他们尝试与特定的链代码进行交互，就会为**每个对等体启动一个链代码容器**。再次，要认识到`Node.js`镜像的编译速度会慢一些。
 
 一旦在通道上实例化了链代码，就可以放弃`-l`标志。只需**传递通道标识符和链码的名称**。
+
+## 查询
+
+让我们查询`a`的值，以确保链代码被正确实例化并填充状态`DB`。查询语法如下：
+
+```sh
+# be sure to set the -C and -n flags appropriately
+
+$ peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}'
+```
 
