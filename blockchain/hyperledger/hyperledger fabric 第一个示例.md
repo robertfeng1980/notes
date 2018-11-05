@@ -202,3 +202,42 @@ Query Result: 90
 
 ## 卸载网络
 
+最后，把它全部停下来，这样就可以一步一步地探索网络设置。以下内容将终止容器，删除加密材料和四个工件，并从`Docker Registry`中删除链码图像：
+
+```sh
+$ ./byfn.sh down
+```
+
+再一次，系统将提示继续，回复`y`或按回车键： 
+
+```sh
+Stopping with channel 'mychannel' and CLI timeout of '10'
+Continue? [Y/n] y
+proceeding ...
+WARNING: The CHANNEL_NAME variable is not set. Defaulting to a blank string.
+WARNING: The TIMEOUT variable is not set. Defaulting to a blank string.
+Removing network net_byfn
+468aaa6201ed
+...
+Untagged: dev-peer1.org2.example.com-mycc-1.0:latest
+Deleted: sha256:ed3230614e64e1c83e510c0c282e982d2b06d148b1c498bbdcc429e2b2531e91
+.....
+```
+
+如果想了解有关底层工具和引导机制的更多信息，请继续阅读。在接下来的部分中，将介绍构建全功能`Hyperledger Fabric`网络的各种步骤和要求。
+
+> **注意**：下面概述的手动步骤假定`CORE_LOGGING_LEVEL`在`cli`容器被设置为`DEBUG`。可以通过修改`first-network`目录中的`docker-compose-cli.yaml`文件来设置此项。例如
+>
+> ```
+> cli:
+>   container_name: cli
+>   image: hyperledger/fabric-tools:$IMAGE_TAG
+>   tty: true
+>   stdin_open: true
+>   environment:
+>     - GOPATH=/opt/gopath
+>     - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+>     - CORE_LOGGING_LEVEL=DEBUG
+>     #- CORE_LOGGING_LEVEL=INFO
+> ```
+
