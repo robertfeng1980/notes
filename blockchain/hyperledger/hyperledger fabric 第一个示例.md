@@ -390,3 +390,28 @@ export CHANNEL_NAME=mychannel  && ../bin/configtxgen -profile TwoOrgsChannel -ou
 
 > **注意**：如果运行`byfn.sh`上面的示例，请确保在继续操作之前已关闭测试网络（请参阅 [“关闭网络”](https://hyperledger-fabric.readthedocs.io/en/latest/build_network.html#bring-down-the-network)）。
 
+将利用脚本来启动我们的网络。`docker-compose`文件引用先前下载的图像，并**使用之前生成的`genesis.block`引导订购者**。
+
+希望手动完成命令，以便展示每个调用的语法和功能。
+
+首先启动网络：
+
+```sh
+$ docker-compose -f docker-compose-cli.yaml up -d
+```
+
+**如果要查看网络的实时日志，请不要提供`-d`标志。如果让日志滚动，那么将需要打开第二个终端来执行`CLI`调用**。
+
+## 环境变量
+
+要使以下针对`peer0.org1.example.com`的`CLI`命令起作用，需要**在命令前面加上下面给出的四个环境变量**。`peer0.org1.example.com`的这些变量被拷贝到`CLI`容器中，因此可以在不传递它们的情况下进行操作。但是，如果要将**调用发送到其他对等方或订货方**，则可以**通过在启动容器之前编辑`docker-compose-base.yaml`**来相应地提供这些值。修改以下四个环境变量以使用不同的对等方和组织。
+
+```sh
+# Environment variables for PEER0
+
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+CORE_PEER_LOCALMSPID="Org1MSP"
+CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+```
+
