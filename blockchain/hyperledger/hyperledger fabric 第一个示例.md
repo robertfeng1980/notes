@@ -485,3 +485,19 @@ $ peer channel join -b mychannel.block
 
 或者，可以选择单独设置这些环境变量，而不是传入整个字符串。一旦设置完毕，只需再次发出`peer channel join`命令，`CLI`容器将代表`peer0.org2.example.com`。
 
+## 更新锚点对等节点
+
+以下命令是通道更新，它们将传播到通道的定义。实质上，**在通道的创世块之上添加了额外的配置信息**。请注意，不是修改`genesis`块，而是**简单地将增量添加**到将定义锚点对等的链中。
+
+更新通道定义以将`Org1`的锚点对等体定义为`peer0.org1.example.com`：
+
+```sh
+$ peer channel update -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/Org1MSPanchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+```
+
+现在更新通道定义以将`Org2`的锚点对等体定义为`peer0.org2.example.com`。与`Org2`对等体的对等通道连接命令相同，需要在此调用前加上适当的环境变量。
+
+```sh
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp CORE_PEER_ADDRESS=peer0.org2.example.com:7051 CORE_PEER_LOCALMSPID="Org2MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt peer channel update -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/Org2MSPanchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+```
+
