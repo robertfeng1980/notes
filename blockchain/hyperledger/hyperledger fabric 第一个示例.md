@@ -131,7 +131,74 @@ org2.example.com
 
 ## 启动网络
 
+接下来，可以使用以下命令之一启动网络： 
 
+```sh
+$ ./byfn.sh up
+```
+
+上面的命令将编译`Golang`链代码图像并启动相应的容器。`Go`是默认的链码语言，但是也支持[Node.js](https://fabric-shim.github.io/)和[Java](https://fabric-chaincode-java.github.io/) 链码。如果想通过`Node.js`链码运行本教程，请改为使用以下命令：
+
+```sh
+# we use the -l flag to specify the chaincode language
+# forgoing the -l flag will default to Golang
+
+$ ./byfn.sh up -l node
+```
+
+> **注意**：有关`Java Shim`的更多信息，请参阅其 [文档](https://fabric-chaincode-java.github.io/org/hyperledger/fabric/shim/Chaincode.html)。有关`Node Shim`的更多信息，请参阅其 [文档](https://fabric-shim.github.io/fabric-shim.ChaincodeInterface.html)。
+
+如果使用Java链代码运行示例，则必须指定如下：`-l java`
+
+```sh
+$ ./byfn.sh up -l java
+```
+
+> **注意**：不要运行这两个命令。除非**关闭并重新**创建网络，否则每次启动只能尝试一种语言。
+
+执行命令后，系统将提示是继续还是中止。回复`y`或按回车键： 
+
+```sh
+Starting with channel 'mychannel' and CLI timeout of '10'
+Continue? [Y/n]
+proceeding ...
+Creating network "net_byfn" with the default driver
+Creating peer0.org1.example.com
+Creating peer1.org1.example.com
+Creating peer0.org2.example.com
+Creating orderer.example.com
+Creating peer1.org2.example.com
+Creating cli
+
+
+ ____    _____      _      ____    _____
+/ ___|  |_   _|    / \    |  _ \  |_   _|
+\___ \    | |     / _ \   | |_) |   | |
+ ___) |   | |    / ___ \  |  _ <    | |
+|____/    |_|   /_/   \_\ |_| \_\   |_|
+
+Channel name : mychannel
+Creating channel...
+```
+
+运行命令后，系统日志将是上的样子。这将启动所有容器，然后启动完整的端到端应用程序方案。成功完成后，它应在终端窗口中报告以下内容：
+
+```sh
+Query Result: 90
+2017-05-16 17:08:15.158 UTC [main] main -> INFO 008 Exiting.....
+===================== Query successful on peer1.org2 on channel 'mychannel' =====================
+
+===================== All GOOD, BYFN execution completed =====================
+
+
+ _____   _   _   ____
+| ____| | \ | | |  _ \
+|  _|   |  \| | | | | |
+| |___  | |\  | | |_| |
+|_____| |_| \_| |____/
+```
+
+可以滚动浏览这些日志以查看各种交易。如果没有得到这个结果，请跳到[故障排除](https://hyperledger-fabric.readthedocs.io/en/latest/build_network.html#troubleshoot)部分，看看我们是否可以帮助发现问题所在。
 
 ## 卸载网络
 
