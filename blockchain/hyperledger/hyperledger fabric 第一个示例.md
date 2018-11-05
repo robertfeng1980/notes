@@ -316,3 +316,45 @@ PeerOrgs:
 
 ## 手动生成工件
 
+可以在`byfn.sh`脚本中引用`generateCerts`函数，以获取生成将用于网络配置的证书所需的命令，如`crypto-config.yaml`文件中所定义。但是，为方便起见，也将在此提供参考。
+
+首先**运行加密工具**，**二进制**文件位于`bin`目录中，因此需要提供工具所在位置的相对路径。
+
+```sh
+../bin/cryptogen generate --config=./crypto-config.yaml
+```
+
+应该在终端中看到以下内容：
+
+```sh
+org1.example.com
+org2.example.com
+```
+
+证书和密钥（即`MSP`材料）将输出到第一个网络目录根目录下的目录：`crypto-config`。
+
+接下来，需要告诉`configtxgen`工具在哪里查找它需要摄取的`configtx.yaml`文件。将在当前的工作目录中告诉它：
+
+```sh
+# configtxgen 会读取这个变量的值，然后找到配置文件 configtx.yaml
+export FABRIC_CFG_PATH=$PWD
+```
+
+然后，将调用`configtxgen`工具来创建`orderer genesis`块：
+
+```sh
+../bin/configtxgen -profile TwoOrgsOrdererGenesis -channelID byfn-sys-channel -outputBlock ./channel-artifacts/genesis.block
+```
+
+执行上面的命令后，应该在终端中看到类似于以下内容的输出：
+
+```sh
+2017-10-26 19:21:56.301 EDT [common/tools/configtxgen] main -> INFO 001 Loading configuration
+2017-10-26 19:21:56.309 EDT [common/tools/configtxgen] doOutputBlock -> INFO 002 Generating genesis block
+2017-10-26 19:21:56.309 EDT [common/tools/configtxgen] doOutputBlock -> INFO 003 Writing genesis block
+```
+
+> **注意**：`orderer genesis`块和即将创建的后续工件将输出到该项目根目录的`channel-artifacts`目录中。上述命令中的`channelID`是系统通道的名称。
+
+## 创建通道交易配置
+
