@@ -591,3 +591,19 @@ $ peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}'
 $ peer chaincode invoke -o orderer.example.com:7050 --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n mycc --peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt --peerAddresses peer0.org2.example.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt -c '{"Args":["invoke","a","b","10"]}'
 ```
 
+## 查询
+
+**确认之前的调用是否正确执行**。使用值`100`初始化了键值`a`，并在之前的调用中删除了`10`。因此，对`a`的查询应该显示`90`查询的语法如下。
+
+```sh
+# be sure to set the -C and -n flags appropriately
+
+$ peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}'
+```
+
+应该看到以下内容：
+
+```sh
+Query Result: 90
+```
+
