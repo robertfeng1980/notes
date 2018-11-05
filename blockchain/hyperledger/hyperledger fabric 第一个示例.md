@@ -607,3 +607,24 @@ $ peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}'
 Query Result: 90
 ```
 
+## 应用内部发生了什么？
+
+> **注意**：这些步骤描述了`script.sh`由`./byfn.sh up`运行的场景。使用`./byfn.sh down`清理网络并确保此命令处于活动状态。然后使用相同的`docker-compose`提示再次启动网络。
+
++ 脚本 `script.sh`在`CLI`容器中拷贝。该脚本根据提供的**通道名称**驱动`createChannel`命令，并使用`channel.tx`文件**进行通道配置**。
++ `createChannel`的**输出是一个创世块** `<your_channel_name> .block`它**存储在对等体的文件系统中***，并包含从`channel.tx`指定的通道配置。
++ 对**所有四个对等体执行`joinChannel`命令**，其将**先前生成的生成块**作为**输入**。此命令指示对等方加入`<your_channel_name>`并创建以`<your_channel_name>.block`开头的链。
++ 现在我们有一个**由四个同行和两个组织组成的频道**。这是`TwoOrgsChannel`的信息资料。
++ `peer0.org1.example.com`和`peer1.org1.example.com`属于`Org1`。`peer0.org2.example.com`和`peer1.org2.example.com`属于`Org2`。
++ 这些关系是通过`crypto-config.yaml`定义的，`MSP`路径是在`docker compose`中指定的。
++ 然后更新 `Org1MSP（peer0.org1.example.com）`和`Org2MSP（peer0.org2.example.com）`的**锚点对等体**。通过将`Org1MSPanchors.tx`和`Org2MSPanchors.tx`工件与**通道名称**一起传递给**orderer 服务**来完成此操作。
++ 链码 `chaincode_example02` 安装在 `peer0.org1.example.com` 和 `peer0.org2.example.com` 上。
++ 然后在`peer0.org2.example.com`上**实例化**链代码。**实例化将链代码添加到通道**，启动目标对等方的容器，并**初始化与链代码关联的键值对**。该示例的初始值是`[“a”,”100” “b”,”200”]`，实例化会启动一个名为`dev-peer0.org2.example.com-mycc-1.0`的容器。
++ 实例化也传递了**背书策略的论据**。该策略定义为`-P "AND ('Org1MSP.peer','Org2MSP.peer')"`，表示任何事务必须由与`Org1`和`Org2`相关联的对等方签署。
++ 向`peer0.org1.example.com`发出针对`a`值的查询。该链代码以前安装在`peer0.org1.example.com`上，因此这将以`dev-peer0.org1.example.com-mycc-1.0`的名称为`Org1 peer0`启动一个容器。还将返回查询结果。**没有发生写入操作**，因此对`a`的查询仍将返回值`100`。
++ 将调用发送到`peer0.org1.example.com`，并`a`向`b`转账10
++ 然后将链代码安装在`peer1.org2.example.com`上
++ 查询将发送到`peer1.org2.example.com`以获取`a`的值。这将启动名为`dev-peer1.org2.example.com-mycc-1.0`的第三个链代码容器。返回值`90`，正确反映上一个事务，在此期间，键`a`的值被修改为10。
+
+## 这表明了什么？
+
