@@ -791,3 +791,22 @@ $ docker-compose -f docker-compose-cli.yaml -f docker-compose-couch.yaml up -d
 此外，`CouchDB`属于`CAP`定理的`AP`类型（**可用性和分区容差**）。它使用具有最终一致性的主：**主复制模型**。可以在`CouchDB`文档的`Eventual Consistency`页面上找到更多信息。但是，在每个结构对等体下，没有数据库副本，对数据库的**写入保证一致且持久**（不是最终一致性）。
 
 `CouchDB`是`Fabric`的第一个外部**可插拔状态数据库**，可能也应该有其他外部数据库选项。例如，`IBM`为其区块链启用了关系数据库。并且`CP`类型（一致性和分区容差）数据库也可能需要，以便在没有应用程序级别保证的情况下实现数据一致性。
+
+# 关于数据持久性
+
+如果在对等容器或·CouchDB·容器上需要**数据持久性**，则可以选择将`docker-host`中的目录安装到容器中的相关目录中。例如，可以在`docker-compose-base.yaml`文件的`peer`容器中添加以下两行：
+
+```yaml
+volumes:
+ - /var/hyperledger/peer0:/var/hyperledger/production
+```
+
+对于`CouchDB`容器，可以在`CouchDB`容器规范中添加以下两行：
+
+```sh
+volumes:
+ - /var/hyperledger/couchdb0:/opt/couchdb/data
+```
+
+# 故障排除
+
