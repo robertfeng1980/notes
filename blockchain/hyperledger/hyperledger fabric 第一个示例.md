@@ -333,14 +333,14 @@ org2.example.com
 
 证书和密钥（即`MSP`材料）将输出到第一个网络目录根目录下的目录：`crypto-config`。
 
-接下来，需要告诉`configtxgen`工具在哪里查找它需要摄取的`configtx.yaml`文件。将在当前的工作目录中告诉它：
+接下来，需要告诉`configtxgen`工具在哪里查找它需要摄取的`configtx.yaml`文件。将在当前的工作目录中告诉它，**`configtxgen` 会读取这个变量的值，然后找到配置文件 `configtx.yaml`**：
 
 ```sh
 # configtxgen 会读取这个变量的值，然后找到配置文件 configtx.yaml
 export FABRIC_CFG_PATH=$PWD
 ```
 
-然后，将调用`configtxgen`工具来创建`orderer genesis`块：
+然后，将**调用`configtxgen`工具来创建`orderer genesis`块**：
 
 ```sh
 ../bin/configtxgen -profile TwoOrgsOrdererGenesis -channelID byfn-sys-channel -outputBlock ./channel-artifacts/genesis.block
@@ -357,4 +357,36 @@ export FABRIC_CFG_PATH=$PWD
 > **注意**：`orderer genesis`块和即将创建的后续工件将输出到该项目根目录的`channel-artifacts`目录中。上述命令中的`channelID`是系统通道的名称。
 
 ## 创建通道交易配置
+
+接下来，需要**创建通道交易配置**。请务必替换`$CHANNEL_NAME`或将`CHANNEL_NAME`设置为可在整个操作说明中使用的环境变量：
+
+```sh
+# The channel.tx artifact contains the definitions for our sample channel
+
+export CHANNEL_NAME=mychannel  && ../bin/configtxgen -profile TwoOrgsChannel -outputCreateChannelTx ./channel-artifacts/channel.tx -channelID $CHANNEL_NAME
+```
+
+应该在终端中看到类似于以下内容的输出：
+
+```sh
+2017-10-26 19:24:05.324 EDT [common/tools/configtxgen] main -> INFO 001 Loading configuration
+2017-10-26 19:24:05.329 EDT [common/tools/configtxgen] doOutputChannelCreateTx -> INFO 002 Generating new channel configtx
+2017-10-26 19:24:05.329 EDT [common/tools/configtxgen] doOutputChannelCreateTx -> INFO 003 Writing new channel tx
+```
+
+接下来，将在通道上为`Org1`定义**锚点对等体**。同样，请务必替换`$CHANNEL_NAME`或为以下命令设置环境变量。终端输出将模仿通道事务工件的输出：
+
+```sh
+../bin/configtxgen -profile TwoOrgsChannel -outputAnchorPeersUpdate ./channel-artifacts/Org1MSPanchors.tx -channelID $CHANNEL_NAME -asOrg Org1MSP
+```
+
+现在，将在同一个通道上为`Org2`定义**锚点对等体**：
+
+```sh
+../bin/configtxgen -profile TwoOrgsChannel -outputAnchorPeersUpdate ./channel-artifacts/Org2MSPanchors.tx -channelID $CHANNEL_NAME -asOrg Org2MSP
+```
+
+# 启动网络
+
+> **注意**：如果运行`byfn.sh`上面的示例，请确保在继续操作之前已关闭测试网络（请参阅 [“关闭网络”](https://hyperledger-fabric.readthedocs.io/en/latest/build_network.html#bring-down-the-network)）。
 
