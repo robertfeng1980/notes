@@ -247,3 +247,43 @@ Deleted: sha256:ed3230614e64e1c83e510c0c282e982d2b06d148b1c498bbdcc429e2b2531e91
 
 ## 它是如何工作的
 
+`Cryptogen`使用一个文件 `crypto-config.yaml` 它包含拓扑网络，并允许我们为组织和属于这些组织的组件生成一组**证书和密钥**。每个组织都配置了一个**唯一的根证书**（`ca-cert`），**用于将特定组件（同行和订购者）绑定到该组织**。通过为每个组织分配唯一的`CA`证书，我们模仿典型的网络，其中参与的成员将使用其自己的证书颁发机构。`Hyperledger Fabric`中的事务和通信由**实体的私钥（密钥库）签名**，然后通过**公钥（`signcerts`）进行验证**。
+
+注意到`count`此文件中的变量。我们用它来**指定每个组织的对等数量**。在例子中，每个`Org`有两个对等体。现在不会深入研究[`x.509`证书和公钥基础设施](https://en.wikipedia.org/wiki/Public_key_infrastructure)的细节 。如果有兴趣，可以在自己的时间内仔细阅读这些主题。
+
+在运行该工具之前，快速浏览一下`crypto-config.yaml`中的一个片段。特别注意`OrdererOrgs`标题下的`“Name”，“Domain”`和`“Specs”`参数：
+
+```yml
+OrdererOrgs:
+#---------------------------------------------------------
+# Orderer
+# --------------------------------------------------------
+- Name: Orderer
+  Domain: example.com
+  CA:
+      Country: US
+      Province: California
+      Locality: San Francisco
+  #   OrganizationalUnit: Hyperledger Fabric
+  #   StreetAddress: address for org # default nil
+  #   PostalCode: postalCode for org # default nil
+  # ------------------------------------------------------
+  # "Specs" - See PeerOrgs below for complete description
+# -----------------------------------------------------
+  Specs:
+    - Hostname: orderer
+# -------------------------------------------------------
+# "PeerOrgs" - Definition of organizations managing peer nodes
+ # ------------------------------------------------------
+PeerOrgs:
+# -----------------------------------------------------
+# Org1
+# ----------------------------------------------------
+- Name: Org1
+  Domain: org1.example.com
+  EnableNodeOUs: true
+```
+
+网络实体的命名约定如下 `“{{.Hostname}}.{{.Domain}}”`。因此，使用我们的订购节点作为参考点，我们留下了一个名为 `orderer.example.com`的订购节点，它与`Orderer`的`MSP ID`相关联。该文件包含有关定义和语法的大量文档。还可以参考[会员服务提供商（`MSP`）](https://hyperledger-fabric.readthedocs.io/en/latest/msp.html)文档，深入了解`MSP`。
+
+运行该`cryptogen`工具后，生成的证书和密钥将保存到名为`crypto-config`的文件夹中。 
