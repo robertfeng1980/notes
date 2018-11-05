@@ -415,3 +415,73 @@ CORE_PEER_LOCALMSPID="Org1MSP"
 CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
 ```
 
+## 创建和加入频道
+
+在之前，使用“[创建通道配置事务”](https://hyperledger-fabric.readthedocs.io/en/latest/build_network.html#createchanneltx)部分中的 `configtxgen` 工具[创建了通道配置事务](https://hyperledger-fabric.readthedocs.io/en/latest/build_network.html#createchanneltx)。可以使用`configtx.yaml`传递给`configtxgen`工具的相同或不同的配置文件重复该过程以创建其他通道配置事务。然后，可以重复本节中定义的过程，以在网络中建立其他通道。
+
+将使用`docker exec`命令进入`CLI`容器：
+
+```sh
+$ docker exec -it cli bash
+```
+
+如果成功，应该看到以下内容：
+
+```sh
+root@0d78bb69300d:/opt/gopath/src/github.com/hyperledger/fabric/peer#
+```
+
+如果不想针对默认对等`peer0.org1.example.com`运行`CLI`命令，请在四个环境变量中替换`peer0`或`org1`的值并运行命令：
+
+```sh
+# Environment variables for PEER0
+
+export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+export CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+export CORE_PEER_LOCALMSPID="Org1MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+```
+
+接下来，将作为创建通道请求的一部分，将在“[创建通道配置事务](https://hyperledger-fabric.readthedocs.io/en/latest/build_network.html#createchanneltx)”部分（我们称之为`channel.tx`）中创建的生成的通道配置事务文件传递给订购者。
+
+使用`-c`标志**指定通道名称**，使用`-f`标志**指定通道交易配置**。在这种情况下，它是`channel.tx`，但是可以使用其他名称装入自己的交易配置。再次在`CLI`容器中设置`CHANNEL_NAME`环境变量，以便不必显式传递此参数。**通道名称必须全部小写，长度小于250个字符，并且与正则表达式`[a-z][a-z0-9.-]*`匹配**。
+
+```sh
+export CHANNEL_NAME=mychannel
+
+# the channel.tx file is mounted in the channel-artifacts directory within your CLI container
+# as a result, we pass the full path for the file
+# we also pass the path for the orderer ca-cert in order to verify the TLS handshake
+# be sure to export or replace the $CHANNEL_NAME variable appropriately
+
+$ peer channel create -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/channel.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+```
+
+> **注意**：注意作为此命令的一部分传递的`--cafile`。它是`orderer`的根证书的**本地路径**，允许**验证`TLS`握手**。
+
+此命令返回一个创世块：`<channel-ID.block>` ，将用它来加入频道。它包含`channel.tx`中**指定的配置信息**如果没有对默认通道名称进行任何修改，那么该命令将返回一个名为`mychannel.block`的原型二进制配置文件。
+
+> **注意**：对于其余的这些手动命令，将保留在`CLI`容器中。在定位`peer0.org1.example.com`以外的对等方时，还必须记住**在所有命令前加上相应的环境变量**。
+
+现在将`peer0.org1.example.com`加入频道
+
+```sh
+# By default, this joins ``peer0.org1.example.com`` only
+# the <channel-ID.block> was returned by the previous command
+# if you have not modified the channel name, you will join with mychannel.block
+# if you have created a different channel name, then pass in the appropriately named block
+
+$ peer channel join -b mychannel.block
+```
+
+可以根据需要通过对在上面的[环境变量](https://hyperledger-fabric.readthedocs.io/en/latest/build_network.html#peerenvvars)部分中使用的四个环境变量进行适当更改来使其他对等方加入通道。 
+
+将加入`peer0.org2.example.com`，而不是加入每个对等体，**以便可以正确更新通道中的锚点对等体**。由于将覆盖`CLI`容器中的默认环境变量，因此完整命令如下：
+
+```sh
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp CORE_PEER_ADDRESS=peer0.org2.example.com:7051 CORE_PEER_LOCALMSPID="Org2MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt 
+$ peer channel join -b mychannel.block
+```
+
+或者，可以选择单独设置这些环境变量，而不是传入整个字符串。一旦设置完毕，只需再次发出`peer channel join`命令，`CLI`容器将代表`peer0.org2.example.com`。
+
