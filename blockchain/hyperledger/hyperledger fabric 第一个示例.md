@@ -501,3 +501,73 @@ $ peer channel update -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-
 CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp CORE_PEER_ADDRESS=peer0.org2.example.com:7051 CORE_PEER_LOCALMSPID="Org2MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt peer channel update -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/Org2MSPanchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
 ```
 
+## 安装和实例化`Chaincode`
+
+> **注意**：将使用一个简单的现有链码。要了解如何编写自己的链代码，请参阅[Chaincode for Developers](https://hyperledger-fabric.readthedocs.io/en/latest/chaincode4ade.html)教程。
+
+应用程序与区块链分类帐交互`chaincode`。因此，需要在**每个将执行和支持交易的对等体上安装**链码，然后在通道上实例化链码。
+
+首先，将示例`Go，Node.js`或`Java`链代码安装到**四个对等节点之一**上。这些命令将指定的源代码放在我们的对等文件系统上。
+
+> **注意**：**只能为每个链代码名称和版本安装一个版本的源代码**。源代码存在于对等体的**文件系统**中，在链代码名称和版本的上下文中，它与语言无关。类似地，实例化的链代码容器将反映对等体上安装的任何语言。
+
+**GoLang**
+
+```sh
+# this installs the Go chaincode
+$ peer chaincode install -n mycc -v 1.0 -p github.com/chaincode/chaincode_example02/go/
+```
+
+**Node.js**
+
+```sh
+# this installs the Node.js chaincode
+# make note of the -l flag; we use this to specify the language
+$ peer chaincode install -n mycc -v 1.0 -l node -p /opt/gopath/src/github.com/chaincode/chaincode_example02/node/
+```
+
+**Java**
+
+```sh
+$ peer chaincode install -n mycc -v 1.0 -l java -p /opt/gopath/src/github.com/chaincode/chaincode_example02/java/
+```
+
+接下来，**在通道上实例化链码**。这将**初始化**通道上的链代码，**设置**链代码的**认可策略**，并为目标对等方**启动链代码容器**。记下`-P`参数。这是背书认可策略，在此策略中**指定针对要验证的此链码的交易所需的认可级别**。
+
+在下面的命令中，会注意到将策略指定为`-P "AND ('Org1MSP.peer','Org2MSP.peer')"`。这意味着**需要来自属于`Org1 AND Org2`的对等方的“认可”（即两个认可）**。如果将语法更改为**OR**，那么**只需要一个认可**。
+
+**GoLang**
+
+```sh
+# be sure to replace the $CHANNEL_NAME environment variable if you have not exported it
+# if you did not install your chaincode with a name of mycc, then modify that argument as well
+
+peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n mycc -v 1.0 -c '{"Args":["init","a", "100", "b","200"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer')"
+```
+
+**Node.js**
+
+> **注意**：`Node.js`链代码的实例化大约需要一分钟。命令没有挂起，而是在**编译图像时安装`fabric-shim`镜像图层**。国内的可能需要下载数据，最好能访问国外的资源。
+
+```sh
+# be sure to replace the $CHANNEL_NAME environment variable if you have not exported it
+# if you did not install your chaincode with a name of mycc, then modify that argument as well
+# notice that we must pass the -l flag after the chaincode name to identify the language
+
+peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n mycc -l node -v 1.0 -c '{"Args":["init","a", "100", "b","200"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer')"
+```
+
+**Java**
+
+> **注意**：请注意，`Java`链代码实例化可能需要一些时间，因为它编译链代码并使用`java`环境下载`docker`容器。
+
+```sh
+$ peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n mycc -l java -v 1.0 -c '{"Args":["init","a", "100", "b","200"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer')"
+```
+
+有关策略实施的更多详细信息，请参阅[认可政策](http://hyperledger-fabric.readthedocs.io/en/latest/endorsement-policies.html)文档。 
+
+如果希望其他对等方与分类帐**进行交互**，则需要将它们连接到通道，并**将链码源的相同名称，版本和语言安装到相应的对等文件系统**上。一旦他们尝试与特定的链代码进行交互，就会为**每个对等体启动一个链代码容器**。再次，要认识到`Node.js`镜像的编译速度会慢一些。
+
+一旦在通道上实例化了链代码，就可以放弃`-l`标志。只需**传递通道标识符和链码的名称**。
+
