@@ -630,3 +630,36 @@ Query Result: 90
 
 **`Chaincode`必须安装在对等体上**，以便它能够成功地对分类帐执行**读/写**操作。此外，在针对该链代码执行`init`或传统事务（**读/写**）之前，**不会为对等体启动链代码容器**（例如，查询“a”的值）。该事务导致容器启动。此外，通道中的所有对等体都**保持分类帐的精确副本**，其包括用于**以块的形式**存储**不可变的有序**记录的区块链，以及用于维护当前**状态的快照的状态数据库**。这包括那些没有安装链代码的对等体（如上例中的`peer1.org1.example.com`）。最后，链代码在安装后可以访问（如上例中的`peer1.org2.example.com`），因为它已经被实例化了。
 
+## 如何查看这些交易？
+
+检查`CLI Docker`容器的日志：
+
+```sh
+$ docker logs -f cli
+```
+
+应该看到以下输出：
+
+```sh
+2017-05-16 17:08:01.366 UTC [msp] GetLocalMSP -> DEBU 004 Returning existing local MSP
+2017-05-16 17:08:01.366 UTC [msp] GetDefaultSigningIdentity -> DEBU 005 Obtaining default signing identity
+2017-05-16 17:08:01.366 UTC [msp/identity] Sign -> DEBU 006 Sign: plaintext: 0AB1070A6708031A0C08F1E3ECC80510...6D7963631A0A0A0571756572790A0161
+2017-05-16 17:08:01.367 UTC [msp/identity] Sign -> DEBU 007 Sign: digest: E61DB37F4E8B0D32C9FE10E3936BA9B8CD278FAA1F3320B08712164248285C54
+Query Result: 90
+2017-05-16 17:08:15.158 UTC [main] main -> INFO 008 Exiting.....
+===================== Query successful on peer1.org2 on channel 'mychannel' =====================
+
+===================== All GOOD, BYFN execution completed =====================
+
+
+ _____   _   _   ____
+| ____| | \ | | |  _ \
+|  _|   |  \| | | | | |
+| |___  | |\  | | |_| |
+|_____| |_| \_| |____/
+```
+
+可以滚动浏览这些日志以查看各种交易。
+
+## 如何查看链码日志？
+
