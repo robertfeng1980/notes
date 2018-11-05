@@ -663,3 +663,35 @@ Query Result: 90
 
 ## 如何查看链码日志？
 
+检查各个链代码容器，以查看针对每个容器执行的单独事务。以下是每个容器的组合输出：
+
+```sh
+$ docker logs dev-peer0.org2.example.com-mycc-1.0
+04:30:45.947 [BCCSP_FACTORY] DEBU : Initialize BCCSP [SW]
+ex02 Init
+Aval = 100, Bval = 200
+
+$ docker logs dev-peer0.org1.example.com-mycc-1.0
+04:31:10.569 [BCCSP_FACTORY] DEBU : Initialize BCCSP [SW]
+ex02 Invoke
+Query Response:{"Name":"a","Amount":"100"}
+ex02 Invoke
+Aval = 90, Bval = 210
+
+$ docker logs dev-peer1.org2.example.com-mycc-1.0
+04:31:30.420 [BCCSP_FACTORY] DEBU : Initialize BCCSP [SW]
+ex02 Invoke
+Query Response:{"Name":"a","Amount":"90"}
+```
+
+## 了解`Docker Compose`服务编排
+
+`BYFN`示例提供了两种`Docker Compose`文件，这两种文件都是从`docker-compose-base.yaml`（位于基本文件夹中）扩展而来的。第一个版本`docker-compose-cli.yaml`为提供了一个`CLI`容器，以及一个订购者，四个同行。将此文件用于此页面上的所有说明。
+
+> **注意**：本节的其余部分介绍了为`SDK`设计的`docker-compose`文件。 有关运行这些测试的详细信息，请参阅[Node SDK](https://github.com/hyperledger/fabric-sdk-node) repo。
+
+第二种风格`docker-compose-e2e.yaml`构建为使用`Node.js SDK`运行端到端测试。除了使用`SDK`之外，它的主要区别在于`Fabric-ca`服务器还有容器。因此，**可以向组织`CA`发送`REST`调用以进行用户注册和认证**。
+
+如果想在没有先运行`byfn.sh`脚本的情况下使用`docker-compose-e2e.yaml`，那么需要进行四次略微修改。需要修改指向组织CA的私钥。可以在`crypto-config`文件夹中找到这些值。例如，要找到`Org1`的私钥，将遵循此路径 `crypto-config/peerOrganizations/org1.example.com/ca/`。私钥是一个长哈希值，后跟`_sk`。`Org2`的路径是 `crypto-config/peerOrganizations/org2.example.com/ca/`。
+
+在`docker-compose-e2e.yaml`中更新`ca0`和`ca1`的`FABRIC_CA_SERVER_TLS_KEYFILE`变量。还需要编辑命令中提供的路径以启动`ca`服务器。为每个`CA`容器提供两次相同的私钥。
