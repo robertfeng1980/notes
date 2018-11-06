@@ -60,3 +60,25 @@ $ docker rmi $(docker images dev-* -aq)
 
 ## 安装客户端并启动网络
 
+> **注意**：以下说明要求操作位于`fabric-samples` `repo`的本地克隆中的`fabcar`子目录中。在本教程的其余部分中，保留在此子目录的根目录下。
+
+运行以下命令以安装应用程序的`Fabric`依赖项。需要关注的是`fabric-ca-client`，它允许**应用程序与`CA`服务器通信并检索身份资料**，以及`fabric-client`，它允许**加载身份资料并与同行和订购服务交互**。
+
+```sh
+$ npm install
+```
+
+使用`startFabric.sh` 脚本启动网络。此命令将启动各种`Fabric`实体并为`Golang`编写的链码启动智能合约容器：
+
+```sh
+$ ./startFabric.sh
+```
+
+还可以选择针对`Node.js`中编写的链码运行本教程。如果想继续这条路线，请发出以下命令：
+
+```sh
+$ ./startFabric.sh node
+```
+
+> **注意**：`Node.js`链码场景大约**需要90秒**才能完成，也许更长。脚本没有挂起，而是增加的时间是在**构建链代码镜像时安装`fabric-shim`的结果**。
+
