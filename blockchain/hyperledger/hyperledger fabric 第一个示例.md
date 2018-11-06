@@ -160,7 +160,7 @@ $ node registerUser.js
 fabric_client.getUserContext('user1', true);
 ```
 
-`user1`注册资料已经放入`hfc-key-store`子目录中，所以只需要告诉应用程序获取该身份。通过定义用户对象，现在可以继续从分类帐中读取。将查询所有汽车`queryAllCars`的函数预先加载到应用程序中，因此可以按原样运行程序：
+**`user1`注册资料已经放入`hfc-key-store`子目录**中，所以只需要告诉应用程序获取该身份。通过定义用户对象，现在可以继续从分类帐中读取。将查询所有汽车`queryAllCars`的函数预先加载到应用程序中，因此可以按原样运行程序：
 
 ```sh
 $ node query.js
@@ -183,5 +183,83 @@ Response is  [{"Key":"CAR0", "Record":{"colour":"blue","make":"Toyota","model":"
 {"Key":"CAR9", "Record":{"colour":"brown","make":"Holden","model":"Barina","owner":"Shotaro"}}]
 ```
 
+这些是`10`辆车。由`Adriana`拥有的黑色特斯拉`Model S`，由`Brad`拥有的红色`Ford Mustang`，`Pari`拥有的紫色菲亚特`Punto`等等。分类账是基于键值的，在我们的实现中，**关键是`CAR0`到`CAR9`**。这将在一瞬间变得特别重要。
 
+仔细看看这个程序，使用编辑器并打开`query.js`。应用程序的**初始部分定义了某些变量**，例如通道名称，证书存储位置和网络端点。在示例应用程序中，这些变量已经被引用，但在实际应用程序中，这些变量必须由`app dev`指定。
+
+```js
+var channel = fabric_client.newChannel('mychannel');
+var peer = fabric_client.newPeer('grpc://localhost:7051');
+channel.addPeer(peer);
+
+var member_user = null;
+var store_path = path.join(__dirname, 'hfc-key-store');
+console.log('Store path:'+store_path);
+var tx_id = null;
+```
+
+这是构造查询的代码块：
+
+```js
+// queryCar chaincode function - requires 1 argument, ex: args: ['CAR4'],
+// queryAllCars chaincode function - requires no arguments , ex: args: [''],
+const request = {
+  //targets : --- letting this default to the peers assigned to the channel
+  chaincodeId: 'fabcar',
+  fcn: 'queryAllCars',
+  args: ['']
+};
+```
+
+当应用程序运行时，它调用对等体上的`fabcar`链代码，在其中运行`queryAllCars`函数，并且不传递任何参数。
+
+要查看智能合约中的可用功能，请导航到`fabric-samples`根目录下的`chaincode/fabcar/go`子目录，并在编辑器中打开`fabcar.go`。
+
+> **注意**：这些相同的功能在`fabcar`链码的`Node.js`版本中定义。
+
+在代码中将看到可以调用以下函数：`initLedger`，`queryCar`，`queryAllCars`，`createCar`和`changeCarOwner`。让我们**仔细看看`queryAllCars`函数，看看它如何与分类帐交互**。
+
+```go
+func (s *SmartContract) queryAllCars(APIstub shim.ChaincodeStubInterface) sc.Response {
+
+      startKey := "CAR0"
+      endKey := "CAR999"
+
+      resultsIterator, err := APIstub.GetStateByRange(startKey, endKey)
+```
+
+这定义了`queryAllCars`的范围。`CAR0`和`CAR999`之间的每辆车 总共`1,000`辆车，假设每个`key`都已正确标记将由查询返回。
+
+下面是**应用程序如何在链代码中调用不同函数**的演示。必须根据链码`shim`中的可用`API`对每个函数进行编码，这反过来允许智能合约容器与对等分类帐正确连接。
+
+![_images/RunningtheSample.png](https://hyperledger-fabric.readthedocs.io/en/latest/_images/RunningtheSample.png)
+
+可以看到`queryAllCars`函数，以及一个名为`createCar`的函数，它将允许更新分类帐并最终在一瞬间将新块附加到链中。
+
+但首先，返回`query.js`程序并编辑构造函数请求以查询`CAR4`。我们通过将`query.js`中的函数从`queryAllCars`更改为`queryCar`并将`CAR4`作为特定键传递来完成此操作。
+
+`query.js`程序现在应该如下所示：
+
+```sh
+const request = {
+  //targets : --- letting this default to the peers assigned to the channel
+  chaincodeId: 'fabcar',
+  fcn: 'queryCar',
+  args: ['CAR4']
+};
+```
+
+保存程序并返回`fabcar`目录。现在再次运行程序：
+
+```sh
+$ node query.js
+
+{"colour":"black","make":"Tesla","model":"S","owner":"Adriana"}
+```
+
+如果你回过头来查看我们之前查询过每辆车的结果，你可以看到`CAR4`是`Adriana`的黑色特斯拉型号`S`，这是在这里返回的结果。
+
+使用`queryCar`函数，我们可以查询任何键（例如`CAR0`）并获得与该汽车相对应的任何品牌，型号，颜色和所有者。
+
+# 更新分类帐
 
