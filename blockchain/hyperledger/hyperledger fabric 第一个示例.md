@@ -807,6 +807,3 @@ volumes:
 volumes:
  - /var/hyperledger/couchdb0:/opt/couchdb/data
 ```
-
-# 故障排除
-
