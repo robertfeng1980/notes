@@ -5,25 +5,22 @@
 # 准备工作
 
 + `docker` 的安装， `v1.12 +`
-
 + `docker-compose` 的安装，`v1.8 +`
-
 + `Git` 的安装
-
 + `NodeJS` 的安装，`v8.9.4 +`  `npm v5.6.0+`
-
 + `fabric docker images`
-
   ```sh
   $ curl https://github.com/hyperledger/fabric/blob/release-1.1/scripts/bootstrap.sh
   $ /bin/bash bootstrap.sh
   ```
 
-## NodeJS 和 NPM 安装与设置
+## `NodeJS` 和 `NPM` 安装与设置
 
 ### 升级版本
 
 ```sh
+$ npm -v
+
 $ node -v
 v4.2.6
 
@@ -63,7 +60,7 @@ $ npm -v
 $ apt install nodejs-legacy -y
 ```
 
-### 配置 NPM 模块和缓存目录
+### 配置 `NPM` 模块和缓存目录
 
 ```sh
 # npm模块安装路径
@@ -81,7 +78,7 @@ $ npm config ls
 # 注销并重新登陆机器
 ```
 
-### NPM简单命令
+### `NPM` 简单命令
 
 ```sh
 # 模块 安装当前目录下
@@ -114,13 +111,11 @@ $ cd fabric-samples/balance-transfer/
 
 # 运行示例
 
-本示例有两个`chaincode`可以选择安装使用，你可以选择 使用`golang`或`node.js`编写的`chaincode`运行。
-
-确定已经进入目录 `fabric-samples/balance-transfer/`
+本示例有两个`chaincode`可以选择安装使用，你可以选择 使用`golang`或`node.js`编写的`chaincode`运行。确定已经进入目录 `fabric-samples/balance-transfer/`
 
 ## 手动命令行运行示例
 
-+ 启动 docker 服务容器编排
++ 启动 `docker` 服务容器编排
 
   ```sh
   $ docker-compose -f artifacts/docker-compose.yaml up
@@ -169,7 +164,7 @@ $ cd fabric-samples/balance-transfer/
   - 安装`fabric-client`和`fabric-ca-client`节点模块
   - 在`PORT 4000`上启动节点应用程序
 
-+ 为了让以下shell脚本正确解析`JSON`，必须安装`jq`
++ 为了让以下`shell`脚本正确解析`JSON`，必须安装`jq`
 
   ```sh
   $ whereis jq
@@ -181,7 +176,7 @@ $ cd fabric-samples/balance-transfer/
   $ mv jq /usr/local/bin/jq
   ```
 
-+ 运行脚本 **testAPIs.sh** 进行交易测试
++ 运行脚本 **`testAPIs.sh`** 进行交易测试
 
   ```sh
   $ cd fabric-samples/balance-transfer
@@ -209,7 +204,7 @@ $ docker rmi -f $(docker images | grep dev | awk '{print $3}')
 $ rm -rf fabric-client-kv-org[1-2]
 ```
 
-# REST API 测试
+# `REST API` 测试
 
 ## 登陆请求
 
@@ -221,7 +216,7 @@ $ curl -s -X POST http://localhost:4000/users -H "content-type: application/x-ww
 {"success":true,"secret":"","message":"Jim enrolled Successfully","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MjgyMjQ2NTQsInVzZXJuYW1lIjoiSmltIiwib3JnTmFtZSI6Ik
 ```
 
-响应包含 `成功/失败` 状态，**注册secret**和**JSON Web Token（JWT）**，它是请求标头中的后续请求所需的字符串的参数。
+响应包含 `成功/失败` 状态，**注册`secret`**和**`JSON Web Token（JWT）`**，它是请求标头中的后续请求所需的字符串的参数。
 
 ## 创建频道请求
 
@@ -266,7 +261,7 @@ $ curl -s -X POST \
 }'
 ```
 
-**注意**： 当使用`node.js`链码并且*chaincodePath*必须设置为`node.js`链码的位置时，*chaincodeType*必须设置为**node**。
+**注意**： 当使用`node.js`链码并且*`chaincodePath`*必须设置为`node.js`链码的位置时，*`chaincodeType`*必须设置为**node**。
 
 ```sh
 $ curl -s -X POST \
@@ -298,7 +293,7 @@ $ curl -s -X POST \
 }'
 ```
 
-**注意**： 当使用`node.js`链码时，*chaincodeType*必须设置为**node**
+**注意**： 当使用`node.js`链码时，*`chaincodeType`*必须设置为**node**
 
 ##调用请求
 
@@ -314,9 +309,9 @@ $ curl -s -X POST \
 }'
 ```
 
-**注意**：确保保存响应中的交易ID，以便在随后的查询事务中传递此字符串。
+**注意**：确保保存响应中的交易`ID`，以便在随后的查询交易中传递此字符串。
 
-## Chaincode查询
+## `Chaincode`查询
 
 ```sh
 $ curl -s -X GET \
@@ -325,7 +320,7 @@ $ curl -s -X GET \
   -H "content-type: application/json"
 ```
 
-## 通过 BlockNumber 查询区块
+## 通过 `BlockNumber` 查询区块
 
 ```sh
 $ curl -s -X GET \
@@ -334,7 +329,7 @@ $ curl -s -X GET \
   -H "content-type: application/json"
 ```
 
-## 通过TransactionID查询事务
+## 通过`TransactionID`查询交易
 
 ```sh
 $ curl -s -X GET http://localhost:4000/channels/mychannel/transactions/<put transaction id here>?peer=peer0.org1.example.com \
@@ -342,9 +337,9 @@ $ curl -s -X GET http://localhost:4000/channels/mychannel/transactions/<put tran
   -H "content-type: application/json"
 ```
 
-**注意**：事务ID可以来自任何先前的调用事务，查看调用请求的结果将看起来像`8a95b1794cb17e7772164c3f1292f8410fcfdc1943955a35c9764a21fcd1d1b3`。
+**注意**：交易`ID`可以来自任何先前的调用交易，查看调用请求的结果将看起来像`8a95b1794cb17e7772164c3f1292f8410fcfdc1943955a35c9764a21fcd1d1b3`。
 
-## 查询 ChainInfo
+## 查询 `ChainInfo`
 
 ```sh
 $ curl -s -X GET \
