@@ -263,3 +263,114 @@ $ node query.js
 
 # 更新分类帐
 
+现在已经完成了一些分类帐查询并添加了一些代码，已准备好更新分类帐。可以做很多潜在的更新，但让我们从创建汽车开始吧。
+
+下面可以看到这个过程如何运作。建议更新，签署，然后返回给应用程序，然后应用程序将其发送给每个对等方的分类帐进行排序和写入：
+
+![_images/UpdatingtheLedger.png](https://hyperledger-fabric.readthedocs.io/en/latest/_images/UpdatingtheLedger.png)
+
+我们对分类账的第一次更新将是创建一辆新车。有一个单独的`Javascript`程序  `invoke.js`  我们将用它来进行更新。与查询一样，使用编辑器打开程序并导航到构建调用的代码块：
+
+```js
+// createCar chaincode function - requires 5 args, ex: args: ['CAR12', 'Honda', 'Accord', 'Black', 'Tom'],
+// changeCarOwner chaincode function - requires 2 args , ex: args: ['CAR10', 'Barry'],
+// must send the proposal to endorsing peers
+var request = {
+  //targets: let default to the peer assigned to the client
+  chaincodeId: 'fabcar',
+  fcn: '',
+  args: [''],
+  txId: tx_id
+};
+```
+
+将看到可以调用两个函数 `createCar`或`changeCarOwner`。首先，创建一个红色雪佛兰`Volt`并将其交给名为`Nick`的老板。我们的分类账上有`CAR9`，因此我们将`CAR10`作为识别密钥。编辑此代码块如下所示：
+
+```go
+var request = {
+  //targets: let default to the peer assigned to the client
+  chaincodeId: 'fabcar',
+  fcn: 'createCar',
+  args: ['CAR10', 'Chevy', 'Volt', 'Red', 'Nick'],
+  txId: tx_id
+};
+```
+
+保存并运行程序：
+
+```sh
+$ node invoke.js
+```
+
+终端中会有一些关于`ProposalResponse`和`promises`的输出。但是，我们所关注的是这条消息：
+
+```sh
+The transaction has been committed on peer localhost:7053
+```
+
+要查看此事务已写入，请返回`query.js`并将参数从`CAR4`更改为`CAR10`。
+
+再次改变下代码：
+
+```js
+const request = {
+  //targets : --- letting this default to the peers assigned to the channel
+  chaincodeId: 'fabcar',
+  fcn: 'queryCar',
+  args: ['CAR4']
+};
+
+const request = {
+  //targets : --- letting this default to the peers assigned to the channel
+  chaincodeId: 'fabcar',
+  fcn: 'queryCar',
+  args: ['CAR10']
+};
+```
+
+再次保存，然后查询：
+
+```sh
+$ node query.js
+```
+
+将返回如下结果：
+
+```sh
+Response is  {"colour":"Red","make":"Chevy","model":"Volt","owner":"Nick"}
+```
+
+要做到这一点，请返回`invoke.js`并将函数从`createCar`更改为`changeCarOwner`并输入如下参数：
+
+```js
+var request = {
+  //targets: let default to the peer assigned to the client
+  chaincodeId: 'fabcar',
+  fcn: 'changeCarOwner',
+  args: ['CAR10', 'Dave'],
+  txId: tx_id
+};
+```
+
+第一个参数 `CAR10` 反映了将改变的汽车。第二个参数 `Dave` 定义了汽车的新主人。
+
+再次保存并执行程序：
+
+```sh
+$ node invoke.js
+```
+
+现在让我们再次查询分类帐并确保`Dave`现在与`CAR10`密钥相关联：
+
+```sh
+$ node query.js
+```
+
+它应该返回这个结果：
+
+```sh
+Response is  {"colour":"Red","make":"Chevy","model":"Volt","owner":"Dave"}
+```
+
+`CAR10`的所有权已从`Nick`改为`Dave`。
+
