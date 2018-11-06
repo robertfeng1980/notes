@@ -64,6 +64,34 @@ $ docker rmi $(docker images dev-* -aq)
 
 运行以下命令以安装应用程序的`Fabric`依赖项。需要关注的是`fabric-ca-client`，它允许**应用程序与`CA`服务器通信并检索身份资料**，以及`fabric-client`，它允许**加载身份资料并与同行和订购服务交互**。
 
+如果`node`或`npm`版本过旧，可以先安装或升级相关程序
+
+```sh
+$ sudo npm -v
+# 安装node版本安装工具
+$ sudo npm install -g n
+# 安装指定版本node
+$ n v8.9.4
+
+# 配置NODE_HOME，进入profile编辑环境变量
+$ vim /etc/profile
+#set for nodejs
+export NODE_HOME=/usr/local/n/versions/node/8.9.4
+export PATH=$NODE_HOME/bin:$PATH
+# set npm module path
+export NODE_PATH=/usr/local/lib/node_modules
+
+# 立即执行生效
+$ source /etc/profile
+
+$ node -v
+v8.9.4 
+
+$ npm -v
+```
+
+安装依赖的 `nodejs` 程序库
+
 ```sh
 $ npm install
 ```
