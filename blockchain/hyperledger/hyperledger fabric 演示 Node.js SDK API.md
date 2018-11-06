@@ -266,7 +266,7 @@ $ curl -s -X POST \
 }'
 ```
 
-**注意：** 当使用`node.js`链码并且*chaincodePath*必须设置为`node.js`链码的位置时，*chaincodeType*必须设置为**node**。
+**注意**： 当使用`node.js`链码并且*chaincodePath*必须设置为`node.js`链码的位置时，*chaincodeType*必须设置为**node**。
 
 ```sh
 $ curl -s -X POST \
@@ -298,7 +298,7 @@ $ curl -s -X POST \
 }'
 ```
 
-**注意：** 当使用`node.js`链码时，*chaincodeType*必须设置为**node**
+**注意**： 当使用`node.js`链码时，*chaincodeType*必须设置为**node**
 
 ##调用请求
 
@@ -314,7 +314,7 @@ $ curl -s -X POST \
 }'
 ```
 
-**注意：**确保保存响应中的交易ID，以便在随后的查询事务中传递此字符串。
+**注意**：确保保存响应中的交易ID，以便在随后的查询事务中传递此字符串。
 
 ## Chaincode查询
 
