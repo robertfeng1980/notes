@@ -8,7 +8,7 @@
     + [`hyperledger fabric 建立你的第一个网络`](./hyperledger/hyperledger%20fabric%20建立你的第一个网络.md)
     + [`hyperledger fabric 第一个示例`](./hyperledger/hyperledger%20fabric%20第一个示例.md)
     + [`hyperledger fabric e2e 端对端示例`](./hyperledger/hyperledger%20fabric%20e2e%20端对端示例.md)
-    + [`hyperledger fabric 演示 Node.js SDK API`](./hyperledger/hyperledger20%fabric20%演示20%Node.js20%SDK20%API.md)
+    + [`hyperledger fabric 演示 Node.js SDK API`](./hyperledger/hyperledger%20fabric%20演示%20Node.js%20SDK%20API.md)
 
 - 开发
     + [`在windows 下搭建hyperledger fabric java 开发环境`](./hyperledger/在windows%20下搭建hyperledger%20fabric%20java%20开发环境.md)
