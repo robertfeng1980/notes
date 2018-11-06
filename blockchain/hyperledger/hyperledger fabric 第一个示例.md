@@ -117,3 +117,71 @@ $ ./startFabric.sh node
 要更深入地了解`fabcar`网络中的组件（它们的**部署方式**）以及**应用程序如何在更精细的级别上与这些组件进行交互**，请参阅[了解Fabcar网络](https://hyperledger-fabric.readthedocs.io/en/latest/understand_fabcar_network.html)。
 
 开发人员更有兴趣了解应用程序的作用，以及查看代码本身以查看**应用程序的构建方式**应该继续。目前，最重要的是要知道应用程序**使用软件开发工具包（`SDK`）来访问允许查询和更新分类帐的`API`**。
+
+# 注册管理员用户
+
+> **注意**：以下两节涉及与**证书颁发机构的通信**。可能会发现在运行即将推出的程序时流式传输`CA`日志很有用。
+
+要流式查看`CA`日志，请拆分终端或打开新`shell`并发出以下命令：
+
+```sh
+$ docker logs -f ca.example.com
+```
+
+当启动网络时，**管理员用户 `admin` 已在证书颁发机构注册**。现在，需要向`CA`服务器发送注册请求，并为该用户检索注册证书（`eCert`）。不会在这里深入研究注册详细信息，但只需说明`SDK`和扩展的应用程序需要此证书才能形成管理员的用户对象。然后，将**使用此管理对象随后注册并注册新用户**。将管理员注册请求发送到`CA`服务器：
+
+```sh
+$ node enrollAdmin.js
+```
+
+程序将调用证书签名请求（`CSR`），并最终将`eCert`和密钥材料输出到此项目根目录中新创建的文件夹 `hfc-key-store`。然后，当应用需要为各种用户创建或加载身份对象时，他们会查看此位置。
+
+# 注册并认证 `user1`
+
+使用新生成的管理`eCert`，现在将再次与`CA`服务器通信以注册和认证新用户。此**用户 `user1`将是在查询和更新分类帐时使用的身份标识**。这里需要注意的是，**管理员身份是为我们的新用户发出注册和注册请求**（即该用户扮演注册商的角色）。发送注册并认证`user1`的电话：
+
+```sh
+$ node registerUser.js
+```
+
+与管理员注册类似，该程序调用`CSR`并将密钥和`eCert`输出到`hfc-key-store`子目录中。所以现在有两个独立用户的身份资料 `admin`＆`user1`。
+
+# 查询分类帐
+
+**查询是从分类帐中读取数据的方式**。此数据存储为一系列键值对，可以查询单个键，多个键的值。如果分类帐是以`JSON`等丰富的数据存储格式编写的，对其执行复杂的搜索（寻找包含某些关键字的所有资产）。
+
+查询如何工作的表示：
+
+![_images/QueryingtheLedger.png](https://hyperledger-fabric.readthedocs.io/en/latest/_images/QueryingtheLedger.png)
+
+首先，运行`query.js`程序，返回分类帐中所有汽车的清单。**使用第二个身份`user1`作为此应用程序的签名实体**。程序中的以下行将`user1`指定为签名者：
+
+```javascript
+fabric_client.getUserContext('user1', true);
+```
+
+`user1`注册资料已经放入`hfc-key-store`子目录中，所以只需要告诉应用程序获取该身份。通过定义用户对象，现在可以继续从分类帐中读取。将查询所有汽车`queryAllCars`的函数预先加载到应用程序中，因此可以按原样运行程序：
+
+```sh
+$ node query.js
+```
+
+它应该返回这样的东西：
+
+```sh
+Successfully loaded user1 from persistence
+Query has completed, checking results
+Response is  [{"Key":"CAR0", "Record":{"colour":"blue","make":"Toyota","model":"Prius","owner":"Tomoko"}},
+{"Key":"CAR1",   "Record":{"colour":"red","make":"Ford","model":"Mustang","owner":"Brad"}},
+{"Key":"CAR2", "Record":{"colour":"green","make":"Hyundai","model":"Tucson","owner":"Jin Soo"}},
+{"Key":"CAR3", "Record":{"colour":"yellow","make":"Volkswagen","model":"Passat","owner":"Max"}},
+{"Key":"CAR4", "Record":{"colour":"black","make":"Tesla","model":"S","owner":"Adriana"}},
+{"Key":"CAR5", "Record":{"colour":"purple","make":"Peugeot","model":"205","owner":"Michel"}},
+{"Key":"CAR6", "Record":{"colour":"white","make":"Chery","model":"S22L","owner":"Aarav"}},
+{"Key":"CAR7", "Record":{"colour":"violet","make":"Fiat","model":"Punto","owner":"Pari"}},
+{"Key":"CAR8", "Record":{"colour":"indigo","make":"Tata","model":"Nano","owner":"Valeria"}},
+{"Key":"CAR9", "Record":{"colour":"brown","make":"Holden","model":"Barina","owner":"Shotaro"}}]
+```
+
+
+
