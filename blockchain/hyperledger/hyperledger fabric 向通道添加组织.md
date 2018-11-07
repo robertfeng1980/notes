@@ -209,3 +209,56 @@ $ configtxlator proto_decode --input config_block.pb --type common.Block | jq .d
 这将得到一个精简的`JSON`对象`config.json`，它位于`fabric-samples`文件夹中，它将作为配置更新的基线。
 
 花一点时间在选择的文本编辑器（或浏览器）中打开此文件。即使在完成本教程之后，也值得研究它，因为它揭示了**底层配置结构和可以进行的其他类型的通道更新**。我们将在[更新频道配置](https://hyperledger-fabric.readthedocs.io/en/latest/config_update.html)中更详细地讨论它们。
+
+## 添加`Org3`加密配置
+
+> 无论尝试进行何种配置更新，采取的步骤几乎完全相同。选择在本教程中添加组织，因为它是可以尝试的最复杂的通道配置更新之一。
+
+将再次使用`jq`工具将`Org3`配置定义 `org3.json` ，添加加到通道的应用程序组字段，并命名输出`modified_config.json`
+
+```sh
+jq -s '.[0] * {"channel_group":{"groups":{"Application":{"groups": {"Org3MSP":.[1]}}}}}' config.json ./channel-artifacts/org3.json > modified_config.json
+```
+
+现在，在`CLI`容器中，有两个`JSON`文件 `config.json`和`modified_config.json`。**初始文件仅包含`Org1`和`Org2`配置，而`modified`文件包含所有三个`Orgs`。此时，只需重新编码这两个`JSON`文件并计算增量即可**。
+
+首先，将`config.json`转换回名为`config.pb`的`protobuf`：
+
+```sh
+$ configtxlator proto_encode --input config.json --type common.Config --output config.pb
+```
+
+接下来，将`modified_config.json`编码为`modified_config.pb`的`protobuf`：
+
+```sh
+$ configtxlator proto_encode --input modified_config.json --type common.Config --output modified_config.pb
+```
+
+现在使用`configtxlator`来计算这两个配置`protobufs`之间的**增量**。此命令将输出名为`org3_update.pb`的新`protobuf`二进制文件：
+
+```sh
+$ configtxlator compute_update --channel_id $CHANNEL_NAME --original config.pb --updated modified_config.pb --output org3_update.pb
+```
+
+这个新的`proto`   `org3_update.pb` 包含`Org3`和`Org1`和`Org2`材质的高级指针。能够丢弃`Org1`和`Org2`的广泛`MSP`材料和修改策略信息，因为这些数据已经存在于通道的创世块中。因此，只需要两种配置之间的增量。
+
+在提交频道更新之前，需要执行一些最终步骤。首先，将此对象解码为可编辑的`JSON`格式并将其命名为`org3_update.json`：
+
+```sh
+$ configtxlator proto_decode --input org3_update.pb --type common.ConfigUpdate | jq . > org3_update.json
+```
+
+现在，有一个解码的更新文件 `org3_update.json` ，需要**包装一个信封消息**。这一步将返回之前剥离的标题字段。将此文件命名为`org3_update_in_envelope.json`：
+
+```sh
+$ echo '{"payload":{"header":{"channel_header":{"channel_id":"mychannel", "type":2}},"data":{"config_update":'$(cat org3_update.json)'}}}' | jq . > org3_update_in_envelope.json
+```
+
+使用最终形成的`JSON` 文件 `org3_update_in_envelope.json` ，将最后一次利用`configtxlator`工具并将其转换为`Fabric`所需的完全成熟的`protobuf`格式。将命名最终更新对象`org3_update_in_envelope.pb`：
+
+```sh
+$ configtxlator proto_encode --input org3_update_in_envelope.json --type common.Envelope --output org3_update_in_envelope.pb
+```
+
+
+
