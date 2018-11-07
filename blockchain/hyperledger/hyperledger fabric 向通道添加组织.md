@@ -142,7 +142,7 @@ $ export FABRIC_CFG_PATH=$PWD && ../../bin/configtxgen -printOrg Org3MSP > ../ch
 
 上面的命令创建一个`JSON`文件 `org3.json`，并将其输出到`first-network`根目录下的`channel-artifacts`子目录中。此文件包含`Org3`的**背书策略**定义，以及以`base 64`格式显示的三个重要证书：**管理员用户证书（稍后将充当`Org3`的管理员），`CA`根证书和`TLS`根目录证书**。在接下来的步骤中，将此`JSON`文件添加到通道配置。
 
-最后的工作是将`Orderer Org`的**`MSP`材料移植到`Org3` `crypto-config`目录**中。特别是，**关注的是`Orderer`的`TLS`根证书，它将允许`Org3`实体与网络订购节点之间的安全通信**。
+最后的工作是**将`Orderer Org`的`MSP`材料移植到`Org3` `crypto-config`目录**中。特别是，**关注的是`Orderer`的`TLS`根证书，它将允许`Org3`实体与网络订购节点之间的安全通信**。
 
 ```sh
 $ cd ../ && cp -r crypto-config/ordererOrganizations org3-artifacts/crypto-config/
@@ -316,3 +316,6 @@ $ docker logs -f peer0.org1.example.com
 ```
 
 如果要检查其内容，请按照演示过程获取和解码新配置块。
+
+## 配置选举领导者
+
