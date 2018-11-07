@@ -117,3 +117,34 @@ $ ./byfn.sh up
 ```
 
 这将使网络恢复到执行`eyfn.sh`脚本之前的状态。现在准备手动添加`Org3`了。作为第一步，需要生成`Org3`的加密文件。
+
+# 生成`Org3`加密文件
+
+在另一个终端中，从`first-network`切换到`org3-artifacts`子目录。
+
+```sh
+$ cd org3-artifacts
+```
+
+这里有两个`yaml`文件：`org3-crypto.yaml`和`configtx.yaml`。首先，为`Org3`生成加密文件：
+
+```sh
+$ ../../bin/cryptogen generate --config=./org3-crypto.yaml
+```
+
+此命令读入新加密`yaml`文件 `org3-crypto.yaml` 并利用`cryptogen`为`Org3 CA`以及绑定到此新组织的两个对等方**生成密钥和证书**。与`BYFN`实现一样，此加密文件将放入当前工作目录（在示例中为`org3-artifacts`）中新生成的`crypto-config`文件夹中。
+
+现在使用`configtxgen`实用程序在`JSON`中打印出特定于`Org3`的配置材料。通过告诉工具在当前目录中查找它需要提取的`configtx.yaml`文件来执行命令。
+
+```sh
+$ export FABRIC_CFG_PATH=$PWD && ../../bin/configtxgen -printOrg Org3MSP > ../channel-artifacts/org3.json
+```
+
+上面的命令创建一个`JSON`文件 `org3.json`，并将其输出到`first-network`根目录下的`channel-artifacts`子目录中。此文件包含`Org3`的**背书策略**定义，以及以`base 64`格式显示的三个重要证书：**管理员用户证书（稍后将充当`Org3`的管理员），`CA`根证书和`TLS`根目录证书**。在接下来的步骤中，将此`JSON`文件添加到通道配置。
+
+最后的工作是将`Orderer Org`的**`MSP`材料移植到`Org3` `crypto-config`目录**中。特别是，**关注的是`Orderer`的`TLS`根证书，它将允许`Org3`实体与网络订购节点之间的安全通信**。
+
+```sh
+$ cd ../ && cp -r crypto-config/ordererOrganizations org3-artifacts/crypto-config/
+```
+
