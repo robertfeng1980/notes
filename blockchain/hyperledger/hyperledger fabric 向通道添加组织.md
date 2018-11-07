@@ -339,5 +339,59 @@ CORE_PEER_GOSSIP_USELEADERELECTION=true
 CORE_PEER_GOSSIP_ORGLEADER=false
 ```
 
-> **注意**：由于新添加的组织的对等方将**无法形成成员资格视图**，因此**该选项将类似于静态配置**，因为每个对等方将开始**宣称自己是领导者**。但是，一旦他们更新了将**组织添加到通道的配置交易**，组织中将只有一个活跃的领导者。因此，如果您最终希望组织的同行使用领导者选举，建议使用此选项。
+> **注意**：由于新添加的组织的对等方将**无法形成成员资格视图**，因此**该选项将类似于静态配置**，因为每个对等方将开始**宣称自己是领导者**。但是，一旦他们更新了将**组织添加到通道的配置交易**，组织中将**只有一个**活跃的领导者。因此，如果最终希望**组织的同行使用领导者选举**，建议使用此选项。
+
+## 将`Org3`加入通道
+
+此时，通道配置已更新为包含我们的新组织`Org3`，意味着与其关联的对等方现在可以加入`mychannel`。
+
+首先，让我们为`Org3`对等体和`Org3`特定的`CLI`启动容器。打开一个新的终端，从第一个网络启动`Org3` 的`docker compose`：
+
+```sh
+$ docker-compose -f docker-compose-org3.yaml up -d
+```
+
+此文件已配置为**桥接**我们的初始网络，因此两个对等方和`CLI`容器将能够使用现有对等方和订购节点进行通信解析。现在运行三个新容器，执行特定于`Org3`的`CLI`容器：
+
+```sh
+$ docker exec -it Org3cli bash
+```
+
+正如对初始`CLI`容器所做的那样，导出两个关键环境变量：`ORDERER_CA`和`CHANNEL_NAME`：
+
+```sh
+$ export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem && export CHANNEL_NAME=mychannel
+```
+
+检查以确保已正确设置变量：
+
+```sh
+$ echo $ORDERER_CA && echo $CHANNEL_NAME
+```
+
+现在让向订购服务发起请求，询问`mychannel`的创世块。由于成功的频道更新，订购服务能够验证附加到此呼叫的`Org3`签名。如果`Org3`尚未成功附加到通道配置，则订购服务应拒绝此请求。
+
+> **注意**：同样，可能会发现流式`orderer`节点的日志以显示签名/验证逻辑和策略检查很有用。
+
+使用`peer channel fetch`命令检索此块：
+
+```sh
+$ peer channel fetch 0 mychannel.block -o orderer.example.com:7050 -c $CHANNEL_NAME --tls --cafile $ORDERER_CA
+```
+
+请注意，我们传递`0`表示我们**想要通道的分类帐上的第一个块（即创世块）**。如果我们只是简单地传递了`peer channel fetch config`命令，那么我们**就会收到第5块**，定义了`Org3`的更新配置。但是，**无法使用下游块开始我们的分类帐，我们必须从块0开始**。
+
+发出`peer channel join`命令并传入`genesis`块 `mychannel.block`：
+
+```sh
+$ peer channel join -b mychannel.block
+```
+
+如果要加入`Org3`的第二个对等体，请导出`TLS`和`ADDRESS`变量并重新发出对等通道连接命令：
+
+```sh
+$ export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/peers/peer1.org3.example.com/tls/ca.crt && export CORE_PEER_ADDRESS=peer1.org3.example.com:7051
+
+$ peer channel join -b mychannel.block
+```
 
