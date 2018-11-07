@@ -170,3 +170,33 @@ $ export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/or
 $ echo $ORDERER_CA && echo $CHANNEL_NAME
 ```
 
+> **注意**：由于任何原因需要重新启动`CLI`容器，则还需要**重新导出两个环境变量** `ORDERER_CA`和`CHANNEL_NAME`。
+
+## 获取配置
+
+现在有一个`CLI`容器，其中包含两个关键环境导出变量 `ORDERER_CA`和`CHANNEL_NAME`。让我们去获取频道的最新配置块 `mychannel`。
+
+**必须提取配置的最新版本的原因是因为通道配置元素是版本化的**。版本控制很重要，原因有几个。它可以**防止重复**或回放配置更改（例如，恢复到使用旧`CRL`的通道配置将代表安全风险）。此外，它还有助于**确保并发性**（如果要从通道中删除组织，例如，在添加新组织后，版本控制将有助于防止删除两个组织，而不仅仅是要删除的组织）。
+
+```sh
+$ peer channel fetch config config_block.pb -o orderer.example.com:7050 -c $CHANNEL_NAME --tls --cafile $ORDERER_CA
+```
+
+此命令**将二进制`protobuf`通道配置块保存到`config_block.pb`**。请注意，名称和文件扩展名的选择是任意的。但是，建议遵循一个约定标识**所表示的对象类型及其编码（`protobuf`或`JSON`）的约定**。
+
+当发出`peer channel fetch`命令时，终端中有相当数量的日志输出。日志中的最后一行很有意义：
+
+```sh
+2017-11-07 17:17:57.383 UTC [channelCmd] readBlock -> DEBU 011 Received block: 2
+```
+
+这告诉我们`mychannel`的**最新配置块实际上是块2**，而**不是创世块**。默认情况下，`peer channel fetch config`命令返回目标通道的**最新配置块**，在这种情况下是第三个块。这是因为`BYFN`脚本在两个单独的通道更新事务中为我们的两个组织（`Org1`和`Org2`）定义了锚点对等体。
+
+因此，有以下配置顺序：
+
++ **块0**：创世块
++ **块1**：`Org1`锚点对等更新
++ **块2**：`Org2`锚点对等更新
+
+## 将配置转换为`JSON`并将其修剪下来
+
