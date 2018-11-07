@@ -260,5 +260,59 @@ $ echo '{"payload":{"header":{"channel_header":{"channel_id":"mychannel", "type"
 $ configtxlator proto_encode --input org3_update_in_envelope.json --type common.Envelope --output org3_update_in_envelope.pb
 ```
 
+## 签名并提交配置更新
 
+现在在`CLI`容器中有一个`protobuf`二进制文件`org3_update_in_envelope.pb`。但是，在将配置写入分类帐之前，需要来自**必需管理员用户的签名**。通道应用程序组的修改策略（`mod_policy`）设置为默认值`MAJORITY`，这意味着需要多数**现有组织管理员对其进行签名**。因为只有两个组织`Org1`和`Org2`，而多数就是现有的两个组织，我们**需要它们两个的签名**。如果**没有这两个签名，订购服务将拒绝交易，因为未能履行该政策**。
 
+首先，将此**更新二进制文件作为`Org1`管理员签名**。请记住，`CLI`容器当前是配置变量使用`Org1 MSP`加密文件引导的，因此只需要发出`peer channel signconfigtx`命令：
+
+```sh
+$ peer channel signconfigtx -f org3_update_in_envelope.pb
+```
+
+最后一步是切换`CLI`容器的身份 `Org2 Admin`用户。通过**导出特定于`Org2 MSP`的四个环境变量**来实现此目的。
+
+> 在组织之间切换以签署配置交易（或执行任何其他操作）并不反映真实的`Fabric`操作。永远不会使用整个网络的加密材料安装单个容器。相反，配置更新需要安全地带外传递给`Org2`管理员进行检查和批准。
+
+导出`Org2`环境变量：
+
+```sh
+# you can issue all of these commands at once
+
+export CORE_PEER_LOCALMSPID="Org2MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+export CORE_PEER_ADDRESS=peer0.org2.example.com:7051
+```
+
+最后，将发出`peer channel update`命令，**`Org2`管理员签名将附加到此调用，因此无需再次手动签署`protobuf`**。
+
+> 即将进行的订购服务更新调用将进行一系列**系统签名和策略检查**。因此，可能会发现日志流和检查订购节点的日志很有用。从另一个`shell`发出`docker logs -f orderer.example.com`命令以显示它们。
+
+发送更新调用：
+
+```sh
+$ peer channel update -f org3_update_in_envelope.pb -c $CHANNEL_NAME -o orderer.example.com:7050 --tls --cafile $ORDERER_CA
+```
+
+如果更新已成功提交，应该会看到类似于以下内容的消息摘要指示：
+
+```sh
+2018-02-24 18:56:33.499 UTC [msp/identity] Sign -> DEBU 00f Sign: digest: 3207B24E40DE2FAB87A2E42BC004FEAA1E6FDCA42977CB78C64F05A88E556ABA
+```
+
+还将看到配置事务的提交：
+
+```sh
+2018-02-24 18:56:33.499 UTC [channelCmd] update -> INFO 010 Successfully submitted channel update
+```
+
+成功的通道更新请求向通道上的所有对等体返回新块 `block 5`。如果你还记得，**块`0-2`是初始通道配置，而块`3-4`是`mycc`链码的实例化和调用**。因此，**块5用作最近的通道配置**，其中`Org3`现在在通道上定义。
+
+检查`peer0.org1.example.com`的日志：
+
+```sh
+$ docker logs -f peer0.org1.example.com
+```
+
+如果要检查其内容，请按照演示过程获取和解码新配置块。
