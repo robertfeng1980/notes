@@ -19,6 +19,7 @@
     + [`hyperledger fabric 更新 block & tx 配置`](./hyperledger/hyperledger%20fabric%20更新%20block%20&%20tx%20配置.md)
     + [`hyperledger fabric 升级网络`](./hyperledger/hyperledger%20fabric%20升级网络组建.md)
     + [`hyperledger fabric 向通道添加组织`](./hyperledger/hyperledger%20fabric%20向通道添加组织.md)
+    + [`hyperledger fabric 中使用私有数据`](./hyperledger/hyperledger%20fabric%20中使用私有数据.md)
     + [`endorsement-policies`](./hyperledger/endorsement-policies.md)
     + [`endorsement-policies-zh`](./hyperledger/endorsement-policies-zh.md)
 
