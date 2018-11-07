@@ -1,4 +1,4 @@
-# `hyperledger fabric` 入门
+# `hyperledger fabric` 快速开始
 入门章节会检查是否已在将要开发区块链应用程序和运行`Hyperledger Fabric`的平台上安装了所有[必要环境](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html)。
 
 安装必备组件后，即可下载并安装`HyperLedger Fabric`。在我们为`Fabric`二进制文件开发真正的安装程序时，我们提供了一个脚本，可以[将示例、二进制文件和Docker镜像安装](https://hyperledger-fabric.readthedocs.io/en/latest/install.html)到系统中。该脚本还将`Docker`镜像下载到本地仓库中。
@@ -39,6 +39,8 @@
   - 环境变量配置：`export GOPATH=$HOME/go` 和 `export PATH=$PATH:$GOPATH/bin`
 
 - [x] `nodejs` 和 `npm` 的安装：https://nodejs.org/en/download/
+
+  - `nodejs`安装 `8.9.x` 版本
 
   - `npm`的安装 `npm install npm@5.6.0 -g`
 
