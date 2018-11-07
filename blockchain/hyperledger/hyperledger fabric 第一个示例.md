@@ -308,7 +308,7 @@ $ node invoke.js
 The transaction has been committed on peer localhost:7053
 ```
 
-要查看此事务已写入，请返回`query.js`并将参数从`CAR4`更改为`CAR10`。
+要查看此交易已写入，请返回`query.js`并将参数从`CAR4`更改为`CAR10`。
 
 再次改变下代码：
 
