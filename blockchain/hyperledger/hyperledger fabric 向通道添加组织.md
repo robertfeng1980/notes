@@ -68,3 +68,52 @@ $ ./eyfn.sh up -c testchannel -s couchdb -l node
 
 对于那些想要仔细研究这个过程的人来说，文档的其余部分将向你展示进行频道更新的每个命令以及它的作用。
 
+# 手动加入`Org3`到频道
+
+下面列出的手动步骤`cli`和`Org3 cli`容器中的`CORE_LOGGING_LEVEL`设置为`DEBUG`。
+
+对于`cli`容器，可以通过修改`first-network`目录中的`docker-compose-cli.yaml`文件来设置它。例如：
+
+```yml
+cli:
+  container_name: cli
+  image: hyperledger/fabric-tools:$IMAGE_TAG
+  tty: true
+  stdin_open: true
+  environment:
+    - GOPATH=/opt/gopath
+    - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+    #- CORE_LOGGING_LEVEL=INFO
+    - CORE_LOGGING_LEVEL=DEBUG
+```
+
+对于`Org3cli`容器，可以通过修改`first-network`目录中的`docker-compose-org3.yaml`文件来设置它。例如：
+
+```sh
+Org3cli:
+  container_name: Org3cli
+  image: hyperledger/fabric-tools:$IMAGE_TAG
+  tty: true
+  stdin_open: true
+  environment:
+    - GOPATH=/opt/gopath
+    - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+    #- CORE_LOGGING_LEVEL=INFO
+    - CORE_LOGGING_LEVEL=DEBUG
+```
+
+如果使用过`eyfn.sh`脚本，则需要关闭网络。这将关闭网络，删除所有容器并撤消我们为添加`Org3`所做的工作。可以通过执行命令：
+
+```sh
+$ ./eyfn.sh down
+```
+
+当网络关闭时，请重新启动它：
+
+```sh
+$ ./byfn.sh generate
+
+$ ./byfn.sh up
+```
+
+这将使网络恢复到执行`eyfn.sh`脚本之前的状态。现在准备手动添加`Org3`了。作为第一步，需要生成`Org3`的加密文件。
