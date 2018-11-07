@@ -8,7 +8,7 @@
 
 > **注意**：在继续之前，请确保自动`byfn.sh`脚本在计算机上运行时没有错误。如果已将**二进制文件和相关工具（`cryptogen`，`configtxgen`等）导出到`PATH`变量中**，则可以相应地修改命令而不传递完全限定的路径。
 
-# 设置环境
+## 设置环境
 
 将在本地`Fabric-samples`克隆中的第一个网络子目录的根目录下运行。立即切换到该目录。还需要打开一些额外的终端以方便使用。
 
@@ -38,7 +38,7 @@ $ ./byfn.sh up
 
 此外，将显示相同过程的“**手动**”版本，显示每个步骤并解释它完成的内容（因为展示如何在此手动过程之前关闭网络，还可以运行脚本然后查看每个步骤）。
 
-# 用脚本将`Org3`加入到通道
+## 用脚本将`Org3`加入到通道
 
 首先使用如下脚本，只需发出以下命令：
 
@@ -68,7 +68,7 @@ $ ./eyfn.sh up -c testchannel -s couchdb -l node
 
 对于那些想要仔细研究这个过程的人来说，文档的其余部分将向你展示进行频道更新的每个命令以及它的作用。
 
-# 手动加入`Org3`到频道
+## 手动加入`Org3`到频道
 
 下面列出的手动步骤`cli`和`Org3 cli`容器中的`CORE_LOGGING_LEVEL`设置为`DEBUG`。
 
@@ -118,7 +118,7 @@ $ ./byfn.sh up
 
 这将使网络恢复到执行`eyfn.sh`脚本之前的状态。现在准备手动添加`Org3`了。作为第一步，需要生成`Org3`的加密文件。
 
-# 生成`Org3`加密文件
+## 生成`Org3`加密文件
 
 在另一个终端中，从`first-network`切换到`org3-artifacts`子目录。
 
@@ -146,5 +146,27 @@ $ export FABRIC_CFG_PATH=$PWD && ../../bin/configtxgen -printOrg Org3MSP > ../ch
 
 ```sh
 $ cd ../ && cp -r crypto-config/ordererOrganizations org3-artifacts/crypto-config/
+```
+
+## 准备`CLI`环境
+
+更新过程使用**配置转换器**工具 `configtxlator`。此工具提供**独立于`SDK`的无状态`REST API`**。此外，它还提供`CLI`，以简化`Fabric`网络中的配置任务。该工具允许在**不同的等效数据表示/格式之间轻松转换**（在本例中，在`protobufs`和`JSON`之间）。此外，该工具可以**根据两个通道配置之间的差异计算配置更新交易**。
+
+首先，执行命令进入`CLI`容器。这个容器已经安装了`BYFN`加密配置库，可以访问两个原始对等组织和`Orderer`组织的`MSP`资料。引导标识是`Org1`管理员用户，这意味着想要充当`Org2`的任何步骤都需要导出特定于`MSP`的环境变量。
+
+```sh
+$ docker exec -it cli bash
+```
+
+导出`ORDERER_CA`和`CHANNEL_NAME`变量：
+
+```sh
+$ export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem  && export CHANNEL_NAME=mychannel
+```
+
+检查以确保已正确设置变量：
+
+```sh
+$ echo $ORDERER_CA && echo $CHANNEL_NAME
 ```
 
