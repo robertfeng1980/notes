@@ -8,7 +8,7 @@
 
 > **注意**：在继续之前，请确保自动`byfn.sh`脚本在计算机上运行时没有错误。如果已将**二进制文件和相关工具（`cryptogen`，`configtxgen`等）导出到`PATH`变量中**，则可以相应地修改命令而不传递完全限定的路径。
 
-## 设置环境
+# 设置环境
 
 将在本地`Fabric-samples`克隆中的第一个网络子目录的根目录下运行。立即切换到该目录。还需要打开一些额外的终端以方便使用。
 
@@ -38,7 +38,7 @@ $ ./byfn.sh up
 
 此外，将显示相同过程的“**手动**”版本，显示每个步骤并解释它完成的内容（因为展示如何在此手动过程之前关闭网络，还可以运行脚本然后查看每个步骤）。
 
-## 用脚本将`Org3`加入到通道
+# 用脚本将`Org3`加入到通道
 
 首先使用如下脚本，只需发出以下命令：
 
@@ -68,7 +68,7 @@ $ ./eyfn.sh up -c testchannel -s couchdb -l node
 
 对于那些想要仔细研究这个过程的人来说，文档的其余部分将向你展示进行频道更新的每个命令以及它的作用。
 
-## 手动加入`Org3`到频道
+# 手动加入`Org3`到频道
 
 下面列出的手动步骤`cli`和`Org3 cli`容器中的`CORE_LOGGING_LEVEL`设置为`DEBUG`。
 
@@ -118,7 +118,7 @@ $ ./byfn.sh up
 
 这将使网络恢复到执行`eyfn.sh`脚本之前的状态。现在准备手动添加`Org3`了。作为第一步，需要生成`Org3`的加密文件。
 
-## 生成`Org3`加密文件
+# 生成`Org3`加密文件
 
 在另一个终端中，从`first-network`切换到`org3-artifacts`子目录。
 
@@ -148,7 +148,7 @@ $ export FABRIC_CFG_PATH=$PWD && ../../bin/configtxgen -printOrg Org3MSP > ../ch
 $ cd ../ && cp -r crypto-config/ordererOrganizations org3-artifacts/crypto-config/
 ```
 
-## 准备`CLI`环境
+# 准备`CLI`环境
 
 更新过程使用**配置转换器**工具 `configtxlator`。此工具提供**独立于`SDK`的无状态`REST API`**。此外，它还提供`CLI`，以简化`Fabric`网络中的配置任务。该工具允许在**不同的等效数据表示/格式之间轻松转换**（在本例中，在`protobufs`和`JSON`之间）。此外，该工具可以**根据两个通道配置之间的差异计算配置更新交易**。
 
@@ -172,7 +172,7 @@ $ echo $ORDERER_CA && echo $CHANNEL_NAME
 
 > **注意**：由于任何原因需要重新启动`CLI`容器，则还需要**重新导出两个环境变量** `ORDERER_CA`和`CHANNEL_NAME`。
 
-## 获取配置
+# 获取配置
 
 现在有一个`CLI`容器，其中包含两个关键环境导出变量 `ORDERER_CA`和`CHANNEL_NAME`。让我们去获取频道的最新配置块 `mychannel`。
 
@@ -198,7 +198,7 @@ $ peer channel fetch config config_block.pb -o orderer.example.com:7050 -c $CHAN
 + **块1**：`Org1`锚点对等更新
 + **块2**：`Org2`锚点对等更新
 
-## 将配置转换为`JSON`
+# 将配置转换为`JSON`
 
 现在将**使用`configtxlator`工具将此通道配置块解码为`JSON`格式**，这样可以由人类读取和修改。还必须**删除与我们想要进行的更改无关的所有标头，元数据，创建者签名**等。通过`jq`工具实现这一目标：
 
@@ -210,7 +210,7 @@ $ configtxlator proto_decode --input config_block.pb --type common.Block | jq .d
 
 花一点时间在选择的文本编辑器（或浏览器）中打开此文件。即使在完成本教程之后，也值得研究它，因为它揭示了**底层配置结构和可以进行的其他类型的通道更新**。我们将在[更新频道配置](https://hyperledger-fabric.readthedocs.io/en/latest/config_update.html)中更详细地讨论它们。
 
-## 添加`Org3`加密配置
+# 添加`Org3`加密配置
 
 > 无论尝试进行何种配置更新，采取的步骤几乎完全相同。选择在本教程中添加组织，因为它是可以尝试的最复杂的通道配置更新之一。
 
@@ -260,7 +260,7 @@ $ echo '{"payload":{"header":{"channel_header":{"channel_id":"mychannel", "type"
 $ configtxlator proto_encode --input org3_update_in_envelope.json --type common.Envelope --output org3_update_in_envelope.pb
 ```
 
-## 签名并提交配置更新
+# 签名并提交配置更新
 
 现在在`CLI`容器中有一个`protobuf`二进制文件`org3_update_in_envelope.pb`。但是，在将配置写入分类帐之前，需要来自**必需管理员用户的签名**。通道应用程序组的修改策略（`mod_policy`）设置为默认值`MAJORITY`，这意味着需要多数**现有组织管理员对其进行签名**。因为只有两个组织`Org1`和`Org2`，而多数就是现有的两个组织，我们**需要它们两个的签名**。如果**没有这两个签名，订购服务将拒绝交易，因为未能履行该政策**。
 
@@ -317,7 +317,7 @@ $ docker logs -f peer0.org1.example.com
 
 如果要检查其内容，请按照演示过程获取和解码新配置块。
 
-## 配置领导者选举
+# 配置领导者选举
 
 > **注意**：在初始通道配置完成后将组织添加到网络时，此部分作为一般参考用于理解领导者选举设置。此示例默认为**动态领导者选举**，该选举是在`peer-base.yaml`中**为网络中的所有对等方设置**的。
 
@@ -341,7 +341,7 @@ CORE_PEER_GOSSIP_ORGLEADER=false
 
 > **注意**：由于新添加的组织的对等方将**无法形成成员资格视图**，因此**该选项将类似于静态配置**，因为每个对等方将开始**宣称自己是领导者**。但是，一旦他们更新了将**组织添加到通道的配置交易**，组织中将**只有一个**活跃的领导者。因此，如果最终希望**组织的同行使用领导者选举**，建议使用此选项。
 
-## 将`Org3`加入通道
+# 将`Org3`加入通道
 
 此时，通道配置已更新为包含我们的新组织`Org3`，意味着与其关联的对等方现在可以加入`mychannel`。
 
@@ -393,5 +393,69 @@ $ peer channel join -b mychannel.block
 $ export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/peers/peer1.org3.example.com/tls/ca.crt && export CORE_PEER_ADDRESS=peer1.org3.example.com:7051
 
 $ peer channel join -b mychannel.block
+```
+
+# 升级和调用`Chaincode`
+
+最后一个难题是**增加链码版本**并**更新认可政策**以包括`Org3`。由于知道升级即将到来，我们可以放弃安装第1版链码的徒劳。我们完全关注`Org3`将成为认可政策一部分的新版本，因此我们将直接跳转到链码的第2版。
+
+从`Org3 CLI`执行命令：
+
+```sh
+$ peer chaincode install -n mycc -v 2.0 -p github.com/chaincode/chaincode_example02/go/
+```
+
+相应地修改环境变量，如果要在`Org3`的第二个对等体上安装链代码，则重新发出该命令。请注意，第二次安装不是强制要求的，因为只需要在将作为背书人或以其他方式与分类帐接口的对等方上安装链代码（即仅查询）。对等体仍将运行验证逻辑，并在没有运行链码容器的情况下充当提交者。
+
+现在跳回原始`CLI`容器并在`Org1`和`Org2`对等体上安装新版本。使用`Org2`管理员身份提交了通道更新请求，因此容器仍然代表`peer0.org2`：
+
+```sh
+$ peer chaincode install -n mycc -v 2.0 -p github.com/chaincode/chaincode_example02/go/
+```
+
+翻到`peer0.org1`标识：
+
+```sh
+export CORE_PEER_LOCALMSPID="Org1MSP"
+
+export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+
+export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+
+export CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+```
+
+然后重新安装：
+
+```sh
+$ peer chaincode install -n mycc -v 2.0 -p github.com/chaincode/chaincode_example02/go/
+```
+
+现在准备升级链码，对底层源码没有任何修改，只是将`Org3`添加到`mychannel`上的链码`mycc`的认可策略中。
+
+> **注意**：**满足链码实例化策略的任何身份都可以发出升级**调用。默认情况下，这些身份是**通道管理员**。
+
+执行命令发送请求：
+
+```sh
+$ peer chaincode upgrade -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -v 2.0 -c '{"Args":["init","a","90","b","210"]}' -P "OR ('Org1MSP.peer','Org2MSP.peer','Org3MSP.peer')"
+```
+
+可以在上面的命令中看到我们通过`v`标志指定了新版本。还可以看到认可政策已被修改为`-P "OR ('Org1MSP.peer','Org2MSP.peer','Org3MSP.peer')"`，反映了政策中添加了`Org3`。最后感兴趣的领域是我们的构造函数请求（使用`c`标志指定）。
+
+与实例化调用一样，链码升级需要使用`init`方法。如果链码需要将参数传递给`init`方法，那么需要在此处执行此操作。
+
+升级调用将新块**块6**添加到通道的分类帐，并允许`Org3`对等方在批准阶段执行事务。回到`Org3 CLI`容器并发出`a`值的查询。这将花费一些时间，因为需要为目标对等体**构建链代码图像，并且容器需要启动**：
+
+```sh
+$ peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}'
+
+Query Result: 90
+```
+
+现在发出一个调用，将`10`从`a`移到`b`：
+
+```sh
+$ peer chaincode invoke -o orderer.example.com:7050  --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -c '{"Args":["invoke","a","b","10"]}'
 ```
 
