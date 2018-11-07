@@ -198,5 +198,14 @@ $ peer channel fetch config config_block.pb -o orderer.example.com:7050 -c $CHAN
 + **块1**：`Org1`锚点对等更新
 + **块2**：`Org2`锚点对等更新
 
-## 将配置转换为`JSON`并将其修剪下来
+## 将配置转换为`JSON`
 
+现在将**使用`configtxlator`工具将此通道配置块解码为`JSON`格式**，这样可以由人类读取和修改。还必须**删除与我们想要进行的更改无关的所有标头，元数据，创建者签名**等。通过`jq`工具实现这一目标：
+
+```sh
+$ configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config > config.json
+```
+
+这将得到一个精简的`JSON`对象`config.json`，它位于`fabric-samples`文件夹中，它将作为配置更新的基线。
+
+花一点时间在选择的文本编辑器（或浏览器）中打开此文件。即使在完成本教程之后，也值得研究它，因为它揭示了**底层配置结构和可以进行的其他类型的通道更新**。我们将在[更新频道配置](https://hyperledger-fabric.readthedocs.io/en/latest/config_update.html)中更详细地讨论它们。
