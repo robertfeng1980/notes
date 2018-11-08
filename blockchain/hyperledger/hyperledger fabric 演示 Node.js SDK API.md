@@ -84,6 +84,9 @@ $ npm config ls
 # 模块 安装当前目录下
 $ npm install 
 
+# 强制安装，忽略缓存
+$ npm install --force
+
 # 升级npm
 $ npm i npm@latest -g
 
