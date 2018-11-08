@@ -98,6 +98,31 @@ $ npm install -g
 
 # 更新所有全局安装包
 $ npm update -g .
+
+# 初始化项目，生成 package.json
+$ npm init -y
+
+# 安装依赖包
+$ sudo npm install --unsafe-perm --verbose -g speaker
+$ sudo npm install -g PackageName --allow-root
+
+# 删除安装包和npm缓存
+$ rm -rf node_modules
+$ rm -rf ~/.npm
+
+# current user
+$ npm cache clean -f
+# clean root
+$ sudo npm cache clean -f
+$ npm cache verify
+
+# upgrade npm
+$ npm install -g npm@latest
+$ sudo chown $USER:$USER ~/.npm/ -R
+
+# upgrade node
+$ sudo ln -s nodejs /usr/bin/node
+$ sudo apt-get install nodejs-legacy
 ```
 
 # 下载代码
