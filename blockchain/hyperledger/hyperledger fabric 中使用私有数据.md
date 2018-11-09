@@ -14,4 +14,51 @@
 + 使用带有索引的私有数据
 + 其他资源
 
-本文将使用在 **构建第一个网络（`BYFN`）**教程网络上运行的[弹珠私有数据示例](https://github.com/hyperledger/fabric-samples/tree/master/chaincode/marbles02_private)来演示如何创建、部署和使用私有数据集合。大理石私有数据样本将部署到[构建您的第一个网络](https://hyperledger-fabric.readthedocs.io/en/latest/build_network.html)（`BYFN`）教程网络。应该已经完成了[安装样本，二进制文件和Docker镜像](https://hyperledger-fabric.readthedocs.io/en/latest/install.html)的任务; 但是，运行BYFN教程不是本教程的先决条件。相反，本教程中提供了必要的命令来使用网络。我们将描述每个步骤中发生的事情，使得在不实际运行示例的情况下理解教程成为可能。
+本文将使用在 **构建第一个网络（`BYFN`）**教程网络上运行的[弹珠私有数据示例](https://github.com/hyperledger/fabric-samples/tree/master/chaincode/marbles02_private)来演示如何创建、部署和使用私有数据集合。弹珠私有数据样本将部署到[构建第一个网络](https://hyperledger-fabric.readthedocs.io/en/latest/build_network.html)（`BYFN`）教程网络。应该已经完成了[安装样本，二进制文件和Docker镜像](https://hyperledger-fabric.readthedocs.io/en/latest/install.html)的任务；但是，运行`BYFN`教程不是本文的必要条件。相反，本文中提供了必要的命令来使用网络。将描述每个步骤中发生的事情，使得在不实际运行示例的情况下理解教程成为可能。
+
+# 构建集合定义`JSON`文件
+
+将**通道上的数据私有化的第一步是构建一个集合定义**，用于**定义对私有数据的访问**。
+
+集合定义描述了**谁可以持久保存数据**，数据**分配到多少对等节点，传播私有数据需要多少对等节点，以及私有数据在私有数据库中保留多长时间**。稍后，将演示如何使用链码`API PutPrivateData`和`GetPrivateData`将集合映射到受保护的私有数据。
+
+## 集合定义由五个属性组成
+
+- `name`：集合的名称。
+- `policy`：定义允许持久**保存**集合数据的组织**对等方**。
+- `requiredPeerCount`：传播私有数据所需的**对等节点数量**，作为**认可链码的条件**
+- `maxPeerCount`：出于数据冗余目的，当前认可对等方将尝试将数据分发到的其他对等方的数量。如果支持**对等体发生故障**，那么如果有请求提取私有数据，则**这些其他对等体在提交时可用**。
+- `blockToLive`：对于**非常敏感**的信息，例如定价或个人信息，此值表示**数据应以块的形式存在于私有数据库中的时间**。数据将在私有数据库上为此**指定数量的块生效，之后将被清除**，从而使这些数据从**网络中过时**。要**无限期地保留私有数据**，即永远不会清除私有数据，请**将`blockToLive`属性设置为`0`**。
+
+## 用例说明
+
+为了说明私有数据的使用，弹珠私有数据示例包含两个私有数据集合定义：`collectionMarbles`和`collectionMarblePrivateDetails`。`collectionMarbles`定义中的`policy`属性允许通道的所有成员（`Org1`和`Org2`）在**私有数据库中拥有私有数据**。`collectionMarblesPrivateDetails`集合仅允许`Org1`的成员在其私有数据库中拥有私有数据。有关构建策略定义的更多信息，请参阅[认可策略](https://hyperledger-fabric.readthedocs.io/en/latest/endorsement-policies.html)主题。
+
+```json
+// collections_config.json
+
+[
+  {
+       "name": "collectionMarbles",
+       "policy": "OR('Org1MSP.member', 'Org2MSP.member')",
+       "requiredPeerCount": 0,
+       "maxPeerCount": 3,
+       "blockToLive":1000000
+  },
+
+  {
+       "name": "collectionMarblePrivateDetails",
+       "policy": "OR('Org1MSP.member')",
+       "requiredPeerCount": 0,
+       "maxPeerCount": 3,
+       "blockToLive":3
+  }
+]
+```
+
+这些策略要**保护的数据以链代码映射**，稍后将在本教程中显示。
+
+当**使用`peer chaincode instantiate`命令在通道上[实例化其关联的链代码](http://hyperledger-fabric.readthedocs.io/en/latest/commands/peerchaincode.html#peer-chaincode-instantiate)时，此集合定义文件部署在通道上**。有关此过程的更多详细信息，请参见下面的第3节。
+
+# 使用链代码`API`读取和写入私有数据
+
