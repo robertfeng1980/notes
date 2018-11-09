@@ -4,7 +4,7 @@
 
 **本教程用作构建你的第一个网络（`BYFN`）教程的扩展**，并将演示向`BYFN`自动生成的应用程序通道（`mychannel`）添加新组织`Org3`。它假设对`BYFN`有很强的理解，包括上述实用程序的用法和功能。
 
-虽然仅关注此处新组织的扩展集成，但在执行其他**通道配置更新**（例如更新修改策略或更改批量大小）时可以采用相同的方法。要了解有关通道配置更新的过程和可能性的更多信息，请查看[更新通道配置](https://hyperledger-fabric.readthedocs.io/en/latest/config_update.html)。同样值得注意的是，像这里演示的频道配置更新通常是**组织管理员**（而不是链码或应用程序开发人员）的责任。
+虽然仅关注此处新组织的扩展集成，但在执行其他**通道配置更新**（例如更新修改策略或更改批量大小）时可以采用相同的方法。要了解有关通道配置更新的过程和可能性的更多信息，请查看[更新通道配置](https://hyperledger-fabric.readthedocs.io/en/latest/config_update.html)。同样值得注意的是，像这里演示的通道配置更新通常是**组织管理员**（而不是链码或应用程序开发人员）的责任。
 
 > **注意**：在继续之前，请确保自动`byfn.sh`脚本在计算机上运行时没有错误。如果已将**二进制文件和相关工具（`cryptogen`，`configtxgen`等）导出到`PATH`变量中**，则可以相应地修改命令而不传递完全限定的路径。
 
@@ -34,7 +34,7 @@ $ ./byfn.sh generate
 $ ./byfn.sh up
 ```
 
-现在机器上运行了一个干净的`BYFN`版本，可以使用两种不同的路径。首先，提供一个完全注释的脚本，它将执行配置事务更新以将`Org3`引入网络。
+现在机器上运行了一个干净的`BYFN`版本，可以使用两种不同的路径。首先，提供一个完全注释的脚本，它将执行配置交易更新以将`Org3`引入网络。
 
 此外，将显示相同过程的“**手动**”版本，显示每个步骤并解释它完成的内容（因为展示如何在此手动过程之前关闭网络，还可以运行脚本然后查看每个步骤）。
 
@@ -66,9 +66,9 @@ $ ./byfn.sh up -c testchannel -s couchdb -l node
 $ ./eyfn.sh up -c testchannel -s couchdb -l node
 ```
 
-对于那些想要仔细研究这个过程的人来说，文档的其余部分将向你展示进行频道更新的每个命令以及它的作用。
+对于那些想要仔细研究这个过程的人来说，文档的其余部分将向你展示进行通道更新的每个命令以及它的作用。
 
-# 手动加入`Org3`到频道
+# 手动加入`Org3`到通道
 
 下面列出的手动步骤`cli`和`Org3 cli`容器中的`CORE_LOGGING_LEVEL`设置为`DEBUG`。
 
@@ -174,7 +174,7 @@ $ echo $ORDERER_CA && echo $CHANNEL_NAME
 
 # 获取配置
 
-现在有一个`CLI`容器，其中包含两个关键环境导出变量 `ORDERER_CA`和`CHANNEL_NAME`。让我们去获取频道的最新配置块 `mychannel`。
+现在有一个`CLI`容器，其中包含两个关键环境导出变量 `ORDERER_CA`和`CHANNEL_NAME`。让我们去获取通道的最新配置块 `mychannel`。
 
 **必须提取配置的最新版本的原因是因为通道配置元素是版本化的**。版本控制很重要，原因有几个。它可以**防止重复**或回放配置更改（例如，恢复到使用旧`CRL`的通道配置将代表安全风险）。此外，它还有助于**确保并发性**（如果要从通道中删除组织，例如，在添加新组织后，版本控制将有助于防止删除两个组织，而不仅仅是要删除的组织）。
 
@@ -190,7 +190,7 @@ $ peer channel fetch config config_block.pb -o orderer.example.com:7050 -c $CHAN
 2017-11-07 17:17:57.383 UTC [channelCmd] readBlock -> DEBU 011 Received block: 2
 ```
 
-这告诉我们`mychannel`的**最新配置块实际上是块2**，而**不是创世块**。默认情况下，`peer channel fetch config`命令返回目标通道的**最新配置块**，在这种情况下是第三个块。这是因为`BYFN`脚本在两个单独的通道更新事务中为我们的两个组织（`Org1`和`Org2`）定义了锚点对等体。
+这告诉我们`mychannel`的**最新配置块实际上是块2**，而**不是创世块**。默认情况下，`peer channel fetch config`命令返回目标通道的**最新配置块**，在这种情况下是第三个块。这是因为`BYFN`脚本在两个单独的通道更新交易中为我们的两个组织（`Org1`和`Org2`）定义了锚点对等体。
 
 因此，有以下配置顺序：
 
@@ -208,7 +208,7 @@ $ configtxlator proto_decode --input config_block.pb --type common.Block | jq .d
 
 这将得到一个精简的`JSON`对象`config.json`，它位于`fabric-samples`文件夹中，它将作为配置更新的基线。
 
-花一点时间在选择的文本编辑器（或浏览器）中打开此文件。即使在完成本教程之后，也值得研究它，因为它揭示了**底层配置结构和可以进行的其他类型的通道更新**。我们将在[更新频道配置](https://hyperledger-fabric.readthedocs.io/en/latest/config_update.html)中更详细地讨论它们。
+花一点时间在选择的文本编辑器（或浏览器）中打开此文件。即使在完成本教程之后，也值得研究它，因为它揭示了**底层配置结构和可以进行的其他类型的通道更新**。我们将在[更新通道配置](https://hyperledger-fabric.readthedocs.io/en/latest/config_update.html)中更详细地讨论它们。
 
 # 添加`Org3`加密配置
 
@@ -242,7 +242,7 @@ $ configtxlator compute_update --channel_id $CHANNEL_NAME --original config.pb -
 
 这个新的`proto`   `org3_update.pb` 包含`Org3`和`Org1`和`Org2`材质的高级指针。能够丢弃`Org1`和`Org2`的广泛`MSP`材料和修改策略信息，因为这些数据已经存在于通道的创世块中。因此，只需要两种配置之间的增量。
 
-在提交频道更新之前，需要执行一些最终步骤。首先，将此对象解码为可编辑的`JSON`格式并将其命名为`org3_update.json`：
+在提交通道更新之前，需要执行一些最终步骤。首先，将此对象解码为可编辑的`JSON`格式并将其命名为`org3_update.json`：
 
 ```sh
 $ configtxlator proto_decode --input org3_update.pb --type common.ConfigUpdate | jq . > org3_update.json
@@ -301,7 +301,7 @@ $ peer channel update -f org3_update_in_envelope.pb -c $CHANNEL_NAME -o orderer.
 2018-02-24 18:56:33.499 UTC [msp/identity] Sign -> DEBU 00f Sign: digest: 3207B24E40DE2FAB87A2E42BC004FEAA1E6FDCA42977CB78C64F05A88E556ABA
 ```
 
-还将看到配置事务的提交：
+还将看到配置交易的提交：
 
 ```sh
 2018-02-24 18:56:33.499 UTC [channelCmd] update -> INFO 010 Successfully submitted channel update
@@ -321,7 +321,7 @@ $ docker logs -f peer0.org1.example.com
 
 > **注意**：在初始通道配置完成后将组织添加到网络时，此部分作为一般参考用于理解领导者选举设置。此示例默认为**动态领导者选举**，该选举是在`peer-base.yaml`中**为网络中的所有对等方设置**的。
 
-新加入的对等体**使用创世块进行自举**，该创世块**不包含有关在通道配置更新中添加的组织的信息**。因此，新的对等体不能利用`gossip`，因为它们**无法验证其他对等体从其自己的组织转发的块**，直到它们获得将组织添加到信道的配置交易。因此，新添加的对等体必须具有以下配置之一，以便它们从订购服务接收块：
+新加入的对等体**使用创世块进行自举**，该创世块**不包含有关在通道配置更新中添加的组织的信息**。因此，新的对等体不能利用`gossip`，因为它们**无法验证其他对等体从其自己的组织转发的块**，直到它们获得将组织添加到通道的配置交易。因此，新添加的对等体必须具有以下配置之一，以便它们从订购服务接收块：
 
 1、要使用**静态领导模式**，请将**对等方配置为组织领导者**：
 
@@ -369,7 +369,7 @@ $ export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/or
 $ echo $ORDERER_CA && echo $CHANNEL_NAME
 ```
 
-现在让向订购服务发起请求，询问`mychannel`的创世块。由于成功的频道更新，订购服务能够验证附加到此呼叫的`Org3`签名。如果`Org3`尚未成功附加到通道配置，则订购服务应拒绝此请求。
+现在让向订购服务发起请求，询问`mychannel`的创世块。由于成功的通道更新，订购服务能够验证附加到此呼叫的`Org3`签名。如果`Org3`尚未成功附加到通道配置，则订购服务应拒绝此请求。
 
 > **注意**：同样，可能会发现流式`orderer`节点的日志以显示签名/验证逻辑和策略检查很有用。
 
@@ -445,7 +445,7 @@ $ peer chaincode upgrade -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLE
 
 与实例化调用一样，链码升级需要使用`init`方法。如果链码需要将参数传递给`init`方法，那么需要在此处执行此操作。
 
-升级调用将新块**块6**添加到通道的分类帐，并允许`Org3`对等方在批准阶段执行事务。回到`Org3 CLI`容器并发出`a`值的查询。这将花费一些时间，因为需要为目标对等体**构建链代码图像，并且容器需要启动**：
+升级调用将新块**块6**添加到通道的分类帐，并允许`Org3`对等方在批准阶段执行交易。回到`Org3 CLI`容器并发出`a`值的查询。这将花费一些时间，因为需要为目标对等体**构建链代码图像，并且容器需要启动**：
 
 ```sh
 $ peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}'
