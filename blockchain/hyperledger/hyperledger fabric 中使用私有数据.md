@@ -62,3 +62,38 @@
 
 # 使用链代码`API`读取和写入私有数据
 
+理解**如何在通道上私有化数据**的下一步是**在链代码中构建数据定义**。弹珠私有数据样本根据数据的访问方式将私有数据划分为**两个单独的数据定义**。
+
+```go
+// Peers in Org1 and Org2 will have this private data in a side database
+type marble struct {
+  ObjectType string `json:"docType"`
+  Name       string `json:"name"`
+  Color      string `json:"color"`
+  Size       int    `json:"size"`
+  Owner      string `json:"owner"`
+}
+
+// Only peers in Org1 will have this private data in a side database
+type marblePrivateDetails struct {
+  ObjectType string `json:"docType"`
+  Name       string `json:"name"`
+  Price      int    `json:"price"`
+}
+```
+
+具体**访问私有数据将受到如下限制**：
+
++ `name, color, size, and owner` 将对渠道的**所有成员可见**（`Org1`和`Org2`）
++ `price`仅对`Org1`的成员可见
+
+因此，在弹珠私人数据示例中定义了两组不同的私人数据。此数据到**限制其访问的集合策略**的映射由链代码`API`控制。具体来说，**使用集合定义读取和写入私有数据是通过调用`GetPrivateData()`和`PutPrivateData()`来执行**的，这可以在这里找到。
+
+下图说明了弹珠私有数据示例使用的私有数据模型：
+
+![_images/SideDB-org1.png](https://hyperledger-fabric.readthedocs.io/en/latest/_images/SideDB-org1.png)
+
+![_images/SideDB-org2.png](https://hyperledger-fabric.readthedocs.io/en/latest/_images/SideDB-org2.png)
+
+## 读取集合数据
+
