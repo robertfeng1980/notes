@@ -30,7 +30,7 @@
 - `maxPeerCount`：出于数据冗余目的，当前认可对等方将尝试将数据分发到的其他对等方的数量。如果支持**对等体发生故障**，那么如果有请求提取私有数据，则**这些其他对等体在提交时可用**。
 - `blockToLive`：对于**非常敏感**的信息，例如定价或个人信息，此值表示**数据应以块的形式存在于私有数据库中的时间**。数据将在私有数据库上为此**指定数量的块生效，之后将被清除**，从而使这些数据从**网络中过时**。要**无限期地保留私有数据**，即永远不会清除私有数据，请**将`blockToLive`属性设置为`0`**。
 
-## 用例说明
+## 私有数据集合定义
 
 为了说明私有数据的使用，弹珠私有数据示例包含两个私有数据集合定义：`collectionMarbles`和`collectionMarblePrivateDetails`。`collectionMarbles`定义中的`policy`属性允许通道的所有成员（`Org1`和`Org2`）在**私有数据库中拥有私有数据**。`collectionMarblesPrivateDetails`集合仅允许`Org1`的成员在其私有数据库中拥有私有数据。有关构建策略定义的更多信息，请参阅[认可策略](https://hyperledger-fabric.readthedocs.io/en/latest/endorsement-policies.html)主题。
 
@@ -96,4 +96,55 @@ type marblePrivateDetails struct {
 ![_images/SideDB-org2.png](https://hyperledger-fabric.readthedocs.io/en/latest/_images/SideDB-org2.png)
 
 ## 读取集合数据
+
+使用链代码`API`的**方法 `GetPrivateData()`来查询数据库中的私有数据**。`GetPrivateData()`接受两个参数，**集合名称**和**数据键**。回想一下集合`collectionMarbles`允许`Org1`和`Org2`的成员在数据库中拥有私有数据，集合`collectionMarblePrivateDetails`只允许`Org1`的成员在数据库中拥有私有数据。有关实现细节，请参阅以下两个[弹珠数私有数据函数](https://github.com/hyperledger/fabric-samples/blob/master/chaincode/marbles02_private/go/marbles_chaincode_private.go)：
+
++ **`readMarble`** ：用于查询`name, color, size and owner`属性的值
++ **`readMarblePrivateDetails`** ：用于查询`price`属性的值
+
+在本教程后面使用`peer`命令发出数据库查询时，将调用这两个函数。
+
+## 写入私有数据
+
+使用`chaincode API`的**方法 `PutPrivateData()`将私有数据存储到私有数据库**中。`API`还需要**集合的名称**。由于弹珠私有数据样本包含两个不同的集合，因此在链代码中调用两次：
+
++ 使用名为`collectionMarbles`的集合编写私有数据`name, color, size and owner`
++ 使用名为`collectionMarblePrivateDetails`的集合编写私有数据`price`
+
+例如，在`initMarble`函数的以下片段中，`PutPrivateData()`被调用两次，每个私有数据集一次。
+
+```go
+// ==== Create marble object and marshal to JSON ====
+objectType := "marble"
+marble := &marble{objectType, marbleName, color, size, owner}
+marbleJSONasBytes, err := json.Marshal(marble)
+if err != nil {
+    return shim.Error(err.Error())
+}
+//Alternatively, build the marble json string manually if you don't want to use struct marshalling
+//marbleJSONasString := `{"docType":"Marble",  "name": "` + marbleName + `", "color": "` + color + `", "size": ` + strconv.Itoa(size) + `, "owner": "` + owner + `"}`
+//marbleJSONasBytes := []byte(str)
+
+// === Save marble to state ===
+err = stub.PutPrivateData("collectionMarbles", marbleName, marbleJSONasBytes)
+if err != nil {
+    return shim.Error(err.Error())
+}
+
+// ==== Save marble private details ====
+objectType = "marblePrivateDetails"
+marblePrivateDetails := &marblePrivateDetails{objectType, marbleName, price}
+marblePrivateDetailsBytes, err := json.Marshal(marblePrivateDetails)
+if err != nil {
+    return shim.Error(err.Error())
+}
+err = stub.PutPrivateData("collectionMarblePrivateDetails", marbleName, marblePrivateDetailsBytes)
+if err != nil {
+    return shim.Error(err.Error())
+}
+```
+
+总而言之，上面针对`collection.json`的策略定义允许`Org1`和`Org2`中的**所有对等体**都可以在其私有数据库中**存储和交易（认可，提交，查询）**弹珠私有数据`name, color, size, owner`。但只有`Org1`中的同行可以在另外的私有数据库中存储和`price`私有数据。
+
+作为额外的数据隐私优势，由于正在使用集合，因此只有**私有数据哈希值**通过`orderer`，而不是私有数据本身，从而**使私有数据对`orderer`保密**。
 
