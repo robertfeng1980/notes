@@ -250,7 +250,7 @@ root@81eac8493633:/opt/gopath/src/github.com/hyperledger/fabric/peer#
   peer chaincode install -n marblesp -v 1.0 -p github.com/chaincode/marbles02_private/go/
   ```
 
-### 实例化通道上的链码
+## 实例化通道上的链码
 
 使用[`peer chaincode instantiate`](http://hyperledger-fabric.readthedocs.io/en/master/commands/peerchaincode.html?%20chaincode%20instantiate#peer-chaincode-instantiate)命令在通道上实例化大理石链代码。要在通道上配置链码集合，请在示例中指定标志`--collections-config`以及集合`JSON`文件的名称`collections_config.json`。
 
@@ -270,4 +270,32 @@ $ peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile $ORDERER
 [chaincodeCmd] checkChaincodeCmdParams -> INFO 001 Using default escc
 [chaincodeCmd] checkChaincodeCmdParams -> INFO 002 Using default vscc
 ```
+
+# 存储私有数据
+
+作为`Org1`的成员，**有权**与大理石私有数据示例中的所有私有数据进行交易，切换回`Org1`对等体并提交添加大理石的请求。
+
+将以下命令集复制并粘贴到`CLI`命令行：
+
+```sh
+export CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+export CORE_PEER_LOCALMSPID=Org1MSP
+export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+export PEER0_ORG1_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+```
+
+调用大理石链码`initMarble`函数，该函数创建一个**带有私有数据**的大理石 名称`marble1`由`tom`拥有，颜色为`blue`，大小为`35`，价格为`99`。在之前，私有数据`price`将与公共数据`name, owner, color, size`分开存储。出于这个原因`initMarble`函数调用`PutPrivateData()` 接口`API`两次以保留私有数据。
+
+```sh
+$ peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n marblesp -c '{"Args":["initMarble","marble1","blue","35","tom","99"]}'
+```
+
+你应该看到类似的结果：
+
+```sh
+[chaincodeCmd] chaincodeInvokeOrQuery->INFO 001 Chaincode invoke successful. result: status:200
+```
+
+
 
