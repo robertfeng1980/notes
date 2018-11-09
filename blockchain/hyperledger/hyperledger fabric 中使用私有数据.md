@@ -297,5 +297,95 @@ $ peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/s
 [chaincodeCmd] chaincodeInvokeOrQuery->INFO 001 Chaincode invoke successful. result: status:200
 ```
 
+# 利用授权对等体查询私有数据
+
+集合定义允许`Org1`和`Org2`的**所有成员**在其数据库中具有`name, color, size, owner`私有数据，但只有`Org1`中的对等体可以在其数据库中具有`price`私有数据。作为`Org1`中的授权对等体，下面将查询两组私有数据。
+
+## 代码分析
+
+第一个**查询**命令调用`readMarble`函数，该函数将`collectionMarbles`作为参数传递。
+
+```go
+// ===============================================
+// readMarble - read a marble from chaincode state
+// ===============================================
+
+func (t *SimpleChaincode) readMarble(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+     var name, jsonResp string
+     var err error
+     if len(args) != 1 {
+             return shim.Error("Incorrect number of arguments. Expecting name of the marble to query")
+     }
+
+     name = args[0]
+     valAsbytes, err := stub.GetPrivateData("collectionMarbles", name) //get the marble from chaincode state
+
+     if err != nil {
+             jsonResp = "{\"Error\":\"Failed to get state for " + name + "\"}"
+             return shim.Error(jsonResp)
+     } else if valAsbytes == nil {
+             jsonResp = "{\"Error\":\"Marble does not exist: " + name + "\"}"
+             return shim.Error(jsonResp)
+     }
+
+     return shim.Success(valAsbytes)
+}
+```
+
+第二个**查询**命令调用`readMarblePrivateDetails`函数，该函数将`collectionMarblePrivateDetails`作为参数传递。
+
+```go
+// ===============================================
+// readMarblePrivateDetails - read a marble private details from chaincode state
+// ===============================================
+
+func (t *SimpleChaincode) readMarblePrivateDetails(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+     var name, jsonResp string
+     var err error
+
+     if len(args) != 1 {
+             return shim.Error("Incorrect number of arguments. Expecting name of the marble to query")
+     }
+
+     name = args[0]
+     valAsbytes, err := stub.GetPrivateData("collectionMarblePrivateDetails", name) //get the marble private details from chaincode state
+
+     if err != nil {
+             jsonResp = "{\"Error\":\"Failed to get private details for " + name + ": " + err.Error() + "\"}"
+             return shim.Error(jsonResp)
+     } else if valAsbytes == nil {
+             jsonResp = "{\"Error\":\"Marble private details does not exist: " + name + "\"}"
+             return shim.Error(jsonResp)
+     }
+     return shim.Success(valAsbytes)
+}
+```
+
+## 执行查询
+
++ 查询`marble1`作为`Org1`成员的`name, color, size and owner`私有数据：
+
+  ```sh
+  $ peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarble","marble1"]}'
+  ```
+
+  应该看到以下结果：
+
+  ```sh
+  {"color":"blue","docType":"marble","name":"marble1","owner":"tom","size":35}
+  ```
+
++ 查询`marble1`的`price`私有数据作为`Org1`的成员：
+
+  ```sh
+  $ peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarblePrivateDetails","marble1"]}'
+  ```
+
+  应该看到以下结果：
+
+  ```sh
+  {"docType":"marblePrivateDetails","name":"marble1","price":99}
+  ```
+
 
 
