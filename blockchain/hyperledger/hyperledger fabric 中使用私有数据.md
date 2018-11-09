@@ -421,5 +421,21 @@ $ peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarble","marbl
 
 `Org2`中的对等方在其边数据库中没有大理石`price`私有数据。当尝试查询此数据时，**会返回与公共状态匹配的密钥的哈希值，但不会拥有私有状态**。
 
+```sh
+$ peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarblePrivateDetails","marble1"]}'
+```
 
+应该看到类似于的结果：
+
+```sh
+{"Error":"Failed to get private details for marble1: GET_STATE failed:
+transaction ID: b04adebbf165ddc90b4ab897171e1daa7d360079ac18e65fa15d84ddfebfae90:
+Private data matching public hash version is not available. Public hash
+version = &version.Height{BlockNum:0x6, TxNum:0x0}, Private data version =
+(*version.Height)(nil)"}
+```
+
+**`Org2`的成员只能看到私有数据的公共哈希值**。
+
+# 清除私有数据
 
