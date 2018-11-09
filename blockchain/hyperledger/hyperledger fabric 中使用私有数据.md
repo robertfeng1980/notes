@@ -257,9 +257,17 @@ root@81eac8493633:/opt/gopath/src/github.com/hyperledger/fabric/peer#
 运行以下命令以实例化`BYFN`通道`mychannel`上的弹珠私有数据链代码：
 
 ```sh
-export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
-peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile $ORDERER_CA -C mychannel -n marblesp -v 1.0 -c '{"Args":["init"]}' -P "OR('Org1MSP.member','Org2MSP.member')" --collections-config  $GOPATH/src/github.com/chaincode/marbles02_private/collections_config.json
+$ export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+$ peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile $ORDERER_CA -C mychannel -n marblesp -v 1.0 -c '{"Args":["init"]}' -P "OR('Org1MSP.member','Org2MSP.member')" --collections-config  $GOPATH/src/github.com/chaincode/marbles02_private/collections_config.json
 ```
 
+> **注意**：指定`--collections-config`标志的值时，需要指定`collections_config.json`文件的完全限定路径。例如：`--collections-config $GOPATH/src/github.com/chaincode/xx/collections_config.json`
 
+实例化成功完成后，应该看到类似于：
+
+```sh
+[chaincodeCmd] checkChaincodeCmdParams -> INFO 001 Using default escc
+[chaincodeCmd] checkChaincodeCmdParams -> INFO 002 Using default vscc
+```
 
