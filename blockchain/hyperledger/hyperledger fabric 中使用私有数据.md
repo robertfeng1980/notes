@@ -178,3 +178,88 @@ $ ./byfn.sh up -c mychannel -s couchdb
 
 # 安装和实例化使用集合的链码
 
+客户端应用程序通过链码与区块链分类帐交互。因此，需要在每个将执行和支持交易的对等体上安装和实例化链码。`Chaincode`安装在对等体上，然后使用[`Peer Commands`](https://hyperledger-fabric.readthedocs.io/en/latest/peer-commands.html)实例化到通道上。
+
+## 在所有对等体上安装链码
+
+如上所述，`BYFN`网络包括两个组织`Org1`和`Org2`，每个组织有两个对等节点组。因此，链码必须安装在四个对等体上：
+
+- `peer0.org1.example.com`
+- `peer1.org1.example.com`
+- `peer0.org2.example.com`
+- `peer1.org2.example.com`
+
+[`peer chaincode install`](http://hyperledger-fabric.readthedocs.io/en/master/commands/peerchaincode.html?%20chaincode%20instantiate#peer-chaincode-install)命令用来在每个对等体上安装`Marbles`链代码。
+
+### 进入`CLI`容器
+
+假设已启动`BYFN`网络，请输入`CLI`容器：
+
+```sh
+$ docker exec -it cli bash
+```
+
+命令输入后将看到如下效果：
+
+```sh
+root@81eac8493633:/opt/gopath/src/github.com/hyperledger/fabric/peer#
+```
+
+### 安装链码
+
++ 使用以下命令将`Marts`链代码从`git`存储库安装到`BYFN`网络中的`peer`节点 `peer0.org1.example.com`上。（默认情况下，启动`BYFN`网络后，设置操作的激活对等体为：`CORE_PEER_ADDRESS = peer0.org1.example.com:7051`）：
+
+  ```sh
+  $ CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+  $ peer chaincode install -n marblesp -v 1.0 -p github.com/chaincode/marbles02_private/go/
+  ```
+
+  完成后你应该看到类似的东西：
+
+  ```sh
+  install -> INFO 003 Installed remotely response:<status:200 payload:"OK" >
+  ```
+
++ 使用`CLI`将活动对等方切换到`Org1`中的第二个对等方并安装链代码。将以下整个命令块复制并粘贴到`CLI`容器中并运行它们：
+
+  ```sh
+  export CORE_PEER_ADDRESS=peer1.org1.example.com:7051
+  peer chaincode install -n marblesp -v 1.0 -p github.com/chaincode/marbles02_private/go/
+  ```
+
++ 使用`CLI`切换到`Org2`。将以下命令块作为一个组复制并粘贴到对等容器中，并立即运行它们：
+
+  ```sh
+  export CORE_PEER_LOCALMSPID=Org2MSP
+  export PEER0_ORG2_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+  export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG2_CA
+  export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+  ```
+
++ 将活动对等体切换到`Org2`中的第一个对等体并安装链码：
+
+  ```sh
+  export CORE_PEER_ADDRESS=peer0.org2.example.com:7051
+  peer chaincode install -n marblesp -v 1.0 -p github.com/chaincode/marbles02_private/go/
+  ```
+
++ 将活动对等体切换到`org2`中的第二个对等体并安装链码：
+
+  ```sh
+  export CORE_PEER_ADDRESS=peer1.org2.example.com:7051
+  peer chaincode install -n marblesp -v 1.0 -p github.com/chaincode/marbles02_private/go/
+  ```
+
+### 实例化通道上的链码
+
+使用[`peer chaincode instantiate`](http://hyperledger-fabric.readthedocs.io/en/master/commands/peerchaincode.html?%20chaincode%20instantiate#peer-chaincode-instantiate)命令在通道上实例化大理石链代码。要在通道上配置链码集合，请在示例中指定标志`--collections-config`以及集合`JSON`文件的名称`collections_config.json`。
+
+运行以下命令以实例化`BYFN`通道`mychannel`上的弹珠私有数据链代码：
+
+```sh
+export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile $ORDERER_CA -C mychannel -n marblesp -v 1.0 -c '{"Args":["init"]}' -P "OR('Org1MSP.member','Org2MSP.member')" --collections-config  $GOPATH/src/github.com/chaincode/marbles02_private/collections_config.json
+```
+
+
+
