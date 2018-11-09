@@ -297,7 +297,7 @@ $ peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/s
 [chaincodeCmd] chaincodeInvokeOrQuery->INFO 001 Chaincode invoke successful. result: status:200
 ```
 
-# 利用授权对等体查询私有数据
+# 用`授权`对等体查询私有数据
 
 集合定义允许`Org1`和`Org2`的**所有成员**在其数据库中具有`name, color, size, owner`私有数据，但只有`Org1`中的对等体可以在其数据库中具有`price`私有数据。作为`Org1`中的授权对等体，下面将查询两组私有数据。
 
@@ -386,6 +386,40 @@ func (t *SimpleChaincode) readMarblePrivateDetails(stub shim.ChaincodeStubInterf
   ```sh
   {"docType":"marblePrivateDetails","name":"marble1","price":99}
   ```
+
+# 用`未授权`的对等体查询私有数据
+
+现在将切换到`Org2`的对等体成员，该成员在其边数据库中具有大理石私有数据`name, color, size, owner`，但在其数据库中没有大理石`price`私有数据，将查询这两组私有数据。
+
+## 切换到`Org2`中的对等体
+
+从`docker`容器内部，运行以下命令切换到**未经授权**访问大理石`price`私有数据的对等方：
+
+```sh
+export CORE_PEER_ADDRESS=peer0.org2.example.com:7051
+export CORE_PEER_LOCALMSPID=Org2MSP
+export PEER0_ORG2_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG2_CA
+export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+```
+
+## 查询`Org2`被授权的私有数据
+
+`Org2`中的对等体应该在侧数据库中拥有第一组大理石私有数据（`name, color, size and owner`），并且可以使用`readMarble()`函数访问它，该函数使用`collectionMarbles`参数调用。
+
+```sh
+$ peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarble","marble1"]}'
+```
+
+应该看到类似于以下结果的东西：
+
+```sh
+{"docType":"marble","name":"marble1","color":"blue","size":35,"owner":"tom"}
+```
+
+## 查询`Org2`未被授权的私有数据
+
+`Org2`中的对等方在其边数据库中没有大理石`price`私有数据。当尝试查询此数据时，**会返回与公共状态匹配的密钥的哈希值，但不会拥有私有状态**。
 
 
 
