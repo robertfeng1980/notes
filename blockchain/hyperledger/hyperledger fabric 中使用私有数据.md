@@ -146,5 +146,35 @@ if err != nil {
 
 总而言之，上面针对`collection.json`的策略定义允许`Org1`和`Org2`中的**所有对等体**都可以在其私有数据库中**存储和交易（认可，提交，查询）**弹珠私有数据`name, color, size, owner`。但只有`Org1`中的同行可以在另外的私有数据库中存储和`price`私有数据。
 
-作为额外的数据隐私优势，由于正在使用集合，因此只有**私有数据哈希值**通过`orderer`，而不是私有数据本身，从而**使私有数据对`orderer`保密**。
+作为额外的**数据隐私优势**，由于正在使用集合，因此只有**私有数据哈希值**通过`orderer`，而不是私有数据本身，从而**使私有数据对`orderer`保密**。
+
+# 启动网络
+
+现在准备逐步完成一些演示使用私有数据的命令。
+
+在下面安装和实例化弹珠私有数据链代码之前，我们需要启动`BYFN`网络。以下命令将**终止所有活动或过时的`docker`容器并删除以前生成的配置工件**。因此，运行以下命令来清理以前的所有环境：
+
+```sh
+$ cd fabric-samples/first-network
+$ ./byfn.sh down
+```
+
+如果之前已经完成了本教程，那么还需要**删除大理石私有数据链代码的底层`docker`容器**。运行以下命令来清理以前的环境：
+
+```sh
+$ docker rm -f $(docker ps -a | awk '($2 ~ /dev-peer.*.marblesp.*/) {print $1}')
+$ docker rmi -f $(docker images | awk '($1 ~ /dev-peer.*.marblesp.*/) {print $3}')
+```
+
+通过运行以下命令，使用`CouchDB`启动`BYFN`网络：
+
+```sh
+$ ./byfn.sh up -c mychannel -s couchdb
+```
+
+这将创建一个简单的`Fabric`网络，其中包含一个名为`mychannel`的通道，其中包含两个组织（每个组织维护两个对等节点）和一个订购服务，同时使用`CouchDB`作为状态数据库。`LevelDB`或`CouchDB`可以与数据集合一起使用。选择`CouchDB`来演示如何将索引与私有数据一起使用。
+
+> **注意**：要使集合起作用，必须正确配置跨组织的`gossip`。请参阅关于[`Gossip`数据传播协议](https://hyperledger-fabric.readthedocs.io/en/latest/gossip.html)的文档，特别注意“**对等锚点**”部分。本文没有关注`gossip`，因为它已经在`BYFN`示例中进行了配置，但在配置频道时，`gossip`锚定对等节点对于配置集合以使其正常工作至关重要。
+
+# 安装和实例化使用集合的链码
 
