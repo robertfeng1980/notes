@@ -84,7 +84,7 @@ type marblePrivateDetails struct {
 
 具体**访问私有数据将受到如下限制**：
 
-+ `name, color, size, and owner` 将对渠道的**所有成员可见**（`Org1`和`Org2`）
++ `name, color, size, and owner` 将对通道的**所有成员可见**（`Org1`和`Org2`）
 + `price`仅对`Org1`的成员可见
 
 因此，在弹珠私人数据示例中定义了两组不同的私人数据。此数据到**限制其访问的集合策略**的映射由链代码`API`控制。具体来说，**使用集合定义读取和写入私有数据是通过调用`GetPrivateData()`和`PutPrivateData()`来执行**的，这可以在这里找到。
@@ -159,7 +159,7 @@ $ cd fabric-samples/first-network
 $ ./byfn.sh down
 ```
 
-如果之前已经完成了本教程，那么还需要**删除大理石私有数据链代码的底层`docker`容器**。运行以下命令来清理以前的环境：
+如果之前已经完成了本教程，那么还需要**删除弹珠私有数据链代码的底层`docker`容器**。运行以下命令来清理以前的环境：
 
 ```sh
 $ docker rm -f $(docker ps -a | awk '($2 ~ /dev-peer.*.marblesp.*/) {print $1}')
@@ -174,7 +174,7 @@ $ ./byfn.sh up -c mychannel -s couchdb
 
 这将创建一个简单的`Fabric`网络，其中包含一个名为`mychannel`的通道，其中包含两个组织（每个组织维护两个对等节点）和一个订购服务，同时使用`CouchDB`作为状态数据库。`LevelDB`或`CouchDB`可以与数据集合一起使用。选择`CouchDB`来演示如何将索引与私有数据一起使用。
 
-> **注意**：要使集合起作用，必须正确配置跨组织的`gossip`。请参阅关于[`Gossip`数据传播协议](https://hyperledger-fabric.readthedocs.io/en/latest/gossip.html)的文档，特别注意“**对等锚点**”部分。本文没有关注`gossip`，因为它已经在`BYFN`示例中进行了配置，但在配置频道时，`gossip`锚定对等节点对于配置集合以使其正常工作至关重要。
+> **注意**：要使集合起作用，必须正确配置跨组织的`gossip`。请参阅关于[`Gossip`数据传播协议](https://hyperledger-fabric.readthedocs.io/en/latest/gossip.html)的文档，特别注意“**对等锚点**”部分。本文没有关注`gossip`，因为它已经在`BYFN`示例中进行了配置，但在配置通道时，`gossip`锚定对等节点对于配置集合以使其正常工作至关重要。
 
 # 安装和实例化使用集合的链码
 
@@ -252,7 +252,7 @@ root@81eac8493633:/opt/gopath/src/github.com/hyperledger/fabric/peer#
 
 ## 实例化通道上的链码
 
-使用[`peer chaincode instantiate`](http://hyperledger-fabric.readthedocs.io/en/master/commands/peerchaincode.html?%20chaincode%20instantiate#peer-chaincode-instantiate)命令在通道上实例化大理石链代码。要在通道上配置链码集合，请在示例中指定标志`--collections-config`以及集合`JSON`文件的名称`collections_config.json`。
+使用[`peer chaincode instantiate`](http://hyperledger-fabric.readthedocs.io/en/master/commands/peerchaincode.html?%20chaincode%20instantiate#peer-chaincode-instantiate)命令在通道上实例化弹珠链代码。要在通道上配置链码集合，请在示例中指定标志`--collections-config`以及集合`JSON`文件的名称`collections_config.json`。
 
 运行以下命令以实例化`BYFN`通道`mychannel`上的弹珠私有数据链代码：
 
@@ -273,7 +273,7 @@ $ peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile $ORDERER
 
 # 存储私有数据
 
-作为`Org1`的成员，**有权**与大理石私有数据示例中的所有私有数据进行交易，切换回`Org1`对等体并提交添加大理石的请求。
+作为`Org1`的成员，**有权**与弹珠私有数据示例中的所有私有数据进行交易，切换回`Org1`对等体并提交添加弹珠的请求。
 
 将以下命令集复制并粘贴到`CLI`命令行：
 
@@ -285,7 +285,7 @@ export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/pee
 export PEER0_ORG1_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
 ```
 
-调用大理石链码`initMarble`函数，该函数创建一个**带有私有数据**的大理石 名称`marble1`由`tom`拥有，颜色为`blue`，大小为`35`，价格为`99`。在之前，私有数据`price`将与公共数据`name, owner, color, size`分开存储。出于这个原因`initMarble`函数调用`PutPrivateData()` 接口`API`两次以保留私有数据。
+调用弹珠链码`initMarble`函数，该函数创建一个**带有私有数据**的弹珠 名称`marble1`由`tom`拥有，颜色为`blue`，大小为`35`，价格为`99`。在之前，私有数据`price`将与公共数据`name, owner, color, size`分开存储。出于这个原因`initMarble`函数调用`PutPrivateData()` 接口`API`两次以保留私有数据。
 
 ```sh
 $ peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n marblesp -c '{"Args":["initMarble","marble1","blue","35","tom","99"]}'
@@ -389,11 +389,11 @@ func (t *SimpleChaincode) readMarblePrivateDetails(stub shim.ChaincodeStubInterf
 
 # 用`未授权`的对等体查询私有数据
 
-现在将切换到`Org2`的对等体成员，该成员在其边数据库中具有大理石私有数据`name, color, size, owner`，但在其数据库中没有大理石`price`私有数据，将查询这两组私有数据。
+现在将切换到`Org2`的对等体成员，该成员在其边数据库中具有弹珠私有数据`name, color, size, owner`，但在其数据库中没有弹珠`price`私有数据，将查询这两组私有数据。
 
 ## 切换到`Org2`中的对等体
 
-从`docker`容器内部，运行以下命令切换到**未经授权**访问大理石`price`私有数据的对等方：
+从`docker`容器内部，运行以下命令切换到**未经授权**访问弹珠`price`私有数据的对等方：
 
 ```sh
 export CORE_PEER_ADDRESS=peer0.org2.example.com:7051
@@ -405,7 +405,7 @@ export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/pee
 
 ## 查询`Org2`被授权的私有数据
 
-`Org2`中的对等体应该在侧数据库中拥有第一组大理石私有数据（`name, color, size and owner`），并且可以使用`readMarble()`函数访问它，该函数使用`collectionMarbles`参数调用。
+`Org2`中的对等体应该在侧数据库中拥有第一组弹珠私有数据（`name, color, size and owner`），并且可以使用`readMarble()`函数访问它，该函数使用`collectionMarbles`参数调用。
 
 ```sh
 $ peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarble","marble1"]}'
@@ -419,7 +419,7 @@ $ peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarble","marbl
 
 ## 查询`Org2`未被授权的私有数据
 
-`Org2`中的对等方在其边数据库中没有大理石`price`私有数据。当尝试查询此数据时，**会返回与公共状态匹配的密钥的哈希值，但不会拥有私有状态**。
+`Org2`中的对等方在其边数据库中没有弹珠`price`私有数据。当尝试查询此数据时，**会返回与公共状态匹配的密钥的哈希值，但不会拥有私有状态**。
 
 ```sh
 $ peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarblePrivateDetails","marble1"]}'
@@ -441,11 +441,11 @@ version = &version.Height{BlockNum:0x6, TxNum:0x0}, Private data version =
 
 对于**私有数据只需要在分类账上直到可以复制到离线数据库中**的用例，可以**在一定数量的块之后“清除”数据，只留下数据的哈希值**。作为交易的**不可改变的证据**。
 
-可能存在私人数据，包括个人或机密信息，例如示例中的定价数据，交易方不希望在渠道上向其他组织披露。因此，它**具有有限的寿命**，并且可以在区块链上使用**集合定义中的`blockToLive`属性**在指定数量的块上保持不变之后**进行清除**。
+可能存在私人数据，包括个人或机密信息，例如示例中的定价数据，交易方不希望在通道上向其他组织披露。因此，它**具有有限的寿命**，并且可以在区块链上使用**集合定义中的`blockToLive`属性**在指定数量的块上保持不变之后**进行清除**。
 
 我们的`collectionMarblePrivateDetails`定义的`blockToLive`属性值为`3`，这意味着这些数据将存放在侧数据库中**三个块**，然后它**将被清除**。将所有部分绑定在一起，回想一下这个集合定义`collectionMarblePrivateDetails`在调用`PutPrivateData()` 方法并将`collectionMarblePrivateDetails`作为参数传递时，与`initMarble()`函数中的私有数据相关联。
 
-逐步向链中添加块，然后通过发出四个新的交易（创建一个新的大理石，然后是三个大理石转移）来观察`price`信息被清除，这将为链添加四个新块。在第四次交易（第三次大理石转移）之后，将验证`price`私人数据是否被清除。
+逐步向链中添加块，然后通过发出四个新的交易（创建一个新的弹珠，然后是三个弹珠转移）来观察`price`信息被清除，这将为链添加四个新块。在第四次交易（第三次弹珠转移）之后，将验证`price`私人数据是否被清除。
 
 + 使用以下命令切换回`Org1`中的`peer0`。复制并粘贴以下代码块并在对等容器中运行它：
 
@@ -475,7 +475,7 @@ version = &version.Height{BlockNum:0x6, TxNum:0x0}, Private data version =
   [kvledger] CommitWithPvtData -> INFO 03e Channel [mychannel]: Committed block [4] with 1 transaction(s)
   ```
 
-+ 返回对等容器，通过运行以下命令查询`marble1`价格数据。（**查询不会在分类帐上创建新事务，因为没有数据处理**）。
++ 返回对等容器，通过运行以下命令查询`marble1`价格数据。（**查询不会在分类帐上创建新交易，因为没有数据处理**）。
 
   ```sh
   $ peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarblePrivateDetails","marble1"]}'
@@ -491,7 +491,7 @@ version = &version.Height{BlockNum:0x6, TxNum:0x0}, Private data version =
 
 ## 添加新区块
 
-+ 通过执行以下命令创建一个新的`marble2`，此事务在链上创建一个新块。
++ 通过执行以下命令创建一个新的`marble2`，此交易在链上创建一个新块。
 
   ```sh
   $ peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n marblesp -c '{"Args":["initMarble","marble2","blue","35","tom","99"]}'
@@ -517,7 +517,7 @@ version = &version.Height{BlockNum:0x6, TxNum:0x0}, Private data version =
 
 ## 添加第二个区块
 
-+ 通过运行以下命令将`marble2`传输到“`joe`”。此事务将在链上添加第二个新块。
++ 通过运行以下命令将`marble2`传输到“`joe`”。此交易将在链上添加第二个新块。
 
   ```sh
   $ peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n marblesp -c '{"Args":["transferMarble","marble2","joe"]}'
@@ -543,7 +543,7 @@ version = &version.Height{BlockNum:0x6, TxNum:0x0}, Private data version =
 
 ## 添加第三个区块
 
-+ 通过运行以下命令将`marble2`传输到“`tom`”。此事务将在链上创建第三个新块。
++ 通过运行以下命令将`marble2`传输到“`tom`”。此交易将在链上创建第三个新块。
 
   ```sh
   peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n marblesp -c '{"Args":["transferMarble","marble2","tom"]}'
@@ -569,7 +569,7 @@ version = &version.Height{BlockNum:0x6, TxNum:0x0}, Private data version =
 
 ## 区块被清除
 
-+ 最后，通过运行以下命令将`marble2`转移到“`jerry`”。此事务将在链上创建第四个新块。此交易后应清除私人数据的价格。
++ 最后，通过运行以下命令将`marble2`转移到“`jerry`”。此交易将在链上创建第四个新块。此交易后应清除私人数据的价格。
 
   ```sh
   $ peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n marblesp -c '{"Args":["transferMarble","marble2","jerry"]}'
