@@ -594,3 +594,9 @@ version = &version.Height{BlockNum:0x6, TxNum:0x0}, Private data version =
   message:"{\"Error\":\"Marble private details does not exist: marble1\"}"
   ```
 
+# 使用带索引的私有数据
+
+通过在`META-INF/statedb/couchdb/collections/<collection_name>/indexes`目录中打包索引以及链代码，索引也可以应用于私有数据集合。这里有一个[示例索引](https://github.com/hyperledger/fabric-samples/blob/master/chaincode/marbles02_private/go/META-INF/statedb/couchdb/collections/collectionMarbles/indexes/indexOwner.json)。
+
+为了将链码部署到生产环境，建议在链码旁边定义任何索引，以便链码和支持索引作为一个单元自动部署，一旦链代码安装在对等端并在通道上实例化。**当指定`--collections-config`标志指向集合`JSON`文件的位置时，关联索引将在通道上的链代码实例化时自动部署**。
+
