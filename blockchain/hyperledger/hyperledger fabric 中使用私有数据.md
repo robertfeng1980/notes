@@ -439,3 +439,158 @@ version = &version.Height{BlockNum:0x6, TxNum:0x0}, Private data version =
 
 # 清除私有数据
 
+对于**私有数据只需要在分类账上直到可以复制到离线数据库中**的用例，可以**在一定数量的块之后“清除”数据，只留下数据的哈希值**。作为交易的**不可改变的证据**。
+
+可能存在私人数据，包括个人或机密信息，例如示例中的定价数据，交易方不希望在渠道上向其他组织披露。因此，它**具有有限的寿命**，并且可以在区块链上使用**集合定义中的`blockToLive`属性**在指定数量的块上保持不变之后**进行清除**。
+
+我们的`collectionMarblePrivateDetails`定义的`blockToLive`属性值为`3`，这意味着这些数据将存放在侧数据库中**三个块**，然后它**将被清除**。将所有部分绑定在一起，回想一下这个集合定义`collectionMarblePrivateDetails`在调用`PutPrivateData()` 方法并将`collectionMarblePrivateDetails`作为参数传递时，与`initMarble()`函数中的私有数据相关联。
+
+逐步向链中添加块，然后通过发出四个新的交易（创建一个新的大理石，然后是三个大理石转移）来观察`price`信息被清除，这将为链添加四个新块。在第四次交易（第三次大理石转移）之后，将验证`price`私人数据是否被清除。
+
++ 使用以下命令切换回`Org1`中的`peer0`。复制并粘贴以下代码块并在对等容器中运行它：
+
+  ```sh
+  export CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+  export CORE_PEER_LOCALMSPID=Org1MSP
+  export CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+  export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+  export PEER0_ORG1_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+  ```
+
++ 打开一个新的终端窗口，并通过运行以下命令查看该对等方的私有数据日志：
+
+  ```sh
+  $ docker logs peer0.org1.example.com 2>&1 | grep -i -a -E 'private|pvt|privdata'
+  ```
+
++ 应该看到类似于以下的结果。请注意列表中的**最高块编号**。在下面的示例中，最高块高度为 **4**。
+
+  ```verilog
+  [pvtdatastorage] func1 -> INFO 023 Purger started: Purging expired private data till block number [0]
+  [pvtdatastorage] func1 -> INFO 024 Purger finished
+  [kvledger] CommitWithPvtData -> INFO 022 Channel [mychannel]: Committed block [0] with 1 transaction(s)
+  [kvledger] CommitWithPvtData -> INFO 02e Channel [mychannel]: Committed block [1] with 1 transaction(s)
+  [kvledger] CommitWithPvtData -> INFO 030 Channel [mychannel]: Committed block [2] with 1 transaction(s)
+  [kvledger] CommitWithPvtData -> INFO 036 Channel [mychannel]: Committed block [3] with 1 transaction(s)
+  [kvledger] CommitWithPvtData -> INFO 03e Channel [mychannel]: Committed block [4] with 1 transaction(s)
+  ```
+
++ 返回对等容器，通过运行以下命令查询`marble1`价格数据。（**查询不会在分类帐上创建新事务，因为没有数据处理**）。
+
+  ```sh
+  $ peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarblePrivateDetails","marble1"]}'
+  ```
+
+  应该看到类似的结果：
+
+  ```sh
+  {"docType":"marblePrivateDetails","name":"marble1","price":99}
+  ```
+
+  会发现**价格数据仍在私人数据分类帐中**。
+
+## 添加新区块
+
++ 通过执行以下命令创建一个新的`marble2`，此事务在链上创建一个新块。
+
+  ```sh
+  $ peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n marblesp -c '{"Args":["initMarble","marble2","blue","35","tom","99"]}'
+  ```
+
++ 切换回终端窗口，再次查看该对等体的私有数据日志。应该看到**块高度增加`1`**。
+
+  ```sh
+  $ docker logs peer0.org1.example.com 2>&1 | grep -i -a -E 'private|pvt|privdata'
+  ```
+
++ 返回对等容器，通过运行以下命令再次查询`marble1`价格数据：
+
+  ```sh
+  $ peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarblePrivateDetails","marble1"]}'
+  ```
+
++ 私有数据尚未清除，因此结果与先前的查询相同：
+
+  ```sh
+  {"docType":"marblePrivateDetails","name":"marble1","price":99}
+  ```
+
+## 添加第二个区块
+
++ 通过运行以下命令将`marble2`传输到“`joe`”。此事务将在链上添加第二个新块。
+
+  ```sh
+  $ peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n marblesp -c '{"Args":["transferMarble","marble2","joe"]}'
+  ```
+
++ 切换回终端窗口，再次查看该对等体的私有数据日志。您应该看到**块高度增加`1`**。
+
+  ```sh
+  $ docker logs peer0.org1.example.com 2>&1 | grep -i -a -E 'private|pvt|privdata'
+  ```
+
++ 返回对等容器，通过运行以下命令查询`marble1`价格数据：
+
+  ```sh
+  $ peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarblePrivateDetails","marble1"]}'
+  ```
+
+  仍然可以看到价格私人数据：
+
+  ```sh
+  {"docType":"marblePrivateDetails","name":"marble1","price":99}
+  ```
+
+## 添加第三个区块
+
++ 通过运行以下命令将`marble2`传输到“`tom`”。此事务将在链上创建第三个新块。
+
+  ```sh
+  peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n marblesp -c '{"Args":["transferMarble","marble2","tom"]}'
+  ```
+
++ 切换回终端窗口，再次查看该对等体的私有数据日志。应该看到块高度增加1。
+
+  ```sh
+  docker logs peer0.org1.example.com 2>&1 | grep -i -a -E 'private|pvt|privdata'
+  ```
+
++ 返回对等容器，通过运行以下命令查询`marble1`价格数据：
+
+  ```sh
+  $ peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarblePrivateDetails","marble1"]}'
+  ```
+
++ 仍然可以看到价格数据。
+
+  ```sh
+  {"docType":"marblePrivateDetails","name":"marble1","price":99}
+  ```
+
+## 区块被清除
+
++ 最后，通过运行以下命令将`marble2`转移到“`jerry`”。此事务将在链上创建第四个新块。此交易后应清除私人数据的价格。
+
+  ```sh
+  $ peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C mychannel -n marblesp -c '{"Args":["transferMarble","marble2","jerry"]}'
+  ```
+
++ 切换回终端窗口，再次查看该对等体的私有数据日志。您应该看到块高度增加`1`。
+
+  ```sh
+  $ docker logs peer0.org1.example.com 2>&1 | grep -i -a -E 'private|pvt|privdata'
+  ```
+
++ 返回对等容器，通过运行以下命令查询`marble1`价格数据：
+
+  ```sh
+  $ peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarblePrivateDetails","marble1"]}'
+  ```
+
++ 由于**价格数据已被清除**，您应该再也看不到它了。你应该看到类似的东西：
+
+  ```sh
+  Error: endorsement failure during query. response: status:500
+  message:"{\"Error\":\"Marble private details does not exist: marble1\"}"
+  ```
+
