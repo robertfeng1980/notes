@@ -193,3 +193,41 @@ func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 
 ## 实现`Chaincode`应用程序
 
+如上所述，链码应用程序实现了两个可以通过`Invoke`函数调用的函数，现在实现这些功能。请注意，正如上面提到的，为了**访问分类帐的状态**，将利用`chaincode shim API`的[`ChaincodeStubInterface.PutState`](https://godoc.org/github.com/hyperledger/fabric/core/chaincode/shim#ChaincodeStub.PutState)和[`ChaincodeStubInterface.GetState`](https://godoc.org/github.com/hyperledger/fabric/core/chaincode/shim#ChaincodeStub.GetState)函数。
+
+```go
+// Set stores the asset (both key and value) on the ledger. If the key exists,
+// it will override the value with the new one
+func set(stub shim.ChaincodeStubInterface, args []string) (string, error) {
+    if len(args) != 2 {
+            return "", fmt.Errorf("Incorrect arguments. Expecting a key and a value")
+    }
+
+    err := stub.PutState(args[0], []byte(args[1]))
+    if err != nil {
+            return "", fmt.Errorf("Failed to set asset: %s", args[0])
+    }
+    return args[1], nil
+}
+
+// Get returns the value of the specified asset key
+func get(stub shim.ChaincodeStubInterface, args []string) (string, error) {
+    if len(args) != 1 {
+            return "", fmt.Errorf("Incorrect arguments. Expecting a key")
+    }
+
+    value, err := stub.GetState(args[0])
+    if err != nil {
+            return "", fmt.Errorf("Failed to get asset: %s with error: %s", args[0], err)
+    }
+    if value == nil {
+            return "", fmt.Errorf("Asset not found: %s", args[0])
+    }
+    return string(value), nil
+}
+```
+
+
+
+
+
