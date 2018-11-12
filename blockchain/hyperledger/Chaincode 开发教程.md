@@ -89,3 +89,56 @@ type SimpleAsset struct {
 
 ## 初始化`Chaincode`
 
+接下来，将实现`Init`函数。
+
+```go
+// Init is called during chaincode instantiation to initialize any data.
+func (t *SimpleAsset) Init(stub shim.ChaincodeStubInterface) peer.Response {
+}
+```
+
+> **注意**：链码**升级也会调用此函数**。在编写将升级现有链代码的链代码时，请确保正确修改`Init`函数。特别是，如果**没有“迁移”或者在升级过程中没有任何内容要初始化，请提供一个空的`Init`方法**。
+
+接下来，将使用`ChaincodeStubInterface.GetStringArgs`函数检索`Init`调用的参数并检查其有效性。在例子中，将使用一个键值对。
+
+```go
+// Init is called during chaincode instantiation to initialize any
+// data. Note that chaincode upgrade also calls this function to reset
+// or to migrate data, so be careful to avoid a scenario where you
+// inadvertently clobber your ledger's data!
+func (t *SimpleAsset) Init(stub shim.ChaincodeStubInterface) peer.Response {
+  // Get the args from the transaction proposal
+  args := stub.GetStringArgs()
+  if len(args) != 2 {
+    return shim.Error("Incorrect arguments. Expecting a key and a value")
+  }
+}
+```
+
+接下来，既然已经确定调用有效，将把初始状态存储在分类帐中。为此，将调用`ChaincodeStubInterface.PutState`作为参数传入的键和值。假设一切顺利，返回一个`peer.Response`对象，表明初始化成功。
+
+```go
+// Init is called during chaincode instantiation to initialize any
+// data. Note that chaincode upgrade also calls this function to reset
+// or to migrate data, so be careful to avoid a scenario where you
+// inadvertently clobber your ledger's data!
+func (t *SimpleAsset) Init(stub shim.ChaincodeStubInterface) peer.Response {
+  // Get the args from the transaction proposal
+  args := stub.GetStringArgs()
+  if len(args) != 2 {
+    return shim.Error("Incorrect arguments. Expecting a key and a value")
+  }
+
+  // Set up any variables or assets here by calling stub.PutState()
+
+  // We store the key and the value on the ledger
+  err := stub.PutState(args[0], []byte(args[1]))
+  if err != nil {
+    return shim.Error(fmt.Sprintf("Failed to create asset: %s", args[0]))
+  }
+  return shim.Success(nil)
+}
+```
+
+## 调用`Chaincode`
+
