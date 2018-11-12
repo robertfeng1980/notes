@@ -362,5 +362,32 @@ $ docker-compose -f docker-compose-simple.yaml up
 
 以上内容**使用`SingleSampleMSPSolo`订购者配置文件**启动网络，并以“**开发模式**”启动对等体。它还启动了两个额外的容器，一个**用于链码环境**，另一个**用于与链代码交互**。创建和加入通道的命令嵌入在`CLI`容器中，因此可以立即跳转到链代码调用。
 
+# 终端2  - 构建并启动链码
+
+```sh
+$ docker exec -it chaincode bash
+```
+
+应该看到以下内容：
+
+```sh
+root@d2629980e76b:/opt/gopath/src/chaincode#
+```
+
+现在，编译链码：
+
+```sh
+$ cd sacc
+$ go build
+```
+
+现在运行链码：
+
+```sh
+$ CORE_PEER_ADDRESS=peer:7052 CORE_CHAINCODE_ID_NAME=mycc:0 ./sacc
+```
+
+**链代码以对等节点和链代码日志开始输出，表示向对等方成功注册**。请注意，在**此阶段，链码不与任何通道相关联**。这是使用`instantiate`命令在后续步骤中完成的。
+
 
 
