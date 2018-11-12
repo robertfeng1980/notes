@@ -389,5 +389,33 @@ $ CORE_PEER_ADDRESS=peer:7052 CORE_CHAINCODE_ID_NAME=mycc:0 ./sacc
 
 **链代码以对等节点和链代码日志开始输出，表示向对等方成功注册**。请注意，在**此阶段，链码不与任何通道相关联**。这是使用`instantiate`命令在后续步骤中完成的。
 
+# 终端3  - 使用链码
+
+即使处于`--peer-chaincodedev`模式，仍然**必须安装链代码**，以便**生命周期系统链码可以正常进行检查**。在`--pere-chaincodedev`模式下，将来可能会删除此要求。
+
+```sh
+$ docker exec -it cli bash
+```
+
+在 `cli` 容器中运行：
+
+```sh
+$ peer chaincode install -p chaincodedev/chaincode/sacc -n mycc -v 0
+
+$ peer chaincode instantiate -n mycc -v 0 -c '{"Args":["a","10"]}' -C myc
+```
+
+现在发出一个`invoke`调用，将`a`的值更改为“`20`”。
+
+```sh
+$ peer chaincode invoke -n mycc -c '{"Args":["set", "a", "20"]}' -C myc
+```
+
+最后，查询`a`。应该看到`20`的值。
+
+```sh
+$ peer chaincode query -n mycc -c '{"Args":["query","a"]}' -C myc
+```
+
 
 
