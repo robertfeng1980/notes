@@ -56,7 +56,7 @@ interface Chaincode {
 
 如果还没有在`Go`中进行编程，可能需要确保安装了[`Go Programming Language`](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html#golang)并正确配置了系统环境。
 
-现在，将要为链代码应用程序创建一个目录，作为`$GOPATH/src/`的子目录。为了简单起见，使用以下命令：
+现在，将要**为链码应用程序创建一个目录**，作为`$GOPATH/src/`的子目录。为了简单起见，使用以下命令：
 
 ```sh
 $ mkdir -p $GOPATH/src/sacc && cd $GOPATH/src/sacc
@@ -70,7 +70,7 @@ $ touch sacc.go
 
 ## 准备开始
 
-首先，从一些家务开始。与每个链代码一样，它实现了[`Chaincode`接口](https://godoc.org/github.com/hyperledger/fabric/core/chaincode/shim#Chaincode)，特别是`Init`和`Invoke`函数。因此，为链代码添加必要依赖项的`Go import`语句。我们将导入`chaincode shim`包和[`peer protobuf`包](https://godoc.org/github.com/hyperledger/fabric/protos/peer)。接下来，添加一个结构`SimpleAsset`作为`Chaincode shim `函数的接收器。
+首先，从一些基本的开始。与每个链代码一样，它**实现了[`Chaincode`接口](https://godoc.org/github.com/hyperledger/fabric/core/chaincode/shim#Chaincode)，特别是`Init`和`Invoke`函数**。因此，为链码**添加必要依赖项的`Go import`语句**。将**导入`chaincode shim`包和[`peer protobuf`包](https://godoc.org/github.com/hyperledger/fabric/protos/peer)**。接下来，添加一个**结构`SimpleAsset`作为`Chaincode shim `函数的接收器**。
 
 ```go
 package main
@@ -89,7 +89,7 @@ type SimpleAsset struct {
 
 ## 初始化`Chaincode`
 
-接下来，将实现`Init`函数。
+接下来，将**实现`Init`函数**。
 
 ```go
 // Init is called during chaincode instantiation to initialize any data.
@@ -99,7 +99,7 @@ func (t *SimpleAsset) Init(stub shim.ChaincodeStubInterface) peer.Response {
 
 > **注意**：链码**升级也会调用此函数**。在编写将升级现有链代码的链代码时，请确保正确修改`Init`函数。特别是，如果**没有“迁移”或者在升级过程中没有任何内容要初始化，请提供一个空的`Init`方法**。
 
-接下来，将使用`ChaincodeStubInterface.GetStringArgs`函数检索`Init`调用的参数并检查其有效性。在例子中，将使用一个键值对。
+接下来，将**使用`ChaincodeStubInterface.GetStringArgs`函数检索`Init`调用的参数并检查其有效性**。在例子中，将使用一个键值对。
 
 ```go
 // Init is called during chaincode instantiation to initialize any
@@ -115,7 +115,7 @@ func (t *SimpleAsset) Init(stub shim.ChaincodeStubInterface) peer.Response {
 }
 ```
 
-接下来，既然已经确定调用有效，将把初始状态存储在分类帐中。为此，将调用`ChaincodeStubInterface.PutState`作为参数传入的键和值。假设一切顺利，返回一个`peer.Response`对象，表明初始化成功。
+接下来，既然已经确定调用有效，将**把初始状态存储在分类帐中**。为此，将调用`ChaincodeStubInterface.PutState`作为参数传入的键和值。假设一切顺利，返回一个`peer.Response`对象，表明初始化成功。
 
 ```go
 // Init is called during chaincode instantiation to initialize any
@@ -141,4 +141,55 @@ func (t *SimpleAsset) Init(stub shim.ChaincodeStubInterface) peer.Response {
 ```
 
 ## 调用`Chaincode`
+
+首先，**添加`Invoke`函数的签名**。
+
+```go
+// Invoke is called per transaction on the chaincode. Each transaction is
+// either a 'get' or a 'set' on the asset created by Init function. The 'set'
+// method may create a new asset by specifying a new key-value pair.
+func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
+
+}
+```
+
+与上面的`Init`函数一样，需要**从`ChaincodeStubInterface`中提取参数**。**`Invoke`函数的参数将是要调用的链代码应用程序函数的名称**。在例子中，应用程序将只有两个函数：`set`和`get`，它们允许设置资产的值或检索其当前状态。首先**调用`ChaincodeStubInterface.GetFunctionAndParameters`来为该链代码应用程序函数提取函数名称和参数**。
+
+```go
+// Invoke is called per transaction on the chaincode. Each transaction is
+// either a 'get' or a 'set' on the asset created by Init function. The Set
+// method may create a new asset by specifying a new key-value pair.
+func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
+    // Extract the function and args from the transaction proposal
+    fn, args := stub.GetFunctionAndParameters()
+}
+```
+
+接下来，将函数名称验证为`set`或`get`，并调用这些链代码应用程序函数，通过`shim.Success`或`shim.Error`函数返回适当的响应，这些函数将**响应序列化为`gRPC protobuf`消息**。
+
+```go
+// Invoke is called per transaction on the chaincode. Each transaction is
+// either a 'get' or a 'set' on the asset created by Init function. The Set
+// method may create a new asset by specifying a new key-value pair.
+func (t *SimpleAsset) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
+    // Extract the function and args from the transaction proposal
+    fn, args := stub.GetFunctionAndParameters()
+
+    var result string
+    var err error
+    if fn == "set" {
+            result, err = set(stub, args)
+    } else {
+            result, err = get(stub, args)
+    }
+    if err != nil {
+            return shim.Error(err.Error())
+    }
+
+    // Return the result as success payload
+    return shim.Success([]byte(result))
+}
+```
+
+## 实现`Chaincode`应用程序
 
