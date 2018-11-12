@@ -325,5 +325,16 @@ func main() {
 }
 ```
 
+## 构建`Chaincode`
+
+现在编译构建链码。
+
+```sh
+$ go get -u github.com/hyperledger/fabric/core/chaincode/shim
+$ go build
+```
+
+假设没有错误，现在可以继续下一步，测试链代码。
+
 
 
