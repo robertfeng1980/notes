@@ -417,5 +417,12 @@ $ peer chaincode invoke -n mycc -c '{"Args":["set", "a", "20"]}' -C myc
 $ peer chaincode query -n mycc -c '{"Args":["query","a"]}' -C myc
 ```
 
+# 测试新的链码
 
+默认情况下，只挂载`sacc`。但是，可以通过将不同的**链码添加到`chaincode`子目录**并**重新启动网络来轻松地测试它们**。此时，可以在`chaincode`容器中访问它们。
 
+# `Chaincode`加密
+
+在某些情况下，**完全或仅部分地加密与密钥相关联的值**可能是有用的。例如，如果某人的社会安全号码或地址被写入分类帐，那么可能不希望此数据以**明文形式出现**。通过利用**实体扩展**来实现`Chaincode`加密，该[实体扩展](https://github.com/hyperledger/fabric/tree/master/core/chaincode/shim/ext/entities)是具有**物品工厂和功能的`BCCSP`包装器**，以执行加密操作，例如加密和椭圆曲线数字签名。例如，为了加密，链代码的调用者**通过瞬态字段传递加密密钥**。然后可以将**相同的密钥用于后续查询操作**，从而允许**对加密状态值进行适当的解密**。
+
+有关更多信息和示例，请参阅`fabric/examples`目录中的[`Encc`示例](https://github.com/hyperledger/fabric/tree/master/examples/chaincode/go/enccc_example)。特别注意`utils.go`助手程序。此实用程序**加载`chaincode shim API`和实体扩展**，并构建一个新类型的函数（例如，`encryptAndPutState`和`getStateAndDecrypt`），然后**加密示例链代码将利用这些函数**。因此，链码现在可以与`Get`和`Put`的基本`shim API`结合使用`Encrypt`和`Decrypt`的附加功能。
