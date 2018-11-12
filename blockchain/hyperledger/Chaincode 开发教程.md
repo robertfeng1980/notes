@@ -345,3 +345,14 @@ $ go build
 # 安装`Hyperledger Fabric`示例
 
 如果还没有这样做，请[安装样本，二进制文件和Docker镜像](https://hyperledger-fabric.readthedocs.io/en/latest/install.html)。
+
+进入到`fabric-samples`项目的`chaincode-docker-devmode`目录：
+
+```sh
+$ cd chaincode-docker-devmode
+```
+
+现在打开三个终端并导航到每个终端中的`chaincode-docker-devmode`目录。
+
+
+
