@@ -38,4 +38,35 @@ interface Chaincode {
 - [`node.js`](https://fabric-shim.github.io/ChaincodeInterface.html)
 - [`Java`](https://fabric-chaincode-java.github.io/org/hyperledger/fabric/shim/Chaincode.html)
 
-调用其方法以响应收到的交易。特别是当链码接收实例化或升级事务时调用Init方法，以便链代码可以执行任何必要的初始化，包括应用程序状态的初始化。调用Invoke方法以响应接收调用事务以处理事务提议。
+调用其方法以响应收到的交易。特别是当链码接收**实例化或升级交易**时调用`init`方法，以便链代码可以**执行任何必要的初始化**，包括应用程序状态的初始化。**调用`invoke`方法以响应接收调用交易以处理交易提议**。
+
+链码**`shim` API**中的另一个接口是`ChaincodeStubInterface`：
+
+- [`Go`](https://godoc.org/github.com/hyperledger/fabric/core/chaincode/shim#ChaincodeStubInterface)
+- [`node.js`](https://fabric-shim.github.io/ChaincodeStub.html)
+- [`Java`](https://fabric-chaincode-java.github.io/org/hyperledger/fabric/shim/ChaincodeStub.html)
+
+用于**访问和修改分类帐**，以及**在链码之间**进行调用。
+
+# 简单的`Chaincode`开发示例
+
+应用程序是一个基本的示例链代码，用于在分类帐上创建资产（键值对）。
+
+## 选择`Chaincode`的位置
+
+如果还没有在`Go`中进行编程，可能需要确保安装了[`Go Programming Language`](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html#golang)并正确配置了系统环境。
+
+现在，将要为链代码应用程序创建一个目录，作为`$GOPATH/src/`的子目录。为了简单起见，使用以下命令：
+
+```sh
+$ mkdir -p $GOPATH/src/sacc && cd $GOPATH/src/sacc
+```
+
+现在，创建将用代码填写的源文件：
+
+```sh
+$ touch sacc.go
+```
+
+## 家政
+
