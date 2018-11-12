@@ -68,5 +68,24 @@ $ mkdir -p $GOPATH/src/sacc && cd $GOPATH/src/sacc
 $ touch sacc.go
 ```
 
-## 家政
+## 准备开始
+
+首先，从一些家务开始。与每个链代码一样，它实现了[`Chaincode`接口](https://godoc.org/github.com/hyperledger/fabric/core/chaincode/shim#Chaincode)，特别是`Init`和`Invoke`函数。因此，为链代码添加必要依赖项的`Go import`语句。我们将导入`chaincode shim`包和[`peer protobuf`包](https://godoc.org/github.com/hyperledger/fabric/protos/peer)。接下来，添加一个结构`SimpleAsset`作为`Chaincode shim `函数的接收器。
+
+```go
+package main
+
+import (
+    "fmt"
+
+    "github.com/hyperledger/fabric/core/chaincode/shim"
+    "github.com/hyperledger/fabric/protos/peer"
+)
+
+// SimpleAsset implements a simple chaincode to manage an asset
+type SimpleAsset struct {
+}
+```
+
+## 初始化`Chaincode`
 
