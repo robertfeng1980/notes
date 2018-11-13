@@ -18,7 +18,7 @@
     + [`在windows 下搭建 java 开发环境`](./hyperledger/在windows%20下搭建hyperledger%20fabric%20java%20开发环境.md)
     + [`Chaincode GoLang 开发教程`](./hyperledger/Chaincode%20开发教程.md)
     + [`Chaincode Java 开发教程`](./hyperledger/Chaincode%20Java开发教程.md#)
-    + [`开发系统链码插件`](./hyperledger/hyperledger%20fabric%20开发系统链码插件.md)
+    + [`开发系统Chaincode插件`](./hyperledger/hyperledger%20fabric%20开发系统链码插件.md)
 
 - 运维
     + [`升级网络`](./hyperledger/hyperledger%20fabric%20升级网络组建.md)
