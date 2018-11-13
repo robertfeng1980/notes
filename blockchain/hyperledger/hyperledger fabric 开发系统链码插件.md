@@ -14,5 +14,27 @@
 
 诸如`QSCC`的现有链码还可以用作通常**通过系统链代码实现的某些特征的模板**，例如访问控制。现有的系统链代码也可作为**日志记录和测试**等最佳实践的参考。
 
-> **注意**：在导入的包上：`Go`标准库要求插件必须包含与主机应用程序相同的导入包版本（在本例中为`Fabric`）。
+> **注意**：在导入的包上：`Go`标准库要求插件必须包含与主机应用程序**相同的导入包版本**（在本例中为`Fabric`）。
+
+# 配置插件
+
+插件在`core.yaml`的`chaincode.systemPlugin`部分中配置：
+
+```yaml
+chaincode:
+  systemPlugins:
+    - enabled: true
+      name: mysyscc
+      path: /opt/lib/syscc.so
+      invokableExternal: true
+      invokableCC2CC: true
+```
+
+系统链码也必须在`core.yaml`的`chaincode.system`部分**列入白名单**：
+
+```yml
+chaincode:
+  system:
+    mysyscc: enable
+```
 
