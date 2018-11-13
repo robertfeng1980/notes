@@ -16,15 +16,15 @@
 - 开发
     + [`在windows下搭建开发环境`](./hyperledger/在windows下搭建hyperledger%20fabric%20开发环境.md)
     + [`在windows 下搭建 java 开发环境`](./hyperledger/在windows%20下搭建hyperledger%20fabric%20java%20开发环境.md)
-    + [`Chaincode GoLang 开发教程`](./hyperledger/Chaincode%20开发教程.md)
-    + [`Chaincode Java 开发教程`](./hyperledger/Chaincode%20Java开发教程.md#)
+    + [`Chaincode GoLang 开发教程`](./hyperledger/hyperledger%20fabric%20Chaincode%20开发教程.md)
+    + [`Chaincode Java 开发教程`](./hyperledger/hyperledger%20fabric%20Chaincode%20Java开发教程.md#)
     + [`开发系统Chaincode插件`](./hyperledger/hyperledger%20fabric%20开发系统链码插件.md)
 
 - 运维
     + [`升级网络`](./hyperledger/hyperledger%20fabric%20升级网络组建.md)
     + [`向通道添加组织`](./hyperledger/hyperledger%20fabric%20向通道添加组织.md)
     + [`使用私有数据`](./hyperledger/hyperledger%20fabric%20中使用私有数据.md)
-    + [`Chaincode 运营操作`](./hyperledger/Chaincode%20运营操作.md)
+    + [`Chaincode 运营操作`](./hyperledger/hyperledger%20fabric%20Chaincode%20运营操作.md)
 
 - 操作指南
     + 升级到最新版本的`Fabric`
@@ -41,8 +41,8 @@
     + 使用传输层安全性（`TLS`）保护通信安全
     + 打造基于卡夫卡的订购服务
     + [`更新 block & tx 配置`](./hyperledger/hyperledger%20fabric%20更新%20block%20&%20tx%20配置.md)
-    + [`endorsement-policies`](./hyperledger/endorsement-policies.md)
-    + [`endorsement-policies-zh`](./hyperledger/endorsement-policies-zh.md)
+    + [`endorsement-policies`](./hyperledger/hyperledger%20fabric%20endorsement-policies.md)
+    + [`背书策略`](./hyperledger/hyperledger%20fabric%20背书策略.md)
 
 - 系统架构
     + 架构解释
