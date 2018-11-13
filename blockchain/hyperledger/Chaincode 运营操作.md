@@ -58,9 +58,7 @@ $ peer chaincode package -n mycc -p github.com/hyperledger/fabric/examples/chain
 
 > **注意**：此绑定策略是在带外确定的，以便在某些通道上实例化链代码时提供适当的`MSP`主体。如果未指定实例化策略，则**默认策略是该通道的任何`MSP`管理员**。
 
-每个所有者通过将`ChaincodeDeploymentSpec`与该所有者的身份（例如证书）相结合并签署合并结果来认可`ChaincodeDeploymentSpec`。
-
-链码所有者可以使用以下命令对先前创建的已签名包进行签名：
+每个所有者通过将`ChaincodeDeploymentSpec`与该所有者的身份（例如证书）相结合并**签署合并结果**来认可`ChaincodeDeploymentSpec`。链码**所有者**可以使用以下命令**对先前创建的已签名包进行签名**：
 
 ```sh
 $ peer chaincode signpackage ccpack.out signedccpack.out
@@ -78,7 +76,7 @@ $ peer chaincode signpackage ccpack.out signedccpack.out
 
 > **注意**：`Chaincode`只应安装在**链码拥有成员的对等节点**上，以**保护链码逻辑**与网络上其他成员的**机密性**。那些**没有链码**的成员，**不能成为链码交易的参与者**。也就是说，他们**无法执行**链码。但是，他们仍然**可以验证事务并将其提交到分类帐**。
 
-要安装链代码，请将[`SignedProposal`](https://github.com/hyperledger/fabric/blob/master/protos/peer/proposal.proto#L104)发送到[`System Chaincode`](https://hyperledger-fabric.readthedocs.io/en/latest/chaincode4noah.html#system-chaincode)部分中描述的生命周期系统链代码（`LSCC`）。例如，要使用`CLI`安装[`Simple Asset Chaincode`](https://hyperledger-fabric.readthedocs.io/en/latest/chaincode4ade.html#simple-asset-chaincode)部分中描述的`sacc`示例链代码，命令将如下所示：
+要安装链代码，请将[`SignedProposal`](https://github.com/hyperledger/fabric/blob/master/protos/peer/proposal.proto#L104)发送到[`System Chaincode`](https://hyperledger-fabric.readthedocs.io/en/latest/chaincode4noah.html#system-chaincode)部分中描述的**生命周期系统链代码（`LSCC`）**。例如，要使用`CLI`安装[`Simple Asset Chaincode`](https://hyperledger-fabric.readthedocs.io/en/latest/chaincode4ade.html#simple-asset-chaincode)部分中描述的`sacc`示例链代码，命令将如下所示：
 
 ```sh
 $ peer chaincode install -n asset_mgmt -v 1.0 -p sacc
@@ -87,4 +85,24 @@ $ peer chaincode install -n asset_mgmt -v 1.0 -p sacc
 `CLI`在内部为`sacc`创建`SignedChaincodeDeploymentSpec`并将其发送到**本地对等方**，后者在`LSCC`上调用`Install`方法。`-p`选项的参数**指定了链代码的路径**，该链代码必须位于用户`GOPATH`的源树中，例如，`$GOPATH/src/sacc`。有关命令选项的完整说明，请参阅`CLI`部分。
 
 请注意，为了在对等方上安装，`SignedProposal`的签名**必须来自对等方的本地`MSP`管理员**。
+
+## 实例化
+
+实例化事务**调用生命周期系统链接（`LSCC`）**来创建和初始化通道上的链代码。这是一个**链码通道绑定过程**：链码可以绑定到**任意数量**的通道，并且可以**单独和独立**地在每个通道上运行。换句话说，无论可以在其上**安装和实例化链代码的其他通道数量**，**状态都与提交事务的通道保持隔离**。
+
+实例化事务的创建者必须满足`SignedCDS`中**包含的链代码的实例化策略**，并且还必须是通道上的写入器，其被配置为通道创建的一部分。这对于通道的安全性非常重要，可以**防止恶意实体部署链代码或欺骗成员在未绑定的通道上执行链代码**。
+
+例如，回想一下默认实例化策略是任何通道`MSP`管理员，因此**链代码实例化的创建者必须是通道管理员的成员**。当**交易提议到达背书人**时，它会根据**实例化策略验证创建者的签名**。在将事务提交到分类帐之前，在**事务验证期间再次执行此操作**(二次验证)。
+
+实例化事务还为通道上的该链代码**设置了认可策略**。认可政策描述了渠道成员接受的交易结果的**证明要求**。
+
+例如，使用`CLI`实例化`sacc`链代码并使用`john`和`0`初始化状态，该命令将如下所示：
+
+```sh
+$ peer chaincode instantiate -n sacc -v 1.0 -c '{"Args":["john","0"]}' -P "AND ('Org1.member','Org2.member')"
+```
+
+> **注意**：认可政策（`CLI`使用波兰表示法），这需要**得到`Org1`和`Org2`成员对所有`sacc`交易的认可**。也就是说，`Org1`和`Org2`都必须在`sacc`上执行`Invoke`的结果，以使事务有效。
+
+成功**实例化后**，链代码在通道上进入**活动状态**，并**准备处理`ENDORSER_TRANSACTION`类型**的任何交易提议。交易在到达认可对等方时同时处理。
 
