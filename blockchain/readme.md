@@ -36,7 +36,6 @@
     + 记录控制
     + 使用传输层安全性（`TLS`）保护通信安全
     + 打造基于卡夫卡的订购服务
-
     + [`hyperledger fabric 更新 block & tx 配置`](./hyperledger/hyperledger%20fabric%20更新%20block%20&%20tx%20配置.md)
     + [`endorsement-policies`](./hyperledger/endorsement-policies.md)
     + [`endorsement-policies-zh`](./hyperledger/endorsement-policies-zh.md)
