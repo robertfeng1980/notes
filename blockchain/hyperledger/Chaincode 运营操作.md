@@ -176,13 +176,31 @@ Use "peer chaincode [command] --help" for more information about a command.
 为了便于在脚本应用程序中使用，`peer`命令在命令**失败时始终生成非零返回码**。链码命令示例：
 
 ```sh
+# 安装 和 实例化 链码
 peer chaincode install -n mycc -v 0 -p path/to/my/chaincode/v0
 peer chaincode instantiate -n mycc -v 0 -c '{"Args":["a", "b", "c"]}' -C mychannel
+
+# 安装 和 升级 链码
 peer chaincode install -n mycc -v 1 -p path/to/my/chaincode/v1
 peer chaincode upgrade -n mycc -v 1 -c '{"Args":["d", "e", "f"]}' -C mychannel
+
+# 查询 和 调用 链码交易
 peer chaincode query -C mychannel -n mycc -c '{"Args":["query","e"]}'
 peer chaincode invoke -o orderer.example.com:7050  --tls --cafile $ORDERER_CA -C mychannel -n mycc -c '{"Args":["invoke","a","b","10"]}'
 ```
 
 # 系统链码
 
+系统链代码具有相同的编程模型，除了**它在对等进程内运行**而**不是**像普通链代码那样**在孤立的容器中运行**。因此，系统链代码**内置于对等可执行文件中，并且不遵循上述相同的生命周期**。特别是**安装、实例化和升级不适用于系统链代码**。
+
+系统链代码的目的是在**同行和链码之间快速`gRPC`通信成本，并权衡管理的灵活性**。例如，系统链代码**只能使用对等二进制文件**进行升级。它还**必须注册一组[固定的参数](https://github.com/hyperledger/fabric/blob/master/core/scc/importsysccs.go)**，并且**没有认可政策或认可政策功能**。
+
+系统链代码在`Hyperledger Fabric`中用于实现许多系统行为，以便系统集成商可以适当地**替换或修改**它们。
+
+系统链代码的当前列表：
+
++ `LSCC` **生命周期系统链码**处理上述生命周期请求。
++ `CSCC` **配置系统链码**处理对等端的信道配置。
++ `QSCC` **查询系统链码**提供分类帐查询`API`，例如获取块和事务。
+
+用于**认可和验证**的前系统链代码已被[可插拔交易认可和验证](https://hyperledger-fabric.readthedocs.io/en/latest/pluggable_endorsement_and_validation.html)文档所描述的可插入认可和验证功能所取代。在修改或更换这些系统链码时，尤其是`LSCC`，必须格外小心。
