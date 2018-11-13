@@ -16,7 +16,7 @@
 
 **链码包由3部分组成**：
 
-+ 链码由`ChaincodeDeploymentSpec`或`CDS`定义。`CDS`根据**代码和其他属性（如名称和版本）**定义链代码包
++ 链码由`ChaincodeDeploymentSpec`或`CDS`定义。`CDS`根据**代码和其他属性（如名称和版本）定义链代码包**
 + **可选**的实例化策略，可以通过用于**认可策略**的相同在语法上描述，并在[认可策略](https://hyperledger-fabric.readthedocs.io/en/latest/endorsement-policies.html)中描述
 + 由**拥有**链码的实体签署的一组签名
 
@@ -120,7 +120,7 @@ $ peer chaincode instantiate -n sacc -v 1.0 -c '{"Args":["john","0"]}' -P "AND (
 
 ## 停止并开始
 
-请注意，**尚未实现停止和启动生命周期交易**。但是，可以通过**从每个参与者中删除链代码容器**和`SignedCDS`包来**手动停止链码**。这是通过**删除运行支持对等节点的每个主机或虚拟机上的链代码容器**，然后从**每个支持对等节点删除`SignedCDS`**来完成的：
+请注意，**尚未实现停止和启动生命周期交易**。但是，可以通过**从每个参与者中删除链代码容器**和`SignedCDS`包来**手动停止链码**。这是通过**删除运行支持对等节点的每个主机或虚拟机上的链代码容器**，然后从**每个支持对等节点删除`SignedCDS`来完成**的：
 
 > **注意**：为了从对等节点删除`CDS`，首先需要**输入对等节点的容器**。我们真的需要提供一个可以执行此操作的实用程序脚本。
 
@@ -199,8 +199,10 @@ peer chaincode invoke -o orderer.example.com:7050  --tls --cafile $ORDERER_CA -C
 
 系统链代码的当前列表：
 
-+ `LSCC` **生命周期系统链码**处理上述生命周期请求。
-+ `CSCC` **配置系统链码**处理对等端的通道配置。
-+ `QSCC` **查询系统链码**提供分类帐查询`API`，例如获取块和交易。
+1. `LSCC` **生命周期系统链码**处理上述生命周期请求。
+
+2. `CSCC` **配置系统链码**处理对等端的通道配置。
+
+3. `QSCC` **查询系统链码**提供分类帐查询`API`，例如获取块和交易。
 
 用于**认可和验证**的前系统链代码已被[可插拔交易认可和验证](https://hyperledger-fabric.readthedocs.io/en/latest/pluggable_endorsement_and_validation.html)文档所描述的可插入认可和验证功能所取代。在修改或更换这些系统链码时，尤其是`LSCC`，必须格外小心。
