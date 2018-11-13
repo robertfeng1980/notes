@@ -48,7 +48,23 @@ $ peer chaincode package -n mycc -p github.com/hyperledger/fabric/examples/chain
 
 ## 包签名
 
+在创建时签署的链码包可以**移交给其他所有者进行检查和签名**。该工作流程支持链码包的带外签名。
 
+[`ChaincodeDeploymentSpec`](https://github.com/hyperledger/fabric/blob/master/protos/peer/chaincode.proto#L78)可以选择由**集体所有者签名**，以创建[`SignedChaincodeDeploymentSpec`](https://github.com/hyperledger/fabric/blob/master/protos/peer/signed_cc_dep_spec.proto#L26)（或`SignedCDS`）。`SignedCDS`包含3个元素：
 
++ `CDS`包含**源代码**，链码的**名称和版本**。
++ 链码的**实例化策略**，表示为背书认可策略。
++ 通过[背书](https://github.com/hyperledger/fabric/blob/master/protos/peer/proposal_response.proto#L111)认可策略定义的链码**所有者列表**。
 
+> **注意**：此绑定策略是在带外确定的，以便在某些通道上实例化链代码时提供适当的`MSP`主体。如果未指定实例化策略，则**默认策略是该通道的任何`MSP`管理员**。
+
+每个所有者通过将`ChaincodeDeploymentSpec`与该所有者的身份（例如证书）相结合并签署合并结果来认可`ChaincodeDeploymentSpec`。
+
+链码所有者可以使用以下命令对先前创建的已签名包进行签名：
+
+```sh
+$ peer chaincode signpackage ccpack.out signedccpack.out
+```
+
+其中`ccpack.out`和`signedccpack.out`分别是**输入和输出包**。`signedccpack.out`包含使用本地`MSP`签名的程序包的附加签名。
 
