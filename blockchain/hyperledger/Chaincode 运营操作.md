@@ -131,3 +131,58 @@ rm /var/hyperledger/production/chaincodes/<ccname>:<ccversion>
 
 停止在以控制方式进行升级的工作流程中非常有用，其中在**发出升级之前可以在所有对等体上的通道上停止链码**。
 
+# `CLI`
+
+> 正在评估为`Hyperledger Fabric`对等二进制文件分发特定于平台的二进制文件的需求。目前，只需从正在运行的`docker`容器中调用命令即可。
+
+要查看当前可用的`CLI`命令，请在正在运行的`fabric-peer`的 `Docker` 容器中执行以下命令：
+
+```sh
+$ docker run -it hyperledger/fabric-peer bash
+# peer chaincode --help
+```
+
+其中显示的输出类似于以下示例：
+
+```sh
+Usage:
+  peer chaincode [command]
+
+Available Commands:
+  install     Package the specified chaincode into a deployment spec and save it on the peer's path.
+  instantiate Deploy the specified chaincode to the network.
+  invoke      Invoke the specified chaincode.
+  list        Get the instantiated chaincodes on a channel or installed chaincodes on a peer.
+  package     Package the specified chaincode into a deployment spec.
+  query       Query using the specified chaincode.
+  signpackage Sign the specified chaincode package
+  upgrade     Upgrade chaincode.
+
+Flags:
+      --cafile string                       Path to file containing PEM-encoded trusted certificate(s) for the ordering endpoint
+      --certfile string                     Path to file containing PEM-encoded X509 public key to use for mutual TLS communication with the orderer endpoint
+      --clientauth                          Use mutual TLS when communicating with the orderer endpoint
+      --connTimeout duration                Timeout for client to connect (default 3s)
+  -h, --help                                help for chaincode
+      --keyfile string                      Path to file containing PEM-encoded private key to use for mutual TLS communication with the orderer endpoint
+  -o, --orderer string                      Ordering service endpoint
+      --ordererTLSHostnameOverride string   The hostname override to use when validating the TLS connection to the orderer.
+      --tls                                 Use TLS when communicating with the orderer endpoint
+      --transient string                    Transient map of arguments in JSON encoding
+
+Use "peer chaincode [command] --help" for more information about a command.
+```
+
+为了便于在脚本应用程序中使用，`peer`命令在命令**失败时始终生成非零返回码**。链码命令示例：
+
+```sh
+peer chaincode install -n mycc -v 0 -p path/to/my/chaincode/v0
+peer chaincode instantiate -n mycc -v 0 -c '{"Args":["a", "b", "c"]}' -C mychannel
+peer chaincode install -n mycc -v 1 -p path/to/my/chaincode/v1
+peer chaincode upgrade -n mycc -v 1 -c '{"Args":["d", "e", "f"]}' -C mychannel
+peer chaincode query -C mychannel -n mycc -c '{"Args":["query","e"]}'
+peer chaincode invoke -o orderer.example.com:7050  --tls --cafile $ORDERER_CA -C mychannel -n mycc -c '{"Args":["invoke","a","b","10"]}'
+```
+
+# 系统链码
+
