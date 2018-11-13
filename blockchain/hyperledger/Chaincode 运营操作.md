@@ -66,5 +66,25 @@ $ peer chaincode package -n mycc -p github.com/hyperledger/fabric/examples/chain
 $ peer chaincode signpackage ccpack.out signedccpack.out
 ```
 
-其中`ccpack.out`和`signedccpack.out`分别是**输入和输出包**。`signedccpack.out`包含使用本地`MSP`签名的程序包的附加签名。
+其中`ccpack.out`和`signedccpack.out`分别是**输入和输出包**。`signedccpack.out`包含使用本地`MSP`签名的程序包的**附加签名**。
+
+## 安装链码
+
+安装事务将链代码的源代码打包成称为`ChaincodeDeploymentSpec`（或`CDS`）的规定格式，并将其安装在将运行该链代码的**对等节点**上。
+
+> **注意**：必须在将运行链码的通道的**每个支持对等节点**上安装链代码。
+
+如果只为`ChaincodeDeploymentSpec`提供安装`API`，它将**默认实例化策略**并包含一个**空的所有者**列表。
+
+> **注意**：`Chaincode`只应安装在**链码拥有成员的对等节点**上，以**保护链码逻辑**与网络上其他成员的**机密性**。那些**没有链码**的成员，**不能成为链码交易的参与者**。也就是说，他们**无法执行**链码。但是，他们仍然**可以验证事务并将其提交到分类帐**。
+
+要安装链代码，请将[`SignedProposal`](https://github.com/hyperledger/fabric/blob/master/protos/peer/proposal.proto#L104)发送到[`System Chaincode`](https://hyperledger-fabric.readthedocs.io/en/latest/chaincode4noah.html#system-chaincode)部分中描述的生命周期系统链代码（`LSCC`）。例如，要使用`CLI`安装[`Simple Asset Chaincode`](https://hyperledger-fabric.readthedocs.io/en/latest/chaincode4ade.html#simple-asset-chaincode)部分中描述的`sacc`示例链代码，命令将如下所示：
+
+```sh
+$ peer chaincode install -n asset_mgmt -v 1.0 -p sacc
+```
+
+`CLI`在内部为`sacc`创建`SignedChaincodeDeploymentSpec`并将其发送到**本地对等方**，后者在`LSCC`上调用`Install`方法。`-p`选项的参数**指定了链代码的路径**，该链代码必须位于用户`GOPATH`的源树中，例如，`$GOPATH/src/sacc`。有关命令选项的完整说明，请参阅`CLI`部分。
+
+请注意，为了在对等方上安装，`SignedProposal`的签名**必须来自对等方的本地`MSP`管理员**。
 
