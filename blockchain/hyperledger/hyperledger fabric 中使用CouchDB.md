@@ -25,7 +25,12 @@
 
 # 在`Hyperledger Fabric`中启用`CouchDB`
 
+`CouchDB`作为一个**独立**的数据库进程与对等体一起运行，因此在设置，管理和操作方面还有其他考虑因素。可以使用`CouchDB`的`docker`镜像，**建议它在与同级服务器相同的服务器上运行**。需要**为每个对等节点**设置一个`CouchDB`容器，并通过**更改`core.yaml`中的配置**来更新每个对等容器，以**指向`CouchDB`容器**。**文件`core.yaml`必须位于环境变量`FABRIC_CFG_PATH`指定的目录中**：
 
++ 对于`docker`部署，`core.yaml`**已预先配置并位于对等容器`FABRIC_CFG_PATH`文件夹**中。但是，在使用`docker`环境时，通常通过编辑`docker-compose-couch.yaml`来**覆盖**`core.yaml`来传递**环境变量**。
++ 对于本机二进制部署，`core.yaml`包含在发布配置工件分发中。
+
+编辑`core.yaml`的`stateDatabase`部分。将`CouchDB`指定为`stateDatabase`并填写关联的`couchDBConfig`属性。有关配置`CouchDB`以使用结构的更多详细信息，请参阅此处。要查看为`CouchDB`配置的`core.yaml`文件的示例，请检查`HyperLedger/fabric-samples/first-network`目录中的**BYFN** `docker-compose-couch.yaml`。
 
 # 创建索引
 
