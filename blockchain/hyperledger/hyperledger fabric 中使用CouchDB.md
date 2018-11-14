@@ -159,7 +159,28 @@ $ ./byfn.sh up -c mychannel -s couchdb
 
 # 安装并实例化`Chaincode`
 
+**客户端应用程序通过链码与区块链分类帐交互**。因此，需要在**每个将执行和支持事务的对等体上**安装链代码，并在通道上实例化链代码。在上一节中，演示了如何打包链代码，以便它们可以为部署做好准备。
 
+`Chaincode`安装在对等体上，然后使用`peer-commands`实例化到通道上。
+
++ `peer chaincode install` 命令用来在对等体上安装`Marbles`链码。假设已启动`BYFN`网络，请使用以下命令进入到`CLI`容器：
+
+  ```sh
+  $ docker exec -it cli bash
+  ```
+
+  使用以下命令将`marbles`链代码从`git`存储库安装到`BYFN`网络中的对等方。`CLI`容器默认使用`org1`的`peer0`：
+
+  ```sh
+  $ peer chaincode install -n marbles -v 1.0 -p github.com/chaincode/marbles02/go
+  ```
+
++ 执行`peer chaincode instantiate`命令以实例化通道上的链代码。要在`BYFN`通道`mychannel`上实例化`Marbles`示例，请运行以下命令：
+
+  ```sh
+  export CHANNEL_NAME=mychannel
+  peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -v 1.0 -c '{"Args":["init"]}' -P "OR ('Org0MSP.peer','Org1MSP.peer')"
+  ```
 
 # 查询`CouchDB`状态数据库
 
