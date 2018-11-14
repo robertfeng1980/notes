@@ -215,7 +215,61 @@ $ docker logs peer0.org1.example.com  2>&1 | grep "CouchDB index"
 + `queryMarbles`富查询的示例 `ad hoc`。这是一个查询，其中（选择器）字符串可以传递给函数。此查询对于需要在运行时**动态构建自己的选择器**的客户端应用程序非常有用。有关选择器的更多信息，请参阅[`CouchDB`选择器语法](http://docs.couchdb.org/en/latest/api/database/find.html#find-selectors)。
 + `queryMarblesByOwner` 参数化查询的示例，其中查询逻辑被拷贝到链代码中。在这种情况下，函数接受单个参数，即弹珠所有者。然后，它使用`JSON`查询语法在状态数据库中查询与`marble`的`docType`和所有者`id`匹配的`JSON`文档。
 
+## 使用`peer`命令运行查询
 
+如果没有客户端应用程序来测试链码中定义的富查询，则可以使用对等命令。对等命令从`docker`容器内的命令行运行。将自定义`peer chaincode query`命令以使用`Marbles`索引`indexOwner`并使用`queryMarbles`函数查询`tom`拥有的所有弹珠。
+
+在查询数据库之前，应该添加一些数据。在对等容器中运行以下命令以创建由`tom`拥有的弹珠：
+
+```sh
+$ peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -c '{"Args":["initMarble","marble1","blue","35","tom"]}'
+```
+
+在**链代码实例化期间部署索引之后，链代码查询将自动使用它**。`CouchDB`可以根据要**查询的字段**确定要使用的索引。如果查询**条件存在索引**，则将使用该索引。但是，**建议的方法是在查询中指定`use_index`关键字**。下面的`peer`命令是一个如何通过包含`use_index`关键字在选择器语法中显式指定索引的示例：
+
+```sh
+// Rich Query with index name explicitly specified:
+$ peer chaincode query -C $CHANNEL_NAME -n marbles -c '{"Args":["queryMarbles", "{\"selector\":{\"docType\":\"marble\",\"owner\":\"tom\"}, \"use_index\":[\"_design/indexOwnerDoc\", \"indexOwner\"]}"]}'
+```
+
+深入研究上面的查询命令，有三个重要的参数：
+
++ `queryMarbles`
+
+  `Marbles`链码中函数的名称。注意`shim.ChaincodeStubInterface`用于**访问和修改**分类帐。`getQueryResultForQueryString()`将`queryString`传递给`shim API getQueryResult()`。
+
+  ```go
+  func (t *SimpleChaincode) queryMarbles(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+  
+          //   0
+          // "queryString"
+           if len(args) < 1 {
+                   return shim.Error("Incorrect number of arguments. Expecting 1")
+           }
+  
+           queryString := args[0]
+  
+           queryResults, err := getQueryResultForQueryString(stub, queryString)
+           if err != nil {
+                 return shim.Error(err.Error())
+           }
+           return shim.Success(queryResults)
+  }
+  ```
+
++ `{"selector":{"docType":"marble","owner":"tom"}`
+
+  这是一个`ad hoc`选择器字符串的示例，它**查找所有类型为`marble`的文档**，其中`owner`属性的值为`tom`。
+
++ `"use_index":["_design/indexOwnerDoc", "indexOwner"]`
+
+  指定设计文档名称`indexOwnerDoc`和索引名称`indexOwner`。在此示例中，**选择器查询显式包含使用`use_index`关键字指定的索引名称**。回顾上面的索引定义[创建一个索引](https://hyperledger-fabric.readthedocs.io/en/latest/couchdb_tutorial.html#cdb-create-index)，它包含一个设计文档`"ddoc":"indexOwnerDoc"`。使用`CouchDB`时，如果计划在查询中显式包含索引名称，则**索引定义必须包含`ddoc`值**，因此可以使用`use_index`关键字引用它。
+
+查询成功运行，并利用以下结果利用索引：
+
+```sh
+Query Result: [{"Key":"marble1", "Record":{"color":"blue","docType":"marble","name":"marble1","owner":"tom","size":35}}]
+```
 
 # 使用分页查询`CouchDB`状态数据库
 
