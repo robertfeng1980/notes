@@ -19,6 +19,7 @@
     + [`Chaincode GoLang 开发教程`](./hyperledger/hyperledger%20fabric%20Chaincode%20开发教程.md)
     + [`Chaincode Java 开发教程`](./hyperledger/hyperledger%20fabric%20Chaincode%20Java开发教程.md#)
     + [`开发系统Chaincode插件`](./hyperledger/hyperledger%20fabric%20开发系统链码插件.md)
+    + [`使用CouchDB状态数据库`](./hyperledger/hyperledger%20fabric%20中使用CouchDB.md)
 
 - 运维
     + [`升级网络`](./hyperledger/hyperledger%20fabric%20升级网络组建.md)
