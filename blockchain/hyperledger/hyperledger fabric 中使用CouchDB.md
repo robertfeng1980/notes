@@ -273,7 +273,112 @@ Query Result: [{"Key":"marble1", "Record":{"color":"blue","docType":"marble","na
 
 # 使用分页查询`CouchDB`状态数据库
 
+当`CouchDB`查询返回大型结果集时，可以使用一组`API`，这些`API`可以通过链代码调用以对结果列表进行分页。分页提供了一种机制，通过**指定`pageSize`和起始点**来划分结果集，一个指示结果集**开始位置**的书签`bookmark` 。客户端应用程序**迭代地调用执行查询**的链代码，直到**不再返回结果**。有关更多信息，请参阅有关[`CouchDB`分页的此主题](http://hyperledger-fabric.readthedocs.io/en/master/couchdb_as_state_database.html#couchdb-pagination)。
 
+使用`Marbles`示例函数`queryMarblesWithPagination`来演示如何在链代码和客户端应用程序中实现分页。
+
+`queryMarblesWithPagination`具有**分页的临时丰富查询**的示例。这是一个查询，其中（选择器）字符串可以传递到类似于上面示例的函数中。在这种情况下，查询还包括`pageSize`以及书签`bookmark`。
+
+## 准备数据
+
+为了展示分页，需要更多数据。此示例假定已从上方添加了`marble1`。在对等容器中运行以下命令以创建`tom`拥有的四个弹珠，以创建由`tom`拥有的总共五个弹珠：
+
+```sh
+peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -c '{"Args":["initMarble","marble2","yellow","35","tom"]}'
+peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -c '{"Args":["initMarble","marble3","green","20","tom"]}'
+peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -c '{"Args":["initMarble","marble4","purple","20","tom"]}'
+peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -c '{"Args":["initMarble","marble5","blue","40","tom"]}'
+```
+
+除了前一个示例中的查询参数之外，`queryMarblesWithPagination`还添加了`pagesize`和`bookmark`。`PageSize`指定每个**查询返回的记录数**。书签是一个**锚**告诉`couchDB`**从哪里开始分页查询**，**每个结果页面都会返回一个唯一的书签**。
+
+## 分页函数
+
+`queryMarblesWithPagination`是 `Marbles`链码中函数的名称。注意`shim.ChaincodeStubInterface`用于访问和修改分类帐。`getQueryResultForQueryStringWithPagination()`传递`queryString`使用`pageSize`和`bookmark`来访问填充`API GetQueryResultWithPagination()`。
+
+```go
+func (t *SimpleChaincode) queryMarblesWithPagination(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+      //   0
+      // "queryString"
+      if len(args) < 3 {
+              return shim.Error("Incorrect number of arguments. Expecting 3")
+      }
+
+      queryString := args[0]
+      //return type of ParseInt is int64
+      pageSize, err := strconv.ParseInt(args[1], 10, 32)
+      if err != nil {
+              return shim.Error(err.Error())
+      }
+      bookmark := args[2]
+
+      queryResults, err := getQueryResultForQueryStringWithPagination(stub, queryString, int32(pageSize), bookmark)
+      if err != nil {
+              return shim.Error(err.Error())
+      }
+      return shim.Success(queryResults)
+}
+```
+
+## 查询首页数据
+
+以下示例是一个`peer`命令，它调用`queryMarblesWithPagination`，`pageSize`为`3`且**未指定书签**。
+
+> **提示**：如果**未指定**书签，则查询以“**第一**”记录页开头。
+
+```sh
+// Rich Query with index name explicitly specified and a page size of 3:
+$ peer chaincode query -C $CHANNEL_NAME -n marbles -c '{"Args":["queryMarblesWithPagination", "{\"selector\":{\"docType\":\"marble\",\"owner\":\"tom\"}, \"use_index\":[\"_design/indexOwnerDoc\", \"indexOwner\"]}","3",""]}'
+```
+
+收到以下响应（为清晰起见添加了回车），因为`pagsize`设置为`3`，所以返回五个弹珠中的三个：
+
+```sh
+[{"Key":"marble1", "Record":{"color":"blue","docType":"marble","name":"marble1","owner":"tom","size":35}},
+ {"Key":"marble2", "Record":{"color":"yellow","docType":"marble","name":"marble2","owner":"tom","size":35}},
+ {"Key":"marble3", "Record":{"color":"green","docType":"marble","name":"marble3","owner":"tom","size":20}}]
+[{"ResponseMetadata":{"RecordsCount":"3",
+"Bookmark":"g1AAAABLeJzLYWBgYMpgSmHgKy5JLCrJTq2MT8lPzkzJBYqz5yYWJeWkGoOkOWDSOSANIFk2iCyIyVySn5uVBQAGEhRz"}}]
+```
+
+> **注意**：由`CouchDB`为每个查询生成唯一书签，并表示结果集中的占位符。在后续的查询迭代中传递返回的书签以检索下一组结果。
+
+## 查询下页数据
+
+以下是使用`pageSize`为`3`调用`queryMarblesWithPagination`的`peer`命令。请注意，这次查询**包含从上一个查询返回的书签**。
+
+```sh
+$ peer chaincode query -C $CHANNEL_NAME -n marbles -c '{"Args":["queryMarblesWithPagination", "{\"selector\":{\"docType\":\"marble\",\"owner\":\"tom\"}, \"use_index\":[\"_design/indexOwnerDoc\", \"indexOwner\"]}","3","g1AAAABLeJzLYWBgYMpgSmHgKy5JLCrJTq2MT8lPzkzJBYqz5yYWJeWkGoOkOWDSOSANIFk2iCyIyVySn5uVBQAGEhRz"]}'
+```
+
+收到以下响应（为清楚起见，添加了回车）。检索最后两条记录：
+
+```sh
+[{"Key":"marble4", "Record":{"color":"purple","docType":"marble","name":"marble4","owner":"tom","size":20}},
+ {"Key":"marble5", "Record":{"color":"blue","docType":"marble","name":"marble5","owner":"tom","size":40}}]
+[{"ResponseMetadata":{"RecordsCount":"2",
+"Bookmark":"g1AAAABLeJzLYWBgYMpgSmHgKy5JLCrJTq2MT8lPzkzJBYqz5yYWJeWkmoKkOWDSOSANIFk2iCyIyVySn5uVBQAGYhR1"}}]
+```
+
+## 查询分页结束
+
+最后一个命令是一个`peer`命令，用于调用`querySarblesWithPagination`，其`pageSize`为`3`，并**带有上一个查询的书签**。
+
+```sh
+$ peer chaincode query -C $CHANNEL_NAME -n marbles -c '{"Args":["queryMarblesWithPagination", "{\"selector\":{\"docType\":\"marble\",\"owner\":\"tom\"}, \"use_index\":[\"_design/indexOwnerDoc\", \"indexOwner\"]}","3","g1AAAABLeJzLYWBgYMpgSmHgKy5JLCrJTq2MT8lPzkzJBYqz5yYWJeWkmoKkOWDSOSANIFk2iCyIyVySn5uVBQAGYhR1"]}'
+
+```
+
+收到以下响应（为清楚起见，添加了回车）。**没有返回任何记录，表明已检索到所有页面**：
+
+```sh
+[]
+[{"ResponseMetadata":{"RecordsCount":"0",
+"Bookmark":"g1AAAABLeJzLYWBgYMpgSmHgKy5JLCrJTq2MT8lPzkzJBYqz5yYWJeWkmoKkOWDSOSANIFk2iCyIyVySn5uVBQAGYhR1"}}]
+```
+
+有关客户端应用程序如何使用分页迭代结果集的示例，请在[`Marbles`示例](https://github.com/hyperledger/fabric-samples/blob/master/chaincode/marbles02/go/marbles_chaincode.go)中搜索`getQueryResultForQueryStringWithPagination`函数。
 
 # 更新索引
 
