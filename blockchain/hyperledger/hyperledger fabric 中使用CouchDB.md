@@ -210,6 +210,11 @@ $ docker logs peer0.org1.example.com  2>&1 | grep "CouchDB index"
 
 ## 在链码中构建查询
 
+可以使用链码中的`CouchDB JSON`查询语言对链码数据值执行复杂的富查询。正如上面所探讨的，[`marbles02`示例](https://github.com/hyperledger/fabric-samples/blob/master/chaincode/marbles02/go/marbles_chaincode.go)链代码包含一个索引，并且在函数中定义了丰富的查询 `queryMarbles`和`queryMarblesByOwner`：
+
++ `queryMarbles`富查询的示例 `ad hoc`。这是一个查询，其中（选择器）字符串可以传递给函数。此查询对于需要在运行时**动态构建自己的选择器**的客户端应用程序非常有用。有关选择器的更多信息，请参阅[`CouchDB`选择器语法](http://docs.couchdb.org/en/latest/api/database/find.html#find-selectors)。
++ `queryMarblesByOwner` 参数化查询的示例，其中查询逻辑被拷贝到链代码中。在这种情况下，函数接受单个参数，即弹珠所有者。然后，它使用`JSON`查询语法在状态数据库中查询与`marble`的`docType`和所有者`id`匹配的`JSON`文档。
+
 
 
 # 使用分页查询`CouchDB`状态数据库
