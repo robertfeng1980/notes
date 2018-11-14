@@ -52,7 +52,7 @@ type marble struct {
 }
 ```
 
-在此结构中，属性（`docType`, `name`, `color`, `size`, `owner`）定义与资产关联的分类帐数据。属性`docType`是链代码中使用的模式，用于**区分可能需要单独查询的不同数据类型**。使用`CouchDB`时，建议包含此`docType`属性以**区分`chaincode`命名空间中的每种类型的文档**。（每个链码都表示为自己的`CouchDB`数据库，也就是说，每个链码都有自己的`key`命名空间）
+在此结构中，属性（`docType`, `name`, `color`, `size`, `owner`）定义与资产关联的分类帐数据。属性`docType`是链码中使用的模式，用于**区分可能需要单独查询的不同数据类型**。使用`CouchDB`时，建议包含此`docType`属性以**区分`chaincode`命名空间中的每种类型的文档**。（每个链码都表示为自己的`CouchDB`数据库，也就是说，每个链码都有自己的`key`命名空间）
 
 对于`Marbles`数据结构，**属性`docType`用于标识此文档/资产是`Marbles`资产。可能在链码数据库中可能存在其他文档/资产**。数据库中的文档可以**针对所有这些属性值**进行搜索。
 
@@ -134,7 +134,7 @@ type marble struct {
 
 如果链码安装和实例化使用`Hyperledger Fabric Node SDK`，则`JSON`索引文件可以位于任何文件夹中，只要它符合此目录结构即可。在使用`client.installChaincode() API`进行链码安装期间，请在安装请求中包含属性（`metadataPath`）。`metadataPath`的值是一个字符串，表示**包含`JSON`索引文件的目录结构的绝对路径**。
 
-或者，如果**使用`peer-commands`来安装和实例化链代码，那么`JSON`索引文件必须位于`META-INF/statedb/couchdb/indexes`路径下，该路径位于链代码所在的目录内**。
+或者，如果**使用`peer-commands`来安装和实例化链码，那么`JSON`索引文件必须位于`META-INF/statedb/couchdb/indexes`路径下，该路径位于链码所在的目录内**。
 
 下面的[`Marbles`示例](https://github.com/hyperledger/fabric-samples/tree/master/chaincode/marbles02/go)说明了索引如何与将使用`peer`命令安装的`chaincode`打包在一起。
 
@@ -159,7 +159,7 @@ $ ./byfn.sh up -c mychannel -s couchdb
 
 # 安装并实例化`Chaincode`
 
-**客户端应用程序通过链码与区块链分类帐交互**。因此，需要在**每个将执行和支持事务的对等体上**安装链代码，并在通道上实例化链代码。在上一节中，演示了如何打包链代码，以便它们可以为部署做好准备。
+**客户端应用程序通过链码与区块链分类帐交互**。因此，需要在**每个将执行和支持交易的对等体上**安装链码，并在通道上实例化链码。在上一节中，演示了如何打包链码，以便它们可以为部署做好准备。
 
 `Chaincode`安装在对等体上，然后使用`peer-commands`实例化到通道上。
 
@@ -169,13 +169,13 @@ $ ./byfn.sh up -c mychannel -s couchdb
   $ docker exec -it cli bash
   ```
 
-  使用以下命令将`marbles`链代码从`git`存储库安装到`BYFN`网络中的对等方。`CLI`容器默认使用`org1`的`peer0`：
+  使用以下命令将`marbles`链码从`git`存储库安装到`BYFN`网络中的对等方。`CLI`容器默认使用`org1`的`peer0`：
 
   ```sh
   $ peer chaincode install -n marbles -v 1.0 -p github.com/chaincode/marbles02/go
   ```
 
-+ 执行`peer chaincode instantiate`命令以实例化通道上的链代码。要在`BYFN`通道`mychannel`上实例化`Marbles`示例，请运行以下命令：
++ 执行`peer chaincode instantiate`命令以实例化通道上的链码。要在`BYFN`通道`mychannel`上实例化`Marbles`示例，请运行以下命令：
 
   ```sh
   export CHANNEL_NAME=mychannel
@@ -210,10 +210,10 @@ $ docker logs peer0.org1.example.com  2>&1 | grep "CouchDB index"
 
 ## 在链码中构建查询
 
-可以使用链码中的`CouchDB JSON`查询语言对链码数据值执行复杂的富查询。正如上面所探讨的，[`marbles02`示例](https://github.com/hyperledger/fabric-samples/blob/master/chaincode/marbles02/go/marbles_chaincode.go)链代码包含一个索引，并且在函数中定义了丰富的查询 `queryMarbles`和`queryMarblesByOwner`：
+可以使用链码中的`CouchDB JSON`查询语言对链码数据值执行复杂的富查询。正如上面所探讨的，[`marbles02`示例](https://github.com/hyperledger/fabric-samples/blob/master/chaincode/marbles02/go/marbles_chaincode.go)链码包含一个索引，并且在函数中定义了丰富的查询 `queryMarbles`和`queryMarblesByOwner`：
 
 + `queryMarbles`富查询的示例 `ad hoc`。这是一个查询，其中（选择器）字符串可以传递给函数。此查询对于需要在运行时**动态构建自己的选择器**的客户端应用程序非常有用。有关选择器的更多信息，请参阅[`CouchDB`选择器语法](http://docs.couchdb.org/en/latest/api/database/find.html#find-selectors)。
-+ `queryMarblesByOwner` 参数化查询的示例，其中查询逻辑被拷贝到链代码中。在这种情况下，函数接受单个参数，即弹珠所有者。然后，它使用`JSON`查询语法在状态数据库中查询与`marble`的`docType`和所有者`id`匹配的`JSON`文档。
++ `queryMarblesByOwner` 参数化查询的示例，其中查询逻辑被拷贝到链码中。在这种情况下，函数接受单个参数，即弹珠所有者。然后，它使用`JSON`查询语法在状态数据库中查询与`marble`的`docType`和所有者`id`匹配的`JSON`文档。
 
 ## 使用`peer`命令运行查询
 
@@ -225,7 +225,7 @@ $ docker logs peer0.org1.example.com  2>&1 | grep "CouchDB index"
 $ peer chaincode invoke -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -c '{"Args":["initMarble","marble1","blue","35","tom"]}'
 ```
 
-在**链代码实例化期间部署索引之后，链代码查询将自动使用它**。`CouchDB`可以根据要**查询的字段**确定要使用的索引。如果查询**条件存在索引**，则将使用该索引。但是，**建议的方法是在查询中指定`use_index`关键字**。下面的`peer`命令是一个如何通过包含`use_index`关键字在选择器语法中显式指定索引的示例：
+在**链码实例化期间部署索引之后，链码查询将自动使用它**。`CouchDB`可以根据要**查询的字段**确定要使用的索引。如果查询**条件存在索引**，则将使用该索引。但是，**建议的方法是在查询中指定`use_index`关键字**。下面的`peer`命令是一个如何通过包含`use_index`关键字在选择器语法中显式指定索引的示例：
 
 ```sh
 // Rich Query with index name explicitly specified:
@@ -273,9 +273,9 @@ Query Result: [{"Key":"marble1", "Record":{"color":"blue","docType":"marble","na
 
 # 使用分页查询`CouchDB`状态数据库
 
-当`CouchDB`查询返回大型结果集时，可以使用一组`API`，这些`API`可以通过链代码调用以对结果列表进行分页。分页提供了一种机制，通过**指定`pageSize`和起始点**来划分结果集，一个指示结果集**开始位置**的书签`bookmark` 。客户端应用程序**迭代地调用执行查询**的链代码，直到**不再返回结果**。有关更多信息，请参阅有关[`CouchDB`分页的此主题](http://hyperledger-fabric.readthedocs.io/en/master/couchdb_as_state_database.html#couchdb-pagination)。
+当`CouchDB`查询返回大型结果集时，可以使用一组`API`，这些`API`可以通过链码调用以对结果列表进行分页。分页提供了一种机制，通过**指定`pageSize`和起始点**来划分结果集，一个指示结果集**开始位置**的书签`bookmark` 。客户端应用程序**迭代地调用执行查询**的链码，直到**不再返回结果**。有关更多信息，请参阅有关[`CouchDB`分页的此主题](http://hyperledger-fabric.readthedocs.io/en/master/couchdb_as_state_database.html#couchdb-pagination)。
 
-使用`Marbles`示例函数`queryMarblesWithPagination`来演示如何在链代码和客户端应用程序中实现分页。
+使用`Marbles`示例函数`queryMarblesWithPagination`来演示如何在链码和客户端应用程序中实现分页。
 
 `queryMarblesWithPagination`具有**分页的临时丰富查询**的示例。这是一个查询，其中（选择器）字符串可以传递到类似于上面示例的函数中。在这种情况下，查询还包括`pageSize`以及书签`bookmark`。
 
@@ -382,9 +382,9 @@ $ peer chaincode query -C $CHANNEL_NAME -n marbles -c '{"Args":["queryMarblesWit
 
 # 更新索引
 
-可能需要随时间更新索引，安装的链码的后续版本中可能存在相同的索引。为了更新索引，原始索引定义必须包含设计文档`ddoc`属性和索引名称。要更新索引定义，请使用相同的索引名称，但更改索引定义。只需**编辑索引`JSON`文件，然后在索引中添加或删除字段**。`Fabric`仅**支持索引类型`JSON`，不支持更改索引类型**。在安装和实例化链代码时，更新的索引定义将**重新部署到对等方的状态数据库**。**对索引名称或`ddoc`属性的更改将导致创建新索引，并且原始索引在`CouchDB`中保持不变，直到将其删除**。
+可能需要随时间更新索引，安装的链码的后续版本中可能存在相同的索引。为了更新索引，原始索引定义必须包含设计文档`ddoc`属性和索引名称。要更新索引定义，请使用相同的索引名称，但更改索引定义。只需**编辑索引`JSON`文件，然后在索引中添加或删除字段**。`Fabric`仅**支持索引类型`JSON`，不支持更改索引类型**。在安装和实例化链码时，更新的索引定义将**重新部署到对等方的状态数据库**。**对索引名称或`ddoc`属性的更改将导致创建新索引，并且原始索引在`CouchDB`中保持不变，直到将其删除**。
 
-> **注意**：如果状态数据库具有大量数据，则**重建索引将花费一些时间**，在此期间**链代码调用问题查询可能失败或超时**。
+> **注意**：如果状态数据库具有大量数据，则**重建索引将花费一些时间**，在此期间**链码调用问题查询可能失败或超时**。
 
 ## 迭代索引定义
 
