@@ -42,7 +42,7 @@
 
 为了演示构建索引，将使用[`Marbles`示例](https://github.com/hyperledger/fabric-samples/blob/master/chaincode/marbles02/go/marbles_chaincode.go)中的数据。在此示例中，`Marbles`数据结构定义为：
 
-```json
+```go
 type marble struct {
     ObjectType string `json:"docType"` //docType is used to distinguish the various types of objects in state database
     Name       string `json:"name"`    //the field tags are needed to keep case from bouncing around
@@ -201,6 +201,14 @@ $ docker logs peer0.org1.example.com  2>&1 | grep "CouchDB index"
 > **注意**：如果`BYFN`示例的 `peer`节点 `peer0.org1.example.com`上未安装`Marbles`，则可能需要将其替换为安装了`Marbles`的其他对等方的名称。
 
 # 查询`CouchDB`状态数据库
+
+现在**索引已在`JSON`文件中定义并与链码一起部署**，链码函数可以对`CouchDB`状态数据库**执行`JSON`查询**，因此对等命令可以调用链码函数。
+
+在**查询上指定索引名称是可选的。如果未指定，并且已查询的字段已存在索引，则将自动使用现有索引**。
+
+> **提示**：使用`use_index`关键字在查询中**显式包含索引名称**是一种很好的做法。没有它，`CouchDB`可能会**选择一个不太理想的索引**。此外，`CouchDB`可能**根本不使用索引**，可能没有意识到它，在测试期间的低容量。只有在较高的卷上，可能会发现性能较慢，因为`CouchDB`没有使用索引而认为它是。
+
+## 在链码中构建查询
 
 
 
