@@ -182,6 +182,24 @@ $ ./byfn.sh up -c mychannel -s couchdb
   peer chaincode instantiate -o orderer.example.com:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem -C $CHANNEL_NAME -n marbles -v 1.0 -c '{"Args":["init"]}' -P "OR ('Org0MSP.peer','Org1MSP.peer')"
   ```
 
+# 验证索引已部署
+
+一旦链码安装在对等体上并在通道上实例化，**索引将被部署到每个对等体的`CouchDB`状态数据库**。可以通过检查`Docker`容器中的**对等节点日志**来验证是**否已成功创建`CouchDB`索引**。
+
+要查看对等`docker`容器中的日志，请打开一个新的终端窗口并运行以下命令以`grep`查找已创建索引的消息。
+
+```sh
+$ docker logs peer0.org1.example.com  2>&1 | grep "CouchDB index"
+```
+
+应该看到如下所示的结果：
+
+```sh
+[couchdb] CreateIndex -> INFO 0be Created CouchDB index [indexOwner] in state database [mychannel_marbles] using design document [_design/indexOwnerDoc]
+```
+
+> **注意**：如果`BYFN`示例的 `peer`节点 `peer0.org1.example.com`上未安装`Marbles`，则可能需要将其替换为安装了`Marbles`的其他对等方的名称。
+
 # 查询`CouchDB`状态数据库
 
 
