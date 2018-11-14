@@ -124,7 +124,7 @@ type marble struct {
 }
 ```
 
-通常，应该为**索引字段建模以匹配将在查询过滤器和排序中使用的字段**。有关以`JSON`格式构建索引的更多详细信息，请[参阅`CouchDB`文档](http://docs.couchdb.org/en/latest/api/database/find.html#db-index)。
+通常，应该为**索引字段建模以匹配将在查询过滤器和排序中使用的字段**。有关以`JSON`格式构建索引的更多详细信息，请[参阅`CouchDB`文档索引章节](http://docs.couchdb.org/en/latest/api/database/find.html#db-index)。
 
 关于索引的最后一句话，`Fabric`负责使用称为`index warming`的模式索引数据库中的文档。在下一个查询之前，`CouchDB`通常**不会索引新文档或更新的文档**。`Fabric`通过在**提交**每个数据块之后**请求索引更新**来确保索引保持“**warm**”。这可以**确保查询很快**，因为它们**不必查询之前索引**文档。**每次将新记录添加到状态数据库时，此过程都会使索引保持最新并刷新**。
 
@@ -397,7 +397,7 @@ $ peer chaincode query -C $CHANNEL_NAME -n marbles -c '{"Args":["queryMarblesWit
 **Index for docType, owner** 示例`curl`命令行，用于在`CouchDB channel_chaincode`数据库中定义索引：
 
 ```sh
-curl -i -X POST -H "Content-Type: application/json" -d
+curl -i -X POST -H "Content-Type: application/json" -d \
        "{\"index\":{\"fields\":[\"docType\",\"owner\"]},
          \"name\":\"indexOwner\",
          \"ddoc\":\"indexOwnerDoc\",
