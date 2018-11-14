@@ -134,9 +134,28 @@ type marble struct {
 
 如果链码安装和实例化使用`Hyperledger Fabric Node SDK`，则`JSON`索引文件可以位于任何文件夹中，只要它符合此目录结构即可。在使用`client.installChaincode() API`进行链码安装期间，请在安装请求中包含属性（`metadataPath`）。`metadataPath`的值是一个字符串，表示**包含`JSON`索引文件的目录结构的绝对路径**。
 
-或者，如果使用`peer-commands`来安装和实例化链代码，那么`JSON`索引文件必须位于`META-INF/statedb/couchdb/indexes`路径下，该路径位于链代码所在的目录内。
+或者，如果**使用`peer-commands`来安装和实例化链代码，那么`JSON`索引文件必须位于`META-INF/statedb/couchdb/indexes`路径下，该路径位于链代码所在的目录内**。
 
-下面的`Marbles`示例说明了索引如何与将使用`peer`命令安装的`chaincode`打包在一起。
+下面的[`Marbles`示例](https://github.com/hyperledger/fabric-samples/tree/master/chaincode/marbles02/go)说明了索引如何与将使用`peer`命令安装的`chaincode`打包在一起。
+
+![Marbles Chaincode Index Package](https://hyperledger-fabric.readthedocs.io/en/latest/_images/couchdb_tutorial_pkg_example.png)
+
+# 启动网络
+
+在安装和实例化弹珠链码之前，需要启动`BYFN`网络。为了本教程的目的，希望从已知的初始状态进行操作。以下命令将终止所有活动或过时的`docker`容器并删除以前生成的工件。因此，**运行以下命令来清理以前的所有环境**：
+
+```sh
+$ cd fabric-samples/first-network
+$ ./byfn.sh down
+```
+
+现在通过运行以下命令启动与`CouchDB`的`BYFN`网络：
+
+```sh
+$ ./byfn.sh up -c mychannel -s couchdb
+```
+
+这将创建一个简单的`Fabric`网络，其中包含一个名为`mychannel`的通道，其中包含两个组织（每个组织维护两个对等节点）和一个订购服务，同时使用`CouchDB`作为状态数据库。
 
 # 安装并实例化`Chaincode`
 
