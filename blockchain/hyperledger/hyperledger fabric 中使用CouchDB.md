@@ -128,9 +128,15 @@ type marble struct {
 
 关于索引的最后一句话，`Fabric`负责使用称为`index warming`的模式索引数据库中的文档。在下一个查询之前，`CouchDB`通常**不会索引新文档或更新的文档**。`Fabric`通过在**提交**每个数据块之后**请求索引更新**来确保索引保持“**warm**”。这可以**确保查询很快**，因为它们**不必查询之前索引**文档。**每次将新记录添加到状态数据库时，此过程都会使索引保持最新并刷新**。
 
-# 将索引添加到您的`chaincode`文件夹
+# 将索引添加到`chaincode`文件夹
 
+**完成索引后，可以将其与链码打包在一起，以便将其放在相应的元数据文件夹中**。
 
+如果链码安装和实例化使用`Hyperledger Fabric Node SDK`，则`JSON`索引文件可以位于任何文件夹中，只要它符合此目录结构即可。在使用`client.installChaincode() API`进行链码安装期间，请在安装请求中包含属性（`metadataPath`）。`metadataPath`的值是一个字符串，表示**包含`JSON`索引文件的目录结构的绝对路径**。
+
+或者，如果使用`peer-commands`来安装和实例化链代码，那么`JSON`索引文件必须位于`META-INF/statedb/couchdb/indexes`路径下，该路径位于链代码所在的目录内。
+
+下面的`Marbles`示例说明了索引如何与将使用`peer`命令安装的`chaincode`打包在一起。
 
 # 安装并实例化`Chaincode`
 
