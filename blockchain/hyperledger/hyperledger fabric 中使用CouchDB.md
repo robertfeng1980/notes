@@ -382,7 +382,41 @@ $ peer chaincode query -C $CHANNEL_NAME -n marbles -c '{"Args":["queryMarblesWit
 
 # 更新索引
 
+可能需要随时间更新索引，安装的链码的后续版本中可能存在相同的索引。为了更新索引，原始索引定义必须包含设计文档`ddoc`属性和索引名称。要更新索引定义，请使用相同的索引名称，但更改索引定义。只需**编辑索引`JSON`文件，然后在索引中添加或删除字段**。`Fabric`仅**支持索引类型`JSON`，不支持更改索引类型**。在安装和实例化链代码时，更新的索引定义将**重新部署到对等方的状态数据库**。**对索引名称或`ddoc`属性的更改将导致创建新索引，并且原始索引在`CouchDB`中保持不变，直到将其删除**。
 
+> **注意**：如果状态数据库具有大量数据，则**重建索引将花费一些时间**，在此期间**链代码调用问题查询可能失败或超时**。
 
+## 迭代索引定义
+
+如果可以在开发环境中访问对等方的`CouchDB`状态数据库，则可以**迭代测试各种索引以支持链码查询**。但是，**对链码的任何更改都需要重新部署**。使用[`CouchDB Fauxton`接口](http://docs.couchdb.org/en/latest/fauxton/index.html)或命令行`curl`实用程序来创建和更新索引。
+
+> **注意**：`Fauxton`接口是**用于创建、更新和部署`CouchDB`索引**的`Web UI`。如果想试试这个界面，有一个`Marbles`示例中索引的`Fauxton`版本格式的例子。如果已使用`CouchDB`部署`BYFN`网络，则可以通过打开浏览器并导航到`http://localhost:5984/_utils`来加载`Fauxton`接口。
+
+或者，如果不想使用`Fauxton UI`，则以下是`curl`命令的示例，该命令可用于在数据库`mychannel_marbles`上创建索引：
+
+**Index for docType, owner** 示例`curl`命令行，用于在`CouchDB channel_chaincode`数据库中定义索引：
+
+```sh
+curl -i -X POST -H "Content-Type: application/json" -d
+       "{\"index\":{\"fields\":[\"docType\",\"owner\"]},
+         \"name\":\"indexOwner\",
+         \"ddoc\":\"indexOwnerDoc\",
+         \"type\":\"json\"}" http://hostname:port/mychannel_marbles/_index
+```
+
+> **注意**：如果使用的是`BYFN`配置的`CouchDB`，请将`hostname:port`替换为`localhost:5984`。
 
 # 删除索引
+
+**索引删除不受`Fabric`工具管理**。如果需要删除索引，请**手动向数据库发出`curl`命令或使用`Fauxton`接口将其删除**。删除索引的`curl`命令的格式为：
+
+```sh
+$ curl -X DELETE http://localhost:5984/{database_name}/_index/{design_doc}/json/{index_name} -H  "accept: */*" -H  "Host: localhost:5984"
+```
+
+要删除本教程中使用的索引，`curl`命令将是：
+
+```sh
+$ curl -X DELETE http://localhost:5984/mychannel_marbles/_index/indexOwnerDoc/json/indexOwner -H  "accept: */*" -H  "Host: localhost:5984"
+```
+
