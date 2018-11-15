@@ -38,3 +38,30 @@
 + **节点的`X.509`证书**，即此`MSP`验证参数下的**有效标识**
 
 值得注意的是，`MSP`身份**永不过期**。它们只能通过将它们**添加到适当的`CRL`来撤销**。此外，目前**不支持强制撤销`TLS`证书**。
+
+# 如何生成`MSP`证书及其签名密钥？
+
+要生成`X.509`证书以提供其`MSP`配置，应用程序可以使用[`Openssl`](https://www.openssl.org/)。系统强调在`Hyperledger Fabric`中不支持包括`RSA`密钥在内的证书。
+
+或者，可以使用`cryptogen` 工具，操作方式可以在[入门文档中查看](https://hyperledger-fabric.readthedocs.io/en/latest/getting_started.html)。
+
+[Hyperledger Fabric CA`](http://hyperledger-fabric-ca.readthedocs.io/en/latest/)还可用于生成配置`MSP`所需的**密钥和证书**。
+
+# 在对等方和定序方设置`MSP`
+
+要设置本地`MSP`（对等或订货人），管理员应创建一个**包含六个子文件夹**和**一个文件**的文件夹（例如`$MY_PATH/mspconfig`）：
+
+1. 文件夹`admincerts`包括每个对应于**管理员证书的`PEM`文件**
+2. 文件夹`cacerts`包括每个对应于**根`CA`证书的`PEM`文件**
+3. （可选）文件夹`intermediatecerts` 包含`PEM`文件，每个文件对应于**中间`CA`的证书**
+4. （可选）文件`config.yaml`，用于**配置支持的组织单位和身份分类**（请参阅下面的相应部分）。
+5. （可选）文件夹`crls`包括**所考虑的`CRL`证书撤销列表**
+6. 文件夹`keystore`，包含带有**节点签名密钥的`PEM`文件**。强调**目前不支持`RSA`密钥**
+7. 文件夹`signcerts`包含具有**节点的`X.509`证书的`PEM`文件**
+8. （可选）文件夹`tlscacerts`包含`PEM`文件，**每个文件对应一个`TLS`根`CA`证书**
+9. （可选）文件夹`tlsintermediatecerts`包括每个对应于**中间`TLS CA`证书的`PEM`文件**
+
+在节点的配置文件（对等体的`core.yaml`文件和`orderer`的`orderer.yaml`）中，需要**指定`mspconfig`文件夹的路径**以及**节点`MSP`的`MSP`标识符**。`mspconfig`文件夹的路径应该**与`FABRIC_CFG_PATH`相关**，并且作为对等的**参数`mspConfigPath`**和`orderer`的**`LocalMSPDir`的值**提供。节点的`MSP`的标识符作为对等体的**参数`localMspId`**和`orderer`的**`LocalMSPID`的值**提供。可以使用**对等的`CORE`前缀**（例如`CORE_PEER_LOCALMSPID`）和**定序者的`ORDERER`前缀**（例如`ORDERER_GENERAL_LOCALMSPID`）通过**环境覆盖这些变量**。请注意，对于订货人设置，需要生成并向订货人提供系统通道的生成块。此块的`MSP`配置需求将在下一节中详细介绍。
+
+只能手动重新配置本地`MSP`，并且**需要重新启动对等或订购者进程**。在后续版本中，官方的目标是提供**在线/动态重新配置**（即无需通过使用节点管理系统链代码来停止节点）。
+
