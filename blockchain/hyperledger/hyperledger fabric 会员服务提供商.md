@@ -45,7 +45,7 @@
 
 或者，可以使用`cryptogen` 工具，操作方式可以在[入门文档中查看](https://hyperledger-fabric.readthedocs.io/en/latest/getting_started.html)。
 
-[Hyperledger Fabric CA`](http://hyperledger-fabric-ca.readthedocs.io/en/latest/)还可用于生成配置`MSP`所需的**密钥和证书**。
+[`Hyperledger Fabric CA`](http://hyperledger-fabric-ca.readthedocs.io/en/latest/)还可用于生成配置`MSP`所需的**密钥和证书**。
 
 # 在对等方和定序方设置`MSP`
 
