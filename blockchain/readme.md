@@ -28,7 +28,7 @@
     + [`Chaincode 运营操作`](./hyperledger/hyperledger%20fabric%20Chaincode%20运营操作.md)
 
 - 操作指南
-    + 升级到最新版本的`Fabric`
+    + [`升级到最新版本的Fabric`](./hyperledger/hyperledger%20fabric%20升级网络组建.md)
     + 更新通道配置
     + 会员服务提供商（`MSP`）
     + 通道配置（`configtx`）
@@ -40,7 +40,7 @@
     + 错误处理
     + 记录控制
     + 使用传输层安全性（`TLS`）保护通信安全
-    + 打造基于卡夫卡的订购服务
+    + 打造基于kafka的排序服务
     + [`更新 block & tx 配置`](./hyperledger/hyperledger%20fabric%20更新%20block%20&%20tx%20配置.md)
     + [`endorsement-policies`](./hyperledger/hyperledger%20fabric%20endorsement-policies.md)
     + [`背书策略`](./hyperledger/hyperledger%20fabric%20背书策略.md)
