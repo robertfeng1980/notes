@@ -65,3 +65,41 @@
 
 只能手动重新配置本地`MSP`，并且**需要重新启动对等或订购者进程**。在后续版本中，官方的目标是提供**在线/动态重新配置**（即无需通过使用节点管理系统链代码来停止节点）。
 
+# 组织单位
+
+为了配置此`MSP`的**有效成员**应在其`X.509`证书中包含的**组织单位列表**，`config.yaml`文件需要**指定组织单位标识符**。这是一个例子：
+
+```yaml
+OrganizationalUnitIdentifiers:
+  - Certificate: "cacerts/cacert1.pem"
+    OrganizationalUnitIdentifier: "commercial"
+  - Certificate: "cacerts/cacert2.pem"
+    OrganizationalUnitIdentifier: "administrators"
+```
+
+上面的示例声明了两个组织单位标识符：`commercial`和`administrators`。如果`MSP`身份**至少携带其中一个组织单位标识符，则该身份有效**。`Certificate`字段是**指`CA`或中间`CA`证书路径**，在该路径下，应验证具有该**特定`OU`的身份**。该路径**相对于`MSP`根文件夹，不能为空**。
+
+# 身份分类
+
+默认的`MSP`实现允许基于其`x509`证书的`OU`进一步将**身份分类到客户端和对等端**。如果身份**提交交易、查询同行**等，则该身份应被归类为**客户**。如果身份**认可或提交交易**，则该身份应被归类为**同等身份**。为了定义给定`MSP`的客户端和对等端，需要适当地设置`config.yaml`文件。这是一个例子：
+
+```yaml
+NodeOUs:
+  Enable: true
+  ClientOUIdentifier:
+    Certificate: "cacerts/cacert.pem"
+    OrganizationalUnitIdentifier: "client"
+  PeerOUIdentifier:
+    Certificate: "cacerts/cacert.pem"
+    OrganizationalUnitIdentifier: "peer"
+```
+
+如上所示，`NodeOUs.Enable`设置为`true`，这将**启用标识分类**。然后，通过为`NodeOUs.ClientOUIdentifier（NodeOUs.PeerOUIdentifier）`键**设置以下属性来定义客户端（对等）标识符**：
+
++ `OrganizationalUnitIdentifier` 将此值设置为与客户端（对等方）的`x509`证书应包含的`OU`匹配的值。
++ `Certificate` 将此**设置为`CA`或中间`CA`**，在该`CA`下应**验证客户端（对等）标识**。该字段**相对于`MSP`根文件夹**。它可以为空，这意味着可以在`MSP`配置中定义的**任何`CA`下验证身份的`x509`证书**。
+
+**启用分类后，`MSP`管理员需要成为该`MSP`的客户端**，这意味着他们的`x509`证书**需要携带标识客户端的`OU`**。另请注意，**身份可以是客户端也可以是对等端**。这两个分类是**相互排斥**的。如果身份**既不是客户端也不是对等方，则验证将失败**。
+
+最后，请注意，对于升级环境，需要启用`1.1`通道功能才能使用标识分类。
+
