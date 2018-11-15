@@ -12,5 +12,138 @@
 
 要更深入地了解拉动配置并将其转换为`JSON`的过程，请查看[**向通道添加组织**](https://hyperledger-fabric.readthedocs.io/en/latest/channel_update_tutorial.html)。在本文档中，将重点介绍**编辑配置的不同方法以及对其进行签名的过程**。
 
+# 编辑配置
 
+频道具有**高度可配置性**，但不是无限的。**不同的配置元素具有不同的修改策略（指定签署配置更新所需的身份组）**。要查看可能更改的范围，以`JSON`格式查看配置非常重要。[将组织添加到频道](https://hyperledger-fabric.readthedocs.io/en/latest/channel_update_tutorial.html)教程会生成一个，所以如果已经浏览了该文档，则可以简单地引用它。对于那些没有的人，将在[这里提供一个](https://hyperledger-fabric.readthedocs.io/en/latest/config_update.html#editing-a-config)。
+
+配置可能在这种形式下看起来令人生畏，但是一旦你研究它，你会发现它具有逻辑结构。
+
+除了**策略的定义**， 定义谁可以在渠道级别**执行某些操作**，以及**谁有权更改谁可以更改配置**，通道还具有可以使用配置更新修改的其他类型的功能。向频道添加组织会引导您完成最重要的组织之一，**将组织添加到频道**。使用配置更新可以更改的其他一些内容包括：
+
++ **`Batch Size` 批量大小**：这些参数决定了**块中事务的数量和大小**。没有块会出现大于`absolute_max_bytes`或块内有超过`max_message_count`的事务。如果可以在`preferred_max_bytes`下构造一个块，那么将过早地切割一个块，并且大于这个大小的事务将出现在它们自己的块中。
+
+  ```json
+  {
+    "absolute_max_bytes": 102760448,
+    "max_message_count": 10,
+    "preferred_max_bytes": 524288
+  }
+  ```
+
++ **`Batch Timeout` 批量超时**：在切割块之前**第一个事务到达其他事务之后等待的时间量**。减小此值将**改善延迟**，但减少太多可能会因为不允许块填充到其最大容量而**降低吞吐量**。
+
+  ```json
+  { "timeout": "2s" }
+  ```
+
++ **`Channel Restrictions` 渠道限制**：渠道限制。定序者愿意分配的渠道总数可以指定为`max_count`。这在具有弱联合`ChannelCreation`策略的预生产环境中非常有用。
+
+  ```json
+  {
+   "max_count":1000
+  }
+  ```
+
++ **`Channel Creation Policy` 频道创建策略**：定义**策略**值，该策略值将被设置为其定义的联合体的新通道的应用程序组的`mod_policy`。将**根据新通道中的此策略的实例**来**检查附加到通道**创建请求的**签名集**以确保通道创建是**经过授权**的。请注意，此配置值**仅在定序者系统通道中设置**。
+
+  ```json
+  {
+  "type": 3,
+  "value": {
+    "rule": "ANY",
+    "sub_policy": "Admins"
+    }
+  }
+  ```
+
++ **`Kafka brokers` `kafka` 经纪人**：当`ConsensusType`设置为`kafka`时，代理列表枚举某些子集（或最好是所有）`Kafka`代理，**供定序者在启动时初始连接**。请注意，**在建立共识类型（在创建块的引导）之后，无法更改共识类型**。
+
+  ```json
+  {
+    "brokers": [
+      "kafka0:9092",
+      "kafka1:9092",
+      "kafka2:9092",
+      "kafka3:9092"
+    ]
+  }
+  ```
+
++ **`Anchor Peers Definition` 锚点同行节点定义**：定义每个组织的**锚点对等点的位置**。
+
+  ```json
+  {
+    "host": "peer0.org2.example.com",
+    "port": 7051
+  }
+  ```
+
++ **`Hashing Structure` 哈希结构**：块数据是字节数组的数组。块数据的散列被计算为`Merkle`树。**此值指定`Merkle`树的宽度**。目前，该值固定为`4294967295`，其对应于块数据字节的串联的简单平坦散列。
+
+  ```json
+  { "width": 4294967295 }
+  ```
+
++ **`Hashing Algorithm` 哈希算法**：该算法用于**计算编码到区块链块中的哈希值**。特别是，这会影响数据散列以及块的先前块散列字段。注意，该字段**当前只有一个有效值（`SHA256`），不应更改**。
+
+  ```json
+  { "name": "SHA256" }
+  ```
+
++ **`Block Validation` 块验证**：此**策略指定块被认为有效的签名要求**。默认情况下，它需要来自**排序组织**的某个成员的**签名**。
+
+  ```json
+  {
+    "type": 3,
+    "value": {
+      "rule": "ANY",
+      "sub_policy": "Writers"
+    }
+  }
+  ```
+
++ **`Orderer Address` 定序者地址**：客户端可以**调用定序者广播和交付功能的地址列表**。对等体在这些地址中随机选择并在它们之间进行**故障转移**以检索块。
+
+  ```json
+  {
+    "addresses": [
+      "orderer.example.com:7050"
+    ]
+  }
+  ```
+
+正如通过添加工件和`MSP`信息添加`Org`一样，可以通过反转过程来删除它们。
+
+> **注意**：一旦定义了共识类型并且网络已被引导，就无法通过配置更新来更改它。
+
+还有另一个重要的通道配置（特别是对于`v1.1`），称为**功能要求**。它有自己的`doc`，可以[在这里找到](https://hyperledger-fabric.readthedocs.io/en/latest/capability_requirements.html)。
+
+## 编辑通道块批量大小示例
+
+假设要编辑通道的块批量大小（因为这是一个单独的数字字段，这是最简单的更改示例）。
+
+首先，简单地引用`JSON`路径，将其定义为环境变量。要确定这一点，请查看配置，找到要查找的内容，然后重新跟踪路径。
+
+例如，如果发现批量大小，将看到它是`Orderer`的`value` 。`Orderer`可以在`groups`下找到，它位于`channel_group`下。批量大小值的参数`value`大于`max_message_count`。
+
+属性路径是这样的：
+
+```sh
+$ export MAXBATCHSIZEPATH=".channel_group.groups.Orderer.values.BatchSize.value.max_message_count"
+```
+
+接下来，显示该属性的值：
+
+```sh
+$ jq "$MAXBATCHSIZEPATH" config.json
+```
+
+现在，让设置新的批量大小并显示新值：
+
+```sh
+$ jq “$MAXBATCHSIZEPATH = 20” config.json > modified_config.json
+$ jq “$MAXBATCHSIZEPATH” modified_config.json
+```
+
+一旦修改了`JSON`，它就可以转换并提交了。[将组织添加到通道](./hyperledger%20fabric%20向通道添加组织.md)中的脚本和步骤将引导您完成转换`JSON`的过程，因此让我们看一下提交它的过程。
 
