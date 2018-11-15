@@ -30,7 +30,7 @@
 - 操作指南
     + [`升级到最新版本的Fabric`](./hyperledger/hyperledger%20fabric%20升级网络组建.md)
     + [`更新通道配置`](./hyperledger/hyperledger%20fabric%20更新通道配置.md)
-    + 会员服务提供商（`MSP`）
+    + [`会员服务提供商（MSP）`](./hyperledger/hyperledger%20fabric%20会员服务提供商.md)
     + 通道配置（`configtx`）
     + 认可政策
     + 可插拔交易认可和验证
