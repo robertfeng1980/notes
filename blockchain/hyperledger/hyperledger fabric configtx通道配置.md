@@ -178,7 +178,7 @@ Channel: (version 0)
 
 请注意，键`{{org_name}}`和`{{consortium_name}}`表示任意名称，并指示可以使用不同名称重复的元素。
 
-```json
+```go
 &ConfigGroup{
     Groups: map<string, *ConfigGroup> {
         "Application":&ConfigGroup{
@@ -232,5 +232,60 @@ Channel: (version 0)
         "OrdererAddresses":common.OrdererAddresses,
     },
 }
+```
+
+# `Orderer`系统通道配置
+
+订购系统渠道需要定义**订购参数**，以及用于创建渠道的**联合体**。订购服务**必须只有一个订购系统渠道**，**它是第一个要创建的渠道**（或更准确地引导）。建议**永远不要在订购系统通道创建配置中定义<u>应用程序</u>部分**，但可以进行测试。请注意，对订购系统渠道具有**读访问权限的任何成员都可以看到所有渠道创建**，因此应**限制此渠道的访问权限**。
+
+排序参数定义为以下配置子集：
+
+```go
+&ConfigGroup{
+    Groups: map<string, *ConfigGroup> {
+        "Orderer":&ConfigGroup{
+            Groups:map<String, *ConfigGroup> {
+                {{org_name}}:&ConfigGroup{
+                    Values:map<string, *ConfigValue>{
+                        "MSP":msp.MSPConfig,
+                    },
+                },
+            },
+
+            Values:map<string, *ConfigValue> {
+                "ConsensusType":orderer.ConsensusType,
+                "BatchSize":orderer.BatchSize,
+                "BatchTimeout":orderer.BatchTimeout,
+                "KafkaBrokers":orderer.KafkaBrokers,
+            },
+        },
+    },
+```
+
+参与订购的每个组织**在`Orderer`组下都有一个组元素**。该组定义**单个参数`MSP`**，其中包含该组织的**加密身份信息**。`Orderer`组的值确定**排序节点的运行方式**。它们存在于**每个通道**中，因此`orderer.BatchTimeout`例如可以在一个通道上以不同方式指定。
+
+在启动时，订货人面对的文件系统包含**许多渠道**的信息。订货人通过识别定义了联合体组的**渠道来识别系统渠道**。联盟具有以下结构。
+
+```go
+&ConfigGroup{
+    Groups: map<string, *ConfigGroup> {
+        "Consortiums":&ConfigGroup{
+            Groups:map<String, *ConfigGroup> {
+                {{consortium_name}}:&ConfigGroup{
+                    Groups:map<string, *ConfigGroup> {
+                        {{org_name}}:&ConfigGroup{
+                            Values:map<string, *ConfigValue>{
+                                "MSP":msp.MSPConfig,
+                            },
+                        },
+                    },
+                    Values:map<string, *ConfigValue> {
+                        "ChannelCreationPolicy":common.Policy,
+                    }
+                },
+            },
+        },
+    },
+},
 ```
 
