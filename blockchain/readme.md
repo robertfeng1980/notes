@@ -31,7 +31,7 @@
     + [`升级到最新版本的Fabric`](./hyperledger/hyperledger%20fabric%20升级网络组建.md)
     + [`更新通道配置`](./hyperledger/hyperledger%20fabric%20更新通道配置.md)
     + [`会员服务提供商（MSP）`](./hyperledger/hyperledger%20fabric%20会员服务提供商.md)
-    + 通道配置（`configtx`）
+    + [`通道配置（`configtx`）`](./hyperledger/hyperledger%20fabric%20configtx通道配置.md)
     + 认可政策
     + 可插拔交易认可和验证
     + 访问控制列表（`ACL`）
