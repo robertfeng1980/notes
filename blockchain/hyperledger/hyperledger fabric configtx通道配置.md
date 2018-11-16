@@ -289,3 +289,29 @@ Channel: (version 0)
 },
 ```
 
+请注意，每个联盟都定义了**一组成员**，就像**订购组织的组织成员一样**。每个联盟还定义了`ChannelCreationPolicy`。这是一个用于**授权频道创建请求的策略**。通常，此值将设置为`ImplicitMetaPolicy`，**要求通道的新成员签名以授权创建通道**。
+
+# 应用程序通道配置
+
+**应用程序配置**适用于为**应用程序类型事务设计的通道**。它的定义如下：
+
+```go
+&ConfigGroup{
+    Groups: map<string, *ConfigGroup> {
+        "Application":&ConfigGroup{
+            Groups:map<String, *ConfigGroup> {
+                {{org_name}}:&ConfigGroup{
+                    Values:map<string, *ConfigValue>{
+                        "MSP":msp.MSPConfig,
+                        "AnchorPeers":peer.AnchorPeers,
+                    },
+                },
+            },
+        },
+    },
+}
+```
+
+与`Orderer`部分一样，每个组织都被**编码为一个组**。然而，代替仅编码`MSP`身份信息，每个组织另外编码`AnchorPeers`列表。该列表允许**不同组织的对等方彼此联系以进行对等`gossip`网络**。
+
+**应用程序通道对订货人组织和共识选项的副本进行编码**，以允许确定性地更新这些参数，因此包括来自订货人系统通道配置的相同`Orderer`部分。但是从应用程序的角度来看，这可能会被忽略。
