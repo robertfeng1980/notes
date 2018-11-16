@@ -128,6 +128,8 @@ message ConfigUpdate {
 
 `channel_id`是更新绑定的**通道`ID`**，这对于支持此**重新配置的签名范围**是必要的。
 
+## 读写集
+
 `read_set`指定**现有配置的子集**，稀疏地指定，其中**仅设置`version` 字段**，并且**不必填充其他字段**。永远不应在`read_set`中设置特定的`ConfigValue` `value`值或`ConfigPolicy` `policy`策略字段。`ConfigGroup`可以填充其**映射字段的子集**，以便**引用配置树中更深的元素**。例如，要在`read_set`中包含`Application`组，其**父级（`Channel`组）也必须包含在读取集中**，但`Channel`组**不需要填充所有键**，例如`Orderer`组键，或任何值或政策密钥。
 
 `write_set`指定要**修改的配置片段**。由于配置的**分层特性**，对层次结构**深处的元素**的写入**也必须在其`write_set`中包含更高级别的元素**。但是，对于`write_set`中也在同一版本的`read_set`中**指定的任何元素**，**应该稀疏地指定该元素，就像在`read_set`中一样**。
@@ -156,6 +158,8 @@ Channel: (version 0)
         Org1 (version 3)
 ```
 
+## 新配置
+
 收到`CONFIG_UPDATE`后，订货人通过执行以下操作来**计算生成的`CONFIG`**：
 
 1. **验证**`channel_id`和`read_set`。`read_set`中的所有元素**必须存在于给定版本**中。
@@ -167,3 +171,66 @@ Channel: (version 0)
 7. 将新的`ConfigEnvelope`写入`CONFIG`类型的`Envelope`，并最终将其作为**新配置块中的唯一事务写入**。
 
 当对等方（或任何其他接收方）收到此配置块时，它应通过将`last_update`消息应用于**当前配置**并**验证`orderer-computed`配置字段**包含**正确的新配置**来验证配置是否已正确验证。
+
+# 允许的配置组和值
+
+任何有效配置**都是以下配置的子集**。这里我们使用符号`peer.<MSG>`来定义`ConfigValue`，其`value` 字段是在`fabric/protos/peer/configuration.proto`中定义的名为`<MSG>`的封送原型消息。常见的符号`common.<MSG>`, `msp.<MSG>`, `orderer.<MSG>`对应类似，但他们的消息分别定义在`fabric/protos/common/configuration.proto`, `fabric/protos/msp/mspconfig.proto`, `fabric/protos/orderer/configuration.proto`。
+
+请注意，键`{{org_name}}`和`{{consortium_name}}`表示任意名称，并指示可以使用不同名称重复的元素。
+
+```json
+&ConfigGroup{
+    Groups: map<string, *ConfigGroup> {
+        "Application":&ConfigGroup{
+            Groups:map<String, *ConfigGroup> {
+                {{org_name}}:&ConfigGroup{
+                    Values:map<string, *ConfigValue>{
+                        "MSP":msp.MSPConfig,
+                        "AnchorPeers":peer.AnchorPeers,
+                    },
+                },
+            },
+        },
+        "Orderer":&ConfigGroup{
+            Groups:map<String, *ConfigGroup> {
+                {{org_name}}:&ConfigGroup{
+                    Values:map<string, *ConfigValue>{
+                        "MSP":msp.MSPConfig,
+                    },
+                },
+            },
+
+            Values:map<string, *ConfigValue> {
+                "ConsensusType":orderer.ConsensusType,
+                "BatchSize":orderer.BatchSize,
+                "BatchTimeout":orderer.BatchTimeout,
+                "KafkaBrokers":orderer.KafkaBrokers,
+            },
+        },
+        "Consortiums":&ConfigGroup{
+            Groups:map<String, *ConfigGroup> {
+                {{consortium_name}}:&ConfigGroup{
+                    Groups:map<string, *ConfigGroup> {
+                        {{org_name}}:&ConfigGroup{
+                            Values:map<string, *ConfigValue>{
+                                "MSP":msp.MSPConfig,
+                            },
+                        },
+                    },
+                    Values:map<string, *ConfigValue> {
+                        "ChannelCreationPolicy":common.Policy,
+                    }
+                },
+            },
+        },
+    },
+
+    Values: map<string, *ConfigValue> {
+        "HashingAlgorithm":common.HashingAlgorithm,
+        "BlockHashingDataStructure":common.BlockDataHashingStructure,
+        "Consortium":common.Consortium,
+        "OrdererAddresses":common.OrdererAddresses,
+    },
+}
+```
+
