@@ -114,11 +114,62 @@ SampleSingleMSPChannel:
             event/Block: /Channel/Application/MyPolicy
 ```
 
-这会**限制**将块事件订阅到`SampleOrg.admin`的能力。
-
-如果已创建了要使用此`ACL`的通道，则必须使用以下流程一次更新一个通道配置：
+这会**限制**将块事件订阅到`SampleOrg.admin`的能力。如果已创建了要使用此`ACL`的通道，则必须使用以下流程一次更新一个通道配置
 
 # 更新通道配置中的`ACL`默认值
 
+如果已经创建了希望使用`MyPolicy`来**限制对等/建议访问的通道**，或者如果想要创建`ACL`，**不希望其他渠道知道**。将**不得不一次更新一个通道配置**通过配置更新事务。
 
+注意：渠道配置事务是一个我们不会在此深入研究的过程。如果想了解更多关于它们的信息，请查看[关于频道配置更新的文档](https://hyperledger-fabric.readthedocs.io/en/latest/config_update.html)以及[向频道添加组织](https://hyperledger-fabric.readthedocs.io/en/latest/channel_update_tutorial.html)教程。
 
+在**提取、转换和剥离**其元数据的配置块之后，可以**通过在`Application: policies`下添加`MyPolicy`来编辑配置**，其中`Admins`，`Writers`和`Readers`策略已经存在。
+
+```json
+"MyPolicy": {
+  "mod_policy": "Admins",
+  "policy": {
+    "type": 1,
+    "value": {
+      "identities": [
+        {
+          "principal": {
+            "msp_identifier": "SampleOrg",
+            "role": "ADMIN"
+          },
+          "principal_classification": "ROLE"
+        }
+      ],
+      "rule": {
+        "n_out_of": {
+          "n": 1,
+          "rules": [
+            {
+              "signed_by": 0
+            }
+          ]
+        }
+      },
+      "version": 0
+    }
+  },
+  "version": "0"
+},
+```
+
+请**特别注意`msp_identifer`和角色**。然后，在配置的`ACLs`部分中，更改`peer/Propose` 的`ACL`：
+
+```json
+"peer/Propose": {
+  "policy_ref": "/Channel/Application/Writers"
+```
+
+更改为：
+
+```json
+"peer/Propose": {
+  "policy_ref": "/Channel/Application/MyPolicy"
+```
+
+> **注意**：如果通道配置中未定义`ACL`，则必须添加整个`ACL`结构。
+
+配置更新后，需要通过**通常的频道更新流程**提交。
