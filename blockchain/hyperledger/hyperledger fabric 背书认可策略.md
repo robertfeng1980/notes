@@ -42,3 +42,31 @@ $ peer chaincode instantiate -C <channelid> -n mycc -P "AND('Org1.peer', 'Org2.p
 
 > **注意**：如果**未在实例化时指定认可策略**，则认可策略默认为“**通道中组织的任何成员**”。例如，具有“`Org1`”和“`Org2`”的频道将具有默认的**认可策略 `OR（'Org1.member'，'Org2.member'）`**。
 
+# 认可策略语法
+
+策略以主体表示（“`principals` 主体”是与角色匹配的身份）。`Principal`被描述为'`MSP.ROLE`'，其中`MSP`表示所需的`MSP ID`，`ROLE`表示四个可接受的角色之一：`member`，`admin`，`client`和`peer`。
+
+**以下是有效主体的几个示例**：
+
+- `'Org0.admin'`：`Org0 MSP`的任何管理员
+- `'Org1.member'`：`Org1 MSP`的任何成员
+- `'Org1.client'`：`Org1 MSP`的任何客户端
+- `'Org1.peer'`：`Org1 MSP`的任何同行节点
+
+**该语言的语法是**：
+
+```sh
+EXPR(E[, E...])
+```
+
+`EXPR`是`AND、OR、OutOf`，而`E`是主体（使用上述语法）或另一个嵌套调用`EXPR`。
+
+例如：
+
++ `AND('Org1.member', 'Org2.member', 'Org3.member')` 请求三个主体成员中的每一个必须签名。
++ `OR('Org1.member', 'Org2.member')` 从两个成员中的任何一个请求一个签名。
++ `OR('Org1.member', AND('Org2.member', 'Org3.member'))` 请求来自`Org1 MSP`成员的一个签名或来自`Org2 MSP`成员的一个签名和来自`Org3 MSP`成员的一个签名。
++ `OutOf(1, 'Org1.member', 'Org2.member')` 这解决了同样的事情 `OR('Org1.member', 'Org2.member')`
++ `OutOf(2, 'Org1.member', 'Org2.member')` 等同于 `AND('Org1.member', 'Org2.member')`
++ `OutOf(2, 'Org1.member', 'Org2.member', 'Org3.member')` 等同于 `OR(AND('Org1.member', 'Org2.member'), AND('Org1.member', 'Org3.member'), AND('Org2.member', 'Org3.member'))`
+
