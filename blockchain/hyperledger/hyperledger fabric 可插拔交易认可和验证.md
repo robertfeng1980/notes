@@ -61,3 +61,73 @@ handlers:
 
 > **注意**：此后，自定义认可或验证逻辑实现将被称为“插件”，即使它们被编译到对等体中。
 
+# 认可插件实现
+
+要实现认可插件，必须实现`core/handlers/endorsement/api/endorsement.go`中的`Plugin`接口：
+
+```go
+// 插件赞同提案回复
+type Plugin interface {
+    // Endorse签署给定的有效负载（ProposalResponsePayload字节），并可选择改变它。
+    // Returns:
+    // 认可：有效载荷上的签名，以及用于验证签名的标识
+    // 作为输入提供的有效负载（可在此功能中修改）
+    // 或者失败时出错
+    Endorse(payload []byte, sp *peer.SignedProposal) (*peer.Endorsement, []byte, error)
+
+    // Init将依赖项注入插件的实例
+    Init(dependencies ...Dependency) error
+}
+```
+
+通过让对等方在`PluginFactory`接口中**调用`New`方法**，为**每个通道**创建给定插件类型的**认可插件实例**（通过方法名称标识为`HandlerLibrary`的实例方法或插件`.so`文件路径）。由插件开发人员实现：
+
+```go
+// PluginFactory 创建插件的新实例
+type PluginFactory interface {
+    New() Plugin
+}
+```
+
+期望`Init`方法接收在`core/handlers/endorsement/api/`下声明的**所有依赖项作为输入**，标识为嵌入`Dependency`接口。
+
+在创建`Plugin`实例之后，**在对等体上调用`Init`方法，并将依赖关系`dependencies` 作为参数传递**。
+
+目前，`Fabric`为代言插件提供了以下依赖项：
+
++ `SigningIdentityFetcher`：根据**给定的签名提议**返回`SigningIdentity`的实例
+
+  ```go
+  // SigningIdentity 签署消息并将其公共标识序列化为字节
+  type SigningIdentity interface {
+      // Serialize返回此标识的字节表示形式，用于验证此SigningIdentity签名的消息
+      Serialize() ([]byte, error)
+  
+      // Sign 签署给定的有效负载并返回签名
+      Sign([]byte) ([]byte, error)
+  }
+  ```
+
++ `StateFetcher`：**获取与世界状态**交互的`State`对象
+
+  ```go
+  // State 定义与世界状态的互动
+  type State interface {
+      // GetPrivateDataMultipleKeys 在单个调用中获取多个私有数据项的值
+      GetPrivateDataMultipleKeys(namespace, collection string, keys []string) ([][]byte, error)
+  
+      // GetStateMultipleKeys 在一次调用中获取多个键的值
+      GetStateMultipleKeys(namespace string, keys []string) ([][]byte, error)
+  
+      // GetTransientByTXID 获取与给定txID关联的值私有数据
+      GetTransientByTXID(txID string) ([]*rwset.TxPvtReadWriteSet, error)
+  
+      // Done 释放世界状态占用的资源
+      Done()
+   }
+  ```
+
+
+
+
+
