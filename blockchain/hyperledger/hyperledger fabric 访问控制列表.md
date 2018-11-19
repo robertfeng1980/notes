@@ -1,4 +1,4 @@
-# `hyperledger fabric` 访问控制列表`ACL`
+# ` hyperledger fabric` 访问控制列表`ACL`
 
 > **注意**：本文介绍**通道管理级别的访问控制和策略**。要了解链代码中的访问控制，请查看[开发链代码教程](https://hyperledger-fabric.readthedocs.io/en/latest/chaincode4ade.html#Chaincode_API)。
 
@@ -51,3 +51,74 @@ Policies:
 ```
 
 在这里，策略`AnotherPolicy`可以由管理员的`MAJORITY`满足，其中管理员最终由**较低级别的签名策略指定**。
+
+# 访问控制在哪里指定？
+
+**访问控制默认值存在于`configtx.yaml`中**，`configtxgen`用于构建通道配置的文件。
+
+可以通过编辑`configtx.yaml`本身（可以**将`ACL`更改传播到任何新通道**）或通过更新**特定通道**的通道**配置**中的访问控制**来更新访问控制**，方法有两种。
+
+# 如何在`configtx.yaml`中格式化`ACL`
+
+`ACL`被格式化为**键值对**，由**资源函数名称后跟字符串组成**。要查看它，请[参考此示例`configtx.yaml`文件](https://github.com/hyperledger/fabric/blob/release-1.2/sampleconfig/configtx.yaml)。
+
+示例参考：
+
+```yaml
+# ACL policy for invoking chaincodes on peer
+peer/Propose: /Channel/Application/Writers
+
+# ACL policy for sending block events
+event/Block: /Channel/Application/Readers
+```
+
+这些`ACL`定义对`peer/Propose`和`event/Block`**资源的访问限制**为分别满足在规范路径`/Channel/Application/Writers`和`/Channel/Application/Readers`中**定义的策略的身份**。
+
+# 在`configtx.yaml`中更新`ACL`默认值
+
+如果在引导网络时需要**覆盖`ACL`默认值**，或者在**引导通道之前更改`ACL`**，最佳做法是**更新`configtx.yaml`**。
+
+假设你要修改 `ACL `默认`peer/Propose` 它指定了在**对等体上调用链代码的策略**， 从`/Channel/Application/Writers`到一个名为`MyPolicy`的策略。
+
+这是通过添加一个名为`MyPolicy`的策略来完成的（它可以被称为任何东西，但是对于这个例子称之为`MyPolicy`）。该**策略在`configtx.yaml`内的`Application.Policies`部分中定义**，并指定要**检查以授予或拒绝用户访问权限的规则**。在本例中，将创建一个标识`SampleOrg.admin`的签名策略。
+
+```yml
+Policies: &ApplicationDefaultPolicies
+    Readers:
+        Type: ImplicitMeta
+        Rule: "ANY Readers"
+    Writers:
+        Type: ImplicitMeta
+        Rule: "ANY Writers"
+    Admins:
+        Type: ImplicitMeta
+        Rule: "MAJORITY Admins"
+    MyPolicy:
+        Type: Signature
+        Rule: "OR('SampleOrg.admin')"
+```
+
+然后，编辑`configtx.yaml`中的`Application`：`ACLs`部分以更改`peer/Propose`：
+
+`peer/Propose: /Channel/Application/Writers` 改为： `peer/Propose: /Channel/Application/MyPolicy`
+
+在`configtx.yaml`中更改了这些字段后，`configtxgen`工具将使用**创建通道创建事务时定义的策略和`ACL`**。当联盟成员的一个管理员适当地**签名和提交**时，将创建具有**已定义的`ACL`和策略的新通道**。一旦`MyPolicy`被引导到通道配置中，它也可以被引用以**覆盖**其他`ACL`默认值。例如：
+
+```yml
+SampleSingleMSPChannel:
+    Consortium: SampleConsortium
+    Application:
+        <<: *ApplicationDefaults
+        ACLs:
+            <<: *ACLsDefault
+            event/Block: /Channel/Application/MyPolicy
+```
+
+这会**限制**将块事件订阅到`SampleOrg.admin`的能力。
+
+如果已创建了要使用此`ACL`的通道，则必须使用以下流程一次更新一个通道配置：
+
+# 更新通道配置中的`ACL`默认值
+
+
+
