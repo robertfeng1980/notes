@@ -18,3 +18,27 @@
 
 在后续部分中展示定义基于州的认可政策。但首先，看看如何设置链码级别的认可政策。
 
+# 设置链码级别认可政策
+
+可以在实例化时使用`SDK`（有关如何执行此操作的示例代码，[单击此处](https://github.com/hyperledger/fabric-sdk-node/blob/f8ffa90dc1b61a4a60a6fa25de760c647587b788/test/integration/e2e/e2eUtils.js#L178)）或使用`-P`开关后跟策略在对等`CLI`中指定`Chaincode`级别认可策略。
+
+参考示例：
+
+```sh
+$ peer chaincode instantiate -C <channelid> -n mycc -P "AND('Org1.member', 'Org2.member')"
+```
+
+此命令使用**策略`AND（'Org1.member'，'Org2.member'）`部署链码`mycc（"my chaincode"）`，这将要求`Org1`和`Org2`的成员签署该事务**。
+
+> **注意**：如果启用了身份分类（请参阅[成员服务提供商](https://hyperledger-fabric.readthedocs.io/en/latest/msp.html)），则可以使用`PEER`角色来限制**仅对等节点的认可**。
+
+参考示例：
+
+```sh
+$ peer chaincode instantiate -C <channelid> -n mycc -P "AND('Org1.peer', 'Org2.peer')"
+```
+
+实例化后添加到通道的**新组织可以查询链码**（假设查询具有由通道策略定义的**适当授权**以及由链码强制执行的任何应用程序级别检查），但**无法执行或认可链代码**。需要**修改认可政策**，以**允许通过新组织的认可来进行交易**。
+
+> **注意**：如果**未在实例化时指定认可策略**，则认可策略默认为“**通道中组织的任何成员**”。例如，具有“`Org1`”和“`Org2`”的频道将具有默认的**认可策略 `OR（'Org1.member'，'Org2.member'）`**。
+
