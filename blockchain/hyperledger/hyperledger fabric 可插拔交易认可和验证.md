@@ -35,9 +35,7 @@ handlers:
 
 当**认可或验证**实现被编译到**对等体**中时，`name`属性表示要**运行的初始化函数**，以便获得**创建认可/验证逻辑实例的工厂**。
 
-该函数是`core/handlers/library/library.go`下的`HandlerLibrary`构造的实例方法，为了添加自定义认可或验证逻辑，需要使用任何其他方法**扩展此构造**。
-
-由于这很麻烦并且构成了部署挑战，因此可以通过在名为`library`的名称下**添加另一个属性**来将**自定义认可和验证部署为`Golang`插件**。
+该函数是`core/handlers/library/library.go`下的`HandlerLibrary`构造的实例方法，为了添加自定义认可或验证逻辑，需要使用任何其他方法**扩展此构造**。由于这很麻烦并且构成了部署挑战，因此可以通过在名为`library`的名称下**添加另一个属性**来将**自定义认可和验证部署为`Golang`插件**。
 
 例如，如果有作为**插件实现的自定义认可和验证逻辑**，将在`core.yaml`的配置中包含以下条目：
 
@@ -89,9 +87,7 @@ type PluginFactory interface {
 }
 ```
 
-期望`Init`方法接收在`core/handlers/endorsement/api/`下声明的**所有依赖项作为输入**，标识为嵌入`Dependency`接口。
-
-在创建`Plugin`实例之后，**在对等体上调用`Init`方法，并将依赖关系`dependencies` 作为参数传递**。
+期望`Init`方法接收在`core/handlers/endorsement/api/`下声明的**所有依赖项作为输入**，标识为嵌入`Dependency`接口。在创建`Plugin`实例之后，**在对等体上调用`Init`方法，并将依赖关系`dependencies` 作为参数传递**。
 
 目前，`Fabric`为代言插件提供了以下依赖项：
 
@@ -127,7 +123,83 @@ type PluginFactory interface {
    }
   ```
 
+# 验证插件实现
 
+要实现验证插件，必须实现`core/handlers/validation/api/validation.go`中的`Plugin`接口：
 
+```go
+// Plugin 验证交易
+type Plugin interface {
+    // Validate 如果在事务内给定位置的操作，则返回nil在给定块中的给定位置有效，否则出错。
+    Validate(block *common.Block, namespace string, txPosition int, actionPosition int, contextData ...ContextDatum) error
 
+    // Init 将依赖项注入插件的实例
+    Init(dependencies ...Dependency) error
+}
+```
+
+每个`ContextDatum`都是由**对等方传递给验证插件**的其他运行时**派生元数据**。目前，唯一传递的`ContextDatum`是代表链码代言政策的代码：
+
+```go
+ // SerializedPolicy 定义序列化策略
+type SerializedPolicy interface {
+      validation.ContextDatum
+
+      // Bytes 返回SerializedPolicy的字节
+      Bytes() []byte
+ }
+```
+
+通过让对等方在`PluginFactory`接口中调用`New`方法，为**每个通道创建给定插件类型的验证插件实例**（通过方法名称识别为`HandlerLibrary`的实例方法或插件`.so`文件路径）。将由插件开发人员实现：
+
+```go
+// PluginFactory 创建插件的新实例
+type PluginFactory interface {
+    New() Plugin
+}
+```
+
+`Init`方法应该接收在`core/handlers/validation/api/`下声明的**所有依赖项作为输入**，标识为嵌入`Dependency`接口。在**创建`Plugin`实例**之后，**对等体在其上调用`Init`方法**，并将依赖关系作为参数传递。
+
+目前，`Fabric`为验证插件提供了以下依赖项：
+
++ `IdentityDeserializer`：将**身份的字节**表示**转换**为可用于验证由其签名的**签名的`Identity`对象**，根据其对应的`MSP`进行**验证**，并查看它们是否**满足给定的`MSP Principal`**。完整规范可以在`core/handlers/validation/api/identities/identities.go`找到。
+
++ `PolicyEvaluator`：**评估**是否满足给定策略
+
+  ```go
+  // PolicyEvaluator 评估政策
+  type PolicyEvaluator interface {
+      validation.Dependency
+  
+      // Evaluate 获取一组SignedData并评估这组签名是否满足具有给定字节的策略
+      Evaluate(policyBytes []byte, signatureSet []*common.SignedData) error
+  }
+  ```
+
++ `StateFetcher`：获取**与世界状态交互**的`State`对象
+
+  ```go
+  // State 定义与世界状态的互动
+  type State interface {
+      // GetStateMultipleKeys 在一次调用中获取多个键的值
+      GetStateMultipleKeys(namespace string, keys []string) ([][]byte, error)
+  
+      // GetStateRangeScanIterator 返回一个迭代器，它包含给定键范围之间的所有键值。
+      // startKey包含在结果中，并且排除了endKey。空startKey是指第一个可用密钥
+      // 并且一个空的endKey引用最后一个可用的键。用于扫描所有键，包括startKey和endKey
+      // 可以作为空字符串提供。但是，出于性能原因，应谨慎使用完整扫描。
+      // 返回的ResultsIterator包含类型* KV的结果，该结果在protos/ledger/queryresult中定义。
+      GetStateRangeScanIterator(namespace string, startKey string, endKey string) (ResultsIterator, error)
+  
+      // GetStateMetadata 返回给定命名空间和键的元数据
+      GetStateMetadata(namespace, key string) (map[string][]byte, error)
+  
+      // GetPrivateDataMetadata 获取由元组<namespace，collection，key>标识的私有数据项的元数据
+      GetPrivateDataMetadata(namespace, collection, key string) (map[string][]byte, error)
+  
+      // Done 释放状态占用的资源
+      Done()
+  }
+  ```
 
