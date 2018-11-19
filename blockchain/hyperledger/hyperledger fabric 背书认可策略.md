@@ -42,7 +42,7 @@ $ peer chaincode instantiate -C <channelid> -n mycc -P "AND('Org1.peer', 'Org2.p
 
 > **注意**：如果**未在实例化时指定认可策略**，则认可策略默认为“**通道中组织的任何成员**”。例如，具有“`Org1`”和“`Org2`”的频道将具有默认的**认可策略 `OR（'Org1.member'，'Org2.member'）`**。
 
-# 认可策略语法
+## 认可策略语法
 
 策略以主体表示（“`principals` 主体”是与角色匹配的身份）。`Principal`被描述为'`MSP.ROLE`'，其中`MSP`表示所需的`MSP ID`，`ROLE`表示四个可接受的角色之一：`member`，`admin`，`client`和`peer`。
 
@@ -69,4 +69,49 @@ EXPR(E[, E...])
 + `OutOf(1, 'Org1.member', 'Org2.member')` 这解决了同样的事情 `OR('Org1.member', 'Org2.member')`
 + `OutOf(2, 'Org1.member', 'Org2.member')` 等同于 `AND('Org1.member', 'Org2.member')`
 + `OutOf(2, 'Org1.member', 'Org2.member', 'Org3.member')` 等同于 `OR(AND('Org1.member', 'Org2.member'), AND('Org1.member', 'Org3.member'), AND('Org2.member', 'Org3.member'))`
+
+# 设置键级别的认可政策
+
+设置常规链码级认可策略与相应**链码的生命周期相关联**。只能在**实例化**或**升级通道**上的相应链码时**设置或修改**它们。
+
+相反，可以从链码中以**更精细**的方式设置和**修改键级别认可策略**。修改是常规事务的**读写集**的一部分。填充程序`API`提供以下功能来**设置和检索**常规关键的认可策略。
+
+> **注意**：下面的`ep`代表“**认可政策**”，其可以通过使用上述相同的语法或通过使用下面描述的便利功能来表达。这两种方法都会生成可由基本填充程序`API`使用的认可策略的二进制版本。
+
+```go
+SetStateValidationParameter(key string, ep []byte) error
+GetStateValidationParameter(key string) ([]byte, error)
+```
+
+对于属于集合中[私有数据](https://hyperledger-fabric.readthedocs.io/en/latest/private-data/private-data.html)的键，以下函数适用：
+
+```go
+SetPrivateDataValidationParameter(collection, key string, ep []byte) error
+GetPrivateDataValidationParameter(collection, key string) ([]byte, error)
+```
+
+为了帮助设置认可策略并将其编组为**验证参数字节数组**，`shim`提供了便利功能，允许链码开发人员根据组织的`MSP`标识符处理认可策略：
+
+```go
+type KeyEndorsementPolicy interface {
+    // Policy returns the endorsement policy as bytes
+    Policy() ([]byte, error)
+
+    // AddOrgs adds the specified orgs to the list of orgs that are required
+    // to endorse
+    AddOrgs(roleType RoleType, organizations ...string) error
+
+    // DelOrgs delete the specified channel orgs from the existing key-level endorsement
+    // policy for this KVS key. If any org is not present, an error will be returned.
+    DelOrgs([]string) error
+
+    // DelAllOrgs removes any key-level endorsement policy from this KVS key.
+    DelAllOrgs() error
+
+    // ListOrgs returns an array of channel orgs that are required to endorse changes
+    ListOrgs() ([]string, error)
+}
+```
+
+例如，要**为键设置认可策略**，其中**需要两个特定组织来认可键更改**，请将两个组织`MSPID`传递给`AddOrgs()`，然后调用`Policy()`以构造可以传递给的`Addoment`策略字节数组 `SetStateValidationParameter()`。
 
