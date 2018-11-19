@@ -94,24 +94,39 @@ GetPrivateDataValidationParameter(collection, key string) ([]byte, error)
 
 ```go
 type KeyEndorsementPolicy interface {
-    // Policy returns the endorsement policy as bytes
+    // Policy 将签注策略作为字节返回
     Policy() ([]byte, error)
 
-    // AddOrgs adds the specified orgs to the list of orgs that are required
-    // to endorse
+    // AddOrgs 将指定的组织添加到所需的组织列表中认可
     AddOrgs(roleType RoleType, organizations ...string) error
 
-    // DelOrgs delete the specified channel orgs from the existing key-level endorsement
-    // policy for this KVS key. If any org is not present, an error will be returned.
+    // DelOrgs 从现有的键级认可中删除指定的渠道组织KVS密钥的策略。如果没有任何组织，将返回错误。
     DelOrgs([]string) error
 
-    // DelAllOrgs removes any key-level endorsement policy from this KVS key.
+    // DelAllOrgs 从此KVS密钥中删除任何键级别的认可策略。
     DelAllOrgs() error
 
-    // ListOrgs returns an array of channel orgs that are required to endorse changes
+    // ListOrgs 返回支持更改所需的通道组织数组
     ListOrgs() ([]string, error)
 }
 ```
 
-例如，要**为键设置认可策略**，其中**需要两个特定组织来认可键更改**，请将两个组织`MSPID`传递给`AddOrgs()`，然后调用`Policy()`以构造可以传递给的`Addoment`策略字节数组 `SetStateValidationParameter()`。
+例如，要**为键设置认可策略**，其中**需要两个特定组织来认可键更改**，请将两个组织`MSPIDs`传递给`AddOrgs()`，然后调用`Policy()`以构造可以传递给的背书策略字节数组 `SetStateValidationParameter()`。
+
+# 验证
+
+在提交时，**设置键的值与设置键的认可策略没有区别**，既**更新键的状态**又根据相同的**规则进行验证**。
+
+| 验证               | 没有验证参数集       | 验证参数集         |
+| ------------------ | -------------------- | ------------------ |
+| 修改值             | 检查链码背书认可策略 | 检查键级别认可策略 |
+| 修改键级别认可策略 | 检查链码背书认可策略 | 检查键级别认可策略 |
+
+如上所述，如果**修改键并且不存在键级认可策略**，则默认情况下应用**链代码级认可策略**。当**首次**为键设置键级认可策略时也是如此，必须首先**根据预先存在的链码级认可策略认可新的键级认可策略**。
+
+如果**修改了键**并且**存在键级认可策略**，则密钥级认可策略将**覆盖**链代码级认可策略。实际上，这意味着密钥级认可策略可以比链代码级认可策略**更少限制或更严格**。由于**必须满足链码级认可策略才能首次设置密钥级认可策略，因此未违反任何信任假设**。
+
+如果**删除密钥的认可策略**（设置为`nil`），则**链代码级认可策略将再次成为默认策略**。
+
+如果事务使用不同的**关联密钥级认可策略修改多个密钥**，则需要**满足所有**这些策略才能使事务有效。
 
