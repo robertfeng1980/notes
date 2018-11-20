@@ -1,6 +1,6 @@
 # `hyperledger fabric` 日志控制
 
-日志对等体和订购者**由`common/flogging`包提供**。如果**使用`shim`程序提供的日志记录方法**，使用`Go`编写的`Chaincodes`也会使用此包。这个包支持：
+日志对等体和定序者**由`common/flogging`包提供**。如果**使用`shim`程序提供的日志记录方法**，使用`Go`编写的`Chaincodes`也会使用此包。这个包支持：
 
 + 根据消息的**严重性**记录日志
 + 基于**生成消息的软件记录器**的记录日志
@@ -54,7 +54,7 @@ chaincode=info:msp,gossip=warning:warning   - Same as above
 
 `peer`和`orderer`命令的日志记录格式是**通过`FABRIC_LOGGING_FORMAT`环境变量控制**的。这可以设置为格式字符串，例如默认值：
 
-```go
+```sh
 "%{color}%{time:2006-01-02 15:04:05.000 MST} [%{module}] %{shortfunc} -> %{level:.4s} %{id:03x}%{color:reset} %{message}"
 ```
 
@@ -62,16 +62,17 @@ chaincode=info:msp,gossip=warning:warning   - Same as above
 
 # `Go` 合约
 
-`Go`链代码应用程序中日志的标准机制是**通过对等方与每个链代码实例公开的日志传输集成**。`chaincode shim`包提供了`API`，**允许链代码创建和管理日志对象**，其日志将与`shim`日志一致地格式化和交错。
+`Go`链码应用程序中日志的标准机制是**通过对等方与每个链码实例公开的日志传输集成**。`chaincode shim`包提供了`API`，**允许链码创建和管理日志对象**，其日志将与`shim`日志一致地格式化和交错。
 
-作为独立执行的程序，**用户提供的链代码在技术上也可以在`stdout/stderr`上产生输出**。虽然对于`devmode`自然有用，但这些**通道通常在生产网络上被禁用**，以减少来自**破坏或恶意代码**的滥用。但是，通过`CORE_VM_DOCKER_ATTACHSTDOUT=true`配置选项，甚至可以在**每个对等体**的基础上为对等管理的容器（例如`netmode`）**启用此输出**。
+作为独立执行的程序，**用户提供的链码在技术上也可以在`stdout/stderr`上产生输出**。虽然对于`devmode`自然有用，但这些**通道通常在生产网络上被禁用**，以减少来自**破坏或恶意代码**的滥用。但是，通过`CORE_VM_DOCKER_ATTACHSTDOUT=true`配置选项，甚至可以在**每个对等体**的基础上为对等管理的容器（例如`netmode`）**启用此输出**。
 
-一旦启用，每个链代码将接收由其`container-id`键入的自己的**日志记录通道**。写入`stdout`或`stderr`的任何输出都将以**每行为基础与对等的日志集成**。**建议不要将其用于生产**。
+一旦启用，每个链码将接收由其`container-id`键入的自己的**日志记录通道**。写入`stdout`或`stderr`的任何输出都将以**每行为基础与对等的日志集成**。**建议不要将其用于生产**。
 
 # API
 
 + `NewLogger(name string) *ChaincodeLogger` 
-  创建一个供链代码使用的**日志记录对象**
+
+  创建一个供链码使用的**日志记录对象**
 
 + `(c *ChaincodeLogger) SetLevel(level LoggingLevel)`  
 
@@ -136,11 +137,11 @@ logging:
 
 可以使用**环境变量覆盖默认日志记录级别**。`CORE_CHAINCODE_LOGGING_LEVEL`设置**所有记录器的默认日志记录级别**。`CORE_CHAINCODE_LOGGING_SHIM`会**覆盖`shim`记录器的级别**。
 
-`Go`语言链代码还可以**通过`SetLoggingLevel API`控制链代码`shim`程序接口的日志记录级别**。
+`Go`语言链码还可以**通过`SetLoggingLevel API`控制链码`shim`程序接口的日志记录级别**。
 
 `SetLoggingLevel(LoggingLevel level)`  控制`shim`的记录级别
 
-下面是一个简单的示例，说明链代码如何创建`LogInfo`级别的**私有日志记录**对象。
+下面是一个简单的示例，说明链码如何创建`LogInfo`级别的**私有日志记录**对象。
 
 ```go
 var logger = shim.NewLogger("myChaincode")
