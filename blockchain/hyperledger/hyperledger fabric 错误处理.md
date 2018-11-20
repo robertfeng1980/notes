@@ -23,5 +23,43 @@
 + 如果错误来自另一个`Fabric`函数，则**使用`errors.WithMessage()`将错误消息添加到错误消息上下文**（如果需要），同时保持调用堆栈不受影响。
 + 不应该让错误异常**传播到其他包**。
 
+# 示例程序
+
+以下示例程序提供了使用该程序包的清晰演示：
+
+```go
+package main
+
+import (
+  "fmt"
+
+  "github.com/pkg/errors"
+)
+
+func wrapWithStack() error {
+  err := createError()
+  // do this when error comes from external source (go lib or vendor)
+  return errors.Wrap(err, "wrapping an error with stack")
+}
+func wrapWithoutStack() error {
+  err := createError()
+  // do this when error comes from internal Fabric since it already has stack trace
+  return errors.WithMessage(err, "wrapping an error without stack")
+}
+func createError() error {
+  return errors.New("original error")
+}
+
+func main() {
+  err := createError()
+  fmt.Printf("print error without stack: %s\n\n", err)
+  fmt.Printf("print error with stack: %+v\n\n", err)
+  err = wrapWithoutStack()
+  fmt.Printf("%+v\n\n", err)
+  err = wrapWithStack()
+  fmt.Printf("%+v\n\n", err)
+}
+```
+
 
 
