@@ -68,3 +68,91 @@ chaincode=info:msp,gossip=warning:warning   - Same as above
 
 一旦启用，每个链代码将接收由其`container-id`键入的自己的**日志记录通道**。写入`stdout`或`stderr`的任何输出都将以**每行为基础与对等的日志集成**。**建议不要将其用于生产**。
 
+# API
+
++ `NewLogger(name string) *ChaincodeLogger` 
+  创建一个供链代码使用的**日志记录对象**
+
++ `(c *ChaincodeLogger) SetLevel(level LoggingLevel)`  
+
+  设置记录器的**日志记录级别**
+
++ `(c *ChaincodeLogger) IsEnabledFor(level LoggingLevel) bool` 
+
+  如果将**在给定级别生成日志**，则返回`true`
+
++ `LogLevel(levelString string) (LoggingLevel, error)` 
+
+  将字符串转换为`LoggingLevel`
+
++ `LoggingLevel` 是枚举的成员
+
+    ```sh
+    LogDebug, LogInfo, LogNotice, LogWarning, LogError, LogCritical
+    ```
+
+    可以**直接使用**，也可以通过传递**不区分大小写的字符串来生成**到`LogLevel API`。
+
++ `SetLoggingLevel（LoggingLevel level）`
+
+    **控制`shim`程序**的日志记录级别
+
+## 提供函数
+
+各种严重性级别的格式化日志记录由函数提供：
+
+```go
+(c *ChaincodeLogger) Debug(args ...interface{})
+(c *ChaincodeLogger) Info(args ...interface{})
+(c *ChaincodeLogger) Notice(args ...interface{})
+(c *ChaincodeLogger) Warning(args ...interface{})
+(c *ChaincodeLogger) Error(args ...interface{})
+(c *ChaincodeLogger) Critical(args ...interface{})
+
+(c *ChaincodeLogger) Debugf(format string, args ...interface{})
+(c *ChaincodeLogger) Infof(format string, args ...interface{})
+(c *ChaincodeLogger) Noticef(format string, args ...interface{})
+(c *ChaincodeLogger) Warningf(format string, args ...interface{})
+(c *ChaincodeLogger) Errorf(format string, args ...interface{})
+(c *ChaincodeLogger) Criticalf(format string, args ...interface{})
+```
+
+日志`API`的`f`形式可以**精确控制日志的格式**。`API`的非`f`形式**当前在参数的打印表示之间插入空格**，并且任意选择要使用的格式。
+
+在当前实现中，由`shim`和`ChaincodeLogger`生成的日志**带有时间戳**，标记有日志器**名称和严重性级别**，并写入`stderr`。请注意，日志记录级别控制当前**基于创建`ChaincodeLogger`时提供的名称**。为了避免歧义，所有`ChaincodeLogger`都应该被**赋予除`shim`之外的唯一名称**。记录器名称将出现在记录器创建的所有日志消息中，`shim`记录名称为`shim`。
+
+## 日志级别设置
+
+可以在`core.yaml`文件中设置`Chaincode`容器中记录器的**默认日志记录级别**。键`chaincode.logging.level`为`Chaincode`容器中的**所有记录器设置默认级别**。键`chaincode.logging.shim`会**覆盖`shim`记录器的默认级别**。
+
+```yml
+# Logging section for the chaincode container
+logging:
+  # Default level for all loggers within the chaincode container
+  level:  info
+  # Override default level for the 'shim' logger
+  shim:   warning
+```
+
+可以使用**环境变量覆盖默认日志记录级别**。`CORE_CHAINCODE_LOGGING_LEVEL`设置**所有记录器的默认日志记录级别**。`CORE_CHAINCODE_LOGGING_SHIM`会**覆盖`shim`记录器的级别**。
+
+`Go`语言链代码还可以**通过`SetLoggingLevel API`控制链代码`shim`程序接口的日志记录级别**。
+
+`SetLoggingLevel(LoggingLevel level)`  控制`shim`的记录级别
+
+下面是一个简单的示例，说明链代码如何创建`LogInfo`级别的**私有日志记录**对象。
+
+```go
+var logger = shim.NewLogger("myChaincode")
+
+func main() {
+
+    logger.SetLevel(shim.LogInfo)
+    ...
+}
+```
+
+
+
+
+
