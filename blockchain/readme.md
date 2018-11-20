@@ -30,13 +30,13 @@
 - 操作指南
     + [`升级到最新版本的Fabric`](./hyperledger/hyperledger%20fabric%20升级网络组建.md)
     + [`更新通道配置`](./hyperledger/hyperledger%20fabric%20更新通道配置.md)
-    + [`会员服务提供商（MSP）`](./hyperledger/hyperledger%20fabric%20会员服务提供商.md)
-    + [`通道配置（`configtx`）`](./hyperledger/hyperledger%20fabric%20configtx通道配置.md)
+    + [`会员服务提供商(MSP)`](./hyperledger/hyperledger%20fabric%20会员服务提供商.md)
+    + [`通道配置configtx`](./hyperledger/hyperledger%20fabric%20configtx通道配置.md)
     + [`背书认可政策`](./hyperledger/hyperledger%20fabric%20背书认可策略.md)
     + [`可插拔交易认可和验证`](./hyperledger/hyperledger%20fabric%20可插拔交易认可和验证.md)
     + [`访问控制列表ACL`](./hyperledger/hyperledger%20fabric%20访问控制列表.md)
     + [`使用Identity Mixer实现MSP`](./hyperledger/hyperledger%20fabric%20使用Identity%20Mixer实现MSP.md)
-    + `Identity Mixer MSP`配置生成器（`idemixgen`）
+    + `Identity Mixer MSP配置生成器(idemixgen)`
     + 错误处理
     + 记录控制
     + 使用传输层安全性（`TLS`）保护通信安全
