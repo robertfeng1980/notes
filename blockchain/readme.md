@@ -38,7 +38,7 @@
     + [`使用Identity Mixer实现MSP`](./hyperledger/hyperledger%20fabric%20使用Identity%20Mixer实现MSP.md)
     + [`Identity Mixer MSP配置生成器idemixgen`](./hyperledger/hyperledger%20fabric%20使用Identity%20Mixer%20MSP配置生成器idemixgen.md)
     + [`错误处理`](./hyperledger/hyperledger%20fabric%20错误处理.md)
-    + 记录控制
+    + [`日志控制`](./hyperledger/hyperledger%20fabric%20日志控制.md)
     + 使用传输层安全性（`TLS`）保护通信安全
     + 打造基于kafka的排序服务
     + [`更新 block & tx 配置`](./hyperledger/hyperledger%20fabric%20更新%20block%20&%20tx%20配置.md)
