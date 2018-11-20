@@ -76,3 +76,16 @@
    ```go
    IdemixEnrollment idemixEnrollment = hfcaClient.idemixEnroll(x509enrollment, "idemixMSPID1");
    ```
+
+# `Idemix`和链码
+
+从**验证者的角度**来看，还有一个角色：**链码**。使用`Idemix`凭证时，链码可以了解有关交易者的信息？
+
+当使用`Idemix`凭证时，[`cid`（客户端标识）库](https://github.com/hyperledger/fabric/tree/master/core/chaincode/shim/ext/cid)（仅用于`golang`）已扩展为支持`GetAttributeValue`函数。但是，正如下面“当前限制”部分所述，`Idemix`案例中只公开了两个属性：`ou`和`role`。
+
+如果`Fabric CA`是凭证颁发者：
+
++ `ou`属性的值是**身份的隶属关系**（例如“`org1.department1`”）;
++ `role`属性的值将是`member`或`admin`。值`admin`表示该**身份标识是`MSP`管理员**。默认情况下，`Fabric CA`创建的身份标识将返回`member`角色。要创建`admin`身份标识，请使用`role`属性和值`2`注册身份标识。
+
+有关使用`cid`库检索这些属性的示例，请[参阅此`Java SDK`示例](https://github.com/hyperledger/fabric-sdk-java/blob/master/src/test/fixture/sdkintegration/gocc/sampleIdemix/src/github.com/example_cc/example_cc.go)。
