@@ -86,6 +86,41 @@
 如果`Fabric CA`是凭证颁发者：
 
 + `ou`属性的值是**身份的隶属关系**（例如“`org1.department1`”）;
-+ `role`属性的值将是`member`或`admin`。值`admin`表示该**身份标识是`MSP`管理员**。默认情况下，`Fabric CA`创建的身份标识将返回`member`角色。要创建`admin`身份标识，请使用`role`属性和值`2`注册身份标识。
++ `role`属性的值将**是`member`或`admin`**。值`admin`表示该**身份标识是`MSP`管理员**。默认情况下，`Fabric CA`创建的身份标识将返回`member`角色。要创建`admin`身份标识，请使用`role`属性和值`2`注册身份标识。
 
 有关使用`cid`库检索这些属性的示例，请[参阅此`Java SDK`示例](https://github.com/hyperledger/fabric-sdk-java/blob/master/src/test/fixture/sdkintegration/gocc/sampleIdemix/src/github.com/example_cc/example_cc.go)。
+
+# 目前的局限
+
+当前版本的`Idemix`确实有一些限制。
+
++ **固定的属性集**
+
+  尚**无法使用自定义属性发布或使用`Idemix`凭据**。将来的版本将支持自定义属性。
+
+  目前支持以下四个属性：
+
+  + **组织单位属性**（`ou`）：
+    + 用法：与X.509相同
+    + `Type`：`String`
+    + `Revealed`: `always`
+  + **角色属性**（`role`）：
+    + 用法：与X.509相同
+    + `Type`：`Integer`
+    + `Revealed`: `always`
+  + **注册`ID`属性**：
+    + `Usage`：**唯一标识用户**，在属于同一用户的所有注册凭据中相同（将在未来版本中用于审核）
+    + `Type`：`BIG`
+    + `Revealed`：从不在签名中，仅在**为`Fabric CA`生成身份验证令牌**时
+  + **撤销句柄属性**：
+    - `Usage`：**唯一标识凭证**（将在未来版本中用于撤销）
+    - `Type`：`integer`
+    - `Revealed`：`never`
+
++ **撤销尚不支持**
+
+  尽管上面提到的撤销句柄属性的存在可以看到很多撤销框架已经到位，但尚不支持撤销`Idemix`凭据。
+
++ **同行身份不使用`Idemix`进行认可**
+
+  目前，**对等体仅使用`Idemix MSP`进行签名验证**。使用`Idemix`进行**签名只能通过`Client SDK`完成**。`Idemix MSP`将支持更多角色（包括`peer`角色）。
