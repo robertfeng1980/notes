@@ -22,3 +22,57 @@
 
 `Idemix`身份验证技术提供的**信任模型和安全保证**类似于标准`X.509`证书所确保的信任模型和安全保证，但具有有效**提供高级隐私**功能的基础加密算法，包括上述隐私功能。在下面的技术部分详细比较`Idemix`和`X.509`技术。
 
+# 如何使用`Idemix`
+
+要了解如何将`Idemix`与`Hyperledger Fabric`一起使用，需要查看哪些`Fabric`组件与`Idemix`中的用户，颁发者和验证者相对应。
+
++ `Fabric Java SDK`是用户的`API`。将来，其他`Fabric SDK`也将支持`Idemix`。
++ `Fabric`提供了两个可能的`Idemix`发行者：
+  + `Fabric CA`适用于生产或开发环境
+  + 用于开发环境的`idemixgen`工具
++ 验证者是`Fabric`中的`Idemix MSP`
+
+要在`Hyperledger Fabric`中使用`Idemix`，需要以下三个基本步骤：
+
+![_images/idemix-three-steps.png](https://hyperledger-fabric.readthedocs.io/en/latest/_images/idemix-three-steps.png)
+
+比较此图像中的角色与上面的角色。
+
+1. 研究**发行人**。
+
+   `Fabric CA`（版本`1.3`或更高版本）已得到增强，可**自动充当`Idemix`颁发者**。当`fabric-ca-server`启动（或通过`fabric-ca-server init`命令初始化）时，将在`fabric-ca-server`的主目录中**自动创建以下两个文件**：`IssuerPublicKey`和`IssuerRevocationPublicKey`。这些文件**在步骤2**中是必需的。
+
+   对于开发环境，如果**不使用`Fabric CA`，可以使用`idemixgen`来创建这些文件**。
+
+2. 研究**验证者**。
+
+   需要**使用步骤1**中的`IssuerPublicKey`和`IssuerRevocationPublicKey`创建`Idemix MSP`。
+
+   例如，请研究以下摘录自`Hyperledger Java SDK`示例中的`configtx.yaml`：
+
+   ```yml
+   - &Org1Idemix
+       # defaultorg定义sampleconfig中使用的组织
+       # fabric.git开发环境
+       name: idemixMSP1
+   
+       # id将msp定义加载为
+       id: idemixMSPID1
+   
+       msptype: idemix
+       mspdir: crypto-config/peerOrganizations/org3.example.com
+   ```
+
+   `msptype`设置为`idemix`，`mspdir`目录的内容（本例中为`crypto-config/peerOrganizations/org3.example.com/msp`）包含`IssuerPublicKey`和`IssuerRevocationPublicKey`文件。
+
+   > 请注意，在此示例中，`Org1Idemix`表示`Org1`的`Idemix MSP`（未显示），它也具有`X509 MSP`。
+
+3. 研究**用户**。`Java SDK`是用户的`API`。
+
+   为了将`Idemix`与`Java SDK`一起使用，只需要一个额外的`API`调用：`org.hyperledger.fabric_ca.sdk.HFCAClient`类的`idemixEnroll`方法。例如，假设`hfcaClient`是您的`HFCAClient`对象，`x509Enrollment`是与您的`X509`证书关联的`org.hyperledger.fabric.sdk.Enrollment`。
+
+   以下调用将返回与您的`Idemix`凭据关联的`org.hyperledger.fabric.sdk.Enrollment`对象。
+
+   ```go
+   IdemixEnrollment idemixEnrollment = hfcaClient.idemixEnroll(x509enrollment, "idemixMSPID1");
+   ```
