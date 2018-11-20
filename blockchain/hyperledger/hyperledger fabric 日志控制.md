@@ -30,5 +30,33 @@
 [<logger>[,<logger>...]=]<level>[:[<logger>[,<logger>...]=]<level>...]
 ```
 
-使用从中选择的**不区分大小写**的字符串指定日志记录严重性级别：
+使用从中选择的**不区分大小写**的字符串指定日志记录**严重性级别**记录级别本身被视为整体默认值。
+
+```sh
+FATAL | PANIC | ERROR | WARNING | INFO | DEBUG
+```
+
+否则，可以使用以下命令指定**个人或记录器组**的覆盖句法。
+
+```sh
+<logger>[,<logger>...]=<level>
+```
+
+日志规格示例：
+
+```sh
+info                                        - Set default to INFO
+warning:msp,gossip=warning:chaincode=info   - Default WARNING; Override for msp, gossip, and chaincode
+chaincode=info:msp,gossip=warning:warning   - Same as above
+```
+
+# 日志格式
+
+`peer`和`orderer`命令的日志记录格式是**通过`FABRIC_LOGGING_FORMAT`环境变量控制**的。这可以设置为格式字符串，例如默认值：
+
+```go
+"%{color}%{time:2006-01-02 15:04:05.000 MST} [%{module}] %{shortfunc} -> %{level:.4s} %{id:03x}%{color:reset} %{message}"
+```
+
+以人类可读的控制台格式打印日志。它也可以设置为`json`以`JSON`格式输出日志。
 
