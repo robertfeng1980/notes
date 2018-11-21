@@ -46,7 +46,7 @@
     + [`背书策略`](./hyperledger/hyperledger%20fabric%20背书策略.md)
 
 - 系统架构
-    + 架构解释
+    + [`架构解释`](./hyperledger/hyperledger%20fabric%20架构解释.md)
     + 交易流程
     + `Hyperledger Fabric CA`的用户指南
     + `Hyperledger Fabric SDK`
