@@ -63,3 +63,8 @@
 
 10. 按以下顺序打开节点：`ZooKeeper`集合，`Kafka`集群，`Orderer`服务节点。
 
+# 其他考虑因素
+
++ **首选消息大小**：在上面的步骤`4`中（请参阅步骤部分），还可以通过设置`Orderer.Batchsize.PreferredMaxBytes`键来**设置块的首选大小**。`Kafka`在处理相对较小的消息时**提供更高的吞吐量**，目标是**不超过`1 MiB`的值**。
++ **使用环境变量覆盖设置**：使用`Fabric`提供的示例`Kafka`和`Zookeeper Docker`镜像时（请分别参见`images/kafka`和`images/zookeeper`），可以使用**环境变量覆盖`Kafka`代理或`ZooKeeper`服务器的设置**。用**下划线替换配置键的点**，例如`KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE = false`将允许覆盖`unclean.leader.election.enable`的默认值。这同样适用于`OSN`的本地配置，即可以在`orderer.yaml`中设置的内容。例如，`ORDERER_KAFKA_RETRY_SHORTINTERVAL = 1s`允许覆盖`Orderer.Kafka.Retry.ShortInterval`的默认值。
+
