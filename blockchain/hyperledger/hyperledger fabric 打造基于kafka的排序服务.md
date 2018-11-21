@@ -74,3 +74,6 @@
 
 使用`orderer.yaml`中的`Kafka.Version`，可以**配置使用哪个版本的`Kafka`协议与`Kafka`集群的代理**进行通信。`Kafka`代理**向后兼容旧协议版本**。由于`Kafka`代理与旧协议版本的向后兼容性，将`Kafka`代理升级到新版本**不需要更新`Kafka.Version`键值**，但`Kafka`集群在使用旧协议版本时可能会**受到[性能损失](https://kafka.apache.org/documentation/#upgrade_11_message_format)**。
 
+# 调试
+
+将环境变量`FABRIC_LOGGING_SPEC`设置为`DEBUG`，并在`orderer.yaml`中将`Kafka.Verbose`设置为`true`。
