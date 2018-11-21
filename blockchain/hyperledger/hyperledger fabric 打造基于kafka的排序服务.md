@@ -68,3 +68,9 @@
 + **首选消息大小**：在上面的步骤`4`中（请参阅步骤部分），还可以通过设置`Orderer.Batchsize.PreferredMaxBytes`键来**设置块的首选大小**。`Kafka`在处理相对较小的消息时**提供更高的吞吐量**，目标是**不超过`1 MiB`的值**。
 + **使用环境变量覆盖设置**：使用`Fabric`提供的示例`Kafka`和`Zookeeper Docker`镜像时（请分别参见`images/kafka`和`images/zookeeper`），可以使用**环境变量覆盖`Kafka`代理或`ZooKeeper`服务器的设置**。用**下划线替换配置键的点**，例如`KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE = false`将允许覆盖`unclean.leader.election.enable`的默认值。这同样适用于`OSN`的本地配置，即可以在`orderer.yaml`中设置的内容。例如，`ORDERER_KAFKA_RETRY_SHORTINTERVAL = 1s`允许覆盖`Orderer.Kafka.Retry.ShortInterval`的默认值。
 
+# `Kafka`协议版本兼容性
+
+`Fabric`使用`sarama`客户端库和供应商的一个版本支持`Kafka 0.10`到`1.0`，但仍然可以使用旧版本。
+
+使用`orderer.yaml`中的`Kafka.Version`，可以**配置使用哪个版本的`Kafka`协议与`Kafka`集群的代理**进行通信。`Kafka`代理**向后兼容旧协议版本**。由于`Kafka`代理与旧协议版本的向后兼容性，将`Kafka`代理升级到新版本**不需要更新`Kafka.Version`键值**，但`Kafka`集群在使用旧协议版本时可能会**受到[性能损失](https://kafka.apache.org/documentation/#upgrade_11_message_format)**。
+
