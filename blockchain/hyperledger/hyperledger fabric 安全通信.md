@@ -32,3 +32,29 @@
 在**对等节点上启用客户端身份验证**时，客户端需要**在`TLS`握手期间发送其证书**。如果客户端**未发送**其证书，则**握手将失败**，并且**对等方将关闭连接**。
 
 当对等体**加入通道**时，从通道的**配置块**读取通道成员的**根CA证书链**，并将其**添加到`TLS`客户端和服务器根`CA`数据结构中**。因此，点对点通信，点对点订购者通信**应该无缝地工作**。
+
+# 为`orderer`节点配置`TLS`
+
+要在定序者节点上启用`TLS`，请设置以下**定序者配置属性**：
+
+- `General.TLS.Enabled` = `true`
+- `General.TLS.PrivateKey` 包含**服务器私钥**的文件的完全限定路径
+- `General.TLS.Certificate`  包含**服务器证书**的文件的完全限定路径
+- `General.TLS.RootCAs`  包含颁发`TLS`服务器证书的`CA`的证书链的文件的完全限定路径
+
+默认情况下，**在`orderer`上关闭`TLS`客户端身份验证**，就像`peer`一样。要**启用`TLS`客户端身份验证**，请设置以下配置属性：
+
+- `General.TLS.ClientAuthRequired` = `true`
+- `General.TLS.ClientRootCAs`  包含**颁发`TLS`服务器证书的`CA`的证书链**的文件的完全限定路径
+
+通过设置以下**环境变量**，也可以启用具有客户端身份验证的`TLS`：
+
+- `ORDERER_GENERAL_TLS_ENABLED` = `true`
+- `ORDERER_GENERAL_TLS_PRIVATEKEY` 包含**服务器私钥**的文件的完全限定路径
+- `ORDERER_GENERAL_TLS_CERTIFICATE`  包含**服务器证书**的文件的完全限定路径
+- `ORDERER_GENERAL_TLS_ROOTCAS`  包含**颁发`TLS`服务器证书的`CA`的证书链**的文件的完全限定路径
+- `ORDERER_GENERAL_TLS_CLIENTAUTHREQUIRED` = `true`
+- `ORDERER_GENERAL_TLS_CLIENTROOTCAS`  包含**颁发`TLS`服务器证书的`CA`的证书链**的文件的完全限定路径
+
+# 为对等`CLI`配置`TLS`
+
