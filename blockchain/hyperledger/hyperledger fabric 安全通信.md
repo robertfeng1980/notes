@@ -58,3 +58,20 @@
 
 # 为对等`CLI`配置`TLS`
 
+对**启用`TLS`的对等节点运行对等`CLI` 命令**时，必须设置以下**环境变量**：
+
+- `CORE_PEER_TLS_ENABLED` = `true`
+- `CORE_PEER_TLS_ROOTCERT_FILE`  包含**颁发`TLS`服务器证书的`CA`的证书链**的文件的完全限定路径
+
+如果在**远程服务器**上也启用了`TLS`客户端身份验证，则**除上述变量外，还必须设置以下变量**：
+
+- `CORE_PEER_TLS_CLIENTAUTHREQUIRED` = `true`
+- `CORE_PEER_TLS_CLIENTCERT_FILE`  **客户端证书**的完全限定路径
+- `CORE_PEER_TLS_CLIENTKEY_FILE`  **客户端私钥**的完全限定路径
+
+当**运行连接到`orderer`服务的命令**时，如**对等通道**`<create | update | fetch>`或**对等链代码**`<invoke | instantiate>`，如果**在`orderer`上启用了`TLS`**，则还必须指定以下命令行参数：
+
+- `–tls`
+- `–cafile` 包含**订货人`CA`的证书链**的文件的完全限定路径
+
+如果在订货人上启用了`TLS`客户端身份验证，则还必须指定以下参数：
