@@ -47,7 +47,7 @@
 
 - 系统架构
     + [`架构解释`](./hyperledger/hyperledger%20fabric%20架构解释.md)
-    + 交易流程
+    + [`交易流程`](./hyperledger/hyperledger%20fabric%20交易流程.md)
     + `Hyperledger Fabric CA`的用户指南
     + `Hyperledger Fabric SDK`
     + 服务发现
