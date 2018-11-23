@@ -40,5 +40,11 @@
 
 ![_images/step5.png](https://hyperledger-fabric.readthedocs.io/en/latest/_images/step5.png)
 
+## 5、交易已验证和提交
+
+**交易块被“交付”到通道上的所有对等方**。 **验证**块内的**事务**以**确保满足认可策略**并**确保读集变量的分类帐状态没有变化**，因为**读集是由事务执行生成**的。 块中的事务被**标记为有效或无效**。
+
+![_images/step6.png](https://hyperledger-fabric.readthedocs.io/en/latest/_images/step6.png)
+
 
 
