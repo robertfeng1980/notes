@@ -34,5 +34,11 @@
 
 ![_images/step4.png](https://hyperledger-fabric.readthedocs.io/en/latest/_images/step4.png)
 
+## 4、客户组装背书认可到交易
+
+该应用程序将“**交易提议**”中的交易和**响应“广播”到订购服务**。该事务将**包含读/写集**，签名**对等签名和通道ID**。订购服务**不需要检查交易**的整个内容以**执行其操作**，它只是从**网络中的所有通道接收交易**，**按时间顺序**按**渠道**对它们进行**排序**，并**创建每个通道的交易块**。
+
+![_images/step5.png](https://hyperledger-fabric.readthedocs.io/en/latest/_images/step5.png)
+
 
 
