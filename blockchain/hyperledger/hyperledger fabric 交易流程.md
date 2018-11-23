@@ -28,5 +28,11 @@
 
 ![_images/step3.png](https://hyperledger-fabric.readthedocs.io/en/latest/_images/step3.png)
 
+## 3、检查提案回复
+
+应用程序**验证支持对等签名**并**比较提议响应**以确定**提议响应是否相同**。如果链代码**仅查询**分类帐，则应用程序**将检查查询响应**，并且通常**不会将事务提交给订购服务**。如果客户端**应用程序**打算将**事务提交给订购服务**以**更新分类帐**，则应用程序在**提交之前**确定**是否已满足指定的认可策略**（即，`peerA`和`peerB`都认可）。该体系结构使得即使**应用程序**选择**不检查响应**或以**其他方式转发*未经许可*的事务**，该**认可策略仍将由对等体*强制执行*并在提交验证阶段维持**。
+
+![_images/step4.png](https://hyperledger-fabric.readthedocs.io/en/latest/_images/step4.png)
+
 
 
