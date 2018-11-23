@@ -46,5 +46,9 @@
 
 ![_images/step6.png](https://hyperledger-fabric.readthedocs.io/en/latest/_images/step6.png)
 
+## 6、更新分类账
 
+**每个对等体将块附加到通道的链**，并且对于**每个有效的事务**，**写集被提交到当前状态数据库**。 **发出**一个事件，**通知**客户端应用程序事务（调用）**已被不可变地附加到链中**，以及**通知该事务是否已经过验证或无效**。
+
+注意：请参阅[序列图](https://hyperledger-fabric.readthedocs.io/en/latest/arch-deep-dive.html#swimlane)以更好地了解事务流。
 
