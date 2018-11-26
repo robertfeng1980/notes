@@ -54,3 +54,42 @@ message Capability { }
 }
 ```
 
+## 初始配置中的功能
+
+在发布工件的`config`目录中分发的`configtx.yaml`文件中，有一个`Capabilities`部分，它列出了每种功能类型`（Channel，Orderer和Application）`的可能功能。
+
+**启用功能**的最简单方法是选择`v1.1`示例配置文件并为网络自定义它。例如：
+
+```yaml
+SampleSingleMSPSoloV1_1:
+    Capabilities:
+        <<: *GlobalCapabilities
+    Orderer:
+        <<: *OrdererDefaults
+        Organizations:
+            - *SampleOrg
+        Capabilities:
+            <<: *OrdererCapabilities
+    Consortiums:
+        SampleConsortium:
+            Organizations:
+                - *SampleOrg
+```
+
+请注意，在**根级别**（对于通道功能）和`Orderer`级别（对于`orderer`功能）定义了功能部分。上面的示例使用`YAML`引用来包括`YAML`底部定义的功能。
+
+定义订货人系统通道时，没有应用程序部分，因为这些功能是在**创建应用程序通道期间定义**的。要**在创建频道时定义新频道的应用功能**，应用管理员应在`SampleSingleMSPChannelV1_1`**配置文件之后**为其频道创建事务建模。
+
+```yaml
+SampleSingleMSPChannelV1_1:
+     Consortium: SampleConsortium
+     Application:
+         Organizations:
+             - *SampleOrg
+         Capabilities:
+             <<: *ApplicationCapabilities
+```
+
+这里，`Application`部分有一个新元素`Capabilities`，它引用了在`YAML`末尾定义的`ApplicationCapabilities`部分。
+
+> **注意**：`Channel`和`Orderer`部分的功能**继承自订购系统通道中的定义**，并且在创建通道的过程中由订货人自动包含。
