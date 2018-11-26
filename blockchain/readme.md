@@ -52,7 +52,7 @@
     + [`Hyperledger Fabric SDK`](https://hyperledger-fabric.readthedocs.io/en/latest/fabric-sdks.html)
     + [`服务发现`](./hyperledger/hyperledger%20fabric%20服务发现.md)
     + [`通道`](./hyperledger/hyperledger%20fabric%20通道.md)
-    + 性能要求
+    + [`性能要求`](./hyperledger/hyperledger%20fabric%20性能要求.md)
     + `CouchDB`作为状态数据库
     + 基于对等通道的事件服务
     + 私人数据
