@@ -53,7 +53,7 @@
     + [`服务发现`](./hyperledger/hyperledger%20fabric%20服务发现.md)
     + [`通道`](./hyperledger/hyperledger%20fabric%20通道.md)
     + [`性能要求`](./hyperledger/hyperledger%20fabric%20性能要求.md)
-    + `CouchDB`作为状态数据库
+    + [`CouchDB作为状态数据库`](./hyperledger/hyperledger%20fabric%20CouchDB作为状态数据库.md)
     + 基于对等通道的事件服务
     + 私人数据
     + 读写集语义
