@@ -26,3 +26,31 @@
 
 > **注意**：通道功能可能定义为版本`v1.3`，而定购商和应用程序功能分别定义为版本`1.1`和`v1.4`。**在“通道”组级别启用功能并不意味着在更具体的“订购者”和“应用程序”组级别上可以使用相同的功能**。
 
+# 设置功能
+
+功能被设置为**通道配置的一部分**（作为**初始配置**的一部分或作为重新配置的一部分）。
+
+> **注意**：我们有两个文档，介绍了通道重新配置的不同方面。首先，我们有一个教程，将指导您完成[向通道添加组织的过程](https://hyperledger-fabric.readthedocs.io/en/latest/channel_update_tutorial.html)。我们还有一个文档，通过[更新通道配置](https://hyperledger-fabric.readthedocs.io/en/latest/config_update.html)进行讨论，该配置概述了可能的各种更新以及更全面的签名过程。
+
+由于新通道**默认复制`Orderer`系统通道的配置**，因此将**自动配置新通道**以使用`Orderer`系统通道的**订购者和通道功能**以及通道创建事务指定的应用程序功能。但是，**必须重新配置已存在的通道**。
+
+`Capabilities`值的模式在`protobuf`中定义为：
+
+```go
+message Capabilities {
+      map<string, Capability> capabilities = 1;
+}
+
+message Capability { }
+```
+
+作为示例，以`JSON`呈现：
+
+```go
+{
+    "capabilities": {
+        "V1_1": {}
+    }
+}
+```
+
