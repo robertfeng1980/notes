@@ -15,3 +15,14 @@
 
 # 使用`Chaincode`的`CouchDB`
 
+## `Chaincode`查询
+
+大多数链码`shim`程序`API`可以与`LevelDB`或`CouchDB`状态数据库一起使用，例如，`GetState`，`PutState`，`GetStateByRange`，`GetStateByPartialCompositeKey`。此外，当您将`CouchDB`用作状态数据库并将模型资产用作链码中的`JSON`时，可以使用`GetQueryResult` `API`并传递`CouchDB`查询字符串，对状态数据库中的`JSON`执行丰富查询。查询字符串[遵循`CouchDB JSON`查询语法](http://docs.couchdb.org/en/2.1.1/api/database/find.html)。
+
+`marbles02`结构样本演示了如何使用来自链代码的`CouchDB`查询。它包含一个`queryMarblesByOwner()`函数，它通过将所有者`ID`传递给`chaincode`来演示参数化查询。然后，它使用`JSON`查询语法查询状态数据以查找与`marble`的`docType`和所有者`id`匹配的`JSON`文档：
+
+```json
+{"selector":{"docType":"marble","owner":<OWNER_ID>}}
+```
+
+
