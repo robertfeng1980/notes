@@ -24,6 +24,28 @@
 
 默认情况下，两个服务都使用`Channel Readers`策略来确定**是否授权请求客户端进行事件**。
 
+# 传递响应消息概述
+
+事件服务发送回`DeliverResponse`消息。
+
+**每条消息都包含以下内容之一**：
+
++ **status**：`HTTP`状态代码。如果发生任何故障，两种服务都将返回相应的**故障代码**；否则，一旦服务完成发送`SeekInfo`消息请求的所有信息，它将返回`200 SUCCESS`。
++ **block**：仅由`Deliver`服务返回。
++ **filtered block**：仅由`DeliverFiltered`服务返回。
+
+**过滤后的块包含**：
+
++ 通道ID
++ `number` （即块号）。
++ 过滤的事务数组。
++ 交易ID。
+  + 类型（例如`ENDORSER_TRANSACTION，CONFIG`）
+  + 交易验证码。
++ 过滤的交易操作。
+  + 过滤的链代码操作数组。
+    + 事务的`chaincode`事件（有效负载被填空）。
+
 
 
 
