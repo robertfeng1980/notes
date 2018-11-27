@@ -55,4 +55,63 @@
 
 如果**已经拥有大量数据**，并且**稍后安装**了链代码，则**安装时创建索引**可能**需要一些时间**。同样，如果**已经拥有大量数据**并**实例化后续版本的链代码**，则**索引创建可能需要一些时间**。**避免在这些时间**调用**查询**状态数据库的链代码函数，因为在**索引初始化时链代码查询可能会超时**。在事务处理期间，**当块被提交到分类帐时，索引将自动刷新**。
 
+# `CouchDB`配置
+
+通过将状态数据库配置选项从`goleveldb`更改为`CouchDB`，可以**将`CouchDB`作为状态数据库启用**。此外，`couchDBAddress`需要**配置为指向对等方使用的`CouchDB`**。如果`CouchDB`配置了**用户名和密码**，则应使用管理员**用户名和密码**填充用户名和密码**属性**。`couchDBConfig`部分提供了其他选项，并记录在案。**对`core.yaml`的更改将在重新启动对等体后立即生效**。
+
+还可以**传入`docker`环境变量来覆盖`core.yaml`值**，例如`CORE_LEDGER_STATE_STATEDATABASE`和`CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS`。
+
+以下是`core.yaml`的`stateDatabase`部分：
+
+```yaml
+state:
+  # stateDatabase - options are "goleveldb", "CouchDB"
+  # goleveldb - default state database stored in goleveldb.
+  # CouchDB - store state database in CouchDB
+  stateDatabase: goleveldb
+  # Limit on the number of records to return per query
+  totalQueryLimit: 10000
+  couchDBConfig:
+     # It is recommended to run CouchDB on the same server as the peer, and
+     # not map the CouchDB container port to a server port in docker-compose.
+     # Otherwise proper security must be provided on the connection between
+     # CouchDB client (on the peer) and server.
+     couchDBAddress: couchdb:5984
+     # This username must have read and write authority on CouchDB
+     username:
+     # The password is recommended to pass as an environment variable
+     # during start up (e.g. LEDGER_COUCHDBCONFIG_PASSWORD).
+     # If it is stored here, the file must be access control protected
+     # to prevent unintended users from discovering the password.
+     password:
+     # CouchDB错误的重试次数
+     maxRetries: 3
+     # 对等启动期间CouchDB错误的重试次数
+     maxRetriesOnStartup: 10
+     # CouchDB请求超时（单位：持续时间，例如20秒）
+     requestTimeout: 35s
+     # 限制每个CouchDB查询的记录数
+     # 请注意，链代码查询仅受totalQueryLimit的约束。
+     # 内部链代码可以执行多个CouchDB查询，
+     # 每个大小的internalQueryLimit。
+     internalQueryLimit: 1000
+     # 限制每个CouchDB批量更新批次的记录数
+     maxBatchUpdateSize: 1000
+     # 每N个块后的热指数。
+     # 此选项可以加热已经存在的所有索引
+     # 每N个块后部署到CouchDB。
+     # 值为1将在每个块提交后加热索引，
+     # 以确保快速选择器查询。
+     # 增加该值可以提高peer和CouchDB的写入效率，
+     # 但可能会降低查询响应时间。
+     warmIndexesAfterNBlocks: 1
+```
+
+托管在`Hyperledger Fabric`提供的`docker`容器中的`CouchDB`能够使用`Docker Compose`脚本使用`COUCHDB_USER`和`COUCHDB_PASSWORD`环境变量传入环境变量来设置`CouchDB`用户名和密码。
+
+对于`Fabric`提供的`docker`镜像之外的`CouchDB`安装，必须编辑该[安装的`local.ini`文件](http://docs.couchdb.org/en/2.1.1/config/intro.html#configuration-files)以**设置管理员用户名和密码**。
+
+`Docker`撰写脚本**仅在创建容器时设置用户名和密码**。如果要在**创建容器后更改用户名或密码，则必须编辑`local.ini`文件**。
+
+> **注意**：在每个对等启动时读取`CouchDB`对等选项。
 
