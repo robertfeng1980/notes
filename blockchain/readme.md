@@ -55,7 +55,7 @@
     + [`性能要求`](./hyperledger/hyperledger%20fabric%20性能要求.md)
     + [`CouchDB作为状态数据库`](./hyperledger/hyperledger%20fabric%20CouchDB作为状态数据库.md)
     + [`基于对等通道的事件服务`](./hyperledger/hyperledger%20fabric%20基于对等通道的事件服务.md)
-    + 私人数据
+    + [`私有数据`](./hyperledger/hyperledger%20fabric%20私有数据.md)
     + 读写集语义
     + `gossip`数据传播协议
     
