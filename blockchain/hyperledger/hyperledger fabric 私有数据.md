@@ -59,4 +59,17 @@
 
 因此，**必须将`requiredPeerCount`和`maxPeerCount`属性设置得足够大**，以**确保通道中私有数据的可用性**。例如，如果**每个签署对等方**在事务**提交之前**变得**不可用**，则`requiredPeerCount`和`maxPeerCount`属性**将确保私有数据在其他对等方上可用**。
 
-> **注意**：要使集合起作用，**必须正确配置跨组织的`gossip`**。请参阅我们关于`Gossip`数据传播协议的文档，**特别注意“锚点对等”部分**。
+> **注意**：要使集合起作用，**必须正确配置跨组织的`gossip`**。请参阅[关于`Gossip`数据传播协议](https://hyperledger-fabric.readthedocs.io/en/latest/gossip.html)的文档，**特别注意“锚点对等”部分**。
+
+# 从链代码引用集合
+
+一组`shim`程序`API`可用于设置和检索私有数据。
+
+相同的链代码数据操作可以应用于**通道状态数据和私有数据**，但在**私有数据的情况下**，**集合名称与链代码`API`中的数据一起指定**，例如`PutPrivateData(collection,key,value)`和`GetPrivateData(collection,key)`。
+
+**单个链代码可以引用多个集合**。
+
+## 如何在链代码提议中传递私人数据
+
+
+
