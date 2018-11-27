@@ -25,4 +25,16 @@
 {"selector":{"docType":"marble","owner":<OWNER_ID>}}
 ```
 
+## `CouchDB`分页
+
+`Fabric`支持对**丰富查询和基于范围的查询**的查询结果**进行分页**。支持分页的`API`允许使用**页面大小**和**书签**来用于范围和富查询。
+
+如果使用分页查询`API`（`GetStateByRangeWithPagination()`，`GetStateByPartialCompositeKeyWithPagination()`和`GetQueryResultWithPagination()`）指定了`pagesize`，则将返回一组结果以及书签。**书签可以与后续查询一起使用以接收结果的下一个“页面”**。
+
+所有链代码查询都由`core.yaml`的`totalQueryLimit`（默认值`100000`）绑定。这是`chaincode`将迭代并返回到客户端的**最大结果数**，以**避免意外或恶意长时间运行的查询**。
+
+使用分页的示例包含在[`Using CouchDB`教程](https://hyperledger-fabric.readthedocs.io/en/latest/couchdb_tutorial.html)中。
+
+> **注意**：无论链代码是否使用分页查询，对等方都将基于`core.yaml`中的`internalQueryLimit`（默认值`1000`）批量查询`CouchDB`。此行为可确保在**对等方和`CouchDB`之间传递合理大小的结果集**，并且对链代码是**透明的，无需其他配置**。
+
 
