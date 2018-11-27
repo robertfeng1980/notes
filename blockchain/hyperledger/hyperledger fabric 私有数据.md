@@ -92,3 +92,9 @@
 + **不支持在单个事务中**执行范围或丰富的`JSON`**查询和更新**数据的`Chaincode`，因为**无法在无法访问**私有数据的**对等方上**或在**缺少私有数据的对等方**上**验证查询结果是否可以访问**。如果链代码**调用同时查询和更新私有数据，则提议请求将返回错误**。如果您的应用程序**可以容忍链代码执行和验证/提交时间之间的结果集更改**，那么您**可以调用一个链代码函数来执行查询**，然后**调用第二个链代码函数来进行更新**。请注意，调用`GetPrivateData()`以**检索单个键**可以在与`PutPrivateData()`调用**相同的事务中进行**，因为所有对等体都可以**根据散列键版本验证键读取**。
 + 请注意，**私有数据集合**仅定义哪个组织的**对等方有权接收和存储私有数据**，从而暗示哪些**对等方可用于查询私有数据**。私有数据集合本身**不限制链代码中的访问控制**。例如，如果**非授权客户端能够在有权访问私有数据**的对等端上调用链代码，则链代码逻辑仍然需要像往常一样**强制执行访问控制**，例如通过调用`GetCreator()`链代码`API`或使用客户端身份链码库。
 
+# 将索引与集合一起使用
+
+`CouchDB`作为状态数据库主题描述了可以应用于**通道状态数据库以启用`JSON`内容查询的索引**，方法是在链代码**安装时将索引打包在`META-INF/statedb/couchdb/indexes`目录中**。同样，索引也可以通过在`META-INF/statedb/couchdb/collections/<collection_name>/indexes`目录中**打包索引来应用于私有数据集合**。[这里有一个示例索引](https://github.com/hyperledger/fabric-samples/blob/master/chaincode/marbles02_private/go/META-INF/statedb/couchdb/collections/collectionMarbles/indexes/indexOwner.json)。
+
+## 私人数据清除
+
