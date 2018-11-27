@@ -38,15 +38,17 @@
 
 + 通道ID
 + `number` （即块号）。
-+ 过滤的事务数组。
++ 过滤的**事务数组**。
 + 交易ID。
-  + 类型（例如`ENDORSER_TRANSACTION，CONFIG`）
-  + 交易验证码。
-+ 过滤的交易操作。
-  + 过滤的链代码操作数组。
+  + **类型**（例如`ENDORSER_TRANSACTION，CONFIG`）
+  + 交易**验证码**。
++ 过滤的交易**操作**。
+  + 过滤的链代码操作**数组**。
     + 事务的`chaincode`事件（有效负载被填空）。
 
+# `SDK`事件文档
 
+有关使用事件服务的更多详细信息，请[参阅`SDK`文档](https://fabric-sdk-node.github.io/tutorial-channel-events.html)。
 
 
 
