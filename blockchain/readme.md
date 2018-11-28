@@ -57,7 +57,7 @@
     + [`基于对等通道的事件服务`](./hyperledger/hyperledger%20fabric%20基于对等通道的事件服务.md)
     + [`私有数据`](./hyperledger/hyperledger%20fabric%20私有数据.md)
     + [`读写集`](./hyperledger/hyperledger%20fabric%20读写集.md)
-    + `gossip`数据传播协议
+    + [`gossip传播协议`](./hyperledger/hyperledger%20fabric%20gossip传播协议.md)
     
 - 命令
     + [`基本命令详解`](./hyperledger/hyperledger%20fabric%20基本命令详解.md)
