@@ -20,3 +20,34 @@
 
 + **Static**：系统管理员**手动将组织中的一个对等体配置为领导者**，例如**一个与订购服务保持开放连接**。
 + **Dynamic**：**对等体执行领导者选举程序**以**选择组织中的一个对等体**成为领导者，从订购服务中**拉出块**，并**将块传播给组织中的其他对等体**。
+
+## 静态领导人选举
+
+使用静态领导者选举允许在组织内**手动定义一组领导者对等体**，可以将**单个节点定义为领导者**或**所有可用的对等体**，应该考虑到这一点：**使太多的对等体连接到排序服务**可能**导致带宽利用效率低**下。要**启用静态领导者选举**模式，请在`core.yaml`部分中配置以下参数：
+
+```yaml
+peer:
+    # Gossip related configuration
+    gossip:
+        useLeaderElection: false
+        orgLeader: true
+```
+
+或者，可以**使用环境变量配置**和覆盖这些参数：
+
+```sh
+export CORE_PEER_GOSSIP_USELEADERELECTION=false
+export CORE_PEER_GOSSIP_ORGLEADER=true
+```
+
+> **注意**：以下配置将使`peer`处于**待机模式**，即`peer`**不会尝试成为领导者**：
+>
+> ```sh
+> export CORE_PEER_GOSSIP_USELEADERELECTION=false
+> export CORE_PEER_GOSSIP_ORGLEADER=false
+> ```
+
+将`CORE_PEER_GOSSIP_USELEADERELECTION`和`CORE_PEER_GOSSIP_USELEADERELECTION`设置为`true`值是**不明确的，将导致错误**。
+
+在静态配置组织中，`admin`负责在**出现故障或崩溃时提供领导节点的高可用性**。
+
