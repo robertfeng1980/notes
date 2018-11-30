@@ -177,3 +177,56 @@ public class SimpleAssetChaincode extends ChaincodeBase {
     }
 ```
 
+## 调用`Chaincode`
+
+首先，**添加`invoke`函数的签名**。`Chaincode`调用在`Response invoke(ChaincodeStub stub)`方法内完成。
+
+```java
+    /**
+     * Invoke is called per transaction on the chaincode. Each transaction is
+     * either a 'get' or a 'set' on the asset created by Init function. The Set
+     * method may create a new asset by specifying a new key-value pair.
+     *
+     * @param stub {@link ChaincodeStub} to operate proposal and ledger
+     * @return response
+     */
+    @Override
+    public Response invoke(ChaincodeStub stub) {
+        return newSuccessResponse();
+    }
+```
+
+与上面的`init`函数一样，需要**从`ChaincodeStub`中提取参数**。**`invoke`函数的参数将是要调用的链代码应用程序函数的名称**。在例子中，应用程序将只有两个函数：`set`和`get`，它们允许设置资产的值或检索其当前状态。使用`ChaincodeStub.getFunction()`和`ChaincodeStub.getParameters()`方法**提取函数名称和参数**。**验证函数名称**并**调用相应的链代码方法**。**链代码方法接收的值**应作为**成功响应**有效负载**返回**。如果出现**异常或不正确**的函数值，则**返回错误响应**。
+
+```java
+    public Response invoke(ChaincodeStub stub) {
+        try {
+            // Extract the function and args from the transaction proposal
+            String func = stub.getFunction();
+            List<String> params = stub.getParameters();            
+        }
+    }
+```
+
+接下来，将函数名称验证为`set`或`get`，并调用这些链代码应用程序函数，通过调用父类的`newSuccessResponse`或`newErrorResponse`函数返回适当的响应，这些函数将**响应序列化为`gRPC protobuf`消息**。
+
+```java
+	public Response invoke(ChaincodeStub stub) {
+        try {
+            // Extract the function and args from the transaction proposal
+            String func = stub.getFunction();
+            List<String> params = stub.getParameters();
+            if (func.equals("set")) {
+                // Return result as success payload
+                return newSuccessResponse(set(stub, params));
+            } else if (func.equals("get")) {
+                // Return result as success payload
+                return newSuccessResponse(get(stub, params));
+            }
+            return newErrorResponse("Invalid invoke function name. Expecting one of: [\"set\", \"get\"");
+        } catch (Throwable e) {
+            return newErrorResponse(e.getMessage());
+        }
+    }
+```
+
