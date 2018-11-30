@@ -38,3 +38,41 @@ $ git clone https://github.com/hyperledger/fabric-chaincode-java.git
 
 `fabric-chaincode-example-gradle` 包含一个示例`java chaincode gradle`项目，其中包含示例链代码和基本`gradle`构建指令。
 
+## 创建`Gradle`项目
+
+可以使用`fabric-chaincode-example-gradle`作为起始点。确保项目构建创建一个可运行的`jar`，其中包含名为`chaincode.jar`的所有依赖项。
+
+```groovy
+plugins {
+    id 'com.github.johnrengelman.shadow' version '2.0.3'
+    id 'java'
+}
+
+group 'org.hyperledger.fabric-chaincode-java'
+version '1.3.1-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.hyperledger.fabric-chaincode-java', name: 'fabric-chaincode-shim', version: '1.3.+'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+shadowJar {
+    baseName = 'chaincode'
+    version = null
+    classifier = null
+
+    manifest {
+        attributes 'Main-Class': 'com.github.hooj0.chaincode.SimpleAssetChaincode'
+    }
+}
+```
+
+新建完成后，可以在项目上右键，选择`Gradle -> Refresh Gradle Project`加载项目依赖的`Jar`包。
+
