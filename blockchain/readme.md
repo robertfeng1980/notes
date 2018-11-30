@@ -18,7 +18,7 @@
     + [`在windows 下搭建 java 开发环境`](./hyperledger/在windows%20下搭建hyperledger%20fabric%20java%20开发环境.md)
     + [`Chaincode 开发模式网络环境`](./hyperledger/hyperledger%20fabric%20Chaincode%20开发模式.md)
     + [`Chaincode GoLang 开发教程`](./hyperledger/hyperledger%20fabric%20Chaincode%20开发教程.md)
-    
+    + [`Chaincode Java 开发教程`](./hyperledger/hyperledger%20fabric%20Chaincode%20开发教程_java.md)
     + [`开发系统Chaincode插件`](./hyperledger/hyperledger%20fabric%20开发系统链码插件.md)
     + [`使用CouchDB状态数据库`](./hyperledger/hyperledger%20fabric%20中使用CouchDB.md)
 
