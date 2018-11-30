@@ -1,8 +1,8 @@
 # `Chaincode` 开发模式
 
-通常，链路由**对等体启动和维护**。然而，在**开发模式**中，链代码由用户构建和启动。在链代码开发阶段，此模式非常有用，可用于**快速代码/构建/运行/调试周期周转**。
+通常，链路由**对等体启动和维护**。然而，在**开发模式**中，链码由用户构建和启动。在链码开发阶段，此模式非常有用，可用于**快速代码/构建/运行/调试周期周转**。
 
-通过为**示例开发网络**利用**预先生成的订购者和渠道工件**来启动“**开发模式**”。这样，用户可以**立即进入编译链码和驱动回调**的过程。
+通过为**示例开发网络**利用**预先生成的定序者和通道工件**来启动“**开发模式**”。这样，用户可以**立即进入编译链码和驱动回调**的过程。
 
 ## 安装`Fabric`示例代码
 
@@ -16,7 +16,7 @@ $ cd fabric-samples/chaincode-docker-devmode
 
 ## 下载`docker`镜像
 
-需要四个`docker`镜像，以便**开发模式**提供的`docker compose`脚本运行。如果安装了`fabric-samples repo clone`并按照说明安装了**[示例、二进制文件和`docker`镜像](hyperledger%20fabric%20入门.md)**，那么在本地应该安装必要的`Docker`镜像。
+需要四个`docker`镜像，以便**开发模式**提供的`docker compose`脚本运行。如果安装了`fabric-samples repo clone`并按照说明**安装了[示例、二进制文件和`docker`镜像](hyperledger%20fabric%20入门.md)**，那么在本地应该安装必要的`Docker`镜像。
 
 > **注意**：如果选择**手动拉取**镜像，则必须将其重新标记为**最新版本**。
 
@@ -50,7 +50,7 @@ hyperledger/fabric-peer        latest              f3ea63abddaa        7 weeks a
 $ docker-compose -f docker-compose-simple.yaml up
 ```
 
-以上内容使用`SingleSampleMSPSolo`订购者配置文件启动网络，并以“**开发模式**”启动对等体。它还**启动了两个额外的容器**：一个用于**链代码环境 `chaincode`**，另一个**用于与链代码交互 `CLI`**。**创建和加入通道**的命令嵌入在`CLI`容器中，可以查看`script.sh`脚本的代码，因此可以立即跳转到链代码调用。
+以上内容使用`SingleSampleMSPSolo`定序者配置文件启动网络，并以“**开发模式**”启动对等体。它还**启动了两个额外的容器**：一个用于**链码环境 `chaincode`**，另一个**用于与链码交互 `CLI`**。**创建和加入通道**的命令嵌入在`CLI`容器中，可以查看`script.sh`脚本的代码，因此可以立即跳转到链码调用。
 
 ### 终端2 - 构建并启动链码
 
@@ -82,11 +82,11 @@ $ CORE_PEER_ADDRESS=peer:7052 CORE_CHAINCODE_ID_NAME=mycc:0 ./chaincode_example0
 2018-11-30 03:32:22.248 UTC [shim] setupChaincodeLogging -> INFO 002 Chaincode (build level: ) starting up ...
 ```
 
-链代码以**对等和链代码日志**开始，表示**向对等方成功注册**。请注意，在此阶段，链码**不与任何通道相关联**。这是使用`instantiate`命令在后续步骤中完成的。
+链码以**对等和链码日志**开始，表示**向对等方成功注册**。请注意，在此阶段，链码**不与任何通道相关联**。这是使用`instantiate`命令在后续步骤中完成的。
 
 ### 终端3 - 使用链码
 
-即使处于`--peer-chaincodedev`模式，仍然**必须安装链代码**，以便**生命周期**系统链代码可以**正常进行检查**。在`--pere-chaincodedev`模式下，将来可能会**删除**此要求。
+即使处于`--peer-chaincodedev`模式，仍然**必须安装链码**，以便**生命周期**系统链码可以**正常进行检查**。在`--pere-chaincodedev`模式下，将来可能会**删除**此要求。
 
 进入到`CLI`容器，将利用`CLI`容器来调用链码进行交互。
 
@@ -97,7 +97,7 @@ $ docker exec -it cli bash
 安装和实例化链码
 
 ```sh
-$ peer chaincode install -p chaincodedev/chaincode/chaincode_example02/go -n mycc -v 0
+$ peer chaincode install -p /opt/gopath/src/chaincodedev/chaincode/chaincode_example02/go -n mycc -v 0
 $ peer chaincode instantiate -n mycc -v 0 -c '{"Args":["init","a","100","b","200"]}' -C myc
 ```
 
@@ -115,7 +115,7 @@ $ peer chaincode query -n mycc -c '{"Args":["query","a"]}' -C myc
 
 ### 测试新的链码
 
-默认情况下，只挂载`chaincode_example02`。但是，可以通过**将不同的链代码添加到`fabric-samples\chaincode`子目录**并**重新启动网络**来**轻松地测试**它们。此时，可以在**链代码容器中访问**它们。
+默认情况下，只挂载`chaincode_example02`。但是，可以通过**将不同的链码添加到`fabric-samples\chaincode`子目录**并**重新启动网络**来**轻松地测试**它们。此时，可以在**链码容器中访问**它们。
 
 ## `Java`版本链码
 
@@ -134,9 +134,6 @@ $ docker-compose -f docker-compose-simple.yaml up
 
 ```sh
 $ cd fabric-samples/chaincode/chaincode_example02/java
-
-$ ll
-
 
 $ gradle clean build shadowJar
 ```
@@ -173,7 +170,7 @@ $ CORE_PEER_ADDRESS=peer:7052 CORE_CHAINCODE_ID_NAME=mycc:0 java -cp .；./build
 
 ### 终端3 - 使用链码
 
-即使处于`--peer-chaincodedev`模式，仍然**必须安装链代码**，以便**生命周期**系统链代码可以**正常进行检查**。在`--pere-chaincodedev`模式下，将来可能会**删除**此要求。
+即使处于`--peer-chaincodedev`模式，仍然**必须安装链码**，以便**生命周期**系统链码可以**正常进行检查**。在`--pere-chaincodedev`模式下，将来可能会**删除**此要求。
 
 进入到`CLI`容器，将利用`CLI`容器来调用链码进行交互。
 
@@ -186,7 +183,7 @@ root@c9e6b820d754:/opt/gopath/src/chaincodedev#
 安装和实例化链码
 
 ```sh
-$ peer chaincode install -n mycc -v 0 -l java -p ./chaincode/chaincode_example02/java/
+$ peer chaincode install -n mycc -v 0 -l java -p /opt/gopath/src/chaincodedev/chaincode/chaincode_example02/java/
 
 $ peer chaincode instantiate -n mycc -v 0 -c '{"Args":["init","a","100","b","200"]}' -C myc -l java
 ```
@@ -263,7 +260,7 @@ root@c9e6b820d754:/opt/gopath/src/chaincodedev#
 安装和实例化链码
 
 ```sh
-$ peer chaincode install -n mycc -v 0 -l java -p ./chaincode/chaincode_example02/jar/
+$ peer chaincode install -n mycc -v 0 -l java -p /opt/gopath/src/chaincodedev/chaincode/chaincode_example02/jar/
 
 $ peer chaincode instantiate -n mycc -v 0 -c '{"Args":["init","a","100","b","200"]}' -C myc -l java
 ```
