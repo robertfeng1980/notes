@@ -106,3 +106,74 @@ public class SimpleAssetChaincode extends ChaincodeBase {
 }
 ```
 
+## 初始化`Chaincode`
+
+接下来，将**实现`init`函数**。
+
+```java
+    /**
+     * Init is called during chaincode instantiation to initialize any
+     * data. Note that chaincode upgrade also calls this function to reset
+     * or to migrate data.
+     *
+     * @param stub {@link ChaincodeStub} to operate proposal and ledger
+     * @return response
+     */
+    @Override
+    public Response init(ChaincodeStub stub) {       
+    }
+```
+
+> **注意**：链码**升级也会调用此函数**。在编写将升级现有链代码的链代码时，请确保正确修改`Init`函数。特别是，如果**没有“迁移”或者在升级过程中没有任何内容要初始化，请提供一个空的`Init`方法**。
+
+接下来，将**使用`ChaincodeStub -> stub.getStringArgs`函数检索`Init`调用的参数并检查其有效性**。在例子中，将使用一个键值对。`Chaincode`初始化在`Response init(ChaincodeStub stub)`方法内完成。首先，使用`ChaincodeStub.getStringArgs()`方法获取参数。
+
+```go
+    /**
+     * Init is called during chaincode instantiation to initialize any
+     * data. Note that chaincode upgrade also calls this function to reset
+     * or to migrate data.
+     *
+     * @param stub {@link ChaincodeStub} to operate proposal and ledger
+     * @return response
+     */
+    @Override
+    public Response init(ChaincodeStub stub) {
+        // Get the args from the transaction proposal
+        List<String> args = stub.getStringArgs();
+        if (args.size() != 2) {
+            newErrorResponse("Incorrect arguments. Expecting a key and a value");
+        }
+        return newSuccessResponse();
+    }
+```
+
+接下来，既然已经确定调用有效，将**把初始状态存储在分类帐中**。为此，将调用`stub.putStringState`作为参数传入的键和值。假设一切顺利，返回一个`Response`对象，表明初始化成功。
+
+```java
+    /**
+     * Init is called during chaincode instantiation to initialize any
+     * data. Note that chaincode upgrade also calls this function to reset
+     * or to migrate data.
+     *
+     * @param stub {@link ChaincodeStub} to operate proposal and ledger
+     * @return response
+     */
+    @Override
+    public Response init(ChaincodeStub stub) {
+        try {
+            // Get the args from the transaction proposal
+            List<String> args = stub.getStringArgs();
+            if (args.size() != 2) {
+                newErrorResponse("Incorrect arguments. Expecting a key and a value");
+            }
+            // Set up any variables or assets here by calling stub.putState()
+            // We store the key and the value on the ledger
+            stub.putStringState(args.get(0), args.get(1));
+            return newSuccessResponse();
+        } catch (Throwable e) {
+            return newErrorResponse("Failed to create asset");
+        }
+    }
+```
+
