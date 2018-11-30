@@ -32,4 +32,89 @@ hyperledger/fabric-tools       amd64-1.3.0         c056cd9890e7        7 weeks a
 hyperledger/fabric-tools       latest              c056cd9890e7        7 weeks ago         1.5GB
 hyperledger/fabric-ccenv       amd64-1.3.0         953124d80237        7 weeks ago         1.38GB
 hyperledger/fabric-ccenv       latest              953124d80237        7 weeks ago         1.38GB
-hyperledger/fabric-orderer     amd64-1.3.0         f430f581b46b        7 
+hyperledger/fabric-orderer     amd64-1.3.0         f430f581b46b        7 weeks ago         145MB
+hyperledger/fabric-orderer     latest              f430f581b46b        7 weeks ago         145MB
+hyperledger/fabric-peer        amd64-1.3.0         f3ea63abddaa        7 weeks ago         151MB
+hyperledger/fabric-peer        latest              f3ea63abddaa        7 weeks ago         151MB
+```
+
+# 资产转账示例
+
+以下将演示`Go`、`Java`的链码运行示例方式。
+
+## `Go`版本链码
+
+### 终端1 - 启动网络
+
+```sh
+$ docker-compose -f docker-compose-simple.yaml up
+```
+
+以上内容使用`SingleSampleMSPSolo`订购者配置文件启动网络，并以“**开发模式**”启动对等体。它还**启动了两个额外的容器**：一个用于**链代码环境 `chaincode`**，另一个**用于与链代码交互 `CLI`**。**创建和加入通道**的命令嵌入在`CLI`容器中，可以查看`script.sh`脚本的代码，因此可以立即跳转到链代码调用。
+
+### 终端2 - 构建并启动链码
+
+此步骤仅限于`Go` 语言的链码，`Java`链码可以在其他开发环境进行打包构建。
+
+```sh
+$ docker exec -it chaincode bash
+```
+
+应该看到以下内容：
+
+```sh
+root@d2629980e76b:/opt/gopath/src/chaincode#
+```
+
+现在，编译链码：
+
+```sh
+$ cd chaincode_example02/go
+$ go build -o chaincode_example02
+```
+
+现在运行链码：
+
+```sh
+$ CORE_PEER_ADDRESS=peer:7052 CORE_CHAINCODE_ID_NAME=mycc:0 ./chaincode_example02
+
+2018-11-30 03:32:22.215 UTC [shim] setupChaincodeLogging -> INFO 001 Chaincode log level not provided; defaulting to: INFO
+2018-11-30 03:32:22.248 UTC [shim] setupChaincodeLogging -> INFO 002 Chaincode (build level: ) starting up ...
+```
+
+链代码以**对等和链代码日志**开始，表示**向对等方成功注册**。请注意，在此阶段，链码**不与任何通道相关联**。这是使用`instantiate`命令在后续步骤中完成的。
+
+### 终端3 - 使用链码
+
+即使处于`--peer-chaincodedev`模式，仍然**必须安装链代码**，以便**生命周期**系统链代码可以**正常进行检查**。在`--pere-chaincodedev`模式下，将来可能会**删除**此要求。
+
+进入到`CLI`容器，将利用`CLI`容器来调用链码进行交互。
+
+```sh
+$ docker exec -it cli bash
+```
+
+安装和实例化链码
+
+```sh
+$ peer chaincode install -p chaincodedev/chaincode/chaincode_example02/go -n mycc -v 0
+$ peer chaincode instantiate -n mycc -v 0 -c '{"Args":["init","a","100","b","200"]}' -C myc
+```
+
+现在发出一个调用，将`10`从`a`移到`b`。
+
+```sh
+$ peer chaincode invoke -n mycc -c '{"Args":["invoke","a","b","10"]}' -C myc
+```
+
+最后，查询一个。应该看到`90`的值。
+
+```sh
+$ peer chaincode query -n mycc -c '{"Args":["query","a"]}' -C myc
+```
+
+### 测试新的链码
+
+默认情况下，只挂载`chaincode_example02`。但是，可以通过**将不同的链代码添加到`fabric-samples\chaincode`子目录**并**重新启动网络**来**轻松地测试**它们。此时，可以在**链代码容器中访问**它们。
+
+
