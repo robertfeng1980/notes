@@ -8,5 +8,13 @@
 + `Gradle 4.8+`
 + `Hyperledger Fabric 1.3+`
 
+# 环境配置
+
+这里主要是配置 `Gradle` 的环境变量。
+
+```sh
+export path=path:/opt/gradle-4.8
+```
+
 
 
