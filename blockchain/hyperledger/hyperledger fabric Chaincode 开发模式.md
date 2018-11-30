@@ -14,4 +14,22 @@
 $ cd fabric-samples/chaincode-docker-devmode
 ```
 
+## 下载`docker`镜像
 
+需要四个`docker`镜像，以便**开发模式**提供的`docker compose`脚本运行。如果安装了`fabric-samples repo clone`并按照说明安装了**[示例、二进制文件和`docker`镜像](hyperledger%20fabric%20入门.md)**，那么在本地应该安装必要的`Docker`镜像。
+
+> **注意**：如果选择**手动拉取**镜像，则必须将其重新标记为**最新版本**。
+
+执行`docker images`命令，显示本地的`Docker Registry`。应该看到类似于以下内容的内容：
+
+```sh
+$ docker iamges
+
+REPOSITORY                     TAG                 IMAGE ID            CREATED             SIZE
+hyperledger/fabric-javaenv     amd64-1.3.0         2476cefaf833        7 weeks ago         1.7GB
+hyperledger/fabric-javaenv     latest              2476cefaf833        7 weeks ago         1.7GB
+hyperledger/fabric-tools       amd64-1.3.0         c056cd9890e7        7 weeks ago         1.5GB
+hyperledger/fabric-tools       latest              c056cd9890e7        7 weeks ago         1.5GB
+hyperledger/fabric-ccenv       amd64-1.3.0         953124d80237        7 weeks ago         1.38GB
+hyperledger/fabric-ccenv       latest              953124d80237        7 weeks ago         1.38GB
+hyperledger/fabric-orderer     amd64-1.3.0         f430f581b46b        7 
