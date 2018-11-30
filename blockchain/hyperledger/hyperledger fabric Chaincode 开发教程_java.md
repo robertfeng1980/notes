@@ -76,3 +76,33 @@ shadowJar {
 
 新建完成后，可以在项目上右键，选择`Gradle -> Refresh Gradle Project`加载项目依赖的`Jar`包。
 
+## 创建链码类
+
+使用`Java`版的[`Simple Asset Chaincode`](https://hyperledger-fabric.readthedocs.io/en/latest/chaincode4ade.html#simple-asset-chaincode)作为示例。这个链代码是`Simple Asset Chaincode`的`Go to Java`翻译，将对此进行解释。
+
+`ChaincodeBase`类是一个**抽象类**，它继承了`Chaincode`形式，它包含用于启动`chaincode`的`start`方法。因此，将通过扩展`ChaincodeBase`而不是实现`Chaincode`来创建我们的链代码。
+
+首先，从一些基本的开始，创建一个`class`文件`SimpleAssetChaincode`。与每个链代码一样，它**继承了[`ChaincodeBase`抽象类](https://godoc.org/github.com/hyperledger/fabric/core/chaincode/shim#Chaincode)，特别是实现了`init`和`invoke`函数**。
+
+```java
+package com.github.hooj0.chaincode;
+
+import org.hyperledger.fabric.shim.ChaincodeBase;
+import org.hyperledger.fabric.shim.ChaincodeStub;
+
+/**
+ * simple asset chaincode
+ * @author hoojo
+ * @createDate 2018年11月30日 下午4:13:27
+ * @file SimpleAssetChaincode.java
+ * @package com.github.hooj0.chaincode
+ * @project fabric-chaincode-asset-gradle
+ * @blog http://hoojo.cnblogs.com
+ * @email hoojo_@126.com
+ * @version 1.0
+ */
+public class SimpleAssetChaincode extends ChaincodeBase {
+
+}
+```
+
