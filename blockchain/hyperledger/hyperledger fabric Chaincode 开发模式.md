@@ -117,4 +117,90 @@ $ peer chaincode query -n mycc -c '{"Args":["query","a"]}' -C myc
 
 默认情况下，只挂载`chaincode_example02`。但是，可以通过**将不同的链代码添加到`fabric-samples\chaincode`子目录**并**重新启动网络**来**轻松地测试**它们。此时，可以在**链代码容器中访问**它们。
 
+## `Java`版本链码
+
+同上`Go`版本运行示例步骤。
+### 终端1 - 重启网络
+
+```sh
+$ docker-compose -f docker-compose-simple.yaml down
+$ docker-compose -f docker-compose-simple.yaml up
+```
+
+### 终端2 - 构建并启动链码
+
+`Java`链码可以在`windows`下的`eclipse`开发环境进行打包构建，也可以在`chaincode`环境打包。
+现在，编译链码（前提是安装好`maven`和`Gradle`工具）：
+
+```sh
+$ cd fabric-samples/chaincode/chaincode_example02/java
+
+$ ll
+
+
+$ gradle clean build shadowJar
+```
+编译完成后，会产生`jar`文件
+
+```sh
+$ ll build/libs/
+total 16583
+drwxrwxrwx 1 vagrant vagrant        0 Nov 30 03:40 ./
+drwxrwxrwx 1 vagrant vagrant        0 Nov 30 03:40 ../
+-rwxrwxrwx 1 vagrant vagrant 16976115 Nov 30 03:41 chaincode.jar*
+-rwxrwxrwx 1 vagrant vagrant     3724 Nov 30 03:40 fabric-chaincode-example-gradle-1.0-SNAPSHOT.jar*
+```
+
+进入`chaincode`容器
+
+```sh
+$ docker exec -it chaincode bash
+```
+
+应该看到以下内容：
+```sh
+root@d2629980e76b:/opt/gopath/src/chaincode#
+```
+
+现在运行链码：
+
+```sh
+$ cd chaincode_example02/java
+
+$ CORE_PEER_ADDRESS=peer:7052 CORE_CHAINCODE_ID_NAME=mycc:0 java -cp .；./build/libs/*.jar；./build/classes/java/main org.hyperledger.fabric.example.SimpleChaincode.class
+```
+这里运行的仅仅是`Java`链码中的`main`主函数。
+
+### 终端3 - 使用链码
+
+即使处于`--peer-chaincodedev`模式，仍然**必须安装链代码**，以便**生命周期**系统链代码可以**正常进行检查**。在`--pere-chaincodedev`模式下，将来可能会**删除**此要求。
+
+进入到`CLI`容器，将利用`CLI`容器来调用链码进行交互。
+
+```sh
+$ docker exec -it cli bash
+
+root@c9e6b820d754:/opt/gopath/src/chaincodedev#
+```
+
+安装和实例化链码
+
+```sh
+$ peer chaincode install -n mycc -v 0 -l java -p ./chaincode/chaincode_example02/java/
+
+$ peer chaincode instantiate -n mycc -v 0 -c '{"Args":["init","a","100","b","200"]}' -C myc -l java
+```
+
+现在发出一个调用，将`10`从`a`移到`b`。
+
+```sh
+$ peer chaincode invoke -n mycc -c '{"Args":["invoke","a","b","10"]}' -C myc
+```
+
+最后，查询一个。应该看到`90`的值。
+
+```sh
+$ peer chaincode query -n mycc -c '{"Args":["query","a"]}' -C myc
+```
+
 
