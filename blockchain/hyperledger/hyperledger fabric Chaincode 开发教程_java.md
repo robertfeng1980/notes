@@ -416,3 +416,27 @@ total 16584
 
 如果还不会开发模式，可以参考[开发模式使用方式文档](hyperledger%20fabric%20Chaincode%20开发模式.md)。
 
+# 准备示例和链码
+
+如果还没有这样做，请[安装样本，二进制文件和Docker镜像](https://hyperledger-fabric.readthedocs.io/en/latest/install.html)。
+
+进入到示例目录下的 `chaincode`位置。
+
+```sh
+$ cd fabric-samples/chaincode
+```
+
+创建链码文件夹
+
+```sh
+$ mkdir -p asset/java
+```
+
+将项目的**源代码和`gradle`**的配置文件，拷贝到上面的文件夹中
+
+```sh
+$ cp xxx/xxx/src/*.java asset/java/src
+
+$ cp xxx/xxx/*.gradle asset/java/
+```
+
