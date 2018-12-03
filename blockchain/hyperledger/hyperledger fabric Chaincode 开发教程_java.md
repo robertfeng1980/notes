@@ -389,3 +389,22 @@ public class SimpleAssetChaincode extends ChaincodeBase {
 }
 ```
 
+## 构建`Chaincode`
+
+现在编译构建链码。
+
+```sh
+$ cd fabric-chaincode-asset/fabric-chaincode-asset-gradle
+
+$ gradle clean build shadowJar
+```
+
+假设没有错误，会生成`jar`文件，现在可以继续下一步，测试链代码。
+
+```sh
+$ ll build/libs/
+total 16584
+-rw-r--r-- 1 Administrator 197121 16974993 十一 30 17:56 chaincode.jar
+-rw-r--r-- 1 Administrator 197121     2371 十一 30 17:56 fabric-chaincode-asset-gradle-1.3.1-SNAPSHOT.jar
+```
+
