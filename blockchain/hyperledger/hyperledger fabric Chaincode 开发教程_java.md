@@ -458,3 +458,31 @@ $ docker-compose -f docker-compose-simple.yaml up
 
 以上内容**使用`SingleSampleMSPSolo`定序者配置文件**启动网络，并以“**开发模式**”启动对等体。它还启动了两个额外的容器，一个**用于链码环境**，另一个**用于与链代码交互**。创建和加入通道的命令嵌入在`CLI`容器中，因此可以立即跳转到链代码调用。
 
+## 终端2  - 使用链码
+
+即使处于`--peer-chaincodedev`模式，仍然**必须安装链代码**，以便**生命周期系统链码可以正常进行检查**。在`--pere-chaincodedev`模式下，将来可能会删除此要求。
+
+```sh
+$ docker exec -it cli bash
+```
+
+在 `cli` 容器中运行：
+
+```sh
+$ peer chaincode install -n asset -v v0 -l java -p /opt/gopath/src/chaincodedev/chaincode/asset/java/
+
+$ peer chaincode instantiate -n asset -v v0 -c '{"Args":["a", "5"]}' -C myc -l java
+```
+
+现在发出一个`invoke`调用，将`a`的值更改为“`20`”。
+
+```sh
+$ peer chaincode invoke -n asset -c '{"Args":["set", "a", "20"]}' -C myc
+```
+
+最后，查询`a`。应该看到`20`的值。
+
+```sh
+$ peer chaincode query -n asset -c '{"Args":["get","a"]}' -C myc
+```
+
