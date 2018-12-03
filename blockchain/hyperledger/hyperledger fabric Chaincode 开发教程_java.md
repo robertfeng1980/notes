@@ -486,3 +486,7 @@ $ peer chaincode invoke -n asset -c '{"Args":["set", "a", "20"]}' -C myc
 $ peer chaincode query -n asset -c '{"Args":["get","a"]}' -C myc
 ```
 
+## 测试新的链码
+
+默认情况下，只挂载`sacc`。但是，可以通过将不同的**链码添加到`chaincode`子目录**并**重新启动网络来轻松地测试它们**。此时，可以在`chaincode`容器中访问它们。
+
