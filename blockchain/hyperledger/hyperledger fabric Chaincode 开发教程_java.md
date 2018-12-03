@@ -230,3 +230,44 @@ public class SimpleAssetChaincode extends ChaincodeBase {
     }
 ```
 
+## 实现`Chaincode`应用程序
+
+如上所述，链码应用程序实现了两个可以通过`invoke`函数调用的函数，现在实现这些功能。请注意，正如上面提到的，为了**访问分类帐的状态**，使用`ChaincodeStub.putStringState(key，value)`和`ChaincodeStub.getStringState(key)`实现方法`set()`和`get()`。
+
+```java
+	/**
+     * get returns the value of the specified asset key
+     *
+     * @param stub {@link ChaincodeStub} to operate proposal and ledger
+     * @param args key
+     * @return value
+     */
+    private String get(ChaincodeStub stub, List<String> args) {
+        if (args.size() != 2) {
+            throw new RuntimeException("Incorrect arguments. Expecting a key");
+        }
+
+        String value = stub.getStringState(args.get(0));
+        if (value == null || value.isEmpty()) {
+            throw new RuntimeException("Asset not found: " + args.get(0));
+        }
+        return value;
+    }
+
+    /**
+     * set stores the asset (both key and value) on the ledger. If the key exists,
+     * it will override the value with the new one
+     *
+     * @param stub {@link ChaincodeStub} to operate proposal and ledger
+     * @param args key and value
+     * @return value
+     */
+    private String set(ChaincodeStub stub, List<String> args) {
+        if (args.size() != 2) {
+            throw new RuntimeException("Incorrect arguments. Expecting a key and a value");
+        }
+        stub.putStringState(args.get(0), args.get(1));
+        return args.get(1);
+    }
+```
+
