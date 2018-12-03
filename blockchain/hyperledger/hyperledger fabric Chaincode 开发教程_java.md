@@ -243,7 +243,7 @@ public class SimpleAssetChaincode extends ChaincodeBase {
      * @return value
      */
     private String get(ChaincodeStub stub, List<String> args) {
-        if (args.size() != 2) {
+        if (args.size() != 1) {
             throw new RuntimeException("Incorrect arguments. Expecting a key");
         }
 
@@ -356,7 +356,7 @@ public class SimpleAssetChaincode extends ChaincodeBase {
      * @return value
      */
     private String get(ChaincodeStub stub, List<String> args) {
-        if (args.size() != 2) {
+        if (args.size() != 1) {
             throw new RuntimeException("Incorrect arguments. Expecting a key");
         }
 
