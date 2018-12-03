@@ -440,3 +440,13 @@ $ cp xxx/xxx/src/*.java asset/java/src
 $ cp xxx/xxx/*.gradle asset/java/
 ```
 
+# 测试和运行链码
+
+进入到`fabric-samples`项目的`chaincode-docker-devmode`目录：
+
+```sh
+$ cd chaincode-docker-devmode
+```
+
+现在打开三个终端并导航到每个终端中的`chaincode-docker-devmode`目录。
+
