@@ -450,3 +450,11 @@ $ cd chaincode-docker-devmode
 
 现在打开三个终端并导航到每个终端中的`chaincode-docker-devmode`目录。
 
+## 终端1 - 启动网络
+
+```sh
+$ docker-compose -f docker-compose-simple.yaml up
+```
+
+以上内容**使用`SingleSampleMSPSolo`定序者配置文件**启动网络，并以“**开发模式**”启动对等体。它还启动了两个额外的容器，一个**用于链码环境**，另一个**用于与链代码交互**。创建和加入通道的命令嵌入在`CLI`容器中，因此可以立即跳转到链代码调用。
+
