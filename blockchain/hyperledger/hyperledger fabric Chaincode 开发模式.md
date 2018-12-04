@@ -277,3 +277,83 @@ $ peer chaincode invoke -n mycc -c '{"Args":["invoke","a","b","10"]}' -C myc
 $ peer chaincode query -n mycc -c '{"Args":["query","a"]}' -C myc
 ```
 
+# 清理脚本
+
+添加一个脚本，用于在网络重启的时候进行安装的`chaincode`镜像的清理，以及容器的清理。防止在稍后进行安装相同`chaincode`的情况下存在缓存数据，导致更新不正常的情况。
+
+```sh
+#!/bin/bash
+
+if [ ! -e "docker-compose-simple.yaml" ];then
+  echo "docker-compose-simple.yaml not found."
+  exit 8
+fi
+
+function clean(){
+
+  rm -rf /var/hyperledger/*
+
+  lines=`docker ps -a | grep 'dev-peer' | wc -l`
+
+  if [ "$lines" -gt 0 ]; then
+    docker ps -a | grep 'dev-peer' | awk '{print $1}' | xargs docker rm -f
+  fi
+
+  lines=`docker images | grep 'dev-peer' | grep 'dev-peer' | wc -l`
+  if [ "$lines" -gt 0 ]; then
+    docker images | grep 'dev-peer' | awk '{print $1}' | xargs docker rmi -f
+  fi
+
+  lines=`docker ps -aq | wc -l`
+  if ((lines > 0)); then
+  	docker stop $(docker ps -aq)
+    docker rm $(docker ps -aq)
+  fi
+}
+
+function up(){
+  docker-compose -f docker-compose-simple.yaml up --force-recreate
+}
+
+function down(){
+  docker-compose -f docker-compose-simple.yaml down;
+}
+
+function stop (){
+  docker-compose -f docker-compose-simple.yaml stop;
+}
+
+function start (){
+  docker-compose -f docker-compose-simple.yaml start;
+}
+
+for opt in "$@"; do
+    case "$opt" in
+        up)
+            up
+            ;;
+        down)
+            down
+            ;;
+        stop)
+            stop
+            ;;
+        start)
+            start
+            ;;
+        clean)
+            clean
+            ;;
+        restart)
+            down
+            clean
+            up
+            ;;
+        *)
+            echo $"Usage: $0 {up|down|start|stop|clean|restart}"
+            exit 1
+        ;;
+    esac
+done
+```
+
