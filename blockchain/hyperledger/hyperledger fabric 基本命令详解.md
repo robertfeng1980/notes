@@ -1458,5 +1458,13 @@ $ cd crypto/peerOrganizations/org1.example.com/users/User1@org1.example.com
 $ PS1='[\[\033[0;32m\]\H@\u\[\033[0m\] \[\033[0;33m\]\w\[\033[0m\]]\r\n\$ '
 ```
 
+## 配置外部端点
+
+目前，要查看**服务发现中的对等体**，需要为它们配置`EXTERNAL_ENDPOINT`。否则，`Fabric`假定**不应该透露**对等体。要定义这些端点，需要在对等体的`core.yaml`中指定它们，将下面的示例端点替换为你的端点。
+
+```sh
+CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
+```
+
 
 
