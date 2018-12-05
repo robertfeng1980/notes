@@ -1595,5 +1595,19 @@ Certificate:
          a3:18:39:58:20:72:3d:1a:43:74:30:f3:56:01:aa:26
 ```
 
+### 配置查询
+
+配置查询返回从`MSP ID`到订购者端点的映射，以及可用于通过`SDK`验证所有对等和订购者节点的`FabricMSPConfig`：
+
+```sh
+$ discover --configFile conf.yaml config --channel mychannel  --server peer0.org1.example.com:7051
+```
+
+重要的是要注意这里的证书是`base64`编码的，因此应该以类似于以下的方式解码：
+
+```sh
+$ discover --configFile conf.yaml config --channel mychannel  --server peer0.org1.example.com:7051 | jq .msps.OrdererOrg.root_certs[0] | sed "s/\"//g" | base64 --decode | openssl x509 -text -noout
+```
+
 
 
