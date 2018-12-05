@@ -1466,5 +1466,37 @@ $ PS1='[\[\033[0;32m\]\H@\u\[\033[0m\] \[\033[0;33m\]\w\[\033[0m\]]\r\n\$ '
 CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
 ```
 
+## 持久配置
+
+要持久保持配置，应通过标志`--configFile`以及`saveConfig`命令提供配置文件名：
+
+```sh
+$ cd fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/users/User1@org1.example.com
+
+$ discover --configFile conf.yaml --peerTLSCA tls/ca.crt --userKey msp/keystore/ea4f6a38ac7057b6fa9502c2f5f39f182e320f71f667749100fe7dd94c23ce43_sk --userCert msp/signcerts/User1\@org1.example.com-cert.pem  --MSP Org1MSP saveConfig
+```
+
+通过执行上述命令，将创建配置文件：
+
+```yaml
+$ cat conf.yaml
+version: 0
+tlsconfig:
+  certpath: ""
+  keypath: ""
+  peercacertpath: /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/User1@org1.example.com/tls/ca.crt
+  timeout: 0s
+signerconfig:
+  mspid: Org1MSP
+  identitypath: /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem
+  keypath: /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore/ea4f6a38ac7057b6fa9502c2f5f39f182e320f71f667749100fe7dd94c23ce43_sk
+```
+
+当对等体在**启用`TLS`**的情况下运行时，对等体上的发现服务要求**客户端使用相互`TLS`连接**到它，这意味着它需要提供`TLS`证书。**默认情况下，对等体配置为请求（但不验证）客户端`TLS`证书**，因此不需要提供`TLS`证书（除非**对等体的`tls.clientAuthRequired`设置为`true`**）。
+
+当发现`CLI`的配置文件**具有`peercacertpath`的证书路径**，但未按上述配置`certpath`和`keypath`时，发现`CLI`会**生成自签名`TLS`证书**并使用它来**连接到对等方**。
+
+如果**未配置`peercacertpath`，则发现`CLI`将在没有`TLS`的情况下进行连接**，因此**不建议这样做**，因为**信息是通过纯文本发送的，未加密**。
+
 
 
