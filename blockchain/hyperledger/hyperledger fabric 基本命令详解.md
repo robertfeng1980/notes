@@ -1609,5 +1609,20 @@ $ discover --configFile conf.yaml config --channel mychannel  --server peer0.org
 $ discover --configFile conf.yaml config --channel mychannel  --server peer0.org1.example.com:7051 | jq .msps.OrdererOrg.root_certs[0] | sed "s/\"//g" | base64 --decode | openssl x509 -text -noout
 ```
 
+### 背书人查询
+
+要查询**链代码调用的代言人**，需要提供其他标志：
+
++ `--chaincode`标志是**必需**的，它提供**链代码名称**。要查询链代码到链代码调用，需要使用**所有链代码**重复`--chaincode`标志。
++ `--collection`用于指定预期由链代码使用的**私有数据集合**。要从通过`--chaincode`传递到的集合映射到集合，应使用以下语法：`collection=CC:Collection1,Collection2,...`
+
+例如，要查询导致`cc1`和`cc2`被调用的链代码调用，以及通过`cc2`写入私有数据集合`col1`，需要指定： `--chaincode=cc1 --chaincode=cc2 --collection=cc2:col1`
+
+以下是当代言政策为`AND('Org1.peer', 'Org2.peer')`时，链码`mycc`的代言人查询的输出：
+
+```sh
+$ discover --configFile conf.yaml endorsers --channel mychannel  --server peer0.org1.example.com:7051 --chaincode mycc
+```
+
 
 
