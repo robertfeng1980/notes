@@ -1409,11 +1409,40 @@ Flags:
 
 # `Service Discovery CLI` 服务发现命令
 
+发现服务具有自己的命令行界面（`CLI`），该界面使用`YAML`配置文件来保存证书和私钥路径等属性以及`MSP ID`。
 
+`discover`命令具有以下子命令：
 
+- `saveConfig`
+- `peers`
+- `config`
+- `endorsers`
 
+命令的用法如下所示：
 
+```sh
+# discover --help
+usage: discover [<flags>] <command> [<args> ...]
 
+用于fabric发现服务的命令行客户端
+
+Flags:
+  --help                   Show context-sensitive help (also try --help-long and --help-man).
+  --configFile=CONFIGFILE  # 指定要从中加载配置的配置文件
+  --peerTLSCA=PEERTLSCA    # 设置验证TLS对等方证书的TLS CA证书文件路径
+  --tlsCert=TLSCERT        # （可选）设置对等体强制执行客户端身份验证时使用的客户端TLS证书文件路径
+  --tlsKey=TLSKEY          # （可选）设置对等体强制执行客户端身份验证时使用的客户端TLS密钥文件路径
+  --userKey=USERKEY        # 设置用户的密钥文件路径，该路径用于对发送给对等方的消息进行签名
+  --userCert=USERCERT      # 设置用户的证书文件路径，该路径用于验证发送给对等方的消息
+  --MSP=MSP                # 设置用户的MSP ID，表示颁发其用户证书的CA.
+
+Commands:
+  help [<command>...]	Show help.
+  peers [<flags>]		# 发现 peers
+  config [<flags>]		# 发现通道配置
+  endorsers [<flags>]	# 发现链码背书参与者
+  saveConfig	# 将由flags传递的配置保存到指定的文件中 --configFile
+```
 
 
 
