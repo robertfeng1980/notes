@@ -1444,5 +1444,19 @@ Commands:
   saveConfig	# 将由flags传递的配置保存到指定的文件中 --configFile
 ```
 
+## 切换到`CLI`容器
+
+`discover` 命令需要在客户端容器中进行运行，执行命令如下：
+
+```sh
+$ docker exec -it cli bash
+
+# 切换到其中一个user目录
+$ cd crypto/peerOrganizations/org1.example.com/users/User1@org1.example.com
+
+# 修改命令提示符
+$ PS1='[\[\033[0;32m\]\H@\u\[\033[0m\] \[\033[0;33m\]\w\[\033[0m\]]\r\n\$ '
+```
+
 
 
