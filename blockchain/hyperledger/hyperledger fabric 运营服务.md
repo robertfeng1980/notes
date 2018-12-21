@@ -55,3 +55,32 @@ operations:
 
 对于每个订货人，可以在`orderer.yaml`的“操作”部分中配置操作服务器：
 
+```yml
+Operations:
+  # host and port for the operations server
+  ListenAddress: 127.0.0.1:8443
+
+  # TLS configuration for the operations endpoint
+  TLS:
+    # TLS enabled
+    Enabled: true
+
+    # PrivateKey: PEM-encoded tls key for the operations endpoint
+    PrivateKey: tls/server.key
+
+    # Certificate governs the file location of the server TLS certificate.
+    Certificate: tls/server.crt
+
+    # Paths to PEM encoded ca certificates to trust for client authentication
+    RootCAs: []
+
+    # Require client certificate authentication to access all endpoints
+    ClientAuthRequired: false
+```
+
+`ListenAddress`键定义操作服务器将侦听的主机和端口。如果服务器应该监听所有地址，则可以省略主机部分。
+
+`TLS`部分用于指示是否为操作服务启用了`TLS`，服务证书和私钥的位置以及应该为客户端身份验证信任的证书颁发机构根证书的位置。当`ClientAuthRequired`为`true`时，将要求客户端提供用于身份验证的证书。
+
+## 运营安全
+
