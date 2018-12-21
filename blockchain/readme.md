@@ -27,6 +27,7 @@
     + [`向通道添加组织`](./hyperledger/hyperledger%20fabric%20向通道添加组织.md)
     + [`使用私有数据`](./hyperledger/hyperledger%20fabric%20中使用私有数据.md)
     + [`Chaincode 运营操作`](./hyperledger/hyperledger%20fabric%20Chaincode%20运营操作.md)
+    + [`运营服务`](./hyperledger/hyperledger%20fabric%20运营服务.md)
 
 - 操作指南
     + [`升级到最新版本的Fabric`](./hyperledger/hyperledger%20fabric%20升级网络组建.md)
