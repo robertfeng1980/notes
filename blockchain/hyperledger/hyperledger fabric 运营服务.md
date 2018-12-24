@@ -194,7 +194,21 @@ metrics:
     prefix: peer-0
 ```
 
+### Orderer
 
+可以将订购者配置为通过在`orderer.yaml`的“指标”部分中将指标提供程序设置为`statsd`来将指标发送到`StatsD`。还必须使用`StatsD`守护程序的地址，要使用的网络类型（`tcp`或`udp`）以及发送度量标准的频率来配置`Statsd`子部分。可以指定可选前缀以帮助区分度量的来源。
+
+```yaml
+Metrics:
+    Provider: statsd
+    Statsd:
+      Network: udp
+      Address: 127.0.0.1:8125
+      WriteInterval: 30s
+      Prefix: org-orderer
+```
+
+要查看生成的不同指标，请查看 [指标参考](https://hyperledger-fabric.readthedocs.io/en/latest/metrics_reference.html)。
 
 
 
