@@ -144,3 +144,13 @@ Operations:
 
 启用`TLS`后，除非`requireClientAuth`设置为`true`，否则**不需要有效的客户端证书**来使用此服务。
 
+## Metrics
+
+`Fabric`对等和订购者的某些组件公开可以帮助深入了解系统行为的指标。操作员和管理员可以使用此信息更好地**了解系统的性能**。
+
+### 配置度量标准
+
+`Fabric`提供了两种公开指标的方法：基于`Prometheus`的**拉**模型和基于`StatsD`的**推**模型。
+
+### Prometheus
+
