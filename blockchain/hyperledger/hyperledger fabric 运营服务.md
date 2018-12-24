@@ -158,3 +158,12 @@ Operations:
 
 配置后，`Fabric`对等方或订货方将在操作服务上显示`/metrics`资源。
 
+### `Peer`
+
+通过在`core.yaml`的`/metrics`部分中将`metrics`提供程序设置为`prometheus`，可以将对等体配置为公开`metrics`端点以便`Prometheus`进行刮擦。
+
+```yaml
+metrics:
+  provider: prometheus
+```
+
