@@ -167,3 +167,12 @@ metrics:
   provider: prometheus
 ```
 
+### `Orderer`
+
+通过在`orderer.yaml`的`Metrics`部分中将`metrics`度量提供程序设置为`prometheus`，可以将`orderer`配置为通过将`metrics`度量提供程序设置为`promeheus`来公开`/metrics`端点。
+
+```yaml
+Metrics:
+  Provider: prometheus
+```
+
