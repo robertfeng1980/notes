@@ -112,3 +112,35 @@ Operations:
 {"error":"error message"}
 ```
 
+## 健康检查
+
+运营服务提供`/healthz`资源，运营商可以使用该资源来帮助确定同伴和订购者的**活跃度和健康状况**。该资源是支持`GET`请求的传统`REST`资源。该实现旨在与`Kubernetes`使用的**活性探针模型**兼容，但可以**在其他上下文中**使用。
+
+收到`GET /healthz`请求后，操作服务将调用**所有已注册的健康检查程序**进行该过程。当所有健康检查程序成功返回时，操作服务将以`200 “OK”`和`JSON`正文响应：
+
+```json
+{
+  "status": "OK",
+  "time": "2009-11-10T23:00:00Z"
+}
+```
+
+如果一个或多个运行状况检查程序**返回错误**，则操作服务将使用`503 "Service Unavailable" `和`JSON`正文进行响应，该**正文包含有关哪个运行状况检查**程序失败的信息：
+
+```json
+{
+  "status": "Service Unavailable",
+  "time": "2009-11-10T23:00:00Z",
+  "failed_checks": [
+    {
+      "component": "docker",
+      "reason": "failed to connect to Docker daemon: invalid endpoint"
+    }
+  ]
+}
+```
+
+在当前版本中，**唯一注册的运行状况检查是针对`Docker`的**。将增强未来版本以添加其他健康检查。
+
+启用`TLS`后，除非`requireClientAuth`设置为`true`，否则**不需要有效的客户端证书**来使用此服务。
+
