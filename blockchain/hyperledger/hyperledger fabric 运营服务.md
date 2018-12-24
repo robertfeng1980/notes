@@ -180,7 +180,7 @@ Metrics:
 
 `StatsD`是一个**简单的统计聚合**守护进程。度量标准被**发送到`statsd`守护程序**，在那里它们被**收集**，**聚合并推送到后端**以进行**可视化和警报**。由于此模型要求检测过程将度量数据发送到`StatsD`，因此这被视为**推送系统**。
 
-### Peer
+### `Peer`
 
 可以将对等体配置为通过在`core.yaml`的`metrics`部分中将度量提供者**设置为`statsd`来将度量发送到`StatsD`**。还**必须使用`StatsD`守护程序的地址**，要使用的网络类型（`tcp`或`udp`）以及发送度量标准的频率来配置`statsd`子部分。可以指定**可选前缀**以帮助**区分度量的来源**。例如，区分来自不同对等点的度量，将被添加到所有生成的度量之前。
 
@@ -194,7 +194,7 @@ metrics:
     prefix: peer-0
 ```
 
-### Orderer
+### `Orderer`
 
 可以将订购者配置为通过在`orderer.yaml`的“指标”部分中将指标提供程序设置为`statsd`来将指标发送到`StatsD`。还必须使用`StatsD`守护程序的地址，要使用的网络类型（`tcp`或`udp`）以及发送度量标准的频率来配置`Statsd`子部分。可以指定可选前缀以帮助区分度量的来源。
 
@@ -210,5 +210,57 @@ Metrics:
 
 要查看生成的不同指标，请查看 [指标参考](https://hyperledger-fabric.readthedocs.io/en/latest/metrics_reference.html)。
 
+# `Metrics` 参考
 
+## `Prometheus Metrics`
+
+目前，以下指标已导出供`Prometheus`使用。
+
+| Name                                                | Type      | Description                                        | Labels                                             |
+| --------------------------------------------------- | --------- | -------------------------------------------------- | -------------------------------------------------- |
+| blockcutter_block_fill_duration                     | histogram | 从第一个事务入队到块被切断的时间（以秒为单位）。   | channel                                            |
+| broadcast_enqueue_duration                          | histogram | 在几秒钟内排队交易的时间。                         | channel type status                                |
+| broadcast_processed_count                           | counter   | 处理的交易数量。                                   | channel type status                                |
+| broadcast_validate_duration                         | histogram | 在几秒钟内验证交易的时间。                         | channel type status                                |
+| chaincode_execute_timeouts                          | counter   | 已超时的链代码执行次数（Init或Invoke）。           | chaincode                                          |
+| chaincode_launch_duration                           | histogram | 发布链码的时间。                                   | chaincode success                                  |
+| chaincode_launch_failures                           | counter   | 已失败的链码启动次数。                             | chaincode                                          |
+| chaincode_launch_timeouts                           | counter   | 已超时的链代码启动次数。                           | chaincode                                          |
+| chaincode_shim_request_duration                     | histogram | 完成链码补丁请求的时间。                           | type channel chaincode success                     |
+| chaincode_shim_requests_completed                   | counter   | 完成了链码填充请求的数量。                         | type channel chaincode success                     |
+| chaincode_shim_requests_received                    | counter   | 收到的链码补丁请求数。                             | type channel chaincode                             |
+| consensus_kafka_batch_size                          | gauge     | 发送到主题的平均批量大小（以字节为单位）           | topic                                              |
+| consensus_kafka_compression_ratio                   | gauge     | 主题的平均压缩比（以百分比表示）。                 | topic                                              |
+| consensus_kafka_incoming_byte_rate                  | gauge     | 字节/秒读取经纪人。                                | broker_id                                          |
+| consensus_kafka_outgoing_byte_rate                  | gauge     | 字节/秒写给经纪人。                                | broker_id                                          |
+| consensus_kafka_record_send_rate                    | gauge     | 发送到主题的每秒记录数。                           | topic                                              |
+| consensus_kafka_records_per_request                 | gauge     | 每个请求发送到主题的平均记录数。                   | topic                                              |
+| consensus_kafka_request_latency                     | gauge     | 对代理的平均请求延迟（以ms为单位）。               | broker_id                                          |
+| consensus_kafka_request_rate                        | gauge     | 请求/秒发送给经纪人。                              | broker_id                                          |
+| consensus_kafka_request_size                        | gauge     | 经纪人的平均请求大小（以字节为单位）。             | broker_id                                          |
+| consensus_kafka_response_rate                       | gauge     | 请求/秒发送给经纪人。                              | broker_id                                          |
+| consensus_kafka_response_size                       | gauge     | 经纪人的平均响应大小（以字节为单位）。             | broker_id                                          |
+| couchdb_processing_time                             | histogram | 函数完成对CouchDB的请求所需的时间（以秒为单位）    | database function_name result                      |
+| deliver_blocks_sent                                 | counter   | 交付服务发送的块数。                               | channel filtered                                   |
+| deliver_requests_completed                          | counter   | 已完成的交付请求数。                               | channel filtered success                           |
+| deliver_requests_received                           | counter   | 已收到的递送请求数。                               | channel filtered                                   |
+| deliver_streams_closed                              | counter   | 已为传送服务关闭的GRPC流的数量。                   |                                                    |
+| deliver_streams_opened                              | counter   | 已为传递服务打开的GRPC流的数量。                   |                                                    |
+| dockercontroller_chaincode_container_build_duration | histogram | 在几秒钟内构建链代码图像的时间。                   | chaincode success                                  |
+| fabric_version                                      | gauge     | Fabric的活动版本。                                 | version                                            |
+| grpc_comm_conn_closed                               | counter   | gRPC连接已关闭。打开减去关闭是活动的连接数。       |                                                    |
+| grpc_comm_conn_opened                               | counter   | gRPC连接已打开。打开减去关闭是活动的连接数。       |                                                    |
+| grpc_server_stream_messages_received                | counter   | 收到的流消息数。                                   | service method                                     |
+| grpc_server_stream_messages_sent                    | counter   | 发送的流消息数。                                   | service method                                     |
+| grpc_server_stream_request_duration                 | histogram | 完成流请求的时间。                                 | service method code                                |
+| grpc_server_stream_requests_completed               | counter   | 已完成的流请求数。                                 | service method code                                |
+| grpc_server_stream_requests_received                | counter   | 收到的流请求数。                                   | service method                                     |
+| grpc_server_unary_request_duration                  | histogram | 完成一元请求的时间。                               | service method code                                |
+| grpc_server_unary_requests_completed                | counter   | 已完成的流请求数。                                 | service method code                                |
+| grpc_server_unary_requests_received                 | counter   | 收到的流请求数。                                   | service method                                     |
+| ledger_block_processing_time                        | histogram | 分类帐块处理的时间以秒为单位。                     | channel                                            |
+| ledger_blockchain_height                            | gauge     | 块中链的高度。                                     | channel                                            |
+| ledger_blockstorage_commit_time                     | histogram | 将块和私有数据提交到存储所需的时间（以秒为单位）。 | channel                                            |
+| ledger_statedb_commit_time                          | histogram | 将块更改提交到状态db所需的时间（以秒为单位）。     | channel                                            |
+| ledger_transaction_count                            | counter   | 处理的交易数量。                                   | channel transaction_type chaincode validation_code |
 
